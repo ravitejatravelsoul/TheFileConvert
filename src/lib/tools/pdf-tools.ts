@@ -5,6 +5,57 @@ const PDF_EXT = ["pdf"];
 
 export const pdfTools: ToolDefinition[] = [
   {
+    id: "pdf-editor",
+    slug: "editor",
+    href: "/pdf/editor",
+    name: "PDF Editor",
+    shortName: "Editor",
+    description: "Edit text, annotate, sign, organize and OCR PDFs directly in your browser.",
+    longDescription:
+      "A full editing workspace for PDFs: correct short text on normal pages, recognize and correct text on scanned pages using the same local OCR engine as the standalone OCR tool, add text/images/signatures, highlight and draw, cover content, and reorganize pages — all processed on your device. Best for short text corrections, annotations, and page organization, not full document authoring: complex formatting, embedded fonts, and paragraph reflow may not be preserved exactly.",
+    category: "pdf",
+    acceptedExtensions: PDF_EXT,
+    acceptedMimeTypes: PDF_MIME,
+    outputExtensions: ["pdf"],
+    processingMode: "local",
+    status: "experimental",
+    supportsMultiple: false,
+    maxRecommendedSizeMb: 60,
+    keywords: [
+      "edit pdf",
+      "pdf editor",
+      "add text to pdf",
+      "sign pdf",
+      "annotate pdf",
+      "edit scanned pdf",
+      "pdf text editor",
+    ],
+    workflow: "file",
+    relatedToolIds: ["pdf-ocr", "pdf-merge", "pdf-watermark", "pdf-add-page-numbers"],
+    faq: [
+      {
+        question: "Can this replace Adobe Acrobat for editing PDFs?",
+        answer:
+          "No — this is best for short text corrections, annotations, signatures, and page organization. It doesn't reflow paragraphs, reconstruct complex layouts, or preserve embedded fonts exactly. For heavy document authoring, a desktop editor is still the better tool.",
+      },
+      {
+        question: "How does editing scanned pages work?",
+        answer:
+          "The editor reuses the same local OCR engine as the standalone OCR PDF tool. Recognize a scanned page, then click any recognized word or line to correct it — the correction covers the original scanned text and places the new text (and an updated searchable layer) at the same position.",
+      },
+      {
+        question: "Does correcting text remove the original from the file?",
+        answer:
+          "No. Corrections are drawn over the original content, not removed from it — this is the same practical approach every browser-based PDF editor uses, since true in-place PDF text mutation isn't reliable. The original is visually covered, and for scanned pages the searchable text is updated to the corrected value.",
+      },
+      {
+        question: "Is the Whiteout tool a secure way to redact sensitive information?",
+        answer:
+          "No. Whiteout visually covers content — it does not remove the underlying data from the PDF file. Don't use it for legally or security-sensitive redaction.",
+      },
+    ],
+  },
+  {
     id: "pdf-merge",
     slug: "merge",
     href: "/pdf/merge",
@@ -264,7 +315,7 @@ export const pdfTools: ToolDefinition[] = [
     maxRecommendedSizeMb: 60,
     keywords: ["ocr pdf", "scanned pdf to text", "searchable pdf", "image pdf to text", "recognize text in pdf"],
     workflow: "file",
-    relatedToolIds: ["pdf-to-images", "images-to-pdf", "pdf-compress"],
+    relatedToolIds: ["pdf-editor", "pdf-to-images", "images-to-pdf", "pdf-compress"],
     faq: [
       {
         question: "Does my document get uploaded anywhere?",

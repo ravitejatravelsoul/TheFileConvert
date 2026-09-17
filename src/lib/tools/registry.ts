@@ -58,6 +58,7 @@ export const CATEGORY_LABELS: Record<ToolCategory, string> = {
 };
 
 export const POPULAR_TOOL_IDS = [
+  "pdf-editor",
   "pdf-merge",
   "pdf-compress",
   "image-compress",
@@ -65,7 +66,6 @@ export const POPULAR_TOOL_IDS = [
   "png-to-jpg",
   "pdf-split",
   "images-to-pdf",
-  "json-formatter",
 ];
 
 export function getPopularTools(): ToolDefinition[] {

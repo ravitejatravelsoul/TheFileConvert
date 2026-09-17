@@ -12,6 +12,7 @@ const NAV_LINKS = [
     label: "PDF",
     href: "/pdf",
     items: [
+      { label: "PDF Editor", href: "/pdf/editor" },
       { label: "Merge PDF", href: "/pdf/merge" },
       { label: "Split PDF", href: "/pdf/split" },
       { label: "Compress PDF", href: "/pdf/compress" },

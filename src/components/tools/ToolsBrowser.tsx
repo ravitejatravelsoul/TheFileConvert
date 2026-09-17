@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { IconSearch } from "@/components/icons";
 import { ToolCard } from "@/components/tools/ToolCard";
-import { allTools, searchTools, CATEGORY_LABELS } from "@/lib/tools/registry";
+import { allTools, searchTools, CATEGORY_LABELS, POPULAR_TOOL_IDS } from "@/lib/tools/registry";
 import type { ToolCategory } from "@/lib/tools/types";
 
 const TABS: { label: string; value: ToolCategory | "all" | "popular" }[] = [
@@ -17,16 +17,7 @@ const TABS: { label: string; value: ToolCategory | "all" | "popular" }[] = [
   { label: CATEGORY_LABELS.media, value: "media" },
 ];
 
-const POPULAR_IDS = new Set([
-  "pdf-merge",
-  "pdf-compress",
-  "image-compress",
-  "jpg-to-png",
-  "png-to-jpg",
-  "pdf-split",
-  "images-to-pdf",
-  "json-formatter",
-]);
+const POPULAR_IDS = new Set(POPULAR_TOOL_IDS);
 
 export function ToolsBrowser({ initialQuery = "" }: { initialQuery?: string }) {
   const [query, setQuery] = useState(initialQuery);
