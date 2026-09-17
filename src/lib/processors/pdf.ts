@@ -316,26 +316,12 @@ export async function pdfToImages(
   format: "png" | "jpeg",
   scale: number
 ): Promise<NamedBlob[]> {
-  const pdfjsLib = await import("pdfjs-dist");
-  pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
-    "pdfjs-dist/build/pdf.worker.min.mjs",
-    import.meta.url
-  ).toString();
-
-  const bytes = await file.arrayBuffer();
-  const doc = await pdfjsLib.getDocument({ data: bytes }).promise;
+  const { loadPdfJsDocument, renderPageToCanvas } = await import("./pdfjs-utils");
+  const doc = await loadPdfJsDocument(file);
   const results: NamedBlob[] = [];
 
   for (let pageNum = 1; pageNum <= doc.numPages; pageNum++) {
-    const page = await doc.getPage(pageNum);
-    const viewport = page.getViewport({ scale });
-    const canvas = document.createElement("canvas");
-    canvas.width = viewport.width;
-    canvas.height = viewport.height;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) throw new ProcessorError("Your browser can't render canvas content.");
-    await page.render({ canvasContext: ctx, viewport, canvas }).promise;
-
+    const canvas = await renderPageToCanvas(doc, pageNum, scale);
     const mime = format === "png" ? "image/png" : "image/jpeg";
     const blob: Blob = await new Promise((resolve, reject) => {
       canvas.toBlob(

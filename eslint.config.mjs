@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Vendored, minified third-party runtime assets — not our source, never linted.
+    "public/tesseract/**",
   ]),
 ]);
 

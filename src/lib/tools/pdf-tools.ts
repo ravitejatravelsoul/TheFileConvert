@@ -139,7 +139,7 @@ export const pdfTools: ToolDefinition[] = [
     maxRecommendedSizeMb: 150,
     keywords: ["jpg to pdf", "png to pdf", "images to pdf", "photo to pdf"],
     workflow: "file",
-    relatedToolIds: ["pdf-to-images", "pdf-merge"],
+    relatedToolIds: ["pdf-to-images", "pdf-merge", "pdf-ocr"],
   },
   {
     id: "pdf-to-images",
@@ -157,7 +157,7 @@ export const pdfTools: ToolDefinition[] = [
     maxRecommendedSizeMb: 100,
     keywords: ["pdf to jpg", "pdf to png", "pdf to image"],
     workflow: "file",
-    relatedToolIds: ["images-to-pdf", "pdf-compress"],
+    relatedToolIds: ["images-to-pdf", "pdf-compress", "pdf-ocr"],
   },
   {
     id: "pdf-add-page-numbers",
@@ -242,6 +242,44 @@ export const pdfTools: ToolDefinition[] = [
         question: "Is this the same as the image compression other PDF tools offer?",
         answer:
           "No. Some PDF compressors re-sample embedded images at lower resolution or quality to shrink file size, which can visibly degrade photos and scans. This tool never does that — it only touches the document's internal structure, so the visual result is identical to the original.",
+      },
+    ],
+  },
+  {
+    id: "pdf-ocr",
+    slug: "ocr",
+    href: "/pdf/ocr",
+    name: "OCR PDF",
+    shortName: "OCR",
+    description: "Turn scanned PDFs into searchable PDFs directly in your browser.",
+    longDescription:
+      "This tool recognizes text on scanned or image-only PDF pages using Tesseract.js, a local, open-source (Apache-2.0) OCR engine — nothing is uploaded. It works best for correcting or extracting individual words, values, and short text; complex formatting, tables, and handwriting may not be recognized accurately. See the tool status page for verified languages.",
+    category: "pdf",
+    acceptedExtensions: PDF_EXT,
+    acceptedMimeTypes: PDF_MIME,
+    outputExtensions: ["pdf", "txt"],
+    processingMode: "local",
+    status: "experimental",
+    supportsMultiple: false,
+    maxRecommendedSizeMb: 60,
+    keywords: ["ocr pdf", "scanned pdf to text", "searchable pdf", "image pdf to text", "recognize text in pdf"],
+    workflow: "file",
+    relatedToolIds: ["pdf-to-images", "images-to-pdf", "pdf-compress"],
+    faq: [
+      {
+        question: "Does my document get uploaded anywhere?",
+        answer:
+          "No. The PDF, the rendered page images, and the recognized text all stay on your device. Your browser does download the OCR engine and language model the first time you use this tool (a few megabytes, served from thefileconvert.com, not a third party) — never your document.",
+      },
+      {
+        question: "How accurate is the OCR?",
+        answer:
+          "It works well on clean, typed, well-scanned pages in a supported language. Accuracy drops on low-resolution scans, poor contrast, unusual fonts, and handwriting. Numbers, dates, and currency are usually recognized reliably on clean scans — always double-check anything important.",
+      },
+      {
+        question: "Can I edit the recognized text in place on the scan?",
+        answer:
+          "Not yet — this V1 focuses on making scanned PDFs searchable and extracting their text. In-place correction of individual recognized words on the page is planned for a future PDF editor.",
       },
     ],
   },

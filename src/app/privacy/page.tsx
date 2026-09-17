@@ -28,6 +28,19 @@ export default function Page() {
           </section>
 
           <section>
+            <h2 className="text-lg font-semibold text-[var(--foreground)]">OCR (PDF text recognition)</h2>
+            <p className="mt-2">
+              The OCR PDF tool recognizes text using Tesseract.js, an open-source engine
+              that runs as WebAssembly in your browser. The first time you use it, your
+              browser downloads the recognition engine and a language model (a few
+              megabytes) — these are static files served from thefileconvert.com itself,
+              not a third party. Your PDF, the images rendered from it, and the text OCR
+              recognizes are never uploaded; only those static engine/model files are
+              fetched over the network.
+            </p>
+          </section>
+
+          <section>
             <h2 className="text-lg font-semibold text-[var(--foreground)]">Server-assisted tools</h2>
             <p className="mt-2">
               Some tools listed as &ldquo;Coming soon&rdquo; on our{" "}

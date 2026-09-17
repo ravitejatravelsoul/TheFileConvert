@@ -2,8 +2,9 @@
 
 ## Current tool count
 
-- **PDF**: 12 available (merge, split, extract pages, delete pages, rotate, reorder,
-  images→PDF, PDF→images, page numbers, watermark, metadata viewer/remover, compress)
+- **PDF**: 12 available + 1 experimental (merge, split, extract pages, delete pages,
+  rotate, reorder, images→PDF, PDF→images, page numbers, watermark, metadata
+  viewer/remover, compress, + OCR PDF as experimental — see `docs/OCR.md`)
 - **Image**: 11 available + 1 experimental (compress, resize, crop, rotate/flip, remove
   metadata, 6 format-conversion routes, SVG→PNG as experimental)
 - **Data & Developer**: 11 available (JSON formatter/minifier/validator, XML formatter,

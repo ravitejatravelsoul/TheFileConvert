@@ -19,6 +19,7 @@ Live site: [thefileconvert.com](https://thefileconvert.com)
 - **Tailwind CSS 4**
 - **pdf-lib** (PDF creation/editing) + **pdfjs-dist** (PDF rendering to images)
 - **JSZip** (archive creation/extraction)
+- **tesseract.js** (local, in-browser OCR — lazy-loaded only on `/pdf/ocr`; see [`docs/OCR.md`](docs/OCR.md))
 - Everything else (image processing, hashing, text/data tools) uses native browser APIs (`Canvas`, `Web Crypto`, `DOMParser`) — no extra dependency
 
 No database, no auth provider, no payment processor, no AI API.
@@ -44,7 +45,7 @@ src/
     ui/                Small primitives: Button, Badge
   lib/
     tools/             Tool registry (metadata: name, category, accepted types, status, FAQ)
-    processors/        Pure conversion logic (pdf.ts, image.ts, archive.ts, data.ts, markdown.ts, text-documents.ts)
+    processors/        Pure conversion logic (pdf.ts, image.ts, archive.ts, data.ts, markdown.ts, text-documents.ts, ocr.ts)
     file-detection/    Extension + magic-byte sniffing
     security/          File validation, SVG sanitization, ZIP-bomb guard, archive path sanitization
     download/          Object URL lifecycle + ZIP-of-results download
@@ -52,7 +53,7 @@ src/
 e2e/                   Playwright end-to-end tests (+ fixtures/)
 ```
 
-See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for the full design, [`docs/TOOLS.md`](docs/TOOLS.md) for how to add a new tool, and [`docs/PRIVACY-MODEL.md`](docs/PRIVACY-MODEL.md) for the privacy architecture.
+See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for the full design, [`docs/TOOLS.md`](docs/TOOLS.md) for how to add a new tool, [`docs/PRIVACY-MODEL.md`](docs/PRIVACY-MODEL.md) for the privacy architecture, and [`docs/OCR.md`](docs/OCR.md) for the OCR engine, self-hosted assets, and verified-language policy.
 
 ## Testing
 
@@ -82,6 +83,7 @@ npx tsc --noEmit
 
 - **PDF compress** performs a lossless structural re-save (compressed cross-reference streams). It does not re-sample embedded images, so savings are modest on already-optimized files.
 - **SVG to PNG** is marked experimental — very complex SVGs (filters, external references) may not rasterize perfectly.
+- **OCR PDF** is marked experimental — strong accuracy on clean/typed scans (verified, see `docs/OCR.md`), but no rotation auto-detection, no deskew, no handwriting support, and heavy scan noise reduces accuracy significantly.
 - **DOCX/PPTX/XLSX conversion, PDF password protect/unlock, and audio/video conversion** are not implemented in V1. They would require server-side processing (e.g. LibreOffice, ffmpeg) or licensed libraries that don't have a reliable, free, purely client-side equivalent yet. They're listed as "Coming soon" on `/tools/status` rather than faked.
 - **Markdown support** covers common syntax (headings, bold/italic, links, lists, blockquotes, fenced code, hr) — it is not a full CommonMark implementation.
 
