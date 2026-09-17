@@ -1,36 +1,90 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# TheFileConvert
 
-## Getting Started
+**Every file. Any format. Free.**
 
-First, run the development server:
+TheFileConvert is a free, privacy-first file conversion and compression platform. Most tools run entirely in the browser using JavaScript, Canvas, Web Crypto, and WebAssembly-adjacent libraries — no account, no subscription, and no server upload for local tools.
+
+Live site: [thefileconvert.com](https://thefileconvert.com)
+
+## Principles
+
+- **Local over server** — process files on-device whenever technically possible.
+- **Free, no account** — no login, no paywalled tiers, no email requirement.
+- **Honest labeling** — every tool declares a status (`available`, `experimental`, `coming-soon`) and a processing mode (`local`, `server-assisted`, `unsupported`). See `/tools/status`.
+- **No AI, no paid APIs** — this is a static/serverless app designed to run near domain-cost.
+
+## Tech stack
+
+- **Next.js 16** (App Router, TypeScript strict, React 19)
+- **Tailwind CSS 4**
+- **pdf-lib** (PDF creation/editing) + **pdfjs-dist** (PDF rendering to images)
+- **JSZip** (archive creation/extraction)
+- Everything else (image processing, hashing, text/data tools) uses native browser APIs (`Canvas`, `Web Crypto`, `DOMParser`) — no extra dependency
+
+No database, no auth provider, no payment processor, no AI API.
+
+## Getting started
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Project structure
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```
+src/
+  app/                 Route pages (App Router) — one folder per tool/category
+  components/
+    home/              Homepage sections
+    layout/            Header, Footer
+    tools/             Shared tool UI: DropZone, FileWorkflow, TextWorkflow, ToolCard, ...
+    ui/                Small primitives: Button, Badge
+  lib/
+    tools/             Tool registry (metadata: name, category, accepted types, status, FAQ)
+    processors/        Pure conversion logic (pdf.ts, image.ts, archive.ts, data.ts, markdown.ts, text-documents.ts)
+    file-detection/    Extension + magic-byte sniffing
+    security/          File validation, SVG sanitization, ZIP-bomb guard, archive path sanitization
+    download/          Object URL lifecycle + ZIP-of-results download
+    format.ts          Byte formatting, filename helpers
+e2e/                   Playwright end-to-end tests (+ fixtures/)
+```
 
-## Learn More
+See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for the full design, [`docs/TOOLS.md`](docs/TOOLS.md) for how to add a new tool, and [`docs/PRIVACY-MODEL.md`](docs/PRIVACY-MODEL.md) for the privacy architecture.
 
-To learn more about Next.js, take a look at the following resources:
+## Testing
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+npm run test          # unit tests (Vitest)
+npm run test:watch    # unit tests, watch mode
+npm run test:e2e      # Playwright end-to-end tests (builds + serves the app first)
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+E2E tests cover real file uploads and downloads — merged PDFs are re-parsed with `pdf-lib` to check page counts, converted images are checked for correct magic bytes, and error states are exercised with intentionally bad input.
 
-## Deploy on Vercel
+## Building & running
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+npm run build
+npm run start
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Linting & types
+
+```bash
+npm run lint
+npx tsc --noEmit
+```
+
+## Known limitations
+
+- **PDF compress** performs a lossless structural re-save (compressed cross-reference streams). It does not re-sample embedded images, so savings are modest on already-optimized files.
+- **SVG to PNG** is marked experimental — very complex SVGs (filters, external references) may not rasterize perfectly.
+- **DOCX/PPTX/XLSX conversion, PDF password protect/unlock, and audio/video conversion** are not implemented in V1. They would require server-side processing (e.g. LibreOffice, ffmpeg) or licensed libraries that don't have a reliable, free, purely client-side equivalent yet. They're listed as "Coming soon" on `/tools/status` rather than faked.
+- **Markdown support** covers common syntax (headings, bold/italic, links, lists, blockquotes, fenced code, hr) — it is not a full CommonMark implementation.
+
+## Deployment
+
+Designed for Vercel's free tier: fully static/serverless, no database, no long-running processes. See `docs/ARCHITECTURE.md` for details.
