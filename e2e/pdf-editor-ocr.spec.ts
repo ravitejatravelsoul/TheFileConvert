@@ -514,6 +514,52 @@ test.describe("PDF Editor: OCR visual-fidelity fixtures", () => {
     const text = await extractText(bytes, 1);
     expect(text).toContain("2028");
   });
+
+  test("regression: selection handles on a freshly-saved micro-edit don't cover the edited glyph", async ({ page, isMobile }) => {
+    // A real defect found via manual reproduction: a corrected object is auto-selected right
+    // after Save, and the resize-handle circles were positioned straddling the object's own
+    // corners (half inside, half outside) — invisible for a normal-sized whole-word patch,
+    // but for a tightened single-character patch (see the micro-edit fix above) the four
+    // handles covered a large fraction of the tiny glyph, making it look malformed/scribbled
+    // immediately after every micro-edit even though the underlying patch/export was correct.
+    const fixturePath = path.join(OCR_FIXTURES, "date-field-scan.pdf");
+    await openFile(page, fixturePath);
+    await openMobilePanel(page, isMobile, "Properties");
+    await page.locator("summary", { hasText: "OCR" }).click();
+    await withOcrLock(async () => {
+      await page.getByRole("button", { name: "Recognize current page" }).click();
+      await expect(page.getByRole("button", { name: "Recognize current page" })).toBeVisible({ timeout: 90_000 });
+    });
+    await page.keyboard.press("Escape");
+
+    const secondDateButton = page.getByRole("button", { name: /Edit recognized word: 12\/20\/2026/i }).first();
+    await expect(secondDateButton).toBeVisible({ timeout: 10_000 });
+    await secondDateButton.click();
+    const dialog = page.getByRole("dialog", { name: "Edit text" });
+    await dialog.locator("input[type=text]").fill("12/20/2028");
+    await dialog.getByRole("button", { name: "Save correction" }).click();
+    await expect(dialog).not.toBeVisible();
+
+    // The new object is auto-selected (addObject selects it), so its resize handles should
+    // already be rendered — this is exactly the state the defect screenshot showed.
+    const objectEl = page.locator('[data-object-type="ocr-text-replacement"]').first();
+    const objectBox = await objectEl.boundingBox();
+    if (!objectBox) throw new Error("no ocr-text-replacement object bounding box");
+
+    // Each of the 4 resize handles (small circles at the corners) must not overlap the
+    // object's own content area — they should sit just outside it, framing the selection
+    // without covering any of the tiny patch image underneath.
+    const handles = await objectEl.locator(".rounded-full").all();
+    expect(handles.length).toBeGreaterThanOrEqual(4);
+    for (const handle of handles) {
+      const handleBox = await handle.boundingBox();
+      if (!handleBox) continue;
+      const overlapX = Math.max(0, Math.min(objectBox.x + objectBox.width, handleBox.x + handleBox.width) - Math.max(objectBox.x, handleBox.x));
+      const overlapY = Math.max(0, Math.min(objectBox.y + objectBox.height, handleBox.y + handleBox.height) - Math.max(objectBox.y, handleBox.y));
+      const overlapArea = overlapX * overlapY;
+      expect(overlapArea, "a resize handle must not overlap the object's own content area").toBeLessThanOrEqual(0.5);
+    }
+  });
 });
 
 test.describe("PDF Editor: OCR privacy regression", () => {

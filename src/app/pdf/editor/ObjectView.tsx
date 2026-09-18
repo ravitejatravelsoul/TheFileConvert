@@ -45,10 +45,16 @@ export function ObjectView({ object, spec, selected, interactive, onPointerDownB
               }}
               className="absolute h-3 w-3 rounded-full border-2 border-[var(--brand)] bg-white"
               style={{
-                left: h.includes("w") ? -6 : undefined,
-                right: h.includes("e") ? -6 : undefined,
-                top: h.includes("n") ? -6 : undefined,
-                bottom: h.includes("s") ? -6 : undefined,
+                // Offset by the handle's own full size (not half), so it sits just outside
+                // the object's box rather than straddling the corner — at half-offset, each
+                // 12px handle covered 6px *into* the box, invisible for a normal-sized object
+                // but enough to visually obscure a large fraction of a very small one (e.g. a
+                // single-character OCR correction patch, now tight enough for this to matter
+                // right when it's auto-selected after Save).
+                left: h.includes("w") ? -12 : undefined,
+                right: h.includes("e") ? -12 : undefined,
+                top: h.includes("n") ? -12 : undefined,
+                bottom: h.includes("s") ? -12 : undefined,
                 cursor: h === "nw" || h === "se" ? "nwse-resize" : "nesw-resize",
               }}
             />
