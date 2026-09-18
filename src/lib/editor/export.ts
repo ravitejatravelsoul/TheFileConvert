@@ -103,6 +103,44 @@ function fitFontSize(font: PDFFont, text: string, box: { width: number; height: 
   return Math.max(4, scaled);
 }
 
+/** How far a replacement word's bounding box may grow past its original OCR box before
+ * export gives up shrinking further and just lets it slightly overflow — this mirrors the
+ * "shrink first, then tolerate a small overflow rather than silently covering neighboring
+ * content" rule from the properties-panel warning shown when the text doesn't fit. */
+const MAX_WIDTH_GROWTH_FACTOR = 1.15;
+/** Never shrink an OCR replacement below this fraction of its natural (bbox-height-based)
+ * size — past that point a slight rightward overflow is safer/more legible than text so
+ * small it's illegible, and the properties panel already warned the user this word's
+ * replacement is wider than the original. */
+const MIN_SHRINK_FACTOR = 0.7;
+
+/** Like fitFontSize, but tuned for word-level OCR replacements: a tight word box has much
+ * less slack than a whole line, so a longer replacement (e.g. "182.50" -> "1,282.50") is
+ * allowed to grow the effective box a little before the font shrinks, and shrinking stops
+ * at a legibility floor rather than continuing indefinitely for very long replacements. */
+function fitOcrReplacementFontSize(
+  font: PDFFont,
+  text: string,
+  box: { width: number; height: number },
+  requestedSize?: number
+): number {
+  if (requestedSize) return requestedSize;
+  // A word-level OCR box is tight to the glyphs' own ink (digits and capitals have no
+  // ascender/descender beyond cap-height), so it reads as noticeably smaller than the
+  // surrounding text's real font size if treated as the font size directly. Helvetica's
+  // published cap-height is ~718/1000 em (Adobe AFM), so a tight cap/digit-height box
+  // implies a font size of roughly box.height / 0.718 to visually match neighboring text
+  // at the same nominal size — much closer than treating the box height as the size itself.
+  const HELVETICA_CAP_HEIGHT_RATIO = 0.718;
+  const heightEstimate = Math.max(6, box.height / HELVETICA_CAP_HEIGHT_RATIO);
+  const naturalWidth = font.widthOfTextAtSize(text || " ", heightEstimate);
+  const allowedWidth = box.width * MAX_WIDTH_GROWTH_FACTOR;
+  if (naturalWidth <= allowedWidth || allowedWidth <= 0) return heightEstimate;
+  const floor = heightEstimate * MIN_SHRINK_FACTOR;
+  const scaled = heightEstimate * (allowedWidth / naturalWidth);
+  return Math.max(floor, scaled);
+}
+
 async function drawObject(
   page: PDFPage,
   obj: EditorObject,
@@ -111,17 +149,11 @@ async function drawObject(
   imageCache: Map<string, unknown>
 ): Promise<void> {
   switch (obj.type) {
-    case "native-text-replacement":
-    case "ocr-text-replacement": {
+    case "native-text-replacement": {
       drawWhiteoutRect(page, obj.x, obj.y, obj.width, obj.height);
       if (!obj.newText.trim()) break;
       const font = fonts.regular;
-      const size = fitFontSize(
-        font,
-        obj.newText,
-        obj,
-        obj.type === "native-text-replacement" ? obj.fontSize : undefined
-      );
+      const size = fitFontSize(font, obj.newText, obj, obj.fontSize);
       try {
         page.drawText(obj.newText, { x: obj.x, y: obj.y, size, font, color: rgb(0, 0, 0) });
         // Keep the page searchable after a correction: draw an invisible run with the
@@ -130,6 +162,46 @@ async function drawObject(
       } catch {
         // A character outside Helvetica's supported encoding shouldn't fail the whole
         // export — the region is still whited out, just without replacement text drawn.
+      }
+      break;
+    }
+
+    case "ocr-text-replacement": {
+      // Minimum-area, background-matched patch: obj's own box is already the tight
+      // word-level OCR region plus a small calibrated padding (see PageSurface.tsx /
+      // regionColor.ts) — never the whole line — and its fill color is sampled from the
+      // scan around the word rather than assumed white. For a background too non-uniform
+      // to reconstruct safely (backgroundComplex), or when the user chose "place as
+      // overlay", the patch is skipped entirely and only the new text is drawn on top of
+      // the original scan pixels, so nothing underneath is destructively covered.
+      const font = fonts.regular;
+      const size = fitOcrReplacementFontSize(font, obj.newText, obj, obj.fontSize);
+      if (!obj.overlayOnly) {
+        // The original word's OCR box is tight to *its own* glyphs — if it had no
+        // descenders (e.g. "Smith") but the replacement does (e.g. "Rodriguez" -> the "g"),
+        // the new glyph would hang below the patch and show over whatever wasn't covered.
+        // Reserving descender room unconditionally (rather than only when the OCR box
+        // measured one) is cheap and safe: the patch already matches the local background
+        // color, so a slightly taller patch doesn't introduce a visible seam.
+        const descenderAllowance = size * 0.28;
+        page.drawRectangle({
+          x: obj.x,
+          y: obj.y - descenderAllowance,
+          width: obj.width,
+          height: obj.height + descenderAllowance,
+          color: toPdfLibColor(obj.backgroundColor),
+        });
+      }
+      if (!obj.newText.trim()) break;
+      try {
+        page.drawText(obj.newText, { x: obj.x, y: obj.y, size, font, color: toPdfLibColor(obj.textColor) });
+        // Keep the page searchable after a correction: draw an invisible run with the
+        // corrected text at the same position, same technique buildSearchablePdf uses.
+        page.drawText(obj.newText, { x: obj.x, y: obj.y, size, font, opacity: 0 });
+      } catch {
+        // A character outside Helvetica's supported encoding shouldn't fail the whole
+        // export — the region still shows the patch/original scan, just without
+        // replacement text drawn.
       }
       break;
     }

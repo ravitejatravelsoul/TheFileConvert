@@ -75,6 +75,21 @@ export interface OcrTextReplacementObject extends BaseObject {
   originalText: string;
   newText: string;
   confidence: number;
+  /** Local, sampled-from-the-scan estimates (see regionColor.ts) so the correction patch
+   * matches the surrounding page instead of punching a plain white rectangle over it. */
+  backgroundColor: RgbColor;
+  textColor: RgbColor;
+  /** True when the sampled background was too non-uniform (table lines, a pattern, a
+   * photo/logo underneath) to safely reconstruct — export skips the background patch
+   * entirely for these and only draws the replacement text on top of the original pixels. */
+  backgroundComplex: boolean;
+  /** User- or auto-selected: skip the background patch and only draw the new text on top
+   * of the original scan. Automatic for backgroundComplex regions; can also be chosen
+   * manually for any region. */
+  overlayOnly: boolean;
+  /** Manual font-size override from the properties panel; unset means "use the automatic
+   * bbox-height estimate", same as before. */
+  fontSize?: number;
 }
 
 export interface AddedTextObject extends BaseObject {

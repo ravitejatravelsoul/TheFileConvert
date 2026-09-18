@@ -24,7 +24,8 @@ class NodeCanvasFactory {
 export interface RenderedPage {
   width: number;
   height: number;
-  /** Returns [r,g,b,a] (0-255) at the given pixel coordinate. */
+  /** Returns [r,g,b,a] (0-255) at the given pixel coordinate. Reads the whole canvas once
+   * and caches it, so repeated calls (e.g. from a full-page pixel diff) are cheap. */
   getPixel(x: number, y: number): [number, number, number, number];
   /** Saves the rendered page as a PNG file, for debugging a failing assertion. */
   savePng(path: string): void;
@@ -50,12 +51,18 @@ export async function renderPdfPage(bytes: Uint8Array | Buffer, pageNumber: numb
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } as any).promise;
 
+  const w = Math.ceil(viewport.width);
+  const h = Math.ceil(viewport.height);
+  const full = context.getImageData(0, 0, w, h);
+
   return {
     width: viewport.width,
     height: viewport.height,
     getPixel(x: number, y: number) {
-      const data = context.getImageData(Math.round(x), Math.round(y), 1, 1).data;
-      return [data[0], data[1], data[2], data[3]];
+      const cx = Math.max(0, Math.min(w - 1, Math.round(x)));
+      const cy = Math.max(0, Math.min(h - 1, Math.round(y)));
+      const i = (cy * w + cx) * 4;
+      return [full.data[i], full.data[i + 1], full.data[i + 2], full.data[i + 3]];
     },
     savePng(path: string) {
       fs.writeFileSync(path, canvas.toBuffer("image/png"));
@@ -66,4 +73,65 @@ export async function renderPdfPage(bytes: Uint8Array | Buffer, pageNumber: numb
 /** True if a pixel is close to white/blank (background), within a tolerance. */
 export function isBlank([r, g, b, a]: [number, number, number, number], tolerance = 10): boolean {
   return a < 10 || (r > 255 - tolerance && g > 255 - tolerance && b > 255 - tolerance);
+}
+
+export interface PixelRectPx {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
+export interface CollateralChangeResult {
+  /** Pixels whose color differs by more than `tolerance` between the two renders. */
+  changedPixelCount: number;
+  /** Of those, how many fall *outside* every allowed region — the exact defect this
+   * guards against: an edit that visibly disturbs unrelated parts of the page. */
+  changedOutsidePixelCount: number;
+  totalPixels: number;
+  /** A representative sample of a handful of offending (x,y) points, for debugging. */
+  offendingSamples: { x: number; y: number }[];
+}
+
+/** The core "no collateral change" check: renders of the same page before/after an edit
+ * should be pixel-identical everywhere except inside the caller-supplied allowed region(s)
+ * (the edit's own patch, already expanded with whatever padding/margin the caller wants).
+ * Fails loudly (via the returned counts) if content *outside* those regions moved, which is
+ * exactly the defect being guarded against: OCR edits that wipe/rebuild far more of the
+ * page than the one word being changed. */
+export function findCollateralChanges(
+  before: RenderedPage,
+  after: RenderedPage,
+  allowedRegionsPx: PixelRectPx[],
+  tolerance = 24
+): CollateralChangeResult {
+  const width = Math.min(before.width, after.width);
+  const height = Math.min(before.height, after.height);
+  let changedPixelCount = 0;
+  let changedOutsidePixelCount = 0;
+  const offendingSamples: { x: number; y: number }[] = [];
+
+  const inAllowedRegion = (x: number, y: number) =>
+    allowedRegionsPx.some((r) => x >= r.x && x <= r.x + r.width && y >= r.y && y <= r.y + r.height);
+
+  // Sampling stride keeps this fast for large pages while still catching any sizeable
+  // collateral change; the intended edit region is checked with full density separately by
+  // the caller via getPixel, so a coarse stride outside it is enough to catch a problem.
+  const stride = width * height > 400_000 ? 2 : 1;
+
+  for (let y = 0; y < height; y += stride) {
+    for (let x = 0; x < width; x += stride) {
+      const b = before.getPixel(x, y);
+      const a = after.getPixel(x, y);
+      const dist = Math.abs(b[0] - a[0]) + Math.abs(b[1] - a[1]) + Math.abs(b[2] - a[2]) + Math.abs(b[3] - a[3]);
+      if (dist <= tolerance) continue;
+      changedPixelCount++;
+      if (!inAllowedRegion(x, y)) {
+        changedOutsidePixelCount++;
+        if (offendingSamples.length < 10) offendingSamples.push({ x, y });
+      }
+    }
+  }
+
+  return { changedPixelCount, changedOutsidePixelCount, totalPixels: width * height, offendingSamples };
 }

@@ -88,7 +88,7 @@ export function SignaturePad({ onConfirm, onClose }: SignaturePadProps) {
   const canConfirm = mode === "draw" ? hasStroke : Boolean(uploadedDataUrl);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={onClose}>
+    <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/40 p-4" onClick={onClose}>
       <div
         className="w-full max-w-md rounded-[var(--radius-lg)] bg-[var(--surface)] p-5 shadow-[var(--shadow-lifted)]"
         onClick={(e) => e.stopPropagation()}

@@ -62,10 +62,24 @@ export function ObjectView({ object, spec, selected, interactive, onPointerDownB
 function ObjectContent({ object, width, height }: { object: EditorObject; width: number; height: number }) {
   switch (object.type) {
     case "native-text-replacement":
-    case "ocr-text-replacement":
       return (
         <div className="h-full w-full border-2 border-[var(--accent-mint)] bg-white" title={`Corrected: ${object.newText}`}>
           <span className="block truncate px-0.5 text-[10px] leading-tight text-[var(--foreground)]">{object.newText}</span>
+        </div>
+      );
+    case "ocr-text-replacement":
+      // Rendered with the same sampled colors export.ts will actually use, so this preview
+      // on the canvas matches the exported result as closely as practical instead of a
+      // generic mint-box placeholder.
+      return (
+        <div
+          className="h-full w-full outline outline-1 outline-[var(--accent-mint)]/60"
+          style={{ backgroundColor: object.overlayOnly ? "transparent" : rgbToCss(object.backgroundColor) }}
+          title={`Corrected: ${object.newText}`}
+        >
+          <span className="block truncate px-0.5 text-[10px] leading-tight" style={{ color: rgbToCss(object.textColor) }}>
+            {object.newText}
+          </span>
         </div>
       );
     case "added-text":

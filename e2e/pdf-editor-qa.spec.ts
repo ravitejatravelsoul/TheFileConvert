@@ -93,11 +93,11 @@ test.describe("PDF Editor: mobile editing checklist", () => {
       await expect(page.getByRole("button", { name: "Recognize current page" })).toBeVisible({ timeout: 90_000 });
     });
 
-    // 3. Edit recognized text.
+    // 3. Edit recognized text — a single word, not the whole line.
     await page.keyboard.press("Escape");
-    const lineButtons = page.getByRole("button", { name: /Edit recognized text/i });
-    await expect(lineButtons.first()).toBeVisible({ timeout: 10_000 });
-    await lineButtons.first().click();
+    const wordButtons = page.getByRole("button", { name: /Edit recognized word/i });
+    await expect(wordButtons.first()).toBeVisible({ timeout: 10_000 });
+    await wordButtons.first().click();
     const dialog = page.getByRole("dialog", { name: "Edit text" });
     await expect(dialog).toBeVisible();
     await dialog.locator("input[type=text]").fill("Mobile correction");

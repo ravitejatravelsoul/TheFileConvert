@@ -8,21 +8,35 @@ import {
   viewportDimensions,
   type Rect,
 } from "@/lib/editor/coordinates";
-import { viewportSpecForPage, effectiveRotation, type EditorDocument, type EditorObject, type EditorPage } from "@/lib/editor/types";
+import { viewportSpecForPage, effectiveRotation, type EditorDocument, type EditorObject, type EditorPage, type RgbColor } from "@/lib/editor/types";
 import type { NativeTextRegion } from "@/lib/editor/nativeText";
 import type { OcrPageResult } from "@/lib/processors/ocr";
 import { confidenceTier } from "@/lib/processors/ocr";
+import { estimateRegionColors, computeEditPadding, type PixelSource } from "@/lib/editor/regionColor";
 import type { EditorWorkspaceApi, ToolId, SearchMatch } from "./useEditorWorkspace";
 import type { ToolOptions } from "./toolOptions";
 import { rgbToCss } from "./toolOptions";
 import { ObjectView } from "./ObjectView";
+
+export interface OcrColorEstimate {
+  backgroundColor: RgbColor;
+  textColor: RgbColor;
+  complex: boolean;
+  /** Padding (PDF points) already folded into `pdfBox` below the request — the caller
+   * doesn't need to add its own. */
+  paddingPt: number;
+}
 
 export interface EditableRegionRequest {
   kind: "native" | "ocr";
   pageId: string;
   text: string;
   confidence?: number;
+  /** The tight region to whiteout/patch — for OCR requests this already includes the
+   * calibrated padding (see computeEditPadding), so it's slightly larger than the raw OCR
+   * word/line box it was derived from. */
   pdfBox: Rect;
+  ocrColors?: OcrColorEstimate;
 }
 
 interface PageSurfaceProps {
@@ -57,6 +71,7 @@ export function PageSurface({
   onPlacementComplete,
 }: PageSurfaceProps) {
   const canvasHostRef = useRef<HTMLDivElement>(null);
+  const baseCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
   const file = doc.sourceFiles[page.sourceFileId];
   const spec = useMemo(() => viewportSpecForPage(page, zoom), [page, zoom]);
@@ -88,6 +103,7 @@ export function PageSurface({
       if (!host) return;
       host.innerHTML = "";
       host.appendChild(canvas);
+      baseCanvasRef.current = canvas;
     })();
     return () => {
       cancelled = true;
@@ -99,6 +115,107 @@ export function PageSurface({
     const vx = e.clientX - rect.left;
     const vy = e.clientY - rect.top;
     return viewportToPdfPoint(spec, { x: vx, y: vy });
+  }
+
+  /** Reads a rectangular slice of the page's own rendered canvas once (fast) and exposes
+   * it as a PixelSource — the canvas's own pixel buffer is 1:1 with viewport CSS pixels
+   * (see renderPageToCanvas), so a viewport-pixel rect maps directly onto it. */
+  function canvasPixelSource(areaPx: Rect): PixelSource | null {
+    const canvas = baseCanvasRef.current;
+    const ctx = canvas?.getContext("2d");
+    if (!canvas || !ctx) return null;
+    const x0 = Math.max(0, Math.floor(areaPx.x));
+    const y0 = Math.max(0, Math.floor(areaPx.y));
+    const x1 = Math.min(canvas.width, Math.ceil(areaPx.x + areaPx.width));
+    const y1 = Math.min(canvas.height, Math.ceil(areaPx.y + areaPx.height));
+    const w = Math.max(1, x1 - x0);
+    const h = Math.max(1, y1 - y0);
+    let imgData: ImageData | null = null;
+    try {
+      imgData = ctx.getImageData(x0, y0, w, h);
+    } catch {
+      return null; // e.g. a tainted canvas — fall back to defaults rather than throwing
+    }
+    return {
+      width: canvas.width,
+      height: canvas.height,
+      getPixel(x, y) {
+        const lx = Math.max(0, Math.min(w - 1, Math.round(x) - x0));
+        const ly = Math.max(0, Math.min(h - 1, Math.round(y) - y0));
+        const i = (ly * w + lx) * 4;
+        const d = imgData!.data;
+        return [d[i], d[i + 1], d[i + 2], d[i + 3]];
+      },
+    };
+  }
+
+  /** Checks rightward from the word's own edge, in a few steps, for genuinely blank
+   * (background-colored) space to grow a longer replacement into — the "expand into
+   * available whitespace only if verified" rule: a longer replacement is allowed extra
+   * room only as far as the scan is actually confirmed blank there, never past real
+   * neighboring content. Returns how many viewport pixels are safe to grow into. */
+  function findSafeExpansionPx(source: PixelSource, wordRectPx: Rect, backgroundColor: RgbColor, maxExtraPx: number): number {
+    const bg: [number, number, number] = [backgroundColor.r * 255, backgroundColor.g * 255, backgroundColor.b * 255];
+    const steps = 6;
+    const stepSize = maxExtraPx / steps;
+    let safe = 0;
+    for (let i = 1; i <= steps; i++) {
+      const testX = wordRectPx.x + wordRectPx.width + i * stepSize;
+      let allBackground = true;
+      const sampleYs = [wordRectPx.y, wordRectPx.y + wordRectPx.height / 2, wordRectPx.y + wordRectPx.height];
+      for (const testY of sampleYs) {
+        const [r, g, b, a] = source.getPixel(testX, testY);
+        if (a < 10) continue;
+        const dist = Math.hypot(r - bg[0], g - bg[1], b - bg[2]);
+        if (dist > 45) {
+          allBackground = false;
+          break;
+        }
+      }
+      if (!allBackground) break;
+      safe = i * stepSize;
+    }
+    return safe;
+  }
+
+  /** Shared by both word- and line-level OCR click targets: samples the local background
+   * and text color from the rendered scan (never assumes white), computes a small
+   * calibrated padding, checks for genuinely blank space to grow into for a longer
+   * replacement, and hands the caller a ready-to-edit request. */
+  function requestOcrEdit(text: string, pdfBox: Rect, confidence: number) {
+    const paddingPt = computeEditPadding(pdfBox.height, confidence);
+    const wordRectPx = pdfRectToViewport(spec, pdfBox);
+    const paddingPx = paddingPt * spec.scale;
+    // Sample wide enough to the right to check for verified expansion room too (up to one
+    // more word-width), not just the tight padding ring used for background/text color.
+    const maxExtraPx = wordRectPx.width;
+    const samplingAreaPx: Rect = {
+      x: wordRectPx.x - paddingPx * 2,
+      y: wordRectPx.y - paddingPx * 2,
+      width: wordRectPx.width + paddingPx * 4 + maxExtraPx,
+      height: wordRectPx.height + paddingPx * 4,
+    };
+    const source = canvasPixelSource(samplingAreaPx);
+    const estimate = source
+      ? estimateRegionColors(source, wordRectPx, paddingPx)
+      : { backgroundColor: { r: 1, g: 1, b: 1 }, textColor: { r: 0, g: 0, b: 0 }, complex: false };
+    const safeExpansionPx = source && !estimate.complex ? findSafeExpansionPx(source, wordRectPx, estimate.backgroundColor, maxExtraPx) : 0;
+    const safeExpansionPt = safeExpansionPx / spec.scale;
+
+    const paddedPdfBox: Rect = {
+      x: pdfBox.x - paddingPt,
+      y: pdfBox.y - paddingPt,
+      width: pdfBox.width + paddingPt * 2 + safeExpansionPt,
+      height: pdfBox.height + paddingPt * 2,
+    };
+    onRequestTextEdit({
+      kind: "ocr",
+      pageId: page.id,
+      text,
+      confidence,
+      pdfBox: paddedPdfBox,
+      ocrColors: { ...estimate, paddingPt },
+    });
   }
 
   function handleOverlayPointerDown(e: React.PointerEvent) {
@@ -323,20 +440,47 @@ export function PageSurface({
           );
         })}
 
-        {/* OCR line regions (click target) + word confidence overlay */}
+        {/* OCR line regions — a lower-priority fallback target for clicking whitespace
+            within a line that no word button covers; word buttons render after these and
+            sit on top, so a click on an actual word always hits the word, never the line. */}
         {ocrResult?.lines.map((line, i) => {
           const vRect = pdfRectToViewport(spec, line.pdfBox);
+          const wordsInLine = ocrResult.words.filter((w) => Math.abs(w.pdfBox.y - line.pdfBox.y) < line.pdfBox.height * 0.5);
+          const lineConfidence =
+            wordsInLine.length > 0 ? wordsInLine.reduce((sum, w) => sum + w.confidence, 0) / wordsInLine.length : 75;
           return (
             <button
               key={`ocr-line-${i}`}
               type="button"
-              aria-label={`Edit recognized text: ${line.text}`}
-              className="absolute rounded-sm border border-transparent hover:border-[var(--brand)] hover:bg-[var(--brand)]/10"
+              aria-label={`Edit recognized line: ${line.text}`}
+              title="Click a specific word above to edit just that word"
+              className="absolute rounded-sm border border-transparent hover:border-[var(--brand)]/40"
               style={{ left: vRect.x, top: vRect.y, width: vRect.width, height: vRect.height, cursor: activeTool === "select" ? "text" : "inherit" }}
               onPointerDown={(e) => e.stopPropagation()}
               onClick={() => {
                 if (activeTool !== "select") return;
-                onRequestTextEdit({ kind: "ocr", pageId: page.id, text: line.text, pdfBox: line.pdfBox });
+                requestOcrEdit(line.text, line.pdfBox, lineConfidence);
+              }}
+            />
+          );
+        })}
+
+        {/* OCR word regions — the primary editable target: clicking a word edits only that
+            word's bounding box, never the whole line (see requestOcrEdit / regionColor.ts). */}
+        {ocrResult?.words.map((word, i) => {
+          const vRect = pdfRectToViewport(spec, word.pdfBox);
+          return (
+            <button
+              key={`ocr-word-${i}`}
+              type="button"
+              aria-label={`Edit recognized word: ${word.text}`}
+              className="absolute rounded-[2px] border border-transparent transition-colors hover:border-[var(--brand)] hover:bg-[var(--brand)]/15"
+              style={{ left: vRect.x, top: vRect.y, width: vRect.width, height: vRect.height, cursor: activeTool === "select" ? "text" : "inherit" }}
+              onPointerDown={(e) => e.stopPropagation()}
+              onClick={(e) => {
+                if (activeTool !== "select") return;
+                e.stopPropagation();
+                requestOcrEdit(word.text, word.pdfBox, word.confidence);
               }}
             />
           );

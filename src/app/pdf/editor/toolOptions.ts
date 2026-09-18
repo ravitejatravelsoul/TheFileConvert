@@ -31,3 +31,19 @@ export const PRESET_COLORS: { label: string; value: RgbColor }[] = [
 export function rgbToCss(c: RgbColor): string {
   return `rgb(${Math.round(c.r * 255)}, ${Math.round(c.g * 255)}, ${Math.round(c.b * 255)})`;
 }
+
+function toHex2(n: number): string {
+  return Math.round(n * 255).toString(16).padStart(2, "0");
+}
+
+export function rgbToHex(c: RgbColor): string {
+  return `#${toHex2(c.r)}${toHex2(c.g)}${toHex2(c.b)}`;
+}
+
+export function hexToRgb(hex: string): RgbColor {
+  const clean = hex.replace("#", "");
+  const r = parseInt(clean.slice(0, 2), 16) / 255;
+  const g = parseInt(clean.slice(2, 4), 16) / 255;
+  const b = parseInt(clean.slice(4, 6), 16) / 255;
+  return { r: Number.isFinite(r) ? r : 0, g: Number.isFinite(g) ? g : 0, b: Number.isFinite(b) ? b : 0 };
+}

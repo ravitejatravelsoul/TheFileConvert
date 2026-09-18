@@ -1,0 +1,115 @@
+import { describe, expect, it } from "vitest";
+import { estimateRegionColors, computeEditPadding, type PixelSource } from "./regionColor";
+
+/** A simple in-memory RGBA grid implementing PixelSource, for fully deterministic tests
+ * without needing a real browser canvas. */
+class FakeCanvas implements PixelSource {
+  width: number;
+  height: number;
+  private data: Uint8ClampedArray;
+
+  constructor(width: number, height: number, fill: [number, number, number, number]) {
+    this.width = width;
+    this.height = height;
+    this.data = new Uint8ClampedArray(width * height * 4);
+    for (let i = 0; i < width * height; i++) {
+      this.data.set(fill, i * 4);
+    }
+  }
+
+  setPixel(x: number, y: number, rgba: [number, number, number, number]) {
+    const cx = Math.max(0, Math.min(this.width - 1, x));
+    const cy = Math.max(0, Math.min(this.height - 1, y));
+    this.data.set(rgba, (cy * this.width + cx) * 4);
+  }
+
+  fillRect(x0: number, y0: number, x1: number, y1: number, rgba: [number, number, number, number]) {
+    for (let y = y0; y <= y1; y++) {
+      for (let x = x0; x <= x1; x++) this.setPixel(x, y, rgba);
+    }
+  }
+
+  getPixel(x: number, y: number): [number, number, number, number] {
+    const cx = Math.max(0, Math.min(this.width - 1, Math.round(x)));
+    const cy = Math.max(0, Math.min(this.height - 1, Math.round(y)));
+    const i = (cy * this.width + cx) * 4;
+    return [this.data[i], this.data[i + 1], this.data[i + 2], this.data[i + 3]];
+  }
+}
+
+const WHITE: [number, number, number, number] = [255, 255, 255, 255];
+const BLACK_INK: [number, number, number, number] = [10, 10, 10, 255];
+
+describe("estimateRegionColors: A. black text on white background", () => {
+  it("estimates a white background and black-ish text, and does not flag it complex", () => {
+    const canvas = new FakeCanvas(100, 60, WHITE);
+    // A word bbox roughly in the middle, with some "ink" pixels inside it.
+    canvas.fillRect(40, 20, 55, 35, BLACK_INK);
+    const result = estimateRegionColors(canvas, { x: 38, y: 18, width: 20, height: 20 }, 4);
+    expect(result.complex).toBe(false);
+    expect(result.backgroundColor.r).toBeGreaterThan(0.9);
+    expect(result.backgroundColor.g).toBeGreaterThan(0.9);
+    expect(result.backgroundColor.b).toBeGreaterThan(0.9);
+    expect(result.textColor.r).toBeLessThan(0.3);
+  });
+});
+
+describe("estimateRegionColors: B. black text on uniform gray scan background", () => {
+  it("estimates a gray background (not white) and does not flag it complex", () => {
+    const gray: [number, number, number, number] = [214, 214, 210, 255]; // typical scanned-paper gray
+    const canvas = new FakeCanvas(100, 60, gray);
+    canvas.fillRect(40, 20, 55, 35, BLACK_INK);
+    const result = estimateRegionColors(canvas, { x: 38, y: 18, width: 20, height: 20 }, 4);
+    expect(result.complex).toBe(false);
+    // Background should track the gray, not collapse to white.
+    expect(result.backgroundColor.r).toBeGreaterThan(0.75);
+    expect(result.backgroundColor.r).toBeLessThan(0.9);
+  });
+});
+
+describe("estimateRegionColors: C. colored form background", () => {
+  it("estimates a colored (e.g. pale blue) background", () => {
+    const paleBlue: [number, number, number, number] = [225, 235, 250, 255];
+    const canvas = new FakeCanvas(100, 60, paleBlue);
+    canvas.fillRect(40, 20, 55, 35, [20, 20, 90, 255]);
+    const result = estimateRegionColors(canvas, { x: 38, y: 18, width: 20, height: 20 }, 4);
+    expect(result.complex).toBe(false);
+    expect(result.backgroundColor.b).toBeGreaterThan(result.backgroundColor.r);
+  });
+});
+
+describe("estimateRegionColors: D. table cell border line running through the sample ring", () => {
+  it("flags the background as complex rather than reconstructing a flat patch", () => {
+    const canvas = new FakeCanvas(100, 60, WHITE);
+    canvas.fillRect(40, 20, 55, 35, BLACK_INK); // the word itself
+    canvas.fillRect(0, 15, 99, 16, [0, 0, 0, 255]); // a horizontal ruling line crossing the padding ring
+    const result = estimateRegionColors(canvas, { x: 38, y: 18, width: 20, height: 20 }, 6);
+    expect(result.complex).toBe(true);
+  });
+});
+
+describe("estimateRegionColors: low-ink word (very light/faint text)", () => {
+  it("falls back to a default text color instead of picking up noise as text", () => {
+    const canvas = new FakeCanvas(100, 60, WHITE);
+    // No real ink drawn — the "word" region is basically blank (e.g. a misdetected box).
+    const result = estimateRegionColors(canvas, { x: 38, y: 18, width: 20, height: 20 }, 4);
+    expect(result.textColor).toEqual({ r: 0, g: 0, b: 0 });
+    expect(result.complex).toBe(false);
+  });
+});
+
+describe("computeEditPadding", () => {
+  it("scales gently with box height and stays within a small, conservative range", () => {
+    const small = computeEditPadding(10, 95);
+    const large = computeEditPadding(40, 95);
+    expect(small).toBeGreaterThan(0);
+    expect(large).toBeGreaterThan(small);
+    expect(large).toBeLessThan(10); // never a large whiteout margin
+  });
+
+  it("reduces padding for low-confidence OCR boxes rather than trusting them fully", () => {
+    const highConfidence = computeEditPadding(20, 95);
+    const lowConfidence = computeEditPadding(20, 40);
+    expect(lowConfidence).toBeLessThan(highConfidence);
+  });
+});

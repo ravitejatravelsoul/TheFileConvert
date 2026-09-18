@@ -2,10 +2,13 @@ import path from "node:path";
 import fs from "node:fs";
 import { test, expect, type Page } from "@playwright/test";
 import { PDFDocument } from "pdf-lib";
-import { renderPdfPage } from "./helpers/pdf-render";
+import { renderPdfPage, findCollateralChanges } from "./helpers/pdf-render";
 import { withOcrLock } from "./helpers/ocr-lock";
+import { EDITOR_BASE_SCALE } from "../src/lib/editor/types";
 
 const OCR_FIXTURES = path.join(__dirname, "fixtures", "ocr");
+const RENDER_SCALE = 2;
+const PIXEL_SCALE = RENDER_SCALE / EDITOR_BASE_SCALE;
 
 // This file holds every PDF Editor test that triggers real Tesseract recognition. It's
 // deliberately kept separate from pdf-editor.spec.ts / pdf-editor-advanced.spec.ts and
@@ -46,6 +49,64 @@ async function extractText(bytes: Buffer, pageNumber: number): Promise<string> {
   return textContent.items.map((it) => ("str" in it ? it.str : "")).join(" ");
 }
 
+/** Opens `fixture`, recognizes it, clicks the recognized word matching `wordPattern`,
+ * replaces it with `replacement`, exports, and verifies the exported page is
+ * pixel-identical to the original everywhere except a tight region around the edited
+ * word — the core "no collateral change" guard for a specific background scenario. */
+async function verifyWordEditIsLocalized(
+  page: Page,
+  isMobile: boolean,
+  fixtureName: string,
+  wordPattern: RegExp,
+  replacement: string
+) {
+  const fixturePath = path.join(OCR_FIXTURES, fixtureName);
+  const originalBytes = fs.readFileSync(fixturePath);
+
+  await openFile(page, fixturePath);
+  await openMobilePanel(page, isMobile, "Properties");
+  await page.locator("summary", { hasText: "OCR" }).click();
+  await withOcrLock(async () => {
+    await page.getByRole("button", { name: "Recognize current page" }).click();
+    await expect(page.getByRole("button", { name: "Recognize current page" })).toBeVisible({ timeout: 90_000 });
+  });
+  await page.keyboard.press("Escape");
+
+  const wordButton = page.getByRole("button", { name: wordPattern }).first();
+  await expect(wordButton).toBeVisible({ timeout: 10_000 });
+  await wordButton.click();
+
+  const dialog = page.getByRole("dialog", { name: "Edit text" });
+  await dialog.locator("input[type=text]").fill(replacement);
+  await dialog.getByRole("button", { name: "Save correction" }).click();
+  await expect(dialog).not.toBeVisible();
+
+  const objectBox = await page.locator('[data-object-type="ocr-text-replacement"]').first().boundingBox();
+  if (!objectBox) throw new Error("no ocr-text-replacement object bounding box");
+  const surfaceBox = await page.locator('[data-testid="page-surface"]').first().boundingBox();
+  if (!surfaceBox) throw new Error("no page surface bounding box");
+
+  const bytes = await exportAndSave(page, `${fixtureName}-edited.pdf`);
+  const before = await renderPdfPage(originalBytes, 1, RENDER_SCALE);
+  const after = await renderPdfPage(bytes, 1, RENDER_SCALE);
+
+  const margin = 14;
+  const allowedRegionPx = {
+    x: (objectBox.x - surfaceBox.x) * PIXEL_SCALE - margin,
+    y: (objectBox.y - surfaceBox.y) * PIXEL_SCALE - margin,
+    width: objectBox.width * PIXEL_SCALE + margin * 2,
+    height: objectBox.height * PIXEL_SCALE + margin * 2,
+  };
+
+  const diff = findCollateralChanges(before, after, [allowedRegionPx]);
+  if (diff.changedOutsidePixelCount > 0) {
+    before.savePng(test.info().outputPath(`${fixtureName}-before.png`));
+    after.savePng(test.info().outputPath(`${fixtureName}-after.png`));
+  }
+  expect(diff.changedOutsidePixelCount, JSON.stringify(diff.offendingSamples)).toBeLessThan(50);
+  expect(diff.changedPixelCount).toBeGreaterThan(0);
+}
+
 test.describe.configure({ timeout: 150_000 });
 
 test.describe("PDF Editor: OCR integration", () => {
@@ -58,7 +119,7 @@ test.describe("PDF Editor: OCR integration", () => {
     await page.getByRole("button", { name: "Go to page 2" }).click();
     await openMobilePanel(page, isMobile, "Properties");
     await page.locator("summary", { hasText: "OCR" }).click();
-    await expect(page.getByText(/Scanned page detected/i)).toBeVisible();
+    await expect(page.getByText(/Scanned page detected\. No editable text/i)).toBeVisible();
 
     await withOcrLock(async () => {
       await page.getByRole("button", { name: "Recognize current page" }).click();
@@ -70,37 +131,35 @@ test.describe("PDF Editor: OCR integration", () => {
 });
 
 test.describe("PDF Editor: OCR text edit round trip", () => {
-  test("recognizes a real scanned page, corrects one recognized word, exports, and the correction is verifiable in the reopened PDF", async ({ page, isMobile }) => {
+  test("corrects exactly one recognized word — original text carries only that word, not the whole line", async ({ page, isMobile }) => {
     await openFile(page, path.join(OCR_FIXTURES, "clean-scan.pdf"));
 
-    // Trigger real OCR recognition on this image-only page.
     await openMobilePanel(page, isMobile, "Properties");
     await page.locator("summary", { hasText: "OCR" }).click();
-    await expect(page.getByText(/Scanned page detected/i)).toBeVisible();
+    // The workspace now also shows a top-level "Scanned page detected — run OCR…" banner
+    // (guided first-time detection) alongside this properties-panel message, so match the
+    // properties-panel one specifically by its distinct wording.
+    await expect(page.getByText(/Scanned page detected\. No editable text/i)).toBeVisible();
     await withOcrLock(async () => {
       await page.getByRole("button", { name: "Recognize current page" }).click();
       await expect(page.getByRole("button", { name: "Recognize current page" })).toBeVisible({ timeout: 90_000 });
     });
 
-    // The recognized-line buttons live on the page surface, not inside the properties
-    // drawer — close it first so the surface underneath is reachable on mobile.
     await page.keyboard.press("Escape");
 
-    // Click the recognized line containing "Jane Smith" and replace it with a distinct value.
-    const lineButton = page.getByRole("button", { name: /Jane Smith/i });
-    await expect(lineButton).toBeVisible({ timeout: 10_000 });
-    await lineButton.click();
+    // Click the recognized WORD "Smith" specifically — not the "Customer: Jane Smith" line.
+    const wordButton = page.getByRole("button", { name: /Edit recognized word: Smith/i });
+    await expect(wordButton).toBeVisible({ timeout: 10_000 });
+    await wordButton.click();
 
     const dialog = page.getByRole("dialog", { name: "Edit text" });
     await expect(dialog).toBeVisible();
-    // Line-level corrections don't carry a per-word confidence figure (only individual
-    // recognized words do), so the modal's confidence caveat is conditional — just confirm
-    // it detected the right recognized text.
-    await expect(dialog).toContainText(/Jane Smith/i);
     const input = dialog.locator("input[type=text]");
     const originalValue = await input.inputValue();
-    expect(originalValue).toContain("Jane Smith");
-    await input.fill("Alex Rivera");
+    // The whole point of word-level editing: this must be just the one word, never the
+    // full "Customer: Jane Smith" line it belongs to.
+    expect(originalValue.trim()).toBe("Smith");
+    await input.fill("Rodriguez");
     await dialog.getByRole("button", { name: "Save correction" }).click();
     await expect(dialog).not.toBeVisible();
 
@@ -108,20 +167,94 @@ test.describe("PDF Editor: OCR text edit round trip", () => {
     const doc = await PDFDocument.load(bytes);
     expect(doc.getPageCount()).toBe(1);
 
-    // Searchable-text layer carries the correction.
     const text = await extractText(bytes, 1);
-    expect(text).toContain("Alex Rivera");
+    expect(text).toContain("Rodriguez");
+    // (The editor only adds a searchable text run for words that were actually edited —
+    // it doesn't bake a full OCR text layer for the whole page automatically, so unrelated
+    // recognized content isn't expected in the searchable layer here. Whether unrelated
+    // *visible* content survives untouched is verified far more rigorously by the
+    // dedicated pixel-diff test below.)
 
-    // Visual verification: rendering the exported page must show the original scan
-    // (paintImageXObject still present) with the correction actually drawn over it.
     const pdfjsLib = await import("pdfjs-dist/legacy/build/pdf.mjs");
     const loaded = await pdfjsLib.getDocument({ data: new Uint8Array(bytes), disableFontFace: true }).promise;
-    const pdfPage = await loaded.getPage(1);
-    const opList = await pdfPage.getOperatorList();
+    const opList = await (await loaded.getPage(1)).getOperatorList();
     expect(opList.fnArray).toContain(pdfjsLib.OPS.paintImageXObject);
+  });
 
-    const rendered = await renderPdfPage(bytes, 1, 2);
-    expect(rendered.width).toBeGreaterThan(0);
+  test("no-collateral-change: editing one word leaves the rest of the scanned page pixel-identical", async ({ page, isMobile }) => {
+    const originalBytes = fs.readFileSync(path.join(OCR_FIXTURES, "clean-scan.pdf"));
+
+    await openFile(page, path.join(OCR_FIXTURES, "clean-scan.pdf"));
+    await openMobilePanel(page, isMobile, "Properties");
+    await page.locator("summary", { hasText: "OCR" }).click();
+    await withOcrLock(async () => {
+      await page.getByRole("button", { name: "Recognize current page" }).click();
+      await expect(page.getByRole("button", { name: "Recognize current page" })).toBeVisible({ timeout: 90_000 });
+    });
+    await page.keyboard.press("Escape");
+
+    const wordButton = page.getByRole("button", { name: /Edit recognized word: Smith/i });
+    await expect(wordButton).toBeVisible({ timeout: 10_000 });
+    await wordButton.click();
+
+    const dialog = page.getByRole("dialog", { name: "Edit text" });
+    await dialog.locator("input[type=text]").fill("Rodriguez");
+    await dialog.getByRole("button", { name: "Save correction" }).click();
+    await expect(dialog).not.toBeVisible();
+
+    // The applied object's own on-page box is the ground truth for "where the edit is
+    // allowed to change pixels" — read it straight from the DOM rather than recomputing it,
+    // so this test verifies the real applied region, not an assumption about it.
+    const objectBox = await page.locator('[data-object-type="ocr-text-replacement"]').first().boundingBox();
+    if (!objectBox) throw new Error("no ocr-text-replacement object bounding box");
+    const surfaceBox = await page.locator('[data-testid="page-surface"]').first().boundingBox();
+    if (!surfaceBox) throw new Error("no page surface bounding box");
+
+    const bytes = await exportAndSave(page, "ocr-corrected-diff.pdf");
+    const before = await renderPdfPage(originalBytes, 1, RENDER_SCALE);
+    const after = await renderPdfPage(bytes, 1, RENDER_SCALE);
+
+    // Generous margin around the applied patch (anti-aliasing, font metric differences
+    // between the browser preview and pdf-lib's actual glyph rendering) — still tiny
+    // relative to the page, which is the whole point of the defect being fixed.
+    const margin = 14;
+    const allowedRegionPx = {
+      x: (objectBox.x - surfaceBox.x) * PIXEL_SCALE - margin,
+      y: (objectBox.y - surfaceBox.y) * PIXEL_SCALE - margin,
+      width: objectBox.width * PIXEL_SCALE + margin * 2,
+      height: objectBox.height * PIXEL_SCALE + margin * 2,
+    };
+
+    const diff = findCollateralChanges(before, after, [allowedRegionPx]);
+    if (diff.changedOutsidePixelCount > 0) {
+      // Save renders for inspection only when something actually looks wrong.
+      before.savePng(test.info().outputPath("collateral-before.png"));
+      after.savePng(test.info().outputPath("collateral-after.png"));
+    }
+    // A handful of stray anti-aliasing pixels right at the region boundary can legitimately
+    // differ; a real collateral-damage regression (whiting out the whole line, moving
+    // neighboring text, dropping the table/logo, etc.) would change thousands of pixels.
+    expect(diff.changedOutsidePixelCount, JSON.stringify(diff.offendingSamples)).toBeLessThan(50);
+    expect(diff.changedPixelCount).toBeGreaterThan(0); // something did actually change
+  });
+});
+
+test.describe("PDF Editor: OCR visual-fidelity fixtures", () => {
+  // Each of these is a synthetic "scan" (real text rendered to a raster image, then
+  // embedded as an image-only PDF page — no native text layer, so OCR is required, exactly
+  // like a real scanned document) built to stress a specific background scenario called
+  // out in the defect report: a plain white background isn't the only case that matters.
+
+  test("B. uniform gray scan background: patch matches the gray, doesn't punch a white hole", async ({ page, isMobile }) => {
+    // Match whatever numeric value Tesseract actually reads off this fixture (its digit
+    // recognition on a synthetic scan can differ slightly from the source text) — this
+    // test is about background preservation, not OCR digit accuracy, which other tests
+    // already cover on real scan fixtures.
+    await verifyWordEditIsLocalized(page, isMobile, "gray-background-scan.pdf", /Edit recognized word: \d[\d.,]+\d/i, "6789.10");
+  });
+
+  test("C+D. colored form background with table border lines close to the value", async ({ page, isMobile }) => {
+    await verifyWordEditIsLocalized(page, isMobile, "colored-form-scan.pdf", /Edit recognized word: 875\.00/i, "1450.00");
   });
 });
 
@@ -141,9 +274,9 @@ test.describe("PDF Editor: OCR privacy regression", () => {
     });
 
     await page.keyboard.press("Escape"); // close the mobile Properties drawer to reach the page surface
-    const lineButton = page.getByRole("button", { name: /Jane Smith/i });
-    await expect(lineButton).toBeVisible({ timeout: 10_000 });
-    await lineButton.click();
+    const wordButton = page.getByRole("button", { name: /Edit recognized word: Smith/i });
+    await expect(wordButton).toBeVisible({ timeout: 10_000 });
+    await wordButton.click();
     await page.getByRole("dialog", { name: "Edit text" }).locator("input[type=text]").fill("Privacy Check");
     await page.getByRole("dialog", { name: "Edit text" }).getByRole("button", { name: "Save correction" }).click();
 

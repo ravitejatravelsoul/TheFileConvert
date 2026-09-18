@@ -1,10 +1,11 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import { DropZone } from "@/components/tools/DropZone";
 import { ProcessingModeBadge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
-import { IconWarning } from "@/components/icons";
+import { IconWarning, IconPdf } from "@/components/icons";
 import { triggerDownload } from "@/lib/download";
 import { getToolById } from "@/lib/tools/registry";
 import { viewportDimensions, computeFitZoom } from "@/lib/editor/coordinates";
@@ -30,10 +31,16 @@ export function EditorWorkspace() {
   const [pendingPlacement, setPendingPlacement] = useState<{ kind: "image" | "signature"; dataUrl: string; naturalWidth: number; naturalHeight: number } | null>(null);
   const [insertAfterPageId, setInsertAfterPageId] = useState<string | null | undefined>(undefined);
   const [mobilePanel, setMobilePanel] = useState<"thumbnails" | "properties" | null>(null);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  // Tracks *which* document's banner was dismissed (by its first page's id) rather than a
+  // plain boolean, so a newly opened document naturally shows the banner again just by
+  // comparing ids during render — no reset-on-change effect needed.
+  const [detectionBannerDismissedForDocId, setDetectionBannerDismissedForDocId] = useState<string | null>(null);
 
   const imageInputRef = useRef<HTMLInputElement>(null);
   const insertFileInputRef = useRef<HTMLInputElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const editorRootRef = useRef<HTMLDivElement>(null);
 
   const activePage = state.doc.pages.find((p) => p.id === state.activePageId) ?? state.doc.pages[0] ?? null;
 
@@ -81,6 +88,34 @@ export function EditorWorkspace() {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [mobilePanel]);
 
+  useEffect(() => {
+    function onFullscreenChange() {
+      setIsFullscreen(Boolean(document.fullscreenElement));
+    }
+    document.addEventListener("fullscreenchange", onFullscreenChange);
+    return () => document.removeEventListener("fullscreenchange", onFullscreenChange);
+  }, []);
+
+  // Warn before an accidental refresh/close/navigation only when there are actual edits to
+  // lose (canUndo is a reliable proxy: it's only true once at least one change was made).
+  useEffect(() => {
+    function onBeforeUnload(e: BeforeUnloadEvent) {
+      if (!api.canUndo) return;
+      e.preventDefault();
+      e.returnValue = "";
+    }
+    window.addEventListener("beforeunload", onBeforeUnload);
+    return () => window.removeEventListener("beforeunload", onBeforeUnload);
+  }, [api.canUndo]);
+
+  async function toggleFullscreen() {
+    if (document.fullscreenElement) {
+      await document.exitFullscreen();
+    } else {
+      await editorRootRef.current?.requestFullscreen();
+    }
+  }
+
   const handleFile = useCallback(
     async (files: File[]) => {
       const picked = files[0];
@@ -127,9 +162,15 @@ export function EditorWorkspace() {
   // ------------------------------------------------------------------ empty
   if (state.stage === "empty") {
     return (
-      <div className="space-y-4">
-        <DropZone accept=".pdf,application/pdf" onFiles={handleFile} hint="or click to choose a PDF to edit" />
-        <ProcessingModeBadge mode={tool.processingMode} />
+      <div className="mx-auto max-w-xl space-y-5 text-center">
+        <h2 className="text-2xl font-semibold text-[var(--foreground)]">Edit a PDF</h2>
+        <DropZone accept=".pdf,application/pdf" onFiles={handleFile} label="Drop your PDF here" hint="or click to choose a PDF" />
+        <p className="text-sm text-[var(--foreground-muted)]">
+          Edit text, OCR scanned pages, sign, annotate and organize your PDF — directly in your browser.
+        </p>
+        <div className="flex justify-center">
+          <ProcessingModeBadge mode={tool.processingMode} />
+        </div>
       </div>
     );
   }
@@ -158,9 +199,51 @@ export function EditorWorkspace() {
   }
 
   // ------------------------------------------------------------------ ready
+  // A full application workspace, not a normal tool-page card: this covers the whole
+  // viewport (fixed, escaping the marketing header/footer/container behind it) rather than
+  // being constrained to the site's usual content column and margins.
+  const activeFile = activePage ? state.doc.sourceFiles[activePage.sourceFileId] : undefined;
+  const currentDocId = state.doc.pages[0]?.id ?? null;
+  const detectionBannerDismissed = detectionBannerDismissedForDocId === currentDocId;
+
+  const classifications = state.doc.pages.map((p) => state.pageClassifications[p.id]).filter(Boolean);
+  const scannedPageIds = state.doc.pages.filter((p) => state.pageClassifications[p.id] && state.pageClassifications[p.id] !== "native").map((p) => p.id);
+  const allNative = classifications.length > 0 && classifications.every((c) => c === "native");
+  const anyScanned = scannedPageIds.length > 0;
+  const detection = allNative
+    ? { message: "Editable text detected.", cta: null }
+    : anyScanned && classifications.length === scannedPageIds.length
+      ? { message: "Scanned page detected — run OCR to edit its text.", cta: "Recognize Text" }
+      : anyScanned
+        ? { message: "Some pages are scanned. OCR is available for those pages.", cta: "Recognize Text" }
+        : null;
+
   return (
-    <div className="-mx-4 flex h-[80vh] min-h-[600px] flex-col overflow-hidden rounded-[var(--radius-lg)] border border-[var(--border)] sm:mx-0">
-      <Toolbar api={api} onRequestImage={requestImageTool} onRequestSign={() => setSignaturePadOpen(true)} onExport={handleExport} />
+    // z-[70]: must clear the site's own sticky header (z-50) — otherwise this full-page
+    // takeover would render *under* it near the top of the viewport, and the header would
+    // silently intercept clicks meant for the editor's own header/toolbar there.
+    <div ref={editorRootRef} className="fixed inset-0 z-[70] flex flex-col overflow-hidden bg-[var(--background)]">
+      <div className="flex items-center gap-2 border-b border-[var(--border)] bg-[var(--surface)] px-3 py-1.5">
+        <Link
+          href="/"
+          aria-label="Back to TheFileConvert"
+          className="flex shrink-0 items-center gap-1.5 rounded-md px-1.5 py-1 text-[var(--foreground-muted)] hover:bg-[var(--surface-muted)] hover:text-[var(--foreground)]"
+        >
+          <IconPdf className="h-4 w-4 text-[var(--brand)]" />
+          <span className="hidden text-xs font-semibold sm:inline">TheFileConvert</span>
+        </Link>
+        <span aria-hidden="true" className="h-4 w-px bg-[var(--border)]" />
+        <span className="min-w-0 truncate text-xs font-medium text-[var(--foreground)]">{activeFile?.name ?? "PDF Editor"}</span>
+      </div>
+
+      <Toolbar
+        api={api}
+        onRequestImage={requestImageTool}
+        onRequestSign={() => setSignaturePadOpen(true)}
+        onExport={handleExport}
+        onToggleFullscreen={toggleFullscreen}
+        isFullscreen={isFullscreen}
+      />
 
       {state.error && (
         <div className="flex items-start gap-2 border-b border-[var(--border)] bg-red-50 px-4 py-2 text-xs text-red-700 dark:bg-red-950/40 dark:text-red-300">
@@ -173,6 +256,54 @@ export function EditorWorkspace() {
           <IconWarning className="mt-0.5 h-3.5 w-3.5 shrink-0" />
           <span>{api.exportError}</span>
         </div>
+      )}
+
+      {state.ocrProgress ? (
+        // Runs whether OCR was triggered from this banner or from the properties panel —
+        // visible progress at the top of the workspace either way, not just inside a
+        // section the user may not have expanded (section stays usable, not frozen).
+        <div className="flex items-center justify-between gap-2 border-b border-[var(--border)] bg-[var(--brand-soft)] px-4 py-2 text-xs text-[var(--brand-strong)]">
+          <div className="flex min-w-0 flex-1 items-center gap-2">
+            <span className="shrink-0">
+              {state.ocrProgress.label} — {Math.round(state.ocrProgress.fraction * 100)}%
+            </span>
+            <span className="h-1.5 flex-1 overflow-hidden rounded-full bg-white/60">
+              <span className="block h-full bg-[var(--brand)]" style={{ width: `${Math.round(state.ocrProgress.fraction * 100)}%` }} />
+            </span>
+          </div>
+          <button type="button" onClick={api.cancelOcr} className="shrink-0 rounded-full px-2 py-1 font-medium hover:bg-black/5">
+            Cancel
+          </button>
+        </div>
+      ) : (
+        detection &&
+        !detectionBannerDismissed && (
+          <div className="flex items-center justify-between gap-2 border-b border-[var(--border)] bg-[var(--brand-soft)] px-4 py-2 text-xs text-[var(--brand-strong)]">
+            <span>{detection.message}</span>
+            <div className="flex shrink-0 items-center gap-2">
+              {detection.cta && (
+                <button
+                  type="button"
+                  onClick={async () => {
+                    setDetectionBannerDismissedForDocId(currentDocId);
+                    await api.runOcr(scannedPageIds);
+                  }}
+                  className="rounded-full bg-[var(--brand)] px-3 py-1 font-medium text-white hover:bg-[var(--brand-strong)]"
+                >
+                  {detection.cta}
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={() => setDetectionBannerDismissedForDocId(currentDocId)}
+                aria-label="Dismiss"
+                className="rounded-full px-1.5 py-1 text-[var(--brand-strong)] hover:bg-black/5"
+              >
+                ✕
+              </button>
+            </div>
+          </div>
+        )
       )}
 
       <div className="flex items-center gap-2 border-b border-[var(--border)] bg-[var(--surface)] px-3 py-1.5 lg:hidden">

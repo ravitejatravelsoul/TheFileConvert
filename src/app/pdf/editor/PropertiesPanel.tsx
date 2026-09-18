@@ -3,7 +3,7 @@
 import { useState } from "react";
 import type { EditorWorkspaceApi } from "./useEditorWorkspace";
 import type { ToolOptions } from "./toolOptions";
-import { PRESET_COLORS, rgbToCss } from "./toolOptions";
+import { PRESET_COLORS, rgbToCss, rgbToHex, hexToRgb } from "./toolOptions";
 import { SUPPORTED_OCR_LANGUAGES } from "@/lib/processors/ocr";
 import { addWatermark, addPageNumbers, addHeaderFooter, type WatermarkOptions, type PageNumberOptions, type HeaderFooterOptions } from "@/lib/processors/pdf";
 import { exportEditorDocument } from "@/lib/editor/export";
@@ -89,7 +89,7 @@ export function PropertiesPanel({ api, doc, toolOptions, onToolOptionsChange }: 
         </div>
       </Section>
 
-      <Section title="OCR">
+      <Section title="Recognize Text (OCR)">
         <div className="space-y-2.5">
           <label className="block">
             <span className="mb-1 block text-xs font-medium text-[var(--foreground)]">Language</span>
@@ -285,6 +285,55 @@ function ObjectProperties({ api, object }: { api: EditorWorkspaceApi; object: No
           Detected: <span className="italic">&ldquo;{object.originalText}&rdquo;</span>
           {"confidence" in object && ` (${Math.round(object.confidence)}% confidence)`}
         </p>
+      )}
+      {object.type === "ocr-text-replacement" && (
+        <div className="space-y-2 rounded-[var(--radius-sm)] border border-[var(--border)] p-2">
+          <p className="text-xs font-medium text-[var(--foreground)]">Style (auto-detected from the scan)</p>
+          <div className="flex items-center gap-3 text-xs">
+            <label className="flex items-center gap-1.5">
+              <span className="text-[var(--foreground-muted)]">Text</span>
+              <input
+                type="color"
+                value={rgbToHex(object.textColor)}
+                onChange={(e) => api.updateObject(object.id, { textColor: hexToRgb(e.target.value) })}
+                className="h-6 w-6 cursor-pointer rounded border border-[var(--border)]"
+                aria-label="Replacement text color"
+              />
+            </label>
+            <label className="flex items-center gap-1.5">
+              <span className="text-[var(--foreground-muted)]">Background</span>
+              <input
+                type="color"
+                value={rgbToHex(object.backgroundColor)}
+                onChange={(e) => api.updateObject(object.id, { backgroundColor: hexToRgb(e.target.value) })}
+                disabled={object.overlayOnly}
+                className="h-6 w-6 cursor-pointer rounded border border-[var(--border)] disabled:opacity-40"
+                aria-label="Replacement background color"
+              />
+            </label>
+          </div>
+          <label className="block">
+            <span className="mb-1 block text-xs text-[var(--foreground-muted)]">Font size (blank = automatic)</span>
+            <input
+              type="number"
+              min={4}
+              max={72}
+              value={object.fontSize ?? ""}
+              placeholder="Auto"
+              onChange={(e) => api.updateObject(object.id, { fontSize: e.target.value ? Number(e.target.value) : undefined })}
+              className="w-full rounded-[var(--radius-sm)] border border-[var(--border)] px-2 py-1 text-xs"
+            />
+          </label>
+          <label className="flex items-center gap-2 text-xs text-[var(--foreground-muted)]">
+            <input
+              type="checkbox"
+              checked={object.overlayOnly}
+              onChange={(e) => api.updateObject(object.id, { overlayOnly: e.target.checked })}
+              className="accent-[var(--brand)]"
+            />
+            Place as overlay instead of covering the background
+          </label>
+        </div>
       )}
       <button
         type="button"
