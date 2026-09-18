@@ -2,7 +2,7 @@ import path from "node:path";
 import fs from "node:fs";
 import { test, expect, type Page } from "@playwright/test";
 import { PDFDocument } from "pdf-lib";
-import { renderPdfPage, findCollateralChanges } from "./helpers/pdf-render";
+import { renderPdfPage, findCollateralChanges, measureRegionStyle } from "./helpers/pdf-render";
 import { withOcrLock } from "./helpers/ocr-lock";
 import { EDITOR_BASE_SCALE } from "../src/lib/editor/types";
 
@@ -255,6 +255,145 @@ test.describe("PDF Editor: OCR visual-fidelity fixtures", () => {
 
   test("C+D. colored form background with table border lines close to the value", async ({ page, isMobile }) => {
     await verifyWordEditIsLocalized(page, isMobile, "colored-form-scan.pdf", /Edit recognized word: 875\.00/i, "1450.00");
+  });
+
+  test("screenshot acceptance: degree -> graduate on a textured serif scan renders in a matching style, not a generic sans-serif box", async ({
+    page,
+    isMobile,
+  }) => {
+    // Matches the exact defect report scenario: a textured gray scan, serif printed text, a
+    // thin form line near the text, and a shorter->longer word replacement ("degree" ->
+    // "graduate") right next to several other words on the same line. This is the release
+    // gate fixture (spec section 20/33) — collateral change must stay localized *and* the
+    // replacement must statistically resemble its neighboring text, not read as an obviously
+    // different font/weight/sharpness pasted on top.
+    const fixtureName = "degree-graduate-scan.pdf";
+    const fixturePath = path.join(OCR_FIXTURES, fixtureName);
+    const originalBytes = fs.readFileSync(fixturePath);
+
+    await openFile(page, fixturePath);
+    await openMobilePanel(page, isMobile, "Properties");
+    await page.locator("summary", { hasText: "OCR" }).click();
+    await withOcrLock(async () => {
+      await page.getByRole("button", { name: "Recognize current page" }).click();
+      await expect(page.getByRole("button", { name: "Recognize current page" })).toBeVisible({ timeout: 90_000 });
+    });
+    await page.keyboard.press("Escape");
+
+    const wordButton = page.getByRole("button", { name: /Edit recognized word: degree/i }).first();
+    await expect(wordButton).toBeVisible({ timeout: 10_000 });
+    await wordButton.click();
+
+    const dialog = page.getByRole("dialog", { name: "Edit text" });
+    await dialog.locator("input[type=text]").fill("graduate");
+    // The live preview should have rendered a real raster patch (not a plain colored div) —
+    // confirms the export-identical-preview requirement (spec section 13) actually fired for
+    // this fixture rather than silently falling back.
+    await expect(dialog.locator("img")).toBeVisible();
+    await dialog.getByRole("button", { name: "Save correction" }).click();
+    await expect(dialog).not.toBeVisible();
+
+    const objectBox = await page.locator('[data-object-type="ocr-text-replacement"]').first().boundingBox();
+    if (!objectBox) throw new Error("no ocr-text-replacement object bounding box");
+    const surfaceBox = await page.locator('[data-testid="page-surface"]').first().boundingBox();
+    if (!surfaceBox) throw new Error("no page surface bounding box");
+
+    const bytes = await exportAndSave(page, `${fixtureName}-edited.pdf`);
+    const before = await renderPdfPage(originalBytes, 1, RENDER_SCALE);
+    const after = await renderPdfPage(bytes, 1, RENDER_SCALE);
+
+    const margin = 14;
+    const allowedRegionPx = {
+      x: (objectBox.x - surfaceBox.x) * PIXEL_SCALE - margin,
+      y: (objectBox.y - surfaceBox.y) * PIXEL_SCALE - margin,
+      width: objectBox.width * PIXEL_SCALE + margin * 2,
+      height: objectBox.height * PIXEL_SCALE + margin * 2,
+    };
+
+    // A. Collateral preservation — unrelated pixels (the line, "for the award of the",
+    // the paper grain) must stay untouched.
+    const diff = findCollateralChanges(before, after, [allowedRegionPx]);
+
+    // B. Style similarity — the new "graduate" should statistically resemble the unchanged
+    // neighboring word "award" on the same line, not read as an obviously different font.
+    // "award" sits well to the left of "degree"/"graduate", comfortably outside the allowed
+    // (edited) region, at the same line height.
+    const neighborRegionPx = {
+      x: allowedRegionPx.x - 6.2 * (allowedRegionPx.width / "graduate".length),
+      y: allowedRegionPx.y,
+      width: 3.5 * (allowedRegionPx.width / "graduate".length),
+      height: allowedRegionPx.height,
+    };
+    const backgroundGuess = after.getPixel(Math.max(0, Math.round(allowedRegionPx.x - 20)), Math.round(allowedRegionPx.y - 20)).slice(0, 3) as [
+      number,
+      number,
+      number,
+    ];
+    const replacementStyle = measureRegionStyle(after, allowedRegionPx, backgroundGuess);
+    const neighborStyle = measureRegionStyle(before, neighborRegionPx, backgroundGuess);
+
+    // Always save crops for this specific fixture — it's the explicit human-visual-QA
+    // acceptance scenario from the report (spec section 21), reviewed by eye in addition to
+    // these automated thresholds.
+    before.savePng(test.info().outputPath("degree-before.png"));
+    after.savePng(test.info().outputPath("degree-after.png"));
+    if (diff.changedOutsidePixelCount > 0) {
+      console.log("collateral offending samples:", diff.offendingSamples);
+    }
+    console.log("style stats — replacement:", replacementStyle, "neighbor:", neighborStyle);
+
+    expect(diff.changedOutsidePixelCount, JSON.stringify(diff.offendingSamples)).toBeLessThan(80);
+    expect(diff.changedPixelCount).toBeGreaterThan(0);
+
+    // Both should actually contain ink (sanity: neither region is blank/misaligned).
+    expect(replacementStyle.inkDensity).toBeGreaterThan(0.03);
+    expect(neighborStyle.inkDensity).toBeGreaterThan(0.03);
+    // Stroke weight in the same ballpark — catches "rendered as a wildly different weight
+    // font" (e.g. a hairline sans vs. a heavy serif) without requiring pixel-perfect font
+    // metrics, which no local (non-AI) technique can promise.
+    expect(replacementStyle.avgStrokeWidthPx).toBeLessThan(neighborStyle.avgStrokeWidthPx * 2.5 + 1);
+    expect(replacementStyle.avgStrokeWidthPx).toBeGreaterThan(neighborStyle.avgStrokeWidthPx * 0.3);
+    // Both should show some anti-aliased/softened edge, not one being a hard binary edge
+    // next to a soft scanned one (the "looks pasted on" tell from the defect report).
+    expect(replacementStyle.edgeSoftness).toBeGreaterThan(0);
+  });
+
+  test("unsafe fallback: a word overlapping a ruling line refuses to auto-erase and requires an explicit manual overlay", async ({
+    page,
+    isMobile,
+  }) => {
+    const fixturePath = path.join(OCR_FIXTURES, "line-overlap-scan.pdf");
+    await openFile(page, fixturePath);
+    await openMobilePanel(page, isMobile, "Properties");
+    await page.locator("summary", { hasText: "OCR" }).click();
+    await withOcrLock(async () => {
+      await page.getByRole("button", { name: "Recognize current page" }).click();
+      await expect(page.getByRole("button", { name: "Recognize current page" })).toBeVisible({ timeout: 90_000 });
+    });
+    await page.keyboard.press("Escape");
+
+    const wordButton = page.getByRole("button", { name: /Edit recognized word: Amount/i }).first();
+    await expect(wordButton).toBeVisible({ timeout: 10_000 });
+    await wordButton.click();
+
+    const dialog = page.getByRole("dialog", { name: "Edit text" });
+    await dialog.locator("input[type=text]").fill("Total");
+
+    // Can't be replaced automatically: Save must stay disabled and the explanation visible,
+    // until the user explicitly opts into a manual overlay (spec section 16 — never silently
+    // fall back to a risky automatic erase over a table/border line).
+    await expect(dialog.getByText(/can.t be replaced automatically/i).first()).toBeVisible();
+    const saveButton = dialog.getByRole("button", { name: "Save correction" });
+    await expect(saveButton).toBeDisabled();
+
+    await dialog.getByRole("checkbox", { name: /manual, doesn.t erase the original/i }).check();
+    await expect(saveButton).toBeEnabled();
+    await saveButton.click();
+    await expect(dialog).not.toBeVisible();
+
+    const bytes = await exportAndSave(page, "line-overlap-edited.pdf");
+    const text = await extractText(bytes, 1);
+    expect(text).toContain("Total");
   });
 });
 

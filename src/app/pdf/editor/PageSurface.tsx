@@ -13,6 +13,7 @@ import type { NativeTextRegion } from "@/lib/editor/nativeText";
 import type { OcrPageResult } from "@/lib/processors/ocr";
 import { confidenceTier } from "@/lib/processors/ocr";
 import { estimateRegionColors, computeEditPadding, type PixelSource } from "@/lib/editor/regionColor";
+import { composeOcrPatch, type ComposeOcrPatchResult } from "@/lib/editor/scanPatch";
 import type { EditorWorkspaceApi, ToolId, SearchMatch } from "./useEditorWorkspace";
 import type { ToolOptions } from "./toolOptions";
 import { rgbToCss } from "./toolOptions";
@@ -37,6 +38,11 @@ export interface EditableRegionRequest {
    * word/line box it was derived from. */
   pdfBox: Rect;
   ocrColors?: OcrColorEstimate;
+  /** Renders a real, export-identical raster preview of what typing `newText` would look
+   * like (scanned-text pipeline only — see scanPatch.ts) — synchronous, cheap enough to call
+   * on every keystroke for a single word. Null/undefined when the page canvas isn't
+   * available (e.g. still rendering) or the edit is a native-text replacement. */
+  composePreview?: (newText: string) => ComposeOcrPatchResult | null;
 }
 
 interface PageSurfaceProps {
@@ -55,6 +61,12 @@ interface PageSurfaceProps {
 }
 
 const MIN_OBJECT_SIZE = 8;
+
+function median(values: number[]): number {
+  const sorted = [...values].sort((a, b) => a - b);
+  const mid = Math.floor(sorted.length / 2);
+  return sorted.length % 2 === 0 ? (sorted[mid - 1] + sorted[mid]) / 2 : sorted[mid];
+}
 
 export function PageSurface({
   api,
@@ -178,11 +190,19 @@ export function PageSurface({
     return safe;
   }
 
+  /** Higher-density render scale for the composed raster patch, relative to this page's own
+   * on-screen viewport pixels — the patch is small (one word) so a few extra samples per
+   * viewport px keeps the exported PDF's embedded image sharp instead of blurry when it ends
+   * up scaled to print/zoom resolution. */
+  const PATCH_PIXEL_SCALE = 3;
+
   /** Shared by both word- and line-level OCR click targets: samples the local background
    * and text color from the rendered scan (never assumes white), computes a small
    * calibrated padding, checks for genuinely blank space to grow into for a longer
-   * replacement, and hands the caller a ready-to-edit request. */
-  function requestOcrEdit(text: string, pdfBox: Rect, confidence: number) {
+   * replacement, and hands the caller a ready-to-edit request. `baselinePdfY`, when given
+   * (word-level edits only), is a same-line-neighbor-informed baseline estimate (spec
+   * section 11) used in place of this word's own box bottom. */
+  function requestOcrEdit(text: string, pdfBox: Rect, confidence: number, baselinePdfY?: number) {
     const paddingPt = computeEditPadding(pdfBox.height, confidence);
     const wordRectPx = pdfRectToViewport(spec, pdfBox);
     const paddingPx = paddingPt * spec.scale;
@@ -208,6 +228,33 @@ export function PageSurface({
       width: pdfBox.width + paddingPt * 2 + safeExpansionPt,
       height: pdfBox.height + paddingPt * 2,
     };
+    const patchRectPx = pdfRectToViewport(spec, paddedPdfBox);
+    const baselinePx = baselinePdfY !== undefined ? pdfRectToViewport(spec, { x: 0, y: baselinePdfY, width: 0, height: 0 }).y : wordRectPx.y + wordRectPx.height;
+
+    // Always offer the raster-patch pipeline when the canvas is readable — even when the
+    // older variance-based `estimate.complex` flag is set. That flag was calibrated for the
+    // old "can a single flat color safely fill the whole box" question; the raster pipeline
+    // clones real local texture instead of a flat fill and runs its own, more precise
+    // line-overlap safety check (see scanPatch.ts's `unsafe`), so it can succeed in plenty of
+    // cases the old flag would have blocked outright (e.g. a word merely *near* a ruling
+    // line, not actually overlapping it).
+    const composePreview =
+      source
+        ? (newText: string) =>
+            composeOcrPatch({
+              source,
+              wordRectPx,
+              patchRectPx,
+              baselinePx,
+              originalText: text,
+              newText,
+              backgroundColor: estimate.backgroundColor,
+              textColor: estimate.textColor,
+              pixelScale: PATCH_PIXEL_SCALE,
+              styleCacheKey: page.id,
+            })
+        : undefined;
+
     onRequestTextEdit({
       kind: "ocr",
       pageId: page.id,
@@ -215,6 +262,7 @@ export function PageSurface({
       confidence,
       pdfBox: paddedPdfBox,
       ocrColors: { ...estimate, paddingPt },
+      composePreview,
     });
   }
 
@@ -480,7 +528,15 @@ export function PageSurface({
               onClick={(e) => {
                 if (activeTool !== "select") return;
                 e.stopPropagation();
-                requestOcrEdit(word.text, word.pdfBox, word.confidence);
+                // Same-line neighbors' own box-bottom, median'd, gives a steadier baseline
+                // estimate than this one word's box alone (spec section 11) — falls back to
+                // this word's own box inside requestOcrEdit when there are no neighbors.
+                const sameLine = (ocrResult?.words ?? []).filter(
+                  (w) => w !== word && Math.abs(w.pdfBox.y - word.pdfBox.y) < word.pdfBox.height * 0.4
+                );
+                const baselinePdfY =
+                  sameLine.length > 0 ? median(sameLine.map((w) => w.pdfBox.y)) : undefined;
+                requestOcrEdit(word.text, word.pdfBox, word.confidence, baselinePdfY);
               }}
             />
           );

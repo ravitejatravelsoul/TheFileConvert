@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { estimateRegionColors, computeEditPadding, type PixelSource } from "./regionColor";
+import {
+  estimateRegionColors,
+  computeEditPadding,
+  computeInkMask,
+  findTextureDonorRect,
+  detectProtectedLines,
+  type PixelSource,
+} from "./regionColor";
 
 /** A simple in-memory RGBA grid implementing PixelSource, for fully deterministic tests
  * without needing a real browser canvas. */
@@ -95,6 +102,75 @@ describe("estimateRegionColors: low-ink word (very light/faint text)", () => {
     const result = estimateRegionColors(canvas, { x: 38, y: 18, width: 20, height: 20 }, 4);
     expect(result.textColor).toEqual({ r: 0, g: 0, b: 0 });
     expect(result.complex).toBe(false);
+  });
+});
+
+describe("computeInkMask", () => {
+  it("marks only the ink pixels within the rect, not the surrounding background", () => {
+    const canvas = new FakeCanvas(40, 40, WHITE);
+    canvas.fillRect(10, 10, 19, 19, BLACK_INK);
+    const mask = computeInkMask(canvas, { x: 5, y: 5, width: 20, height: 20 }, { r: 1, g: 1, b: 1 });
+    // (10,10) is at local (5,5) within the 5,5..25,25 rect.
+    expect(mask.ink[5 * mask.width + 5]).toBe(1);
+    // (0,0) local — well outside the filled square — should read background.
+    expect(mask.ink[0]).toBe(0);
+  });
+});
+
+describe("findTextureDonorRect", () => {
+  it("finds a blank donor rect above the patch when it's clean", () => {
+    const canvas = new FakeCanvas(100, 100, WHITE);
+    canvas.fillRect(40, 60, 55, 70, BLACK_INK); // the word itself, well below row 0
+    const donor = findTextureDonorRect(canvas, { x: 40, y: 60, width: 16, height: 10 }, { r: 1, g: 1, b: 1 });
+    expect(donor).not.toBeNull();
+    expect(donor!.y).toBeLessThan(60); // picked the "above" candidate
+  });
+
+  it("returns null when every direction is full of ink (no safe donor)", () => {
+    const canvas = new FakeCanvas(60, 60, BLACK_INK); // entirely ink-colored
+    const donor = findTextureDonorRect(canvas, { x: 20, y: 20, width: 10, height: 10 }, { r: 1, g: 1, b: 1 });
+    expect(donor).toBeNull();
+  });
+});
+
+describe("detectProtectedLines", () => {
+  it("detects a horizontal ruling line crossing the patch and reports its thin band", () => {
+    const canvas = new FakeCanvas(100, 60, WHITE);
+    canvas.fillRect(0, 30, 99, 31, [0, 0, 0, 255]); // a 2px horizontal rule
+    const { horizontal, vertical } = detectProtectedLines(canvas, { x: 10, y: 20, width: 60, height: 20 }, { r: 1, g: 1, b: 1 });
+    expect(horizontal.length).toBe(1);
+    expect(horizontal[0].height).toBeLessThanOrEqual(3);
+    expect(vertical.length).toBe(0);
+  });
+
+  it("does not mistake a glyph's own ink for a full-width ruling line", () => {
+    const canvas = new FakeCanvas(100, 60, WHITE);
+    // A narrow "glyph stroke" that only covers a small fraction of the patch width.
+    canvas.fillRect(35, 20, 38, 39, BLACK_INK);
+    const { horizontal } = detectProtectedLines(canvas, { x: 10, y: 20, width: 60, height: 20 }, { r: 1, g: 1, b: 1 });
+    expect(horizontal.length).toBe(0);
+  });
+
+  it("regression: a patch tight to a single word (mostly its own ink) isn't misread as a line when judged against a wider span", () => {
+    // Reproduces the real-app shape: the patch rect is only a couple of px of padding wider
+    // than the glyphs themselves, so *within that tight box* a row through the letters is
+    // mostly foreground — but a wider surrounding span shows it's just one word on a mostly
+    // blank line, not a ruling line.
+    const canvas = new FakeCanvas(300, 60, WHITE);
+    canvas.fillRect(120, 22, 178, 36, BLACK_INK); // a short "word", tightly filling its own box
+    const tightPatch = { x: 118, y: 20, width: 62, height: 20 }; // ~2px padding around the word
+    const wideSample = { x: 10, y: 20, width: 280, height: 20 }; // most of the line, mostly blank
+    const { horizontal } = detectProtectedLines(canvas, tightPatch, { r: 1, g: 1, b: 1 }, wideSample);
+    expect(horizontal.length).toBe(0);
+  });
+
+  it("still detects a genuine ruling line even when checked against a wide sample span", () => {
+    const canvas = new FakeCanvas(300, 60, WHITE);
+    canvas.fillRect(0, 30, 299, 31, [0, 0, 0, 255]); // a rule spanning the whole width
+    const tightPatch = { x: 118, y: 20, width: 20, height: 20 };
+    const wideSample = { x: 10, y: 20, width: 280, height: 20 };
+    const { horizontal } = detectProtectedLines(canvas, tightPatch, { r: 1, g: 1, b: 1 }, wideSample);
+    expect(horizontal.length).toBe(1);
   });
 });
 

@@ -113,15 +113,11 @@ export function PropertiesPanel({ api, doc, toolOptions, onToolOptionsChange }: 
           )}
 
           {state.ocrProgress ? (
-            <div className="space-y-1.5">
-              <p className="text-xs text-[var(--foreground-muted)]">{state.ocrProgress.label}</p>
-              <div className="h-1.5 overflow-hidden rounded-full bg-[var(--surface-muted)]">
-                <div className="h-full bg-[var(--brand)]" style={{ width: `${Math.round(state.ocrProgress.fraction * 100)}%` }} />
-              </div>
-              <button type="button" onClick={api.cancelOcr} className="text-xs font-medium text-[var(--brand)] hover:underline">
-                Cancel
-              </button>
-            </div>
+            // One canonical progress/cancel control lives in the workspace header banner
+            // (always visible regardless of whether this section is expanded) — this just
+            // reflects that it's running, rather than duplicating a second progress bar and
+            // Cancel button here.
+            <p className="text-xs text-[var(--foreground-muted)]">{state.ocrProgress.label} — see progress above.</p>
           ) : (
             <div className="flex flex-col gap-1.5">
               <button
@@ -150,7 +146,7 @@ export function PropertiesPanel({ api, doc, toolOptions, onToolOptionsChange }: 
               onChange={(e) => api.setShowOcrOverlay(e.target.checked)}
               className="accent-[var(--brand)]"
             />
-            Show recognized text overlay
+            Show text regions
           </label>
 
           {activePage && state.ocrResultsByPage[activePage.id] && (
@@ -272,9 +268,18 @@ function ObjectProperties({ api, object }: { api: EditorWorkspaceApi; object: No
           <span className="mb-1 block text-xs font-medium text-[var(--foreground)]">Text</span>
           <textarea
             value={object.type === "added-text" ? object.text : object.newText}
-            onChange={(e) =>
-              api.updateObject(object.id, object.type === "added-text" ? { text: e.target.value } : { newText: e.target.value })
-            }
+            onChange={(e) => {
+              if (object.type === "added-text") {
+                api.updateObject(object.id, { text: e.target.value });
+              } else if (object.type === "ocr-text-replacement") {
+                // Editing the text here would otherwise leave a stale raster patch (still
+                // showing the old replacement word) — clear it so this falls back to simple
+                // text rendering that actually reflects the new value.
+                api.updateObject(object.id, { newText: e.target.value, patchDataUrl: undefined });
+              } else {
+                api.updateObject(object.id, { newText: e.target.value });
+              }
+            }}
             rows={2}
             className="w-full rounded-[var(--radius-sm)] border border-[var(--border)] px-2 py-1 text-sm"
           />
@@ -288,14 +293,16 @@ function ObjectProperties({ api, object }: { api: EditorWorkspaceApi; object: No
       )}
       {object.type === "ocr-text-replacement" && (
         <div className="space-y-2 rounded-[var(--radius-sm)] border border-[var(--border)] p-2">
-          <p className="text-xs font-medium text-[var(--foreground)]">Style (auto-detected from the scan)</p>
+          <p className="text-xs font-medium text-[var(--foreground)]">
+            Style {object.patchDataUrl ? `(auto-matched: ${object.fontCandidateId?.replace(/-/g, " ") ?? "auto"})` : "(manual)"}
+          </p>
           <div className="flex items-center gap-3 text-xs">
             <label className="flex items-center gap-1.5">
               <span className="text-[var(--foreground-muted)]">Text</span>
               <input
                 type="color"
                 value={rgbToHex(object.textColor)}
-                onChange={(e) => api.updateObject(object.id, { textColor: hexToRgb(e.target.value) })}
+                onChange={(e) => api.updateObject(object.id, { textColor: hexToRgb(e.target.value), patchDataUrl: undefined })}
                 className="h-6 w-6 cursor-pointer rounded border border-[var(--border)]"
                 aria-label="Replacement text color"
               />
@@ -305,7 +312,7 @@ function ObjectProperties({ api, object }: { api: EditorWorkspaceApi; object: No
               <input
                 type="color"
                 value={rgbToHex(object.backgroundColor)}
-                onChange={(e) => api.updateObject(object.id, { backgroundColor: hexToRgb(e.target.value) })}
+                onChange={(e) => api.updateObject(object.id, { backgroundColor: hexToRgb(e.target.value), patchDataUrl: undefined })}
                 disabled={object.overlayOnly}
                 className="h-6 w-6 cursor-pointer rounded border border-[var(--border)] disabled:opacity-40"
                 aria-label="Replacement background color"
@@ -320,7 +327,9 @@ function ObjectProperties({ api, object }: { api: EditorWorkspaceApi; object: No
               max={72}
               value={object.fontSize ?? ""}
               placeholder="Auto"
-              onChange={(e) => api.updateObject(object.id, { fontSize: e.target.value ? Number(e.target.value) : undefined })}
+              onChange={(e) =>
+                api.updateObject(object.id, { fontSize: e.target.value ? Number(e.target.value) : undefined, patchDataUrl: undefined })
+              }
               className="w-full rounded-[var(--radius-sm)] border border-[var(--border)] px-2 py-1 text-xs"
             />
           </label>
@@ -328,11 +337,16 @@ function ObjectProperties({ api, object }: { api: EditorWorkspaceApi; object: No
             <input
               type="checkbox"
               checked={object.overlayOnly}
-              onChange={(e) => api.updateObject(object.id, { overlayOnly: e.target.checked })}
+              onChange={(e) => api.updateObject(object.id, { overlayOnly: e.target.checked, patchDataUrl: undefined })}
               className="accent-[var(--brand)]"
             />
             Place as overlay instead of covering the background
           </label>
+          {object.patchDataUrl && (
+            <p className="text-[10px] text-[var(--foreground-muted)]">
+              Any manual change here switches this word to simple text rendering instead of the auto-matched scan style.
+            </p>
+          )}
         </div>
       )}
       <button

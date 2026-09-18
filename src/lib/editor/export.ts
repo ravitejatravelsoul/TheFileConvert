@@ -167,41 +167,70 @@ async function drawObject(
     }
 
     case "ocr-text-replacement": {
-      // Minimum-area, background-matched patch: obj's own box is already the tight
-      // word-level OCR region plus a small calibrated padding (see PageSurface.tsx /
-      // regionColor.ts) — never the whole line — and its fill color is sampled from the
-      // scan around the word rather than assumed white. For a background too non-uniform
-      // to reconstruct safely (backgroundComplex), or when the user chose "place as
-      // overlay", the patch is skipped entirely and only the new text is drawn on top of
-      // the original scan pixels, so nothing underneath is destructively covered.
-      const font = fonts.regular;
-      const size = fitOcrReplacementFontSize(font, obj.newText, obj, obj.fontSize);
-      if (!obj.overlayOnly) {
-        // The original word's OCR box is tight to *its own* glyphs — if it had no
-        // descenders (e.g. "Smith") but the replacement does (e.g. "Rodriguez" -> the "g"),
-        // the new glyph would hang below the patch and show over whatever wasn't covered.
-        // Reserving descender room unconditionally (rather than only when the OCR box
-        // measured one) is cheap and safe: the patch already matches the local background
-        // color, so a slightly taller patch doesn't introduce a visible seam.
-        const descenderAllowance = size * 0.28;
-        page.drawRectangle({
-          x: obj.x,
-          y: obj.y - descenderAllowance,
-          width: obj.width,
-          height: obj.height + descenderAllowance,
-          color: toPdfLibColor(obj.backgroundColor),
-        });
+      // Primary path: embed the raster patch composed in the browser (see scanPatch.ts) —
+      // a real background-texture clone plus the replacement rendered in a locally
+      // font-matched typeface at render resolution — as an *image*, not vector PDF text, so
+      // the visible result matches the scan's own look rather than a generic PDF font. This
+      // covers exactly (obj.x, obj.y, obj.width, obj.height); no separate rectangle/text
+      // drawing needed for this path.
+      let patchEmbedded = false;
+      if (obj.patchDataUrl) {
+        try {
+          const bytes = await dataUrlToBytes(obj.patchDataUrl);
+          const embedded = await doc.embedPng(bytes);
+          page.drawImage(embedded, { x: obj.x, y: obj.y, width: obj.width, height: obj.height });
+          patchEmbedded = true;
+        } catch {
+          // Fall through to the legacy vector path below — e.g. a corrupt/oversized data
+          // URL from a much older saved session.
+        }
       }
-      if (!obj.newText.trim()) break;
-      try {
-        page.drawText(obj.newText, { x: obj.x, y: obj.y, size, font, color: toPdfLibColor(obj.textColor) });
-        // Keep the page searchable after a correction: draw an invisible run with the
-        // corrected text at the same position, same technique buildSearchablePdf uses.
-        page.drawText(obj.newText, { x: obj.x, y: obj.y, size, font, opacity: 0 });
-      } catch {
-        // A character outside Helvetica's supported encoding shouldn't fail the whole
-        // export — the region still shows the patch/original scan, just without
-        // replacement text drawn.
+
+      // Legacy/fallback path: used for objects saved before the raster-patch pipeline
+      // existed, for a manual "place as overlay" choice (skips the background rectangle
+      // entirely so nothing underneath is destructively covered), and for a manual
+      // font-size/color override from the properties panel (which clears patchDataUrl so
+      // the override actually has a visible effect — see PropertiesPanel.tsx).
+      if (!patchEmbedded) {
+        const font = fonts.regular;
+        const size = fitOcrReplacementFontSize(font, obj.newText, obj, obj.fontSize);
+        if (!obj.overlayOnly) {
+          // The original word's OCR box is tight to *its own* glyphs — if it had no
+          // descenders (e.g. "Smith") but the replacement does (e.g. "Rodriguez" -> the
+          // "g"), the new glyph would hang below the patch and show over whatever wasn't
+          // covered. Reserving descender room unconditionally (rather than only when the
+          // OCR box measured one) is cheap and safe: the patch already matches the local
+          // background color, so a slightly taller patch doesn't introduce a visible seam.
+          const descenderAllowance = size * 0.28;
+          page.drawRectangle({
+            x: obj.x,
+            y: obj.y - descenderAllowance,
+            width: obj.width,
+            height: obj.height + descenderAllowance,
+            color: toPdfLibColor(obj.backgroundColor),
+          });
+        }
+        if (obj.newText.trim()) {
+          try {
+            page.drawText(obj.newText, { x: obj.x, y: obj.y, size, font, color: toPdfLibColor(obj.textColor) });
+          } catch {
+            // A character outside Helvetica's supported encoding shouldn't fail the whole
+            // export — the region still shows the patch/original scan, just without
+            // replacement text drawn.
+          }
+        }
+      }
+
+      // Keep the page searchable after a correction either way: an invisible run with the
+      // corrected text at the same position, same technique buildSearchablePdf uses.
+      if (obj.newText.trim()) {
+        try {
+          const size = fitOcrReplacementFontSize(fonts.regular, obj.newText, obj, obj.fontSize);
+          page.drawText(obj.newText, { x: obj.x, y: obj.y, size, font: fonts.regular, opacity: 0 });
+        } catch {
+          // Same non-fatal handling as above — searchability is a bonus, not required for
+          // the visible correction to be correct.
+        }
       }
       break;
     }

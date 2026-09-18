@@ -68,9 +68,16 @@ function ObjectContent({ object, width, height }: { object: EditorObject; width:
         </div>
       );
     case "ocr-text-replacement":
-      // Rendered with the same sampled colors export.ts will actually use, so this preview
-      // on the canvas matches the exported result as closely as practical instead of a
-      // generic mint-box placeholder.
+      // When a raster patch was composed (the normal scanned-text path — see scanPatch.ts),
+      // render *that exact image*: the live canvas then shows precisely what export will
+      // embed, not an approximation. Falls back to a CSS approximation for legacy objects
+      // (saved before this patch pipeline existed) or when patch generation failed.
+      if (object.patchDataUrl) {
+        return (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={object.patchDataUrl} alt="" title={`Corrected: ${object.newText}`} className="h-full w-full object-fill" draggable={false} />
+        );
+      }
       return (
         <div
           className="h-full w-full outline outline-1 outline-[var(--accent-mint)]/60"

@@ -115,18 +115,19 @@ function sampleInkPixels(
   source: PixelSource,
   inner: PixelRect,
   background: [number, number, number]
-): [number, number, number][] {
+): { color: [number, number, number]; distance: number }[] {
   const x0 = Math.round(inner.x);
   const y0 = Math.round(inner.y);
   const x1 = Math.round(inner.x + inner.width);
   const y1 = Math.round(inner.y + inner.height);
-  const ink: [number, number, number][] = [];
+  const ink: { color: [number, number, number]; distance: number }[] = [];
   for (let y = y0; y <= y1; y++) {
     for (let x = x0; x <= x1; x++) {
       const [r, g, b, a] = source.getPixel(x, y);
       if (a < 10) continue;
-      if (colorDistanceSq([r, g, b], background) >= INK_DISTANCE_THRESHOLD * INK_DISTANCE_THRESHOLD) {
-        ink.push([r, g, b]);
+      const distSq = colorDistanceSq([r, g, b], background);
+      if (distSq >= INK_DISTANCE_THRESHOLD * INK_DISTANCE_THRESHOLD) {
+        ink.push({ color: [r, g, b], distance: distSq });
       }
     }
   }
@@ -152,7 +153,13 @@ export function estimateRegionColors(source: PixelSource, wordRectPx: PixelRect,
   const inkSamples = sampleInkPixels(source, wordRectPx, backgroundMedian);
   const totalInner = Math.max(1, Math.round(wordRectPx.width) * Math.round(wordRectPx.height));
   const hasEnoughInk = inkSamples.length / totalInner >= 0.02;
-  const textColor = hasEnoughInk ? medianColor(inkSamples) : [0, 0, 0];
+  // Anti-aliased glyph edges put a lot of "ink-classified" pixels only partway between the
+  // background and the glyph's true (solid) ink color — a plain median over all of them
+  // reads noticeably lighter/grayer than the actual text. Taking the median of just the
+  // *most* ink-like half (furthest from the background) targets the solid glyph core
+  // instead, closer to what "dominant text color" means for an anti-aliased scan.
+  const coreInkSamples = [...inkSamples].sort((a, b) => b.distance - a.distance).slice(0, Math.ceil(inkSamples.length / 2));
+  const textColor = hasEnoughInk ? medianColor(coreInkSamples.map((s) => s.color)) : [0, 0, 0];
 
   return {
     backgroundColor: to01(backgroundMedian),
@@ -169,4 +176,170 @@ export function computeEditPadding(boxHeightPt: number, confidence: number): num
   const base = clamp(boxHeightPt * 0.06, 0.5, 3);
   const confidenceFactor = confidence >= 85 ? 1 : confidence >= 60 ? 0.85 : 0.7;
   return base * confidenceFactor;
+}
+
+export interface InkMask {
+  width: number;
+  height: number;
+  /** Row-major, one byte per pixel: 1 = ink (part of a glyph/mark), 0 = background. */
+  ink: Uint8Array;
+}
+
+/** Builds a spatial ink/background mask for a rect (rather than just color samples) — used
+ * both to compare a scanned glyph's shape against rendered font candidates (glyphMatch.ts)
+ * and to know exactly which pixels a redraw needs to cover. */
+export function computeInkMask(source: PixelSource, rect: PixelRect, background: RgbColor): InkMask {
+  const bg: [number, number, number] = [background.r * 255, background.g * 255, background.b * 255];
+  const x0 = Math.round(rect.x);
+  const y0 = Math.round(rect.y);
+  const width = Math.max(1, Math.round(rect.width));
+  const height = Math.max(1, Math.round(rect.height));
+  const ink = new Uint8Array(width * height);
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      const [r, g, b, a] = source.getPixel(x0 + x, y0 + y);
+      if (a >= 10 && colorDistanceSq([r, g, b], bg) >= INK_DISTANCE_THRESHOLD * INK_DISTANCE_THRESHOLD) {
+        ink[y * width + x] = 1;
+      }
+    }
+  }
+  return { width, height, ink };
+}
+
+/**
+ * Looks for a same-sized rectangle of mostly-blank scan immediately above, below, left of,
+ * or right of `patchRect` (in that priority order — text usually has more reliable blank
+ * space above/below its own line than beside it) to use as a texture donor: cloning real
+ * neighboring paper grain/noise into the erased region instead of a flat color fill. Returns
+ * null if no direction has enough blank room, so the caller can fall back to a flat fill.
+ */
+export function findTextureDonorRect(
+  source: PixelSource,
+  patchRect: PixelRect,
+  background: RgbColor,
+  maxInkFraction = 0.06
+): PixelRect | null {
+  const bg: [number, number, number] = [background.r * 255, background.g * 255, background.b * 255];
+  const candidates: PixelRect[] = [
+    { x: patchRect.x, y: patchRect.y - patchRect.height, width: patchRect.width, height: patchRect.height },
+    { x: patchRect.x, y: patchRect.y + patchRect.height, width: patchRect.width, height: patchRect.height },
+    { x: patchRect.x - patchRect.width, y: patchRect.y, width: patchRect.width, height: patchRect.height },
+    { x: patchRect.x + patchRect.width, y: patchRect.y, width: patchRect.width, height: patchRect.height },
+  ];
+  for (const c of candidates) {
+    if (c.width <= 0 || c.height <= 0) continue;
+    if (c.x < 0 || c.y < 0 || c.x + c.width > source.width || c.y + c.height > source.height) continue;
+    let inkCount = 0;
+    let total = 0;
+    const stepX = Math.max(1, Math.floor(c.width / 12));
+    const stepY = Math.max(1, Math.floor(c.height / 6));
+    for (let y = c.y; y < c.y + c.height; y += stepY) {
+      for (let x = c.x; x < c.x + c.width; x += stepX) {
+        const [r, g, b, a] = source.getPixel(x, y);
+        if (a < 10) continue;
+        total++;
+        if (colorDistanceSq([r, g, b], bg) >= INK_DISTANCE_THRESHOLD * INK_DISTANCE_THRESHOLD) inkCount++;
+      }
+    }
+    if (total > 0 && inkCount / total <= maxInkFraction) return c;
+  }
+  return null;
+}
+
+/** A thin band of consistently non-background pixels spanning most of the patch — a table
+ * rule, underline, or box border that must survive a word replacement unchanged. */
+export type ProtectedLine = PixelRect;
+
+/** Detects horizontal and vertical ruling-line-like bands crossing `patchRect`, so an erase
+ * pass can redraw them from the original pixels afterward instead of losing them under the
+ * replacement. A row/column counts as a line when most of it differs from the background —
+ * but judged across `wideSampleRect` (which should span well beyond the word itself), not
+ * `patchRect` alone: a patch is normally tight to just one word, so nearly any row through
+ * the glyph's own ink would otherwise look "mostly foreground" purely because there's so
+ * little background left in such a narrow box, misfiring on ordinary text. A genuine ruling
+ * line stays foreground across a much wider span than any single word does. Defaults to
+ * `patchRect` itself so existing narrow-canvas callers/tests are unaffected. */
+export function detectProtectedLines(
+  source: PixelSource,
+  patchRect: PixelRect,
+  background: RgbColor,
+  wideSampleRect: PixelRect = patchRect
+): { horizontal: ProtectedLine[]; vertical: ProtectedLine[] } {
+  const bg: [number, number, number] = [background.r * 255, background.g * 255, background.b * 255];
+  const x0 = Math.round(patchRect.x);
+  const x1 = Math.round(patchRect.x + patchRect.width);
+  const y0 = Math.round(patchRect.y);
+  const y1 = Math.round(patchRect.y + patchRect.height);
+  const wx0 = Math.round(wideSampleRect.x);
+  const wx1 = Math.round(wideSampleRect.x + wideSampleRect.width);
+  const wy0 = Math.round(wideSampleRect.y);
+  const wy1 = Math.round(wideSampleRect.y + wideSampleRect.height);
+  const LINE_FRACTION = 0.8;
+  const STEPS = 24;
+
+  function isForeground(x: number, y: number): boolean | null {
+    const [r, g, b, a] = source.getPixel(x, y);
+    if (a < 10) return null;
+    return colorDistanceSq([r, g, b], bg) >= INK_DISTANCE_THRESHOLD * INK_DISTANCE_THRESHOLD;
+  }
+
+  const horizontal: ProtectedLine[] = [];
+  {
+    const rowIsLine: boolean[] = [];
+    for (let y = y0; y < y1; y++) {
+      let nonBg = 0;
+      let total = 0;
+      for (let i = 0; i <= STEPS; i++) {
+        const x = Math.round(wx0 + (i / STEPS) * (wx1 - wx0));
+        const fg = isForeground(x, y);
+        if (fg === null) continue;
+        total++;
+        if (fg) nonBg++;
+      }
+      rowIsLine.push(total > 0 && nonBg / total >= LINE_FRACTION);
+    }
+    let bandStart = -1;
+    for (let i = 0; i <= rowIsLine.length; i++) {
+      const isLine = i < rowIsLine.length && rowIsLine[i];
+      if (isLine && bandStart === -1) bandStart = i;
+      if (!isLine && bandStart !== -1) {
+        const thickness = i - bandStart;
+        if (thickness <= Math.max(3, patchRect.height * 0.35)) {
+          horizontal.push({ x: patchRect.x, y: y0 + bandStart, width: patchRect.width, height: thickness });
+        }
+        bandStart = -1;
+      }
+    }
+  }
+
+  const vertical: ProtectedLine[] = [];
+  {
+    const colIsLine: boolean[] = [];
+    for (let x = x0; x < x1; x++) {
+      let nonBg = 0;
+      let total = 0;
+      for (let i = 0; i <= STEPS; i++) {
+        const y = Math.round(wy0 + (i / STEPS) * (wy1 - wy0));
+        const fg = isForeground(x, y);
+        if (fg === null) continue;
+        total++;
+        if (fg) nonBg++;
+      }
+      colIsLine.push(total > 0 && nonBg / total >= LINE_FRACTION);
+    }
+    let bandStart = -1;
+    for (let i = 0; i <= colIsLine.length; i++) {
+      const isLine = i < colIsLine.length && colIsLine[i];
+      if (isLine && bandStart === -1) bandStart = i;
+      if (!isLine && bandStart !== -1) {
+        const thickness = i - bandStart;
+        if (thickness <= Math.max(3, patchRect.width * 0.35)) {
+          vertical.push({ x: x0 + bandStart, y: patchRect.y, width: thickness, height: patchRect.height });
+        }
+        bandStart = -1;
+      }
+    }
+  }
+
+  return { horizontal, vertical };
 }

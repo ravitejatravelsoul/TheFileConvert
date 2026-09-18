@@ -93,7 +93,10 @@ export function useEditorWorkspace() {
     selectedObjectId: null,
     zoom: 1,
     zoomMode: "custom",
-    showOcrOverlay: true,
+    // Off by default: recognized words already get a subtle hover-only highlight (see
+    // PageSurface.tsx's word buttons) without needing every word permanently boxed —
+    // confidence-colored region boxes are opt-in via "Show text regions" (spec section 25).
+    showOcrOverlay: false,
     pageClassifications: {},
     nativeRegionsByPage: {},
     ocrResultsByPage: {},
@@ -177,7 +180,7 @@ export function useEditorWorkspace() {
       selectedObjectId: null,
       zoom: 1,
       zoomMode: "custom",
-      showOcrOverlay: true,
+      showOcrOverlay: false,
       pageClassifications: {},
       nativeRegionsByPage: {},
       ocrResultsByPage: {},

@@ -135,3 +135,72 @@ export function findCollateralChanges(
 
   return { changedPixelCount, changedOutsidePixelCount, totalPixels: width * height, offendingSamples };
 }
+
+export interface RegionStyleStats {
+  /** Fraction of sampled pixels that are meaningfully darker/lighter than the background
+   * guess — a crude proxy for how "heavy" the text reads overall. */
+  inkDensity: number;
+  /** Average horizontal run-length (in rendered px) of consecutive ink pixels per scanned
+   * row — a simple, fast proxy for stroke thickness (not true font metrics, just "does this
+   * look like similarly-weighted strokes"). */
+  avgStrokeWidthPx: number;
+  /** Fraction of foreground-adjacent pixels that are a soft partial shade between background
+   * and full ink (anti-aliasing) rather than a hard on/off edge — higher means softer/more
+   * scan-like edges. */
+  edgeSoftness: number;
+}
+
+/**
+ * Cheap, local (no ML) style-similarity metrics for a rendered region — the "does the
+ * replacement actually look integrated" half of the quality bar (spec section 19B),
+ * complementing findCollateralChanges' "did it stay localized" half. Compares a region
+ * against a caller-supplied background-color guess (sampled by the caller from a corner of
+ * the same region, so it works regardless of the page's own background color).
+ */
+export function measureRegionStyle(rendered: RenderedPage, rectPx: PixelRectPx, background: [number, number, number]): RegionStyleStats {
+  const x0 = Math.max(0, Math.round(rectPx.x));
+  const y0 = Math.max(0, Math.round(rectPx.y));
+  const x1 = Math.min(rendered.width, Math.round(rectPx.x + rectPx.width));
+  const y1 = Math.min(rendered.height, Math.round(rectPx.y + rectPx.height));
+
+  const INK_T = 60; // Euclidean-ish (sum of abs channel diffs) distance counted as "ink"
+  const PARTIAL_LO = 20;
+
+  let inkCount = 0;
+  let partialCount = 0;
+  let total = 0;
+  let strokeRunSum = 0;
+  let strokeRunCount = 0;
+
+  for (let y = y0; y < y1; y++) {
+    let runLength = 0;
+    for (let x = x0; x < x1; x++) {
+      const [r, g, b] = rendered.getPixel(x, y);
+      const dist = Math.abs(r - background[0]) + Math.abs(g - background[1]) + Math.abs(b - background[2]);
+      total++;
+      const isInk = dist >= INK_T;
+      const isPartial = dist >= PARTIAL_LO && dist < INK_T;
+      if (isInk) {
+        inkCount++;
+        runLength++;
+      } else {
+        if (runLength > 0) {
+          strokeRunSum += runLength;
+          strokeRunCount++;
+        }
+        runLength = 0;
+      }
+      if (isPartial) partialCount++;
+    }
+    if (runLength > 0) {
+      strokeRunSum += runLength;
+      strokeRunCount++;
+    }
+  }
+
+  return {
+    inkDensity: total > 0 ? inkCount / total : 0,
+    avgStrokeWidthPx: strokeRunCount > 0 ? strokeRunSum / strokeRunCount : 0,
+    edgeSoftness: inkCount + partialCount > 0 ? partialCount / (inkCount + partialCount) : 0,
+  };
+}

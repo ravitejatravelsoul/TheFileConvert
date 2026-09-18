@@ -84,12 +84,24 @@ export interface OcrTextReplacementObject extends BaseObject {
    * entirely for these and only draws the replacement text on top of the original pixels. */
   backgroundComplex: boolean;
   /** User- or auto-selected: skip the background patch and only draw the new text on top
-   * of the original scan. Automatic for backgroundComplex regions; can also be chosen
-   * manually for any region. */
+   * of the original scan. Automatic when backgroundComplex (the word overlaps a table/
+   * border line the local erase can't safely redraw); can also be chosen manually. */
   overlayOnly: boolean;
   /** Manual font-size override from the properties panel; unset means "use the automatic
-   * bbox-height estimate", same as before. */
+   * bbox-height estimate", same as before. Ignored once patchDataUrl is set (the raster
+   * patch already bakes in its own calibrated size) — manual overrides clear patchDataUrl
+   * so they fall back to the simpler vector rendering they actually affect. */
   fontSize?: number;
+  /** A raster patch — background texture clone + the replacement rendered in a locally
+   * font-matched typeface, at render resolution — covering exactly (x, y, width, height).
+   * When present, export embeds this image directly instead of drawing vector PDF text, so
+   * the visible result matches the scan's own look rather than a generic PDF font (see
+   * scanPatch.ts). A data URL, not a blob reference, so it round-trips through undo/redo and
+   * autosave the same way image/signature objects already do. */
+  patchDataUrl?: string;
+  /** Which locally available font family (see glyphMatch.ts's FONT_CANDIDATES) the patch's
+   * text was rendered in — kept for the properties panel / debugging, not used at export. */
+  fontCandidateId?: string;
 }
 
 export interface AddedTextObject extends BaseObject {
