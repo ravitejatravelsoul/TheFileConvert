@@ -67,6 +67,13 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      // The inline script below intentionally sets data-theme on the raw DOM node before
+      // React hydrates, to pick the right theme with no flash of the wrong one on first
+      // paint — React's server-rendered markup never has this attribute, so hydration would
+      // otherwise always flag it as a mismatch even though the mismatch is expected and
+      // correct (this is the standard no-flash dark-mode pattern; see e.g. next-themes,
+      // which does the same thing for the same reason).
+      suppressHydrationWarning
     >
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
