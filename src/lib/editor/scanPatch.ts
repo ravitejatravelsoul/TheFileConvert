@@ -83,6 +83,29 @@ export interface ComposeOcrPatchResult {
   unsafeReason?: string;
 }
 
+/**
+ * How far (patch-canvas px) to feather the patch's edges to soft transparency, given how much
+ * margin is actually available on each side. Pulled out as a pure function so its edge-case
+ * behavior is directly unit-testable without a real canvas — this exact calculation
+ * previously floored its result to a whole pixel and required `>= 1` to feather at all, which
+ * rounded a small-but-real margin (the common case for realistic, not-100%, OCR confidence —
+ * see computeEditPadding's confidence factor) straight down to 0, silently disabling
+ * feathering and producing a hard, visibly pasted edge instead.
+ */
+export function computeFeatherPx(
+  marginLeftPx: number,
+  marginRightPx: number,
+  marginTopPx: number,
+  marginBottomPx: number,
+  pixelWidth: number,
+  pixelHeight: number
+): number {
+  const rawFeatherPx = 0.7 * Math.min(marginLeftPx, marginRightPx, marginTopPx, marginBottomPx);
+  // Capped well below half the patch's own size, so a very narrow single-character patch
+  // can't feather its two opposing edges into each other and erase the whole glyph.
+  return Math.max(0, Math.min(rawFeatherPx, pixelWidth * 0.4, pixelHeight * 0.4));
+}
+
 function fontString(candidate: FontCandidate, sizePx: number): string {
   const style = candidate.italic ? "italic" : "normal";
   const weight = candidate.bold ? "bold" : "normal";
@@ -336,8 +359,8 @@ export function composeOcrPatch(input: ComposeOcrPatchInput): ComposeOcrPatchRes
   const marginRightPx = (patchRectPx.x + patchRectPx.width - (wordRectPx.x + wordRectPx.width)) * pixelScale;
   const marginTopPx = (wordRectPx.y - patchRectPx.y) * pixelScale;
   const marginBottomPx = (patchRectPx.y + patchRectPx.height - (wordRectPx.y + wordRectPx.height)) * pixelScale;
-  const safeFeatherPx = Math.max(0, Math.floor(0.7 * Math.min(marginLeftPx, marginRightPx, marginTopPx, marginBottomPx)));
-  if (safeFeatherPx >= 1) {
+  const safeFeatherPx = computeFeatherPx(marginLeftPx, marginRightPx, marginTopPx, marginBottomPx, pixelWidth, pixelHeight);
+  if (safeFeatherPx > 0.25) {
     const maskCanvas = document.createElement("canvas");
     maskCanvas.width = pixelWidth;
     maskCanvas.height = pixelHeight;
