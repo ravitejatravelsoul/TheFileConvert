@@ -155,7 +155,8 @@ export function PageSurface({
       activeTool === "shape-arrow" ||
       activeTool === "highlight" ||
       activeTool === "underline" ||
-      activeTool === "strikethrough"
+      activeTool === "strikethrough" ||
+      activeTool === "crop"
     ) {
       setDragState({ mode: "draw-rect", startPdf: pdfPoint });
       return;
@@ -228,6 +229,15 @@ export function PageSurface({
       const y0 = Math.min(dragState.startPdf.y, pdfPoint.y);
       const width = Math.abs(pdfPoint.x - dragState.startPdf.x);
       const height = Math.abs(pdfPoint.y - dragState.startPdf.y);
+
+      if (activeTool === "crop") {
+        if (width > MIN_OBJECT_SIZE && height > MIN_OBJECT_SIZE) {
+          api.setCropDraft({ pageId: page.id, rect: { x: x0, y: y0, width, height } });
+        }
+        setDragState(null);
+        return;
+      }
+
       let created = false;
       if (width > MIN_OBJECT_SIZE && height > MIN_OBJECT_SIZE) {
         created = createDrawnObject(activeTool, { x: x0, y: y0, width, height }, toolOptions, page.id, api);
@@ -257,7 +267,7 @@ export function PageSurface({
     setDragState({ mode: "resize", objectId: obj.id, handle, startPdf: pdfPoint, originRect: { x: obj.x, y: obj.y, width: obj.width, height: obj.height } });
   }
 
-  // Live preview rect for draw-rect drags (whiteout/shape/annotation), computed each render.
+  // Live preview rect for draw-rect drags (whiteout/shape/annotation/crop), computed each render.
   const liveDrawRect: Rect | null =
     dragState?.mode === "draw-rect" && dragState.currentPdf
       ? (() => {
@@ -267,6 +277,15 @@ export function PageSurface({
           return { x: x0, y: y0, width: Math.abs(cur.x - dragState.startPdf.x), height: Math.abs(cur.y - dragState.startPdf.y) };
         })()
       : null;
+
+  // What crop rect (if any) to visualize: an in-progress drag takes priority over a
+  // not-yet-applied draft, which takes priority over an already-applied crop box.
+  const cropDraftForPage = api.state.cropDraft?.pageId === page.id ? api.state.cropDraft.rect : null;
+  const appliedCropRect: Rect | null = page.cropBox
+    ? { x: page.cropBox[0], y: page.cropBox[1], width: page.cropBox[2] - page.cropBox[0], height: page.cropBox[3] - page.cropBox[1] }
+    : null;
+  const cropRectForDisplay: Rect | null =
+    activeTool === "crop" && liveDrawRect ? liveDrawRect : (cropDraftForPage ?? appliedCropRect);
 
   return (
     <div
@@ -357,7 +376,7 @@ export function PageSurface({
           />
         ))}
 
-        {liveDrawRect && (
+        {liveDrawRect && activeTool !== "crop" && (
           <div
             className="pointer-events-none absolute border-2 border-dashed"
             style={{
@@ -367,8 +386,26 @@ export function PageSurface({
             }}
           />
         )}
+
+        {cropRectForDisplay && <CropOverlay spec={spec} pageDims={dims} rect={cropRectForDisplay} />}
       </div>
     </div>
+  );
+}
+
+/** Dims everything outside the proposed/applied crop rect using four bands around it,
+ * plus a dashed outline — avoids clip-path/mask compatibility quirks for a rectangle. */
+function CropOverlay({ spec, pageDims, rect }: { spec: ReturnType<typeof viewportSpecForPage>; pageDims: { width: number; height: number }; rect: Rect }) {
+  const v = pdfRectToViewport(spec, rect);
+  const bandStyle = "pointer-events-none absolute bg-black/50";
+  return (
+    <>
+      <div className={bandStyle} style={{ left: 0, top: 0, width: pageDims.width, height: v.y }} />
+      <div className={bandStyle} style={{ left: 0, top: v.y + v.height, width: pageDims.width, height: Math.max(0, pageDims.height - v.y - v.height) }} />
+      <div className={bandStyle} style={{ left: 0, top: v.y, width: v.x, height: v.height }} />
+      <div className={bandStyle} style={{ left: v.x + v.width, top: v.y, width: Math.max(0, pageDims.width - v.x - v.width), height: v.height }} />
+      <div className="pointer-events-none absolute border-2 border-dashed border-white" style={{ left: v.x, top: v.y, width: v.width, height: v.height }} />
+    </>
   );
 }
 

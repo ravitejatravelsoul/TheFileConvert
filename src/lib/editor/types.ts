@@ -25,6 +25,10 @@ export interface EditorPage {
    * an origin at (0, 0), but not all do — this is read from the real MediaBox rather than
    * assumed, since coordinates.ts's viewBox math depends on getting the origin right. */
   mediaBox: [number, number, number, number];
+  /** Optional crop box, same [xMin,yMin,xMax,yMax] convention as mediaBox and same
+   * unrotated coordinate space — narrows the visible region at export without touching
+   * the underlying page content. */
+  cropBox?: [number, number, number, number];
 }
 
 export function pageWidth(page: EditorPage): number {

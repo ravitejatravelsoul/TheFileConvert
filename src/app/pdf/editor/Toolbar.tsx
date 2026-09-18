@@ -22,6 +22,7 @@ const TOOLS: { id: ToolId; label: string }[] = [
   { id: "shape-line", label: "Line" },
   { id: "shape-arrow", label: "Arrow" },
   { id: "whiteout", label: "Whiteout" },
+  { id: "crop", label: "Crop" },
 ];
 
 export function Toolbar({ api, onRequestImage, onRequestSign, onExport }: ToolbarProps) {

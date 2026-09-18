@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/Button";
 import { IconWarning } from "@/components/icons";
 import { triggerDownload } from "@/lib/download";
 import { getToolById } from "@/lib/tools/registry";
-import { viewportDimensions } from "@/lib/editor/coordinates";
+import { viewportDimensions, computeFitZoom } from "@/lib/editor/coordinates";
 import { viewportSpecForPage } from "@/lib/editor/types";
 import { useEditorWorkspace } from "./useEditorWorkspace";
 import { Toolbar } from "./Toolbar";
@@ -50,11 +50,9 @@ export function EditorWorkspace() {
     if (!container) return;
     const spec = viewportSpecForPage(activePage, 1);
     const dims = viewportDimensions(spec);
-    const availableWidth = container.clientWidth - 48;
-    const availableHeight = container.clientHeight - 48;
-    const zoom =
-      state.zoomMode === "fit-width" ? availableWidth / dims.width : Math.min(availableWidth / dims.width, availableHeight / dims.height);
-    api.setZoom(Math.max(0.2, zoom), state.zoomMode);
+    const available = { width: container.clientWidth - 48, height: container.clientHeight - 48 };
+    const zoom = computeFitZoom(state.zoomMode, available, dims);
+    api.setZoom(zoom, state.zoomMode);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.zoomMode, activePage?.id]);
 

@@ -5,7 +5,7 @@ import type { EditorWorkspaceApi } from "./useEditorWorkspace";
 import type { ToolOptions } from "./toolOptions";
 import { PRESET_COLORS, rgbToCss } from "./toolOptions";
 import { SUPPORTED_OCR_LANGUAGES } from "@/lib/processors/ocr";
-import { addWatermark, addPageNumbers, type WatermarkOptions, type PageNumberOptions } from "@/lib/processors/pdf";
+import { addWatermark, addPageNumbers, addHeaderFooter, type WatermarkOptions, type PageNumberOptions, type HeaderFooterOptions } from "@/lib/processors/pdf";
 import { exportEditorDocument } from "@/lib/editor/export";
 import { IconTrash, IconWarning } from "@/components/icons";
 import type { EditorDocument } from "@/lib/editor/types";
@@ -194,9 +194,63 @@ export function PropertiesPanel({ api, doc, toolOptions, onToolOptionsChange }: 
         </Section>
       )}
 
-      <Section title="Watermark & page numbers">
+      <Section title="Crop">
+        <CropTools api={api} />
+      </Section>
+
+      <Section title="Watermark, page numbers & header/footer">
         <WholeDocumentTools api={api} />
       </Section>
+    </div>
+  );
+}
+
+function CropTools({ api }: { api: EditorWorkspaceApi }) {
+  const { state } = api;
+  const activePage = state.doc.pages.find((p) => p.id === state.activePageId) ?? null;
+  const draft = state.cropDraft;
+  const [applyToAll, setApplyToAll] = useState(false);
+
+  return (
+    <div className="space-y-2.5">
+      <p className="text-xs text-[var(--foreground-muted)]">
+        Select the Crop tool, then drag a box on the page to choose what to keep.
+      </p>
+      {draft ? (
+        <div className="space-y-2">
+          <p className="text-xs text-[var(--foreground)]">Crop area selected on page {state.doc.pages.findIndex((p) => p.id === draft.pageId) + 1}.</p>
+          <label className="flex items-center gap-2 text-xs">
+            <input type="checkbox" checked={applyToAll} onChange={(e) => setApplyToAll(e.target.checked)} className="accent-[var(--brand)]" />
+            Apply to every page (same coordinates)
+          </label>
+          <div className="flex gap-1.5">
+            <button
+              type="button"
+              onClick={() => api.applyCrop(applyToAll)}
+              className="flex-1 rounded-full bg-[var(--button-bg)] px-3 py-1.5 text-xs font-medium text-white hover:bg-[var(--button-bg-hover)]"
+            >
+              Apply crop
+            </button>
+            <button
+              type="button"
+              onClick={() => api.setCropDraft(null)}
+              className="rounded-full bg-[var(--surface-muted)] px-3 py-1.5 text-xs font-medium text-[var(--foreground-muted)] hover:bg-red-50 hover:text-red-600"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      ) : (
+        activePage?.cropBox && (
+          <button
+            type="button"
+            onClick={() => api.clearCrop(activePage.id)}
+            className="w-full rounded-full bg-[var(--surface-muted)] px-3 py-1.5 text-xs font-medium text-[var(--foreground-muted)] hover:bg-red-50 hover:text-red-600"
+          >
+            Remove crop on this page
+          </button>
+        )
+      )}
     </div>
   );
 }
@@ -287,7 +341,10 @@ function SearchPanel({ api }: { api: EditorWorkspaceApi }) {
 
 function WholeDocumentTools({ api }: { api: EditorWorkspaceApi }) {
   const [watermarkText, setWatermarkText] = useState("");
-  const [busy, setBusy] = useState<"watermark" | "numbers" | null>(null);
+  const [headerFooterText, setHeaderFooterText] = useState("");
+  const [headerFooterPosition, setHeaderFooterPosition] = useState<HeaderFooterOptions["position"]>("footer");
+  const [headerFooterAlign, setHeaderFooterAlign] = useState<HeaderFooterOptions["align"]>("center");
+  const [busy, setBusy] = useState<"watermark" | "numbers" | "header-footer" | null>(null);
 
   /** Bakes every edit made so far into a real PDF, then re-opens that as a fresh editor
    * session — this is how whole-document operations (which reuse the standalone
@@ -316,6 +373,23 @@ function WholeDocumentTools({ api }: { api: EditorWorkspaceApi }) {
     try {
       const options: PageNumberOptions = { position: "bottom-center", startAt: 1, fontSize: 11 };
       await bakeThenReload((file) => addPageNumbers(file, options));
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  async function applyHeaderFooter() {
+    if (!headerFooterText.trim()) return;
+    setBusy("header-footer");
+    try {
+      const options: HeaderFooterOptions = {
+        text: headerFooterText,
+        position: headerFooterPosition,
+        align: headerFooterAlign,
+        fontSize: 10,
+      };
+      await bakeThenReload((file) => addHeaderFooter(file, options));
+      setHeaderFooterText("");
     } finally {
       setBusy(null);
     }
@@ -352,6 +426,43 @@ function WholeDocumentTools({ api }: { api: EditorWorkspaceApi }) {
       >
         {busy === "numbers" ? "Applying…" : "Add page numbers"}
       </button>
+
+      <div className="space-y-1.5 border-t border-[var(--border)] pt-3">
+        <input
+          type="text"
+          value={headerFooterText}
+          onChange={(e) => setHeaderFooterText(e.target.value)}
+          placeholder="Header/footer text (use {page} for page number)"
+          className="w-full rounded-[var(--radius-sm)] border border-[var(--border)] px-2 py-1 text-sm"
+        />
+        <div className="flex gap-1.5">
+          <select
+            value={headerFooterPosition}
+            onChange={(e) => setHeaderFooterPosition(e.target.value as HeaderFooterOptions["position"])}
+            className="flex-1 rounded-[var(--radius-sm)] border border-[var(--border)] px-2 py-1 text-xs"
+          >
+            <option value="header">Header (top)</option>
+            <option value="footer">Footer (bottom)</option>
+          </select>
+          <select
+            value={headerFooterAlign}
+            onChange={(e) => setHeaderFooterAlign(e.target.value as HeaderFooterOptions["align"])}
+            className="flex-1 rounded-[var(--radius-sm)] border border-[var(--border)] px-2 py-1 text-xs"
+          >
+            <option value="left">Left</option>
+            <option value="center">Center</option>
+            <option value="right">Right</option>
+          </select>
+        </div>
+        <button
+          type="button"
+          disabled={busy !== null || !headerFooterText.trim()}
+          onClick={applyHeaderFooter}
+          className="w-full rounded-full bg-[var(--surface-muted)] px-3 py-1.5 text-xs font-medium hover:bg-[var(--brand-soft)] hover:text-[var(--brand-strong)] disabled:opacity-40"
+        >
+          {busy === "header-footer" ? "Applying…" : "Add header/footer"}
+        </button>
+      </div>
     </div>
   );
 }

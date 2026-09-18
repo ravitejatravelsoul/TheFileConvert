@@ -2,6 +2,7 @@ import path from "node:path";
 import fs from "node:fs";
 import { test, expect } from "@playwright/test";
 import { PDFDocument } from "pdf-lib";
+import { withOcrLock } from "./helpers/ocr-lock";
 
 const FIXTURES = path.join(__dirname, "fixtures", "ocr");
 
@@ -36,8 +37,10 @@ test.describe("OCR: recognition accuracy", () => {
   test("recognizes a clean scan with high confidence and exact text", async ({ page }) => {
     await page.goto("/pdf/ocr");
     await page.locator('input[type="file"]').setInputFiles(path.join(FIXTURES, "clean-scan.pdf"));
-    await page.getByRole("button", { name: /Recognize \d+ page/i }).click();
-    await expect(page.getByText("Recognition complete")).toBeVisible({ timeout: 90_000 });
+    await withOcrLock(async () => {
+      await page.getByRole("button", { name: /Recognize \d+ page/i }).click();
+      await expect(page.getByText("Recognition complete")).toBeVisible({ timeout: 90_000 });
+    });
 
     await page.locator("summary", { hasText: "Preview recognized text" }).click();
     const preview = page.locator("summary", { hasText: "Preview recognized text" }).locator("xpath=..");
@@ -51,8 +54,10 @@ test.describe("OCR: recognition accuracy", () => {
   test("recognizes currency, account numbers, and dates accurately", async ({ page }) => {
     await page.goto("/pdf/ocr");
     await page.locator('input[type="file"]').setInputFiles(path.join(FIXTURES, "currency-scan.pdf"));
-    await page.getByRole("button", { name: /Recognize \d+ page/i }).click();
-    await expect(page.getByText("Recognition complete")).toBeVisible({ timeout: 90_000 });
+    await withOcrLock(async () => {
+      await page.getByRole("button", { name: /Recognize \d+ page/i }).click();
+      await expect(page.getByText("Recognition complete")).toBeVisible({ timeout: 90_000 });
+    });
 
     await page.locator("summary", { hasText: "Preview recognized text" }).click();
     const preview = page.locator("summary", { hasText: "Preview recognized text" }).locator("xpath=..");
@@ -64,8 +69,10 @@ test.describe("OCR: recognition accuracy", () => {
   test("recognizes names, emails, and phone numbers on a form-like scan", async ({ page }) => {
     await page.goto("/pdf/ocr");
     await page.locator('input[type="file"]').setInputFiles(path.join(FIXTURES, "form-scan.pdf"));
-    await page.getByRole("button", { name: /Recognize \d+ page/i }).click();
-    await expect(page.getByText("Recognition complete")).toBeVisible({ timeout: 90_000 });
+    await withOcrLock(async () => {
+      await page.getByRole("button", { name: /Recognize \d+ page/i }).click();
+      await expect(page.getByText("Recognition complete")).toBeVisible({ timeout: 90_000 });
+    });
 
     await page.locator("summary", { hasText: "Preview recognized text" }).click();
     const preview = page.locator("summary", { hasText: "Preview recognized text" }).locator("xpath=..");
@@ -77,8 +84,10 @@ test.describe("OCR: recognition accuracy", () => {
     await page.goto("/pdf/ocr");
     await page.locator('input[type="file"]').setInputFiles(path.join(FIXTURES, "rotated-scan.pdf"));
     await page.getByLabel("Rotate before OCR").selectOption("90");
-    await page.getByRole("button", { name: /Recognize \d+ page/i }).click();
-    await expect(page.getByText("Recognition complete")).toBeVisible({ timeout: 90_000 });
+    await withOcrLock(async () => {
+      await page.getByRole("button", { name: /Recognize \d+ page/i }).click();
+      await expect(page.getByText("Recognition complete")).toBeVisible({ timeout: 90_000 });
+    });
 
     await page.locator("summary", { hasText: "Preview recognized text" }).click();
     const preview = page.locator("summary", { hasText: "Preview recognized text" }).locator("xpath=..");
@@ -90,8 +99,10 @@ test.describe("OCR: recognition accuracy", () => {
     await page.goto("/pdf/ocr");
     await page.locator('input[type="file"]').setInputFiles(path.join(FIXTURES, "spanish-scan.pdf"));
     await page.getByLabel("Language").selectOption("spa");
-    await page.getByRole("button", { name: /Recognize \d+ page/i }).click();
-    await expect(page.getByText("Recognition complete")).toBeVisible({ timeout: 90_000 });
+    await withOcrLock(async () => {
+      await page.getByRole("button", { name: /Recognize \d+ page/i }).click();
+      await expect(page.getByText("Recognition complete")).toBeVisible({ timeout: 90_000 });
+    });
 
     await page.locator("summary", { hasText: "Preview recognized text" }).click();
     const preview = page.locator("summary", { hasText: "Preview recognized text" }).locator("xpath=..");
@@ -103,8 +114,10 @@ test.describe("OCR: recognition accuracy", () => {
     await page.goto("/pdf/ocr");
     await page.locator('input[type="file"]').setInputFiles(path.join(FIXTURES, "multi-page-scan.pdf"));
     await expect(page.getByRole("button", { name: "Recognize 3 pages" })).toBeVisible({ timeout: 15_000 });
-    await page.getByRole("button", { name: "Recognize 3 pages" }).click();
-    await expect(page.getByText("Recognition complete")).toBeVisible({ timeout: 90_000 });
+    await withOcrLock(async () => {
+      await page.getByRole("button", { name: "Recognize 3 pages" }).click();
+      await expect(page.getByText("Recognition complete")).toBeVisible({ timeout: 90_000 });
+    });
     await expect(page.getByText(/^3 pages recognized/)).toBeVisible();
   });
 });
@@ -113,8 +126,10 @@ test.describe("OCR: searchable PDF export", () => {
   test("exported PDF is reopenable, phrase-searchable, and keeps the original scan visible", async ({ page }) => {
     await page.goto("/pdf/ocr");
     await page.locator('input[type="file"]').setInputFiles(path.join(FIXTURES, "clean-scan.pdf"));
-    await page.getByRole("button", { name: /Recognize \d+ page/i }).click();
-    await expect(page.getByText("Recognition complete")).toBeVisible({ timeout: 90_000 });
+    await withOcrLock(async () => {
+      await page.getByRole("button", { name: /Recognize \d+ page/i }).click();
+      await expect(page.getByText("Recognition complete")).toBeVisible({ timeout: 90_000 });
+    });
 
     const [download] = await Promise.all([
       page.waitForEvent("download"),
@@ -145,8 +160,10 @@ test.describe("OCR: searchable PDF export", () => {
   test("extracted text can be downloaded as a .txt file", async ({ page }) => {
     await page.goto("/pdf/ocr");
     await page.locator('input[type="file"]').setInputFiles(path.join(FIXTURES, "clean-scan.pdf"));
-    await page.getByRole("button", { name: /Recognize \d+ page/i }).click();
-    await expect(page.getByText("Recognition complete")).toBeVisible({ timeout: 90_000 });
+    await withOcrLock(async () => {
+      await page.getByRole("button", { name: /Recognize \d+ page/i }).click();
+      await expect(page.getByText("Recognition complete")).toBeVisible({ timeout: 90_000 });
+    });
 
     const [download] = await Promise.all([
       page.waitForEvent("download"),
@@ -164,12 +181,13 @@ test.describe("OCR: cancel and error handling", () => {
   test("cancelling mid-batch keeps already-recognized pages instead of discarding everything", async ({ page }) => {
     await page.goto("/pdf/ocr");
     await page.locator('input[type="file"]').setInputFiles(path.join(FIXTURES, "multi-page-scan.pdf"));
-    await page.getByRole("button", { name: "Recognize 3 pages" }).click();
-    await page.getByRole("button", { name: "Cancel" }).waitFor();
-    await page.waitForTimeout(2200); // let at least one page finish
-    await page.getByRole("button", { name: "Cancel" }).click();
-
-    await expect(page.getByText(/Recognition complete|No pages were recognized/i)).toBeVisible({ timeout: 15_000 });
+    await withOcrLock(async () => {
+      await page.getByRole("button", { name: "Recognize 3 pages" }).click();
+      await page.getByRole("button", { name: "Cancel" }).waitFor();
+      await page.waitForTimeout(2200); // let at least one page finish
+      await page.getByRole("button", { name: "Cancel" }).click();
+      await expect(page.getByText(/Recognition complete|No pages were recognized/i)).toBeVisible({ timeout: 15_000 });
+    });
     const summaryText = await page.textContent("body");
     const match = summaryText?.match(/(\d+) pages? recognized/);
     expect(Number(match?.[1] ?? 0)).toBeGreaterThanOrEqual(1);
@@ -207,8 +225,10 @@ test.describe("OCR: network privacy", () => {
     await page.getByRole("button", { name: /Recognize \d+ page/i }).waitFor();
 
     requests.length = 0; // only care about traffic from the recognize click onward
-    await page.getByRole("button", { name: /Recognize \d+ page/i }).click();
-    await expect(page.getByText("Recognition complete")).toBeVisible({ timeout: 90_000 });
+    await withOcrLock(async () => {
+      await page.getByRole("button", { name: /Recognize \d+ page/i }).click();
+      await expect(page.getByText("Recognition complete")).toBeVisible({ timeout: 90_000 });
+    });
 
     const baseURL = new URL(page.url()).origin;
     const thirdParty = requests.filter((u) => !u.startsWith(baseURL) && !u.startsWith("blob:"));

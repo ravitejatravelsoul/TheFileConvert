@@ -161,3 +161,26 @@ export function viewportRectToPdf(spec: ViewportSpec, rect: Rect): Rect {
   const minY = Math.min(...ys);
   return { x: minX, y: minY, width: Math.max(...xs) - minX, height: Math.max(...ys) - minY };
 }
+
+/** Lowest zoom "fit" math will ever produce — guards against a degenerate (near-zero)
+ * container or page size collapsing the page to nothing. */
+export const MIN_FIT_ZOOM = 0.2;
+
+/**
+ * The zoom factor (relative to the 100%-zoom page size in `pageDimsAtZoom1`) that fits the
+ * page into `available` space, for the editor's "Fit width"/"Fit page" toolbar buttons.
+ * `available` is the content area the caller has already reserved padding/chrome from —
+ * this function does no layout measurement itself, only the arithmetic, so it's testable
+ * independent of any DOM/ResizeObserver.
+ */
+export function computeFitZoom(
+  mode: "fit-width" | "fit-page",
+  available: { width: number; height: number },
+  pageDimsAtZoom1: { width: number; height: number }
+): number {
+  if (pageDimsAtZoom1.width <= 0 || pageDimsAtZoom1.height <= 0) return 1;
+  const widthZoom = available.width / pageDimsAtZoom1.width;
+  if (mode === "fit-width") return Math.max(MIN_FIT_ZOOM, widthZoom);
+  const heightZoom = available.height / pageDimsAtZoom1.height;
+  return Math.max(MIN_FIT_ZOOM, Math.min(widthZoom, heightZoom));
+}

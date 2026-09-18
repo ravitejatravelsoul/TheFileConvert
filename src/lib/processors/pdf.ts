@@ -311,6 +311,39 @@ export async function addPageNumbers(file: File, options: PageNumberOptions): Pr
   return new Blob([bytes as BlobPart], { type: "application/pdf" });
 }
 
+export interface HeaderFooterOptions {
+  /** May contain the "{page}" token, replaced with each page's 1-indexed number. */
+  text: string;
+  position: "header" | "footer";
+  align: "left" | "center" | "right";
+  fontSize: number;
+}
+
+/** Stamps the same header/footer text onto every page — reuses the exact drawText
+ * approach as addWatermark/addPageNumbers rather than introducing a second rendering
+ * system. */
+export async function addHeaderFooter(file: File, options: HeaderFooterOptions): Promise<Blob> {
+  if (!options.text.trim()) {
+    throw new ProcessorError("Enter header or footer text.");
+  }
+  const doc = await loadPdf(file);
+  const font = await doc.embedFont(StandardFonts.Helvetica);
+  const margin = 24;
+  doc.getPages().forEach((page, index) => {
+    const label = options.text.replace(/\{page\}/g, String(index + 1));
+    const { width, height } = page.getSize();
+    const textWidth = font.widthOfTextAtSize(label, options.fontSize);
+    let x: number;
+    if (options.align === "left") x = margin;
+    else if (options.align === "right") x = width - textWidth - margin;
+    else x = width / 2 - textWidth / 2;
+    const y = options.position === "header" ? height - margin : margin;
+    page.drawText(label, { x, y, size: options.fontSize, font, color: rgb(0.2, 0.2, 0.2) });
+  });
+  const bytes = await doc.save();
+  return new Blob([bytes as BlobPart], { type: "application/pdf" });
+}
+
 export async function pdfToImages(
   file: File,
   format: "png" | "jpeg",

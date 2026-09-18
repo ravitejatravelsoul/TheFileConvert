@@ -191,25 +191,10 @@ test.describe("PDF Editor: undo/redo", () => {
 });
 
 test.describe("PDF Editor: OCR integration", () => {
-  test.describe.configure({ timeout: 120_000 });
-
-  test("recognizes a scanned page inside a mixed document and lets you correct the text", async ({ page, isMobile }) => {
-    await openFile(page, path.join(OCR_FIXTURES, "mixed-native-scanned.pdf"));
-    await openMobilePanel(page, isMobile, "Pages");
-    await expect(page.getByText("3 pages")).toBeVisible();
-
-    // Page 2 is the scanned one — navigate to it via the thumbnail rail.
-    await page.getByRole("button", { name: "Go to page 2" }).click();
-    await openMobilePanel(page, isMobile, "Properties");
-    await page.locator("summary", { hasText: "OCR" }).click();
-    await expect(page.getByText(/Scanned page detected/i)).toBeVisible();
-
-    await page.getByRole("button", { name: "Recognize current page" }).click();
-    // Progress UI appears and then clears when done.
-    await expect(page.getByText("Cancel", { exact: true })).toBeVisible({ timeout: 10_000 }).catch(() => {});
-    await expect(page.getByText(/Recognize current page/i)).toBeVisible({ timeout: 90_000 });
-  });
-
+  // The real-recognition test for this describe block now lives in pdf-editor-ocr.spec.ts,
+  // serialized alongside the rest of the suite's Tesseract-heavy tests (see the comment in
+  // playwright.config.ts). This one does no OCR recognition itself, just checks the asset
+  // isn't fetched prematurely, so it stays here with the rest of the fully-parallel suite.
   test("OCR is never fetched until recognition is explicitly requested", async ({ page }) => {
     const requests: string[] = [];
     page.on("request", (req) => requests.push(req.url()));

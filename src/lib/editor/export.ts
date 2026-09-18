@@ -1,8 +1,35 @@
-import { PDFDocument, StandardFonts, rgb, degrees, type PDFFont, type PDFPage } from "pdf-lib";
+import { PDFDocument, PDFDict, PDFName, PDFRef, StandardFonts, rgb, degrees, type PDFFont, type PDFPage } from "pdf-lib";
 import type { EditorDocument, EditorObject, RgbColor } from "./types";
 import { effectiveRotation } from "./types";
 
 export class EditorExportError extends Error {}
+
+/** `PDFDocument.copyPages` deep-copies a page's widget annotations (and, transitively, the
+ * AcroForm field dicts they point to via /Parent) into the destination document's object
+ * graph, but it does NOT register those field dicts in the destination's AcroForm /Fields
+ * array — so `out.getForm()` sees an empty form even though all the field data is really
+ * there. This walks each copied widget up to its root field (via /Parent) and registers
+ * that root with the destination AcroForm, so copied form fields stay fillable. */
+function reconnectFormFields(out: PDFDocument, copiedPage: PDFPage, seen: Set<string>) {
+  const annots = copiedPage.node.Annots();
+  if (!annots) return;
+  const acroForm = out.catalog.getOrCreateAcroForm();
+  for (let i = 0; i < annots.size(); i++) {
+    const annotRef = annots.get(i);
+    if (!(annotRef instanceof PDFRef)) continue;
+    let ref: PDFRef = annotRef;
+    let dict = out.context.lookup(ref);
+    while (dict instanceof PDFDict && dict.has(PDFName.of("Parent"))) {
+      const parentRef = dict.get(PDFName.of("Parent"));
+      if (!(parentRef instanceof PDFRef)) break;
+      ref = parentRef;
+      dict = out.context.lookup(ref);
+    }
+    if (seen.has(ref.toString())) continue;
+    seen.add(ref.toString());
+    acroForm.addField(ref);
+  }
+}
 
 function toPdfLibColor(c: RgbColor) {
   return rgb(c.r, c.g, c.b);
@@ -236,6 +263,7 @@ export async function exportEditorDocument(doc: EditorDocument): Promise<Blob> {
   }
 
   const imageCache = new Map<string, unknown>();
+  const reconnectedFieldRefs = new Set<string>();
 
   for (const page of doc.pages) {
     const sourceDoc = await getSourceDoc(page.sourceFileId);
@@ -243,10 +271,16 @@ export async function exportEditorDocument(doc: EditorDocument): Promise<Blob> {
     const [copiedPage] = await out.copyPages(sourceDoc, [page.sourcePageIndex]);
     out.addPage(copiedPage);
     copiedPage.setRotation(degrees(effectiveRotation(page)));
+    reconnectFormFields(out, copiedPage, reconnectedFieldRefs);
 
     const objectsForPage = doc.objects.filter((o) => o.pageId === page.id);
     for (const obj of objectsForPage) {
       await drawObject(copiedPage, obj, out, fonts, imageCache);
+    }
+
+    if (page.cropBox) {
+      const [x0, y0, x1, y1] = page.cropBox;
+      copiedPage.setCropBox(x0, y0, x1 - x0, y1 - y0);
     }
   }
 

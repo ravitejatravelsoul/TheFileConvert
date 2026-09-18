@@ -153,6 +153,39 @@ export function rotatePage(doc: EditorDocument, pageId: string, delta: 90 | -90)
   };
 }
 
+/** Sets or clears a page's crop box (in its own unrotated MediaBox coordinate space, same
+ * convention as `EditorPage.mediaBox`). Cropping never rasterizes or re-encodes page
+ * content — it only narrows the visible/printable region via the PDF CropBox, exactly like
+ * `page.setCropBox()` in export.ts. */
+export function setPageCropBox(
+  doc: EditorDocument,
+  pageId: string,
+  cropBox: [number, number, number, number] | null
+): EditorDocument {
+  return {
+    ...doc,
+    pages: doc.pages.map((p) => (p.id === pageId ? { ...p, cropBox: cropBox ?? undefined } : p)),
+  };
+}
+
+/** Applies the same absolute crop box to every page — a reasonable simplification for the
+ * common case of a document whose pages share one size; pages it wouldn't visually make
+ * sense for (crop box outside that page's own MediaBox) are left untouched. */
+export function setCropBoxForAllPages(
+  doc: EditorDocument,
+  cropBox: [number, number, number, number]
+): EditorDocument {
+  const [cx0, cy0, cx1, cy1] = cropBox;
+  return {
+    ...doc,
+    pages: doc.pages.map((p) => {
+      const [mx0, my0, mx1, my1] = p.mediaBox;
+      const fits = cx0 >= mx0 && cy0 >= my0 && cx1 <= mx1 && cy1 <= my1;
+      return fits ? { ...p, cropBox } : p;
+    }),
+  };
+}
+
 export async function insertBlankPage(
   doc: EditorDocument,
   afterPageId: string | undefined,

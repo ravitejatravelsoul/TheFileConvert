@@ -6,6 +6,8 @@ import {
   viewportToPdfPoint,
   pdfRectToViewport,
   viewportRectToPdf,
+  computeFitZoom,
+  MIN_FIT_ZOOM,
   type ViewportSpec,
 } from "./coordinates";
 
@@ -150,5 +152,90 @@ describe("viewportDimensions", () => {
 describe("buildViewportTransform", () => {
   it("throws on a non-90-degree-multiple rotation", () => {
     expect(() => buildViewportTransform({ viewBox: [0, 0, 100, 100], scale: 1, rotation: 45 as never })).toThrow();
+  });
+});
+
+describe("computeFitZoom", () => {
+  it("fit-width: scales so the page's rendered width exactly fills the available width", () => {
+    // Letter page at EDITOR_BASE_SCALE=1.3 (612 * 1.3 = 795.6px at zoom 1).
+    const pageDimsAtZoom1 = { width: 795.6, height: 1029.6 };
+    const zoom = computeFitZoom("fit-width", { width: 1000, height: 5000 }, pageDimsAtZoom1);
+    expect(zoom).toBeCloseTo(1000 / 795.6, 10);
+    expect(pageDimsAtZoom1.width * zoom).toBeCloseTo(1000, 6);
+  });
+
+  it("fit-width ignores available height", () => {
+    const pageDimsAtZoom1 = { width: 800, height: 1000 };
+    const tall = computeFitZoom("fit-width", { width: 400, height: 100 }, pageDimsAtZoom1);
+    const short = computeFitZoom("fit-width", { width: 400, height: 5000 }, pageDimsAtZoom1);
+    expect(tall).toBeCloseTo(short, 10);
+  });
+
+  it("fit-page: picks the smaller of width-fit and height-fit so the whole page is visible", () => {
+    const pageDimsAtZoom1 = { width: 800, height: 1000 };
+    // Width is the binding constraint here (800 vs available 400 is tighter than 1000 vs 900).
+    const zoom = computeFitZoom("fit-page", { width: 400, height: 900 }, pageDimsAtZoom1);
+    expect(zoom).toBeCloseTo(400 / 800, 10);
+    expect(pageDimsAtZoom1.width * zoom).toBeLessThanOrEqual(400 + 1e-9);
+    expect(pageDimsAtZoom1.height * zoom).toBeLessThanOrEqual(900 + 1e-9);
+  });
+
+  it("fit-page: picks height as the binding constraint when it's tighter", () => {
+    const pageDimsAtZoom1 = { width: 800, height: 1000 };
+    const zoom = computeFitZoom("fit-page", { width: 2000, height: 300 }, pageDimsAtZoom1);
+    expect(zoom).toBeCloseTo(300 / 1000, 10);
+  });
+
+  it("clamps to MIN_FIT_ZOOM instead of collapsing to (near) zero for a tiny container", () => {
+    const pageDimsAtZoom1 = { width: 800, height: 1000 };
+    const zoom = computeFitZoom("fit-width", { width: 1, height: 1 }, pageDimsAtZoom1);
+    expect(zoom).toBe(MIN_FIT_ZOOM);
+  });
+
+  it("is consistent with viewportDimensions: fitting then measuring reproduces the target size", () => {
+    const spec1: ViewportSpec = { viewBox: [0, 0, 612, 792], scale: 1.3, rotation: 0 };
+    const dimsAtZoom1 = viewportDimensions(spec1);
+    const available = { width: 640, height: 480 };
+    const zoom = computeFitZoom("fit-page", available, dimsAtZoom1);
+    const fitted = viewportDimensions({ ...spec1, scale: spec1.scale * zoom });
+    expect(fitted.width).toBeLessThanOrEqual(available.width + 1e-6);
+    expect(fitted.height).toBeLessThanOrEqual(available.height + 1e-6);
+    // At least one dimension should exactly hit its bound (that's what "fit" means).
+    const hitsWidth = Math.abs(fitted.width - available.width) < 1e-6;
+    const hitsHeight = Math.abs(fitted.height - available.height) < 1e-6;
+    expect(hitsWidth || hitsHeight).toBe(true);
+  });
+
+  it("stays consistent under rotation: a 90deg-rotated page fits by its swapped dimensions", () => {
+    const spec0: ViewportSpec = { viewBox: [0, 0, 612, 792], scale: 1.3, rotation: 0 };
+    const spec90: ViewportSpec = { ...spec0, rotation: 90 };
+    const dims0 = viewportDimensions(spec0);
+    const dims90 = viewportDimensions(spec90);
+    expect(dims90).toEqual({ width: dims0.height, height: dims0.width });
+
+    const available = { width: 640, height: 480 };
+    const zoom0 = computeFitZoom("fit-width", available, dims0);
+    const zoom90 = computeFitZoom("fit-width", available, dims90);
+    // Fitting the rotated page's (swapped) width should behave like fitting the
+    // unrotated page's height, since that's now the "width" dimension on screen.
+    expect(zoom90).toBeCloseTo(available.width / dims0.height, 10);
+    expect(zoom0).toBeCloseTo(available.width / dims0.width, 10);
+  });
+
+  it("verifying a known PDF point still lands at the fitted edge after a zoom-mode change (overlay alignment)", () => {
+    const spec1: ViewportSpec = { viewBox: [0, 0, 612, 792], scale: 1.3, rotation: 0 };
+    const dimsAtZoom1 = viewportDimensions(spec1);
+    const available = { width: 500, height: 500 };
+    const zoom = computeFitZoom("fit-page", available, dimsAtZoom1);
+    const fittedSpec: ViewportSpec = { ...spec1, scale: spec1.scale * zoom };
+
+    // The page's top-right PDF corner must still map to the fitted viewport's top-right
+    // corner — i.e. an object overlay anchored at a PDF point stays visually aligned with
+    // the page edge after switching zoom modes, not just "some scale was applied".
+    const topRightPdf = { x: spec1.viewBox[2], y: spec1.viewBox[3] };
+    const topRightViewport = pdfToViewportPoint(fittedSpec, topRightPdf);
+    const fittedDims = viewportDimensions(fittedSpec);
+    expect(topRightViewport.x).toBeCloseTo(fittedDims.width, 6);
+    expect(topRightViewport.y).toBeCloseTo(0, 6);
   });
 });

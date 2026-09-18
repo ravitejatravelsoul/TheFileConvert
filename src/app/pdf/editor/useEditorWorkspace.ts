@@ -10,9 +10,12 @@ import {
   reorderPages as reorderPagesOp,
   rotatePage as rotatePageOp,
   insertBlankPage as insertBlankPageOp,
+  setPageCropBox,
+  setCropBoxForAllPages,
   likelyHasDigitalSignature,
   EditorDocumentError,
 } from "@/lib/editor/document";
+import type { Rect } from "@/lib/editor/coordinates";
 import { extractNativeTextRegions, type NativeTextRegion } from "@/lib/editor/nativeText";
 import { exportEditorDocument, EditorExportError } from "@/lib/editor/export";
 import { generateUuidV4 } from "@/lib/processors/data";
@@ -34,7 +37,8 @@ export type ToolId =
   | "shape-ellipse"
   | "shape-line"
   | "shape-arrow"
-  | "whiteout";
+  | "whiteout"
+  | "crop";
 
 export type ZoomMode = "custom" | "fit-width" | "fit-page";
 
@@ -67,6 +71,10 @@ interface WorkspaceState {
   signedWarning: boolean;
   searchQuery: string;
   searchMatchIndex: number;
+  /** A proposed-but-not-yet-applied crop rectangle (page's unrotated PDF space), drawn by
+   * the crop tool. Separate from doc.objects/history since it isn't a document edit until
+   * "Apply crop" commits it via setPageCropBox. */
+  cropDraft: { pageId: string; rect: Rect } | null;
 }
 
 const EMPTY_DOC: EditorDocument = { sourceFiles: {}, pages: [], objects: [], formFields: [] };
@@ -95,6 +103,7 @@ export function useEditorWorkspace() {
     signedWarning: false,
     searchQuery: "",
     searchMatchIndex: 0,
+    cropDraft: null,
   });
 
   useEffect(() => {
@@ -147,6 +156,7 @@ export function useEditorWorkspace() {
         signedWarning: signed,
         selectedObjectId: null,
         activeTool: "select",
+        cropDraft: null,
       }));
     } catch (e) {
       const message = e instanceof EditorDocumentError ? e.message : "We couldn't read this PDF.";
@@ -177,6 +187,7 @@ export function useEditorWorkspace() {
       signedWarning: false,
       searchQuery: "",
       searchMatchIndex: 0,
+      cropDraft: null,
     });
   }, []);
 
@@ -375,6 +386,38 @@ export function useEditorWorkspace() {
     [pushDoc, state.doc]
   );
 
+  // -------------------------------------------------------------- crop
+
+  const setCropDraft = useCallback((draft: { pageId: string; rect: Rect } | null) => {
+    setState((s) => ({ ...s, cropDraft: draft }));
+  }, []);
+
+  const applyCrop = useCallback(
+    (applyToAllPages: boolean) => {
+      const draft = state.cropDraft;
+      if (!draft) return;
+      const box: [number, number, number, number] = [
+        draft.rect.x,
+        draft.rect.y,
+        draft.rect.x + draft.rect.width,
+        draft.rect.y + draft.rect.height,
+      ];
+      const next = applyToAllPages
+        ? setCropBoxForAllPages(state.doc, box)
+        : setPageCropBox(state.doc, draft.pageId, box);
+      pushDoc(next);
+      setState((s) => ({ ...s, cropDraft: null, activeTool: "select" }));
+    },
+    [pushDoc, state.doc, state.cropDraft]
+  );
+
+  const clearCrop = useCallback(
+    (pageId: string) => {
+      pushDoc(setPageCropBox(state.doc, pageId, null));
+    },
+    [pushDoc, state.doc]
+  );
+
   // -------------------------------------------------------------- form fields
 
   const setFormFieldValue = useCallback(
@@ -474,6 +517,9 @@ export function useEditorWorkspace() {
     deletePage,
     reorderPageList,
     rotatePage,
+    setCropDraft,
+    applyCrop,
+    clearCrop,
     setFormFieldValue,
     exportDocument,
     exporting,
