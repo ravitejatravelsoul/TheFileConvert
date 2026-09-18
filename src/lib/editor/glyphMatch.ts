@@ -109,50 +109,52 @@ export function compareGrids(a: Uint8Array, b: Uint8Array): number {
   return intersection / union;
 }
 
-/** Picks the font candidate whose rendering of the *original* OCR text most closely
- * resembles the actual scanned glyph bitmap. `renderCandidate` is supplied by the caller
- * (browser-only canvas rendering lives in scanPatch.ts) so this function itself stays pure
- * and unit-testable with synthetic bitmaps. */
+/** Fraction of a normalized grid's cells that are ink — a simple, cheap proxy for stroke
+ * weight/"boldness" once position and overall size are already normalized away by
+ * normalizeToGrid. A bold face fills noticeably more of the same-shaped grid than a regular
+ * one does. */
+export function inkDensity(grid: Uint8Array): number {
+  if (grid.length === 0) return 0;
+  let count = 0;
+  for (let i = 0; i < grid.length; i++) if (grid[i]) count++;
+  return count / grid.length;
+}
+
 /** A binarized ink mask of an anti-aliased scanned glyph tends to read slightly "fatter"
  * than the same glyph's own true stroke weight (soft edge pixels get counted as ink), which
  * biases raw shape-overlap scoring toward bold candidates even for regular-weight source
- * text. Requiring a bold/italic variant to win by a real margin over its plain counterpart —
- * rather than by any margin at all — counteracts that bias without hard-coding a "never pick
- * bold" rule (a genuinely bold source word should still be able to win outright). */
-const VARIANT_PREFERENCE_MARGIN = 0.04;
+ * text — pure shape (IoU) alone isn't a reliable enough signal to pick weight correctly.
+ * Ink-density similarity is weighted in directly (not just as a tie-break) so a candidate
+ * that matches the reference's actual stroke weight is preferred even when a heavier one's
+ * silhouette happens to overlap slightly more. */
+const DENSITY_PENALTY_WEIGHT = 1.6;
 
-function isPlainer(a: FontCandidate, b: FontCandidate): boolean {
-  // True if `a` has fewer style flags set than `b` (same family) — i.e. `a` is the plainer
-  // of the two variants.
-  const weight = (c: FontCandidate) => (c.bold ? 1 : 0) + (c.italic ? 1 : 0);
-  return a.family === b.family && weight(a) < weight(b);
-}
-
+/** Picks the font candidate whose rendering of the *original* OCR text most closely
+ * resembles the actual scanned glyph bitmap, combining shape overlap (IoU) with how closely
+ * its stroke weight (ink density) matches the reference — see DENSITY_PENALTY_WEIGHT.
+ * `renderCandidate` is supplied by the caller (browser-only canvas rendering lives in
+ * scanPatch.ts) so this function itself stays pure and unit-testable with synthetic bitmaps. */
 export function pickBestFontCandidate(
   originalBitmap: Bitmap,
   renderCandidate: (candidate: FontCandidate) => Bitmap | null,
   candidates: FontCandidate[] = FONT_CANDIDATES
 ): { candidate: FontCandidate; score: number } {
   const originalGrid = normalizeToGrid(originalBitmap);
-  const scored: { candidate: FontCandidate; score: number }[] = [];
+  const referenceDensity = inkDensity(originalGrid);
+  const scored: { candidate: FontCandidate; iou: number; combined: number }[] = [];
   for (const candidate of candidates) {
     const rendered = renderCandidate(candidate);
     if (!rendered) continue;
-    scored.push({ candidate, score: compareGrids(originalGrid, normalizeToGrid(rendered)) });
+    const candidateGrid = normalizeToGrid(rendered);
+    const iou = compareGrids(originalGrid, candidateGrid);
+    const densityGap = Math.abs(inkDensity(candidateGrid) - referenceDensity);
+    scored.push({ candidate, iou, combined: iou - DENSITY_PENALTY_WEIGHT * densityGap });
   }
   if (scored.length === 0) return { candidate: candidates[0], score: 0 };
 
   let best = scored[0];
   for (const entry of scored) {
-    if (entry.score > best.score) best = entry;
+    if (entry.combined > best.combined) best = entry;
   }
-  // Tie-break: if a plainer same-family variant scored within VARIANT_PREFERENCE_MARGIN of
-  // the winner, prefer it — a near-tie is exactly the "anti-aliasing made it look a bit
-  // heavier than it is" case this margin exists for.
-  for (const entry of scored) {
-    if (isPlainer(entry.candidate, best.candidate) && best.score - entry.score <= VARIANT_PREFERENCE_MARGIN) {
-      best = entry;
-    }
-  }
-  return { candidate: best.candidate, score: Math.max(0, best.score) };
+  return { candidate: best.candidate, score: Math.max(0, best.iou) };
 }

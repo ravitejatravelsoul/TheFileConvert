@@ -1,5 +1,20 @@
 import { describe, expect, it } from "vitest";
-import { normalizeToGrid, compareGrids, pickBestFontCandidate, FONT_CANDIDATES, type Bitmap, type FontCandidate } from "./glyphMatch";
+import { normalizeToGrid, compareGrids, inkDensity, pickBestFontCandidate, FONT_CANDIDATES, type Bitmap, type FontCandidate } from "./glyphMatch";
+
+/** Two vertical bars with a gap between them (like a simplified "11" or the two strokes of
+ * a digit) — used to build a case where a thicker rendering's bars merge into a solid block,
+ * changing shape (IoU) *and* density together in a way a real bold/regular font pair does. */
+function twoBars(size: number, barWidth: number, gap: number): Bitmap {
+  const width = Math.max(barWidth * 2 + gap, size);
+  const height = size;
+  const ink = new Uint8Array(width * height);
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < barWidth; x++) ink[y * width + x] = 1;
+    const secondStart = barWidth + Math.max(0, gap);
+    for (let x = secondStart; x < secondStart + barWidth && x < width; x++) ink[y * width + x] = 1;
+  }
+  return { width, height, ink };
+}
 
 function bitmapFromRows(rows: string[]): Bitmap {
   const height = rows.length;
@@ -90,5 +105,39 @@ describe("pickBestFontCandidate", () => {
     const result = pickBestFontCandidate(SERIF_I, () => null);
     expect(result.candidate).toBe(FONT_CANDIDATES[0]);
     expect(result.score).toBe(0);
+  });
+
+  it("regression: prefers the regular-weight candidate over bold even when bold's raw shape overlap scores slightly higher", () => {
+    // Reproduces the actual reported defect: an anti-aliased regular-weight scanned digit
+    // read as noticeably bolder than its neighbors after a correction. Constructed so pure
+    // IoU alone (the pre-fix scoring) picks the bold candidate — verified below — and the
+    // density-aware combined scoring corrects it.
+    const reference = twoBars(20, 2, 3); // a regular glyph, fattened a bit by anti-aliasing
+    const regularCandidate: FontCandidate = { id: "fake-regular", family: "serif", bold: false, italic: false };
+    const boldCandidate: FontCandidate = { id: "fake-bold", family: "serif", bold: true, italic: false };
+    const regularRender = twoBars(20, 1, 6);
+    const boldRender = twoBars(20, 5, 0); // strokes have merged into a solid block
+
+    // Sanity check on the premise: shape-only IoU actually does favor bold here, so this test
+    // is exercising the density correction, not a case IoU already got right on its own.
+    const refGrid = normalizeToGrid(reference);
+    expect(compareGrids(refGrid, normalizeToGrid(boldRender))).toBeGreaterThan(compareGrids(refGrid, normalizeToGrid(regularRender)));
+
+    const renderCandidate = (c: FontCandidate) => (c.id === "fake-bold" ? boldRender : regularRender);
+    const result = pickBestFontCandidate(reference, renderCandidate, [regularCandidate, boldCandidate]);
+    expect(result.candidate.id).toBe("fake-regular");
+  });
+});
+
+describe("inkDensity", () => {
+  it("is higher for a mostly-filled grid than a mostly-empty one", () => {
+    const mostlyFilled = new Uint8Array(100).fill(1);
+    const mostlyEmpty = new Uint8Array(100);
+    mostlyEmpty[0] = 1;
+    expect(inkDensity(mostlyFilled)).toBeGreaterThan(inkDensity(mostlyEmpty));
+  });
+
+  it("returns 0 for an empty grid", () => {
+    expect(inkDensity(new Uint8Array(0))).toBe(0);
   });
 });
