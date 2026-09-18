@@ -24,8 +24,11 @@ export function TextEditModal({ request, api, onClose }: TextEditModalProps) {
 
   // Real, export-identical raster preview (scanned-text pipeline only — see scanPatch.ts):
   // recomposed synchronously on every keystroke so what's shown here is what Apply will
-  // actually produce, not an HTML-font approximation (spec section 13).
-  const patch = useMemo(() => request.composePreview?.(value) ?? null, [request, value]);
+  // actually produce, not an HTML-font approximation (spec section 13). `preview.pdfBox` is
+  // the *tight* patch region actually used — scoped to just the changed characters when OCR
+  // character geometry allows it, not necessarily the whole word (see PageSurface.tsx).
+  const preview = useMemo(() => request.composePreview?.(value) ?? null, [request, value]);
+  const patch = preview?.patch ?? null;
   const overlayForced = Boolean(patch?.unsafe);
 
   function save() {
@@ -55,16 +58,20 @@ export function TextEditModal({ request, api, onClose }: TextEditModalProps) {
     // Scanned-text path. If the region is unsafe to auto-erase (overlaps a table/border
     // line), Save stays disabled until the user explicitly opts into a manual overlay (see
     // canSave below) — never silently fall back to a risky automatic erase.
-    const usePatch = patch && !patch.unsafe && !manualOverlay;
+    const usePatch = preview && patch && !patch.unsafe && !manualOverlay;
+    // The tight changed-substring rect when the patch path is used; the whole word's own
+    // padded box for the unsafe/manual-overlay/legacy fallback (which doesn't erase, so the
+    // wider box doesn't risk anything — see PageSurface.tsx).
+    const objectRect = usePatch ? preview!.pdfBox : box;
 
     api.addObject({
       id: api.newObjectId(),
       type: "ocr-text-replacement",
       pageId: request.pageId,
-      x: box.x,
-      y: box.y,
-      width: box.width,
-      height: box.height,
+      x: objectRect.x,
+      y: objectRect.y,
+      width: objectRect.width,
+      height: objectRect.height,
       originalText: request.text,
       newText: value,
       confidence: request.confidence ?? 0,
@@ -74,6 +81,9 @@ export function TextEditModal({ request, api, onClose }: TextEditModalProps) {
       overlayOnly: manualOverlay,
       patchDataUrl: usePatch ? patch!.dataUrl : undefined,
       fontCandidateId: usePatch ? patch!.fontCandidateId : undefined,
+      // The *whole word's* own box, so the invisible searchable-text run below isn't
+      // squeezed into a box sized for just the changed characters when they differ.
+      searchAnchor: usePatch ? box : undefined,
     });
     onClose();
   }

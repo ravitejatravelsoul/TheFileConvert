@@ -70,6 +70,12 @@ export interface OcrWord {
   /** Position in PDF point space (origin bottom-left, y-up) — already mapped back from
    * the rendered canvas, so callers never need to know about render scale/rotation. */
   pdfBox: { x: number; y: number; width: number; height: number };
+  /** Per-character boxes within this word (Tesseract's own symbol segmentation), same PDF
+   * point space as pdfBox — lets the editor patch only the characters that actually changed
+   * in a correction instead of the whole word. Concatenating `chars.map(c => c.text)` should
+   * reconstruct `text`, but isn't guaranteed to (OCR symbol merges/splits happen); callers
+   * that need geometry should verify that before trusting it. */
+  chars: { text: string; pdfBox: { x: number; y: number; width: number; height: number } }[];
 }
 
 export interface OcrLine {
@@ -156,12 +162,17 @@ function mapBboxToPdf(bbox: Bbox, viewport: PageViewport): OcrWord["pdfBox"] {
 }
 
 function mapWordsToPdfSpace(
-  words: { text: string; confidence: number; bbox: Bbox }[],
+  words: { text: string; confidence: number; bbox: Bbox; symbols: { text: string; bbox: Bbox }[] }[],
   viewport: PageViewport
 ): OcrWord[] {
   return words
     .filter((w) => w.text.trim().length > 0)
-    .map((w) => ({ text: w.text, confidence: w.confidence, pdfBox: mapBboxToPdf(w.bbox, viewport) }));
+    .map((w) => ({
+      text: w.text,
+      confidence: w.confidence,
+      pdfBox: mapBboxToPdf(w.bbox, viewport),
+      chars: w.symbols.map((s) => ({ text: s.text, pdfBox: mapBboxToPdf(s.bbox, viewport) })),
+    }));
 }
 
 function mapLinesToPdfSpace(
@@ -233,14 +244,19 @@ export async function createOcrSession(langCode: string): Promise<OcrSession> {
         options.onProgress?.(1);
       }
 
-      const rawWords: { text: string; confidence: number; bbox: Bbox }[] = [];
+      const rawWords: { text: string; confidence: number; bbox: Bbox; symbols: { text: string; bbox: Bbox }[] }[] = [];
       const rawLines: { text: string; bbox: Bbox }[] = [];
       for (const block of result.data.blocks ?? []) {
         for (const paragraph of block.paragraphs) {
           for (const line of paragraph.lines) {
             rawLines.push({ text: line.text, bbox: line.bbox });
             for (const word of line.words) {
-              rawWords.push({ text: word.text, confidence: word.confidence, bbox: word.bbox });
+              rawWords.push({
+                text: word.text,
+                confidence: word.confidence,
+                bbox: word.bbox,
+                symbols: (word.symbols ?? []).map((s) => ({ text: s.text, bbox: s.bbox })),
+              });
             }
           }
         }

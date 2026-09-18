@@ -55,6 +55,17 @@ export interface ComposeOcrPatchInput {
   pixelScale: number;
   /** Cache key for the per-page style profile (spec section 8) — pass the page id. */
   styleCacheKey: string;
+  /** Optional wider rect (typically the *whole* original OCR word, before narrowing to just
+   * the changed characters) to sample for font matching instead of `wordRectPx` — a single
+   * changed digit rarely has enough shape information to match confidently on its own, but
+   * "12/20/2026" has plenty of digits/slashes to go on (spec section 9's "use nearby digits
+   * from the same field as style anchors"). Only used when it actually has more ink than
+   * `wordRectPx` to offer; falls back to `wordRectPx` otherwise. */
+  styleReferenceRectPx?: PixelRect;
+  /** The text to render when matching against `styleReferenceRectPx` — should be the whole
+   * word's own original text, not just the changed substring. Ignored unless
+   * styleReferenceRectPx is also given. */
+  styleReferenceText?: string;
 }
 
 export interface ComposeOcrPatchResult {
@@ -163,7 +174,19 @@ function rgbToCssColor(c: RgbColor): string {
 
 export function composeOcrPatch(input: ComposeOcrPatchInput): ComposeOcrPatchResult | null {
   if (typeof document === "undefined") return null;
-  const { source, wordRectPx, patchRectPx, originalText, newText, backgroundColor, textColor, pixelScale, styleCacheKey } = input;
+  const {
+    source,
+    wordRectPx,
+    patchRectPx,
+    originalText,
+    newText,
+    backgroundColor,
+    textColor,
+    pixelScale,
+    styleCacheKey,
+    styleReferenceRectPx,
+    styleReferenceText,
+  } = input;
 
   const pixelWidth = Math.max(1, Math.round(patchRectPx.width * pixelScale));
   const pixelHeight = Math.max(1, Math.round(patchRectPx.height * pixelScale));
@@ -174,15 +197,25 @@ export function composeOcrPatch(input: ComposeOcrPatchInput): ComposeOcrPatchRes
   if (!ctx) return null;
 
   // --- 1. Font matching: compare the real scanned glyph's shape against a small curated
-  // set of locally available fonts, reusing a per-page cache when there isn't enough ink on
-  // this particular word to match confidently (e.g. very short words like "of"/"the").
-  const originalInkMask = computeInkMask(source, wordRectPx, backgroundColor);
-  const inkPixelCount = originalInkMask.ink.reduce((sum, v) => sum + v, 0);
+  // set of locally available fonts. A single changed character (e.g. one digit in a date)
+  // rarely has enough ink to match confidently on its own, so prefer a wider style-reference
+  // rect (the whole original word) when one was given and actually has more ink to go on —
+  // "12/20/2026" gives the matcher far more to work with than just "6" (spec section 9).
+  // Falls back to a per-page cache when neither has enough ink (e.g. very short words).
+  const wordInkMask = computeInkMask(source, wordRectPx, backgroundColor);
+  const wordInkCount = wordInkMask.ink.reduce((sum, v) => sum + v, 0);
+  const referenceInkMask = styleReferenceRectPx ? computeInkMask(source, styleReferenceRectPx, backgroundColor) : null;
+  const referenceInkCount = referenceInkMask ? referenceInkMask.ink.reduce((sum, v) => sum + v, 0) : 0;
+
+  const useReference = referenceInkMask !== null && referenceInkCount > wordInkCount && referenceInkCount >= MIN_INK_PIXELS_FOR_MATCHING;
+  const matchMask = useReference ? referenceInkMask! : wordInkMask;
+  const matchText = useReference ? styleReferenceText! : originalText;
+  const matchHeightPx = (useReference ? styleReferenceRectPx! : wordRectPx).height * pixelScale;
+  const matchInkCount = useReference ? referenceInkCount : wordInkCount;
+
   let fontCandidate: FontCandidate;
-  if (inkPixelCount >= MIN_INK_PIXELS_FOR_MATCHING) {
-    const { candidate } = pickBestFontCandidate(originalInkMask, (c) =>
-      rasterizeTextToBitmap(originalText, c, wordRectPx.height * pixelScale)
-    );
+  if (matchInkCount >= MIN_INK_PIXELS_FOR_MATCHING) {
+    const { candidate } = pickBestFontCandidate(matchMask, (c) => rasterizeTextToBitmap(matchText, c, matchHeightPx));
     fontCandidate = candidate;
     pageStyleCache.set(styleCacheKey, candidate);
   } else {
@@ -206,16 +239,16 @@ export function composeOcrPatch(input: ComposeOcrPatchInput): ComposeOcrPatchRes
   let unsafeReason: string | undefined;
   for (const band of protectedBands) {
     const bandLocalX0 = Math.max(0, Math.round(band.x - wordRectPx.x));
-    const bandLocalX1 = Math.min(originalInkMask.width, Math.round(band.x + band.width - wordRectPx.x));
+    const bandLocalX1 = Math.min(wordInkMask.width, Math.round(band.x + band.width - wordRectPx.x));
     const bandLocalY0 = Math.max(0, Math.round(band.y - wordRectPx.y));
-    const bandLocalY1 = Math.min(originalInkMask.height, Math.round(band.y + band.height - wordRectPx.y));
+    const bandLocalY1 = Math.min(wordInkMask.height, Math.round(band.y + band.height - wordRectPx.y));
     if (bandLocalX1 <= bandLocalX0 || bandLocalY1 <= bandLocalY0) continue;
     let overlapInk = 0;
     let bandArea = 0;
     for (let y = bandLocalY0; y < bandLocalY1; y++) {
       for (let x = bandLocalX0; x < bandLocalX1; x++) {
         bandArea++;
-        if (originalInkMask.ink[y * originalInkMask.width + x]) overlapInk++;
+        if (wordInkMask.ink[y * wordInkMask.width + x]) overlapInk++;
       }
     }
     if (bandArea > 0 && overlapInk / bandArea > 0.15) {

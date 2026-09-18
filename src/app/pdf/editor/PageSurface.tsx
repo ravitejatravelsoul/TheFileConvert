@@ -14,6 +14,7 @@ import type { OcrPageResult } from "@/lib/processors/ocr";
 import { confidenceTier } from "@/lib/processors/ocr";
 import { estimateRegionColors, computeEditPadding, type PixelSource } from "@/lib/editor/regionColor";
 import { composeOcrPatch, type ComposeOcrPatchResult } from "@/lib/editor/scanPatch";
+import { computeChangedSpan, computeChangedSubRect, type CharBox } from "@/lib/editor/textDiff";
 import type { EditorWorkspaceApi, ToolId, SearchMatch } from "./useEditorWorkspace";
 import type { ToolOptions } from "./toolOptions";
 import { rgbToCss } from "./toolOptions";
@@ -40,9 +41,13 @@ export interface EditableRegionRequest {
   ocrColors?: OcrColorEstimate;
   /** Renders a real, export-identical raster preview of what typing `newText` would look
    * like (scanned-text pipeline only — see scanPatch.ts) — synchronous, cheap enough to call
-   * on every keystroke for a single word. Null/undefined when the page canvas isn't
-   * available (e.g. still rendering) or the edit is a native-text replacement. */
-  composePreview?: (newText: string) => ComposeOcrPatchResult | null;
+   * on every keystroke for a single word. Recomputes the *changed-substring* region fresh on
+   * every call (see textDiff.ts), since which characters actually changed shifts as the user
+   * types — so the returned `pdfBox` is the tight patch region actually used, not the whole
+   * word's box (that's still available as this request's own top-level `pdfBox`). Null/
+   * undefined when the page canvas isn't available (e.g. still rendering) or the edit is a
+   * native-text replacement. */
+  composePreview?: (newText: string) => { patch: ComposeOcrPatchResult; pdfBox: Rect } | null;
 }
 
 interface PageSurfaceProps {
@@ -201,13 +206,18 @@ export function PageSurface({
    * calibrated padding, checks for genuinely blank space to grow into for a longer
    * replacement, and hands the caller a ready-to-edit request. `baselinePdfY`, when given
    * (word-level edits only), is a same-line-neighbor-informed baseline estimate (spec
-   * section 11) used in place of this word's own box bottom. */
-  function requestOcrEdit(text: string, pdfBox: Rect, confidence: number, baselinePdfY?: number) {
+   * section 11) used in place of this word's own box bottom. `chars`, when given (word-level
+   * edits only), enables patching just the characters that actually changed instead of the
+   * whole word — see computePatchForText below. */
+  function requestOcrEdit(text: string, pdfBox: Rect, confidence: number, baselinePdfY?: number, chars?: CharBox[]) {
     const paddingPt = computeEditPadding(pdfBox.height, confidence);
     const wordRectPx = pdfRectToViewport(spec, pdfBox);
     const paddingPx = paddingPt * spec.scale;
     // Sample wide enough to the right to check for verified expansion room too (up to one
-    // more word-width), not just the tight padding ring used for background/text color.
+    // more word-width), not just the tight padding ring used for background/text color. This
+    // buffer covers the *whole* word up front and is reused for every keystroke's possibly
+    // much smaller changed-substring sub-rect below — re-reading canvas pixels per keystroke
+    // would be wasteful when they're already sitting in this one captured buffer.
     const maxExtraPx = wordRectPx.width;
     const samplingAreaPx: Rect = {
       x: wordRectPx.x - paddingPx * 2,
@@ -222,13 +232,16 @@ export function PageSurface({
     const safeExpansionPx = source && !estimate.complex ? findSafeExpansionPx(source, wordRectPx, estimate.backgroundColor, maxExtraPx) : 0;
     const safeExpansionPt = safeExpansionPx / spec.scale;
 
+    // The whole word's own padded box — kept as this request's top-level `pdfBox` (used by
+    // the "Detected" display, the native-text path, and as the object rect for the unsafe/
+    // manual-overlay fallback, none of which need the tighter changed-substring geometry
+    // below to still behave correctly).
     const paddedPdfBox: Rect = {
       x: pdfBox.x - paddingPt,
       y: pdfBox.y - paddingPt,
       width: pdfBox.width + paddingPt * 2 + safeExpansionPt,
       height: pdfBox.height + paddingPt * 2,
     };
-    const patchRectPx = pdfRectToViewport(spec, paddedPdfBox);
     const baselinePx = baselinePdfY !== undefined ? pdfRectToViewport(spec, { x: 0, y: baselinePdfY, width: 0, height: 0 }).y : wordRectPx.y + wordRectPx.height;
 
     // Always offer the raster-patch pipeline when the canvas is readable — even when the
@@ -238,22 +251,51 @@ export function PageSurface({
     // line-overlap safety check (see scanPatch.ts's `unsafe`), so it can succeed in plenty of
     // cases the old flag would have blocked outright (e.g. a word merely *near* a ruling
     // line, not actually overlapping it).
-    const composePreview =
-      source
-        ? (newText: string) =>
-            composeOcrPatch({
-              source,
-              wordRectPx,
-              patchRectPx,
-              baselinePx,
-              originalText: text,
-              newText,
-              backgroundColor: estimate.backgroundColor,
-              textColor: estimate.textColor,
-              pixelScale: PATCH_PIXEL_SCALE,
-              styleCacheKey: page.id,
-            })
-        : undefined;
+    const composePreview = source
+      ? (newText: string) => {
+          // Recomputed fresh on every keystroke: which characters actually changed shifts as
+          // the user types (e.g. "2026" -> "2" -> "20" -> "202" -> "2028" each has a
+          // different diff against the original), so the patch geometry can't be fixed once
+          // at click time — this is the core of the "patch only what changed" fix (spec
+          // sections 2-5).
+          const span = computeChangedSpan(text, newText);
+          const changedPdfBox = computeChangedSubRect(chars, text, span) ?? pdfBox;
+          const targetPaddingPt = computeEditPadding(changedPdfBox.height, confidence);
+          const targetRectPx = pdfRectToViewport(spec, changedPdfBox);
+          const targetPaddingPx = targetPaddingPt * spec.scale;
+          const targetEstimate = estimateRegionColors(source, targetRectPx, targetPaddingPx);
+          const targetMaxExtraPx = targetRectPx.width;
+          const targetSafeExpansionPx = !targetEstimate.complex
+            ? findSafeExpansionPx(source, targetRectPx, targetEstimate.backgroundColor, targetMaxExtraPx)
+            : 0;
+          const targetSafeExpansionPt = targetSafeExpansionPx / spec.scale;
+          const paddedTargetPdfBox: Rect = {
+            x: changedPdfBox.x - targetPaddingPt,
+            y: changedPdfBox.y - targetPaddingPt,
+            width: changedPdfBox.width + targetPaddingPt * 2 + targetSafeExpansionPt,
+            height: changedPdfBox.height + targetPaddingPt * 2,
+          };
+          const patch = composeOcrPatch({
+            source,
+            wordRectPx: targetRectPx,
+            patchRectPx: pdfRectToViewport(spec, paddedTargetPdfBox),
+            baselinePx,
+            originalText: span.originalMiddle,
+            newText: span.replacementMiddle,
+            backgroundColor: targetEstimate.backgroundColor,
+            textColor: targetEstimate.textColor,
+            pixelScale: PATCH_PIXEL_SCALE,
+            styleCacheKey: page.id,
+            // A single changed character rarely carries enough shape information to match
+            // confidently on its own — offer the whole original word (e.g. "12/20/2026") as
+            // a richer style reference; scanPatch.ts only uses it when it actually has more
+            // ink than the tight changed-substring box.
+            styleReferenceRectPx: wordRectPx,
+            styleReferenceText: text,
+          });
+          return patch ? { patch, pdfBox: paddedTargetPdfBox } : null;
+        }
+      : undefined;
 
     onRequestTextEdit({
       kind: "ocr",
@@ -536,7 +578,7 @@ export function PageSurface({
                 );
                 const baselinePdfY =
                   sameLine.length > 0 ? median(sameLine.map((w) => w.pdfBox.y)) : undefined;
-                requestOcrEdit(word.text, word.pdfBox, word.confidence, baselinePdfY);
+                requestOcrEdit(word.text, word.pdfBox, word.confidence, baselinePdfY, word.chars);
               }}
             />
           );

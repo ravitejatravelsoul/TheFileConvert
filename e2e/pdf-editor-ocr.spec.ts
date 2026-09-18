@@ -41,6 +41,32 @@ async function exportAndSave(page: Page, name: string): Promise<Buffer> {
   return fs.readFileSync(outPath);
 }
 
+/** Counts pixels that differ by more than `tolerance` strictly within `rectPx` — unlike
+ * findCollateralChanges (which reports whole-page totals plus an "outside" count), this is
+ * for asserting a *specific* small region stayed untouched, independent of whatever the
+ * intended edit region elsewhere on the page is doing. */
+function countChangesInRect(
+  before: { getPixel(x: number, y: number): [number, number, number, number] },
+  after: { getPixel(x: number, y: number): [number, number, number, number] },
+  rectPx: { x: number; y: number; width: number; height: number },
+  tolerance = 24
+): number {
+  let count = 0;
+  const x0 = Math.max(0, Math.round(rectPx.x));
+  const y0 = Math.max(0, Math.round(rectPx.y));
+  const x1 = Math.round(rectPx.x + rectPx.width);
+  const y1 = Math.round(rectPx.y + rectPx.height);
+  for (let y = y0; y <= y1; y++) {
+    for (let x = x0; x <= x1; x++) {
+      const b = before.getPixel(x, y);
+      const a = after.getPixel(x, y);
+      const dist = Math.abs(b[0] - a[0]) + Math.abs(b[1] - a[1]) + Math.abs(b[2] - a[2]) + Math.abs(b[3] - a[3]);
+      if (dist > tolerance) count++;
+    }
+  }
+  return count;
+}
+
 async function extractText(bytes: Buffer, pageNumber: number): Promise<string> {
   const pdfjsLib = await import("pdfjs-dist/legacy/build/pdf.mjs");
   const doc = await pdfjsLib.getDocument({ data: new Uint8Array(bytes), disableFontFace: true }).promise;
@@ -394,6 +420,99 @@ test.describe("PDF Editor: OCR visual-fidelity fixtures", () => {
     const bytes = await exportAndSave(page, "line-overlap-edited.pdf");
     const text = await extractText(bytes, 1);
     expect(text).toContain("Total");
+  });
+
+  test("micro-edit acceptance: only the changed date digit is patched, not the whole date field", async ({ page, isMobile }) => {
+    // The exact regression scenario from the defect report: "02/08/2026 UNTIL 12/20/2026",
+    // editing only the final date's last digit (2026 -> 2028). A correct fix patches roughly
+    // one digit's worth of width, not the whole "12/20/2026" token — and must leave the
+    // first date, the word "UNTIL", and the horizontal rule pixel-identical.
+    const fixtureName = "date-field-scan.pdf";
+    const fixturePath = path.join(OCR_FIXTURES, fixtureName);
+    const originalBytes = fs.readFileSync(fixturePath);
+
+    await openFile(page, fixturePath);
+    await openMobilePanel(page, isMobile, "Properties");
+    await page.locator("summary", { hasText: "OCR" }).click();
+    await withOcrLock(async () => {
+      await page.getByRole("button", { name: "Recognize current page" }).click();
+      await expect(page.getByRole("button", { name: "Recognize current page" })).toBeVisible({ timeout: 90_000 });
+    });
+    await page.keyboard.press("Escape");
+
+    const untilButton = page.getByRole("button", { name: /Edit recognized word: UNTIL/i }).first();
+    const firstDateButton = page.getByRole("button", { name: /Edit recognized word: 02\/08\/2026/i }).first();
+    const secondDateButton = page.getByRole("button", { name: /Edit recognized word: 12\/20\/2026/i }).first();
+    await expect(untilButton).toBeVisible({ timeout: 10_000 });
+    await expect(firstDateButton).toBeVisible();
+    await expect(secondDateButton).toBeVisible();
+
+    const untilBoxBefore = await untilButton.boundingBox();
+    const firstDateBoxBefore = await firstDateButton.boundingBox();
+    if (!untilBoxBefore || !firstDateBoxBefore) throw new Error("missing neighbor word bounding boxes");
+
+    await secondDateButton.click();
+    const dialog = page.getByRole("dialog", { name: "Edit text" });
+    const input = dialog.locator("input[type=text]");
+    await expect(input).toHaveValue("12/20/2026");
+    await input.fill("12/20/2028");
+    await expect(dialog.locator("img")).toBeVisible();
+    await dialog.getByRole("button", { name: "Save correction" }).click();
+    await expect(dialog).not.toBeVisible();
+
+    const objectBox = await page.locator('[data-object-type="ocr-text-replacement"]').first().boundingBox();
+    if (!objectBox) throw new Error("no ocr-text-replacement object bounding box");
+    const surfaceBox = await page.locator('[data-testid="page-surface"]').first().boundingBox();
+    if (!surfaceBox) throw new Error("no page surface bounding box");
+
+    // The core tightening assertion: the saved patch object must be far narrower than the
+    // whole "12/20/2026" date token (10 characters) — roughly one character's worth of
+    // width, not the whole field. Compared against the full date's own on-screen width via
+    // the neighboring "02/08/2026" button (same digit count/font), so this isn't a hardcoded
+    // pixel guess.
+    expect(objectBox.width).toBeLessThan(firstDateBoxBefore.width * 0.35);
+
+    const bytes = await exportAndSave(page, `${fixtureName}-edited.pdf`);
+    const before = await renderPdfPage(originalBytes, 1, RENDER_SCALE);
+    const after = await renderPdfPage(bytes, 1, RENDER_SCALE);
+
+    const toPagePx = (box: { x: number; y: number; width: number; height: number }) => ({
+      x: (box.x - surfaceBox.x) * PIXEL_SCALE,
+      y: (box.y - surfaceBox.y) * PIXEL_SCALE,
+      width: box.width * PIXEL_SCALE,
+      height: box.height * PIXEL_SCALE,
+    });
+
+    const margin = 10;
+    const allowedRegionPx = { ...toPagePx(objectBox), x: toPagePx(objectBox).x - margin, y: toPagePx(objectBox).y - margin };
+    allowedRegionPx.width += margin * 2;
+    allowedRegionPx.height += margin * 2;
+
+    // A. Collateral preservation, same as the other fixtures, but now over a much smaller
+    // allowed region — proportionate to the tightened patch, not the whole date field.
+    const diff = findCollateralChanges(before, after, [allowedRegionPx]);
+    before.savePng(test.info().outputPath("date-before.png"));
+    after.savePng(test.info().outputPath("date-after.png"));
+    if (diff.changedOutsidePixelCount > 0) console.log("offending samples:", diff.offendingSamples);
+    expect(diff.changedOutsidePixelCount, JSON.stringify(diff.offendingSamples)).toBeLessThan(60);
+    expect(diff.changedPixelCount).toBeGreaterThan(0);
+
+    // B. Explicit neighbor checks: "UNTIL" and the first date must be pixel-identical
+    // (near-zero tolerance) — checked strictly within their own exact areas, independent of
+    // whatever the intended edit is doing elsewhere on the page.
+    const untilChanged = countChangesInRect(before, after, toPagePx(untilBoxBefore));
+    expect(untilChanged, "UNTIL must remain visually identical").toBe(0);
+    const firstDateChanged = countChangesInRect(before, after, toPagePx(firstDateBoxBefore));
+    expect(firstDateChanged, "the untouched first date must remain visually identical").toBe(0);
+
+    // C. The horizontal rule (a fixed band roughly 65/130ths down the 420x130pt page) must
+    // stay intact across its full width, including directly under the edited digit.
+    const ruleY = Math.round((65 / 130) * before.height);
+    const ruleChanged = countChangesInRect(before, after, { x: 0, y: ruleY - 3, width: before.width, height: 6 });
+    expect(ruleChanged, "the horizontal rule must remain intact").toBe(0);
+
+    const text = await extractText(bytes, 1);
+    expect(text).toContain("2028");
   });
 });
 

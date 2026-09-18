@@ -222,11 +222,16 @@ async function drawObject(
       }
 
       // Keep the page searchable after a correction either way: an invisible run with the
-      // corrected text at the same position, same technique buildSearchablePdf uses.
+      // *full* corrected word, same technique buildSearchablePdf uses. Positioned/sized from
+      // searchAnchor (the whole word's own box) rather than (obj.x, obj.y, obj.width,
+      // obj.height) — since a micro-edit's visible patch is now tight to just the changed
+      // characters, sizing the invisible run to that same tiny box would squeeze the whole
+      // word's search text into it instead of the word's actual full span.
       if (obj.newText.trim()) {
+        const anchor = obj.searchAnchor ?? obj;
         try {
-          const size = fitOcrReplacementFontSize(fonts.regular, obj.newText, obj, obj.fontSize);
-          page.drawText(obj.newText, { x: obj.x, y: obj.y, size, font: fonts.regular, opacity: 0 });
+          const size = fitOcrReplacementFontSize(fonts.regular, obj.newText, anchor, obj.fontSize);
+          page.drawText(obj.newText, { x: anchor.x, y: anchor.y, size, font: fonts.regular, opacity: 0 });
         } catch {
           // Same non-fatal handling as above — searchability is a bonus, not required for
           // the visible correction to be correct.

@@ -102,6 +102,12 @@ export interface OcrTextReplacementObject extends BaseObject {
   /** Which locally available font family (see glyphMatch.ts's FONT_CANDIDATES) the patch's
    * text was rendered in — kept for the properties panel / debugging, not used at export. */
   fontCandidateId?: string;
+  /** Where to position the invisible searchable-text run for the *full* corrected word, in
+   * PDF points — distinct from (x, y, width, height) above, which is now the tight changed-
+   * substring patch region and would otherwise squeeze the whole word's search text into a
+   * box sized for just the characters that changed (see export.ts). Falls back to this
+   * object's own rect when absent (objects saved before this field existed). */
+  searchAnchor?: { x: number; y: number; width: number; height: number };
 }
 
 export interface AddedTextObject extends BaseObject {
