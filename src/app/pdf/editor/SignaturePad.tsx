@@ -21,12 +21,24 @@ export function SignaturePad({ onConfirm, onClose }: SignaturePadProps) {
     return canvas?.getContext("2d") ?? null;
   }
 
+  /** Pointer position in the canvas's own pixel space. The canvas is drawn at a fixed 400x160
+   * but displayed at whatever width the dialog gives it (narrower on a phone), so CSS pixels
+   * must be scaled to canvas pixels — otherwise strokes land offset from the pointer. */
   function pointerPos(e: React.PointerEvent<HTMLCanvasElement>) {
-    const rect = canvasRef.current!.getBoundingClientRect();
-    return { x: e.clientX - rect.left, y: e.clientY - rect.top };
+    const canvas = canvasRef.current!;
+    const rect = canvas.getBoundingClientRect();
+    return {
+      x: ((e.clientX - rect.left) * canvas.width) / Math.max(1, rect.width),
+      y: ((e.clientY - rect.top) * canvas.height) / Math.max(1, rect.height),
+    };
   }
 
   function startStroke(e: React.PointerEvent<HTMLCanvasElement>) {
+    try {
+      e.currentTarget.setPointerCapture(e.pointerId);
+    } catch {
+      // best-effort: a stroke still works without capture
+    }
     drawingRef.current = true;
     const ctx = getCtx();
     if (!ctx) return;
@@ -78,8 +90,10 @@ export function SignaturePad({ onConfirm, onClose }: SignaturePadProps) {
 
   function confirm() {
     if (mode === "draw" && canvasRef.current && hasStroke) {
-      const dataUrl = canvasRef.current.toDataURL("image/png");
-      onConfirm(dataUrl, canvasRef.current.width, canvasRef.current.height);
+      // Crop to the ink (plus a small margin) so the placed signature is the size of the
+      // signature itself, not of the whole empty drawing area.
+      const trimmed = trimToInk(canvasRef.current);
+      onConfirm(trimmed.canvas.toDataURL("image/png"), trimmed.canvas.width, trimmed.canvas.height);
     } else if (mode === "upload" && uploadedDataUrl && uploadedDims) {
       onConfirm(uploadedDataUrl, uploadedDims.width, uploadedDims.height);
     }
@@ -127,7 +141,7 @@ export function SignaturePad({ onConfirm, onClose }: SignaturePadProps) {
               onPointerDown={startStroke}
               onPointerMove={moveStroke}
               onPointerUp={endStroke}
-              onPointerLeave={endStroke}
+              onPointerCancel={endStroke}
               role="img"
               aria-label="Signature drawing area"
             />
@@ -167,4 +181,34 @@ export function SignaturePad({ onConfirm, onClose }: SignaturePadProps) {
       </div>
     </div>
   );
+}
+
+/** A copy of `source` cropped to the bounding box of its non-transparent pixels, plus a small
+ * margin. Returns the original untouched if nothing was drawn. */
+function trimToInk(source: HTMLCanvasElement, pad = 6): { canvas: HTMLCanvasElement } {
+  const ctx = source.getContext("2d");
+  if (!ctx) return { canvas: source };
+  const { width, height } = source;
+  const data = ctx.getImageData(0, 0, width, height).data;
+  let x0 = width, y0 = height, x1 = -1, y1 = -1;
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      if (data[(y * width + x) * 4 + 3] > 8) {
+        if (x < x0) x0 = x;
+        if (x > x1) x1 = x;
+        if (y < y0) y0 = y;
+        if (y > y1) y1 = y;
+      }
+    }
+  }
+  if (x1 < x0 || y1 < y0) return { canvas: source };
+  x0 = Math.max(0, x0 - pad);
+  y0 = Math.max(0, y0 - pad);
+  x1 = Math.min(width - 1, x1 + pad);
+  y1 = Math.min(height - 1, y1 + pad);
+  const out = document.createElement("canvas");
+  out.width = x1 - x0 + 1;
+  out.height = y1 - y0 + 1;
+  out.getContext("2d")?.drawImage(source, x0, y0, out.width, out.height, 0, 0, out.width, out.height);
+  return { canvas: out };
 }

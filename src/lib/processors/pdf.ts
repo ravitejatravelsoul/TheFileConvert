@@ -250,15 +250,38 @@ export interface WatermarkOptions {
   rotationDegrees: number;
 }
 
+/**
+ * Where to start drawing a watermark so its *center* lands on the page's center after being
+ * rotated by `rotationDegrees`. pdf-lib rotates text about its starting point (the left end of
+ * the baseline), so simply starting at (centerX - width/2, centerY) leaves anything but a
+ * horizontal watermark pushed off-center — a diagonal one drifts up, a vertical one left.
+ */
+export function watermarkOrigin(
+  pageWidth: number,
+  pageHeight: number,
+  textWidth: number,
+  fontSize: number,
+  rotationDegrees: number
+): { x: number; y: number } {
+  const theta = (rotationDegrees * Math.PI) / 180;
+  const halfW = textWidth / 2;
+  const halfH = fontSize * 0.35; // ~ half the height of lowercase/cap letters above the baseline
+  return {
+    x: pageWidth / 2 - (halfW * Math.cos(theta) - halfH * Math.sin(theta)),
+    y: pageHeight / 2 - (halfW * Math.sin(theta) + halfH * Math.cos(theta)),
+  };
+}
+
 export async function addWatermark(file: File, options: WatermarkOptions): Promise<Blob> {
   const doc = await loadPdf(file);
   const font = await doc.embedFont(StandardFonts.HelveticaBold);
   for (const page of doc.getPages()) {
     const { width, height } = page.getSize();
     const textWidth = font.widthOfTextAtSize(options.text, options.fontSize);
+    const origin = watermarkOrigin(width, height, textWidth, options.fontSize, options.rotationDegrees);
     page.drawText(options.text, {
-      x: width / 2 - textWidth / 2,
-      y: height / 2,
+      x: origin.x,
+      y: origin.y,
       size: options.fontSize,
       font,
       color: rgb(0.5, 0.5, 0.5),

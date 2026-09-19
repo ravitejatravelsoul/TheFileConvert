@@ -1,6 +1,8 @@
 import { PDFDocument, PDFDict, PDFName, PDFRef, StandardFonts, rgb, degrees, type PDFFont, type PDFPage } from "pdf-lib";
 import type { EditorDocument, EditorObject, RgbColor } from "./types";
 import { effectiveRotation } from "./types";
+import { wrapText, lineBaselineY, sanitizeForFont } from "./textLayout";
+import { arrowHead, drawingPdfPoints, lineEndpoints, annotationLineThickness } from "./shapeGeometry";
 
 export class EditorExportError extends Error {}
 
@@ -71,23 +73,18 @@ function drawPolyline(page: PDFPage, points: { x: number; y: number }[], color: 
   }
 }
 
-function drawArrow(page: PDFPage, x: number, y: number, width: number, height: number, color: RgbColor, strokeWidth: number) {
-  const start = { x, y };
-  const end = { x: x + width, y: y + height };
+function drawArrow(
+  page: PDFPage,
+  start: { x: number; y: number },
+  end: { x: number; y: number },
+  width: number,
+  height: number,
+  color: RgbColor,
+  strokeWidth: number
+) {
   const pdfColor = toPdfLibColor(color);
   page.drawLine({ start, end, thickness: strokeWidth, color: pdfColor });
-
-  const angle = Math.atan2(end.y - start.y, end.x - start.x);
-  const headLength = Math.max(8, Math.min(24, Math.hypot(width, height) * 0.2));
-  const headAngle = Math.PI / 7;
-  const left = {
-    x: end.x - headLength * Math.cos(angle - headAngle),
-    y: end.y - headLength * Math.sin(angle - headAngle),
-  };
-  const right = {
-    x: end.x - headLength * Math.cos(angle + headAngle),
-    y: end.y - headLength * Math.sin(angle + headAngle),
-  };
+  const { left, right } = arrowHead(start, end, width, height);
   page.drawLine({ start: end, end: left, thickness: strokeWidth, color: pdfColor });
   page.drawLine({ start: end, end: right, thickness: strokeWidth, color: pdfColor });
 }
@@ -242,17 +239,32 @@ async function drawObject(
 
     case "added-text": {
       const font = obj.bold ? fonts.bold : fonts.regular;
-      const size = fitFontSize(font, obj.text, obj);
-      let x = obj.x;
-      if (obj.align !== "left") {
-        const textWidth = font.widthOfTextAtSize(obj.text, size);
-        x = obj.align === "center" ? obj.x + (obj.width - textWidth) / 2 : obj.x + obj.width - textWidth;
-      }
-      try {
-        page.drawText(obj.text, { x, y: obj.y, size, font, color: toPdfLibColor(obj.color) });
-      } catch {
-        // Unsupported character in this text — skip rather than fail the whole export.
-      }
+      const size = obj.fontSize;
+      const canEncode = (ch: string) => {
+        try {
+          font.widthOfTextAtSize(ch, 1);
+          return true;
+        } catch {
+          return false;
+        }
+      };
+      const text = sanitizeForFont(obj.text, canEncode);
+      const measure = (t: string) => font.widthOfTextAtSize(t, size);
+      const lines = wrapText(text, obj.width, measure);
+      const topY = obj.y + obj.height;
+      lines.forEach((line, i) => {
+        if (!line) return;
+        let x = obj.x;
+        if (obj.align !== "left") {
+          const lineWidth = measure(line);
+          x = obj.align === "center" ? obj.x + (obj.width - lineWidth) / 2 : obj.x + obj.width - lineWidth;
+        }
+        try {
+          page.drawText(line, { x, y: lineBaselineY(topY, size, i), size, font, color: toPdfLibColor(obj.color) });
+        } catch {
+          // Shouldn't happen after sanitizing, but one bad line shouldn't fail the export.
+        }
+      });
       break;
     }
 
@@ -266,12 +278,8 @@ async function drawObject(
     }
 
     case "drawing":
-      drawPolyline(
-        page,
-        obj.points.map((p) => ({ x: p.x + obj.x, y: p.y + obj.y })),
-        obj.color,
-        obj.strokeWidth
-      );
+      // Scaled to the object's current box, so a resized drawing exports the size it shows.
+      drawPolyline(page, drawingPdfPoints(obj), obj.color, obj.strokeWidth);
       break;
 
     case "shape": {
@@ -298,14 +306,11 @@ async function drawObject(
           color: fillColor,
         });
       } else if (obj.shape === "line") {
-        page.drawLine({
-          start: { x: obj.x, y: obj.y },
-          end: { x: obj.x + obj.width, y: obj.y + obj.height },
-          thickness: obj.strokeWidth,
-          color: strokeColor,
-        });
+        const { start, end } = lineEndpoints(obj);
+        page.drawLine({ start, end, thickness: obj.strokeWidth, color: strokeColor });
       } else if (obj.shape === "arrow") {
-        drawArrow(page, obj.x, obj.y, obj.width, obj.height, obj.strokeColor, obj.strokeWidth);
+        const { start, end } = lineEndpoints(obj);
+        drawArrow(page, start, end, obj.width, obj.height, obj.strokeColor, obj.strokeWidth);
       }
       break;
     }
@@ -322,7 +327,7 @@ async function drawObject(
         page.drawLine({
           start: { x: obj.x, y: obj.y },
           end: { x: obj.x + obj.width, y: obj.y },
-          thickness: Math.max(1, obj.height * 0.08),
+          thickness: annotationLineThickness(obj.height),
           color,
         });
       } else if (obj.kind === "strikethrough") {
@@ -330,7 +335,7 @@ async function drawObject(
         page.drawLine({
           start: { x: obj.x, y: midY },
           end: { x: obj.x + obj.width, y: midY },
-          thickness: Math.max(1, obj.height * 0.08),
+          thickness: annotationLineThickness(obj.height),
           color,
         });
       }

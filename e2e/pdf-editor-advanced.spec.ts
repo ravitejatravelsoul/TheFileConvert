@@ -271,7 +271,8 @@ test.describe("PDF Editor: form fill", () => {
 
     await page.locator("#field-full_name").fill("Ada Lovelace");
     await page.locator("#field-subscribe").check();
-    await page.locator("#field-plan").fill("pro");
+    // A radio group offers its real choices (a select), instead of a free-text box.
+    await page.locator("#field-plan").selectOption("pro");
 
     const bytes = await exportAndSave(page, "form-filled.pdf");
     const doc = await PDFDocument.load(bytes);
@@ -304,7 +305,8 @@ test.describe("PDF Editor: crop", () => {
 
     await openPropertiesPanel(page, isMobile);
     await page.locator("summary", { hasText: "Crop" }).click();
-    await expect(page.getByText(/Crop area selected/i)).toBeVisible();
+    // (Shown both in the workspace action bar and in this panel section.)
+    await expect(page.getByText(/Crop area selected/i).first()).toBeVisible();
     await page.getByRole("button", { name: "Apply crop" }).click();
 
     const bytes = await exportAndSave(page, "cropped.pdf");

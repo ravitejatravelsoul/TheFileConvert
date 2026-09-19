@@ -59,6 +59,11 @@ interface WorkspaceState {
   activePageId: string | null;
   activeTool: ToolId;
   selectedObjectId: string | null;
+  /** The text object currently being edited directly on the canvas (a caret is inside it),
+   * or null. Separate from selection: an object can be selected without being edited. */
+  editingObjectId: string | null;
+  /** When entering edit mode should select all existing text (a freshly-placed box's placeholder). */
+  editSelectAll: boolean;
   zoom: number;
   zoomMode: ZoomMode;
   showOcrOverlay: boolean;
@@ -71,6 +76,9 @@ interface WorkspaceState {
   signedWarning: boolean;
   searchQuery: string;
   searchMatchIndex: number;
+  /** Bumped on every Next/Prev press so the view jumps to the match even when the index
+   * didn't change (a single match, or one you've since scrolled away from). */
+  searchNavTick: number;
   /** A proposed-but-not-yet-applied crop rectangle (page's unrotated PDF space), drawn by
    * the crop tool. Separate from doc.objects/history since it isn't a document edit until
    * "Apply crop" commits it via setPageCropBox. */
@@ -91,6 +99,8 @@ export function useEditorWorkspace() {
     activePageId: null,
     activeTool: "select",
     selectedObjectId: null,
+    editingObjectId: null,
+    editSelectAll: false,
     zoom: 1,
     zoomMode: "custom",
     // Off by default: recognized words already get a subtle hover-only highlight (see
@@ -106,6 +116,7 @@ export function useEditorWorkspace() {
     signedWarning: false,
     searchQuery: "",
     searchMatchIndex: 0,
+    searchNavTick: 0,
     cropDraft: null,
   });
 
@@ -115,19 +126,29 @@ export function useEditorWorkspace() {
     };
   }, []);
 
-  const pushDoc = useCallback((next: EditorDocument) => {
-    historyRef.current.push(next);
-    setState((s) => ({ ...s, doc: next, selectedObjectId: null }));
+  /** Pushes a new document state to history. Selection is cleared by default (most edits —
+   * page operations, deletes — invalidate whatever was selected); pass keepSelection for an
+   * in-place edit of the selected object (typing, recoloring), which must not deselect it or
+   * the controls being used vanish mid-edit. `coalesceKey` merges a burst of edits to the same
+   * thing into one undo step (see EditorHistory.push). */
+  const pushDoc = useCallback((next: EditorDocument, opts?: { keepSelection?: boolean; coalesceKey?: string }) => {
+    historyRef.current.push(next, opts?.coalesceKey);
+    setState((s) => ({
+      ...s,
+      doc: next,
+      selectedObjectId: opts?.keepSelection ? s.selectedObjectId : null,
+      editingObjectId: opts?.keepSelection ? s.editingObjectId : null,
+    }));
   }, []);
 
   const undo = useCallback(() => {
     const next = historyRef.current.undo();
-    setState((s) => ({ ...s, doc: next, selectedObjectId: null }));
+    setState((s) => ({ ...s, doc: next, selectedObjectId: null, editingObjectId: null }));
   }, []);
 
   const redo = useCallback(() => {
     const next = historyRef.current.redo();
-    setState((s) => ({ ...s, doc: next, selectedObjectId: null }));
+    setState((s) => ({ ...s, doc: next, selectedObjectId: null, editingObjectId: null }));
   }, []);
 
   const openFile = useCallback(async (file: File) => {
@@ -178,6 +199,8 @@ export function useEditorWorkspace() {
       activePageId: null,
       activeTool: "select",
       selectedObjectId: null,
+      editingObjectId: null,
+      editSelectAll: false,
       zoom: 1,
       zoomMode: "custom",
       showOcrOverlay: false,
@@ -190,6 +213,7 @@ export function useEditorWorkspace() {
       signedWarning: false,
       searchQuery: "",
       searchMatchIndex: 0,
+      searchNavTick: 0,
       cropDraft: null,
     });
   }, []);
@@ -200,12 +224,22 @@ export function useEditorWorkspace() {
     setState((s) => ({ ...s, activePageId: pageId, selectedObjectId: null }));
   }, []);
 
-  const setActiveTool = useCallback((toolId: ToolId) => {
-    setState((s) => ({ ...s, activeTool: toolId, selectedObjectId: null }));
+  const setActiveTool = useCallback((toolId: ToolId, opts?: { keepSelection?: boolean }) => {
+    setState((s) => ({
+      ...s,
+      activeTool: toolId,
+      selectedObjectId: opts?.keepSelection ? s.selectedObjectId : null,
+      editingObjectId: null,
+    }));
   }, []);
 
   const setSelectedObjectId = useCallback((id: string | null) => {
-    setState((s) => ({ ...s, selectedObjectId: id }));
+    setState((s) => ({ ...s, selectedObjectId: id, editingObjectId: id && s.editingObjectId === id ? id : null }));
+  }, []);
+
+  const setEditingObjectId = useCallback((id: string | null) => {
+    if (id === null) historyRef.current.breakCoalescing();
+    setState((s) => ({ ...s, editingObjectId: id, editSelectAll: false, selectedObjectId: id ?? s.selectedObjectId }));
   }, []);
 
   const setZoom = useCallback((zoom: number, mode: ZoomMode = "custom") => {
@@ -285,10 +319,13 @@ export function useEditorWorkspace() {
 
   // -------------------------------------------------------------- objects
 
+  /** Adds an object and (by default) selects it, leaving the active tool alone — so a
+   * persistent drawing tool stays armed for the next stroke. Pass select:false to add without
+   * disturbing the current selection (repeated highlights/underlines). */
   const addObject = useCallback(
-    (object: EditorObject) => {
+    (object: EditorObject, opts?: { select?: boolean }) => {
       pushDoc({ ...state.doc, objects: [...state.doc.objects, object] });
-      setState((s) => ({ ...s, selectedObjectId: object.id }));
+      if (opts?.select !== false) setState((s) => ({ ...s, selectedObjectId: object.id }));
     },
     [pushDoc, state.doc]
   );
@@ -300,21 +337,30 @@ export function useEditorWorkspace() {
    * whiteout, shapes, annotations) that hand off to "select" immediately after creating an
    * object should use this instead. */
   const addObjectAndSelect = useCallback(
-    (object: EditorObject) => {
+    (object: EditorObject, opts?: { startEditing?: boolean; selectAllOnEdit?: boolean }) => {
       pushDoc({ ...state.doc, objects: [...state.doc.objects, object] });
-      setState((s) => ({ ...s, activeTool: "select", selectedObjectId: object.id }));
+      setState((s) => ({
+        ...s,
+        activeTool: "select",
+        selectedObjectId: object.id,
+        editingObjectId: opts?.startEditing ? object.id : null,
+        editSelectAll: Boolean(opts?.startEditing && opts?.selectAllOnEdit),
+      }));
     },
     [pushDoc, state.doc]
   );
 
+  /** Edits an object in place. The object stays selected (and stays in text-edit mode if it
+   * was) — deselecting it on every change would unmount the very control being typed into,
+   * which is what made the properties-panel text box accept only one character at a time. */
   const updateObject = useCallback(
-    (id: string, patch: Partial<EditorObject>) => {
+    (id: string, patch: Partial<EditorObject>, opts?: { coalesceKey?: string }) => {
       const next = {
         ...state.doc,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         objects: state.doc.objects.map((o) => (o.id === id ? ({ ...o, ...patch } as any) : o)),
       };
-      pushDoc(next);
+      pushDoc(next, { keepSelection: true, coalesceKey: opts?.coalesceKey });
     },
     [pushDoc, state.doc]
   );
@@ -481,13 +527,18 @@ export function useEditorWorkspace() {
   }, []);
 
   const nextMatch = useCallback(() => {
-    setState((s) => ({ ...s, searchMatchIndex: searchIndex.length ? (s.searchMatchIndex + 1) % searchIndex.length : 0 }));
+    setState((s) => ({
+      ...s,
+      searchMatchIndex: searchIndex.length ? (s.searchMatchIndex + 1) % searchIndex.length : 0,
+      searchNavTick: s.searchNavTick + 1,
+    }));
   }, [searchIndex.length]);
 
   const prevMatch = useCallback(() => {
     setState((s) => ({
       ...s,
       searchMatchIndex: searchIndex.length ? (s.searchMatchIndex - 1 + searchIndex.length) % searchIndex.length : 0,
+      searchNavTick: s.searchNavTick + 1,
     }));
   }, [searchIndex.length]);
 
@@ -502,6 +553,7 @@ export function useEditorWorkspace() {
     setActivePageId,
     setActiveTool,
     setSelectedObjectId,
+    setEditingObjectId,
     setZoom,
     loadNativeRegionsForPage,
     runOcr,

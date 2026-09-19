@@ -145,6 +145,9 @@ export interface ShapeObjectData extends BaseObject {
   strokeColor: RgbColor;
   strokeWidth: number;
   fillColor?: RgbColor;
+  /** For lines/arrows: the corner of the box the line starts from (it ends at the opposite
+   * one). Absent = bottom-left → top-right, matching shapes saved before this was recorded. */
+  startCorner?: "bl" | "br" | "tl" | "tr";
 }
 
 export interface WhiteoutObjectData extends BaseObject {
@@ -175,6 +178,8 @@ export interface FormFieldValue {
   name: string;
   kind: "text" | "checkbox" | "radio" | "dropdown";
   value: string; // for checkbox: "true"/"false"; for radio/dropdown: the selected option
+  /** For radio groups and dropdowns: the choices the PDF offers. */
+  options?: string[];
 }
 
 export interface EditorDocument {

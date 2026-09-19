@@ -83,3 +83,46 @@ describe("EditorHistory", () => {
     expect(h.canUndo).toBe(false);
   });
 });
+
+describe("EditorHistory coalescing", () => {
+  it("collapses a burst of same-key pushes into a single undo step", () => {
+    const h = new EditorHistory<string>("");
+    h.push("H", "text:1", 1000);
+    h.push("He", "text:1", 1100);
+    h.push("Hel", "text:1", 1200);
+    expect(h.current).toBe("Hel");
+    expect(h.undo()).toBe(""); // one undo returns to before the whole burst
+    expect(h.canUndo).toBe(false);
+  });
+
+  it("does not coalesce across different keys or after the time window", () => {
+    const h = new EditorHistory<string>("");
+    h.push("a", "k1", 1000);
+    h.push("b", "k2", 1100);
+    h.push("c", "k2", 1100 + 5000); // same key but too long after
+    expect(h.undo()).toBe("b");
+    expect(h.undo()).toBe("a");
+  });
+
+  it("never coalesces an un-keyed push, and undo/redo break a coalescing run", () => {
+    const h = new EditorHistory<string>("0");
+    h.push("1", "k", 1000);
+    h.undo();
+    h.push("2", "k", 1050); // right after an undo: must be its own step
+    expect(h.undo()).toBe("0");
+    h.push("3", undefined, 1100);
+    h.push("4", undefined, 1110);
+    expect(h.undo()).toBe("3");
+  });
+});
+
+describe("EditorHistory.breakCoalescing", () => {
+  it("makes the next same-key edit its own undo step", () => {
+    const h = new EditorHistory<string>("");
+    h.push("a", "k", 1000);
+    h.breakCoalescing();
+    h.push("ab", "k", 1100);
+    expect(h.undo()).toBe("a");
+    expect(h.undo()).toBe("");
+  });
+});

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { FileWorkflow, type FileWorkflowResult } from "@/components/tools/FileWorkflow";
 import { Field, FieldGrid, RangeField, SelectField } from "@/components/tools/fields";
 import { Button } from "@/components/ui/Button";
@@ -24,11 +24,17 @@ function CropConfig({
   const [cropHeight, setCropHeight] = useState(80);
   const [format, setFormat] = useState<ImageOutputFormat>("jpeg");
 
-  const previewUrl = useMemo(() => URL.createObjectURL(file), [file]);
+  // Created and revoked in the same effect: creating it in useMemo and revoking in a cleanup
+  // breaks under StrictMode's mount/unmount/mount (the memoized URL is already revoked).
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   useEffect(() => {
-    return () => URL.revokeObjectURL(previewUrl);
-  }, [previewUrl]);
+    const url = URL.createObjectURL(file);
+    // Syncing React state with an external resource (an object URL) that this effect owns.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setPreviewUrl(url);
+    return () => URL.revokeObjectURL(url);
+  }, [file]);
 
   useEffect(() => {
     let cancelled = false;

@@ -282,6 +282,8 @@ function SizeComparison({ originalBytes, newBytes }: { originalBytes: number; ne
   // noise (or the file quietly growing slightly), and showing "1% smaller" or nothing at
   // all when it grew would both be misleading. Say so honestly instead.
   const meaningfulReduction = newBytes < originalBytes && saved >= 2;
+  const grewPercent = originalBytes > 0 ? Math.round(((newBytes - originalBytes) / originalBytes) * 100) : 0;
+  const grew = newBytes > originalBytes && grewPercent >= 2;
 
   return (
     <div className="grid grid-cols-3 gap-3 rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--surface)] p-4 text-center">
@@ -297,6 +299,8 @@ function SizeComparison({ originalBytes, newBytes }: { originalBytes: number; ne
         <p className="text-xs text-[var(--foreground-muted)]">Result</p>
         {meaningfulReduction ? (
           <p className="mt-1 font-semibold text-[var(--accent-mint)]">{saved}% smaller</p>
+        ) : grew ? (
+          <p className="mt-1 font-semibold text-[var(--foreground)]">{grewPercent}% larger — keep your original</p>
         ) : (
           <p className="mt-1 font-semibold text-[var(--foreground-muted)]">No significant change</p>
         )}

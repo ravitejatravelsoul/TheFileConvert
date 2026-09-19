@@ -17,7 +17,7 @@ import { PropertiesPanel } from "./PropertiesPanel";
 import { PageSurface, type EditableRegionRequest } from "./PageSurface";
 import { TextEditModal } from "./TextEditModal";
 import { SignaturePad } from "./SignaturePad";
-import { DEFAULT_TOOL_OPTIONS, type ToolOptions } from "./toolOptions";
+import { DEFAULT_TOOL_OPTIONS, PRESET_COLORS, type ToolOptions } from "./toolOptions";
 
 const tool = getToolById("pdf-editor")!;
 
@@ -25,7 +25,13 @@ export function EditorWorkspace() {
   const api = useEditorWorkspace();
   const { state } = api;
 
-  const [toolOptions, setToolOptions] = useState<ToolOptions>(DEFAULT_TOOL_OPTIONS);
+  const [baseToolOptions, setToolOptions] = useState<ToolOptions>(DEFAULT_TOOL_OPTIONS);
+  // Highlighting in near-black is useless (a translucent gray smear), so until the user picks a
+  // color themselves the Highlight tool defaults to yellow. Derived, not stored, so switching
+  // back to another tool restores the normal default.
+  const [colorChosen, setColorChosen] = useState(false);
+  const toolOptions: ToolOptions =
+    state.activeTool === "highlight" && !colorChosen ? { ...baseToolOptions, color: PRESET_COLORS[3].value } : baseToolOptions;
   const [textEditRequest, setTextEditRequest] = useState<EditableRegionRequest | null>(null);
   const [signaturePadOpen, setSignaturePadOpen] = useState(false);
   const [pendingPlacement, setPendingPlacement] = useState<{ kind: "image" | "signature"; dataUrl: string; naturalWidth: number; naturalHeight: number } | null>(null);
@@ -50,6 +56,24 @@ export function EditorWorkspace() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activePage?.id]);
 
+  // Searching has to cover the whole document, not just the pages that happen to have been
+  // viewed: load every page's text as soon as there's a query.
+  const hasSearchQuery = state.searchQuery.trim().length > 0;
+  useEffect(() => {
+    if (!hasSearchQuery) return;
+    for (const p of state.doc.pages) api.loadNativeRegionsForPage(p);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hasSearchQuery, state.doc.pages.length]);
+
+  // Jump to the page of the current search match (on a new query, or Next/Prev) so its
+  // highlight is actually visible. Keyed on the match, not the active page, so browsing to
+  // another page afterwards isn't fought.
+  const currentMatchPageId = api.searchIndex[state.searchMatchIndex]?.pageId ?? null;
+  useEffect(() => {
+    if (currentMatchPageId && currentMatchPageId !== state.activePageId) api.setActivePageId(currentMatchPageId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentMatchPageId, state.searchMatchIndex, state.searchQuery, state.searchNavTick]);
+
   // Fit-width / fit-page zoom calculation.
   useEffect(() => {
     if (state.zoomMode === "custom" || !activePage) return;
@@ -63,20 +87,55 @@ export function EditorWorkspace() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.zoomMode, activePage?.id]);
 
-  // Keyboard shortcuts: undo/redo.
+  // Keyboard shortcuts: undo/redo, Escape (leave the current tool), Delete (remove the
+  // selection), Enter (edit the selected text). Ignored while typing in a field, where those
+  // keys belong to the field.
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
-      const meta = e.ctrlKey || e.metaKey;
-      if (!meta || e.key.toLowerCase() !== "z") return;
       const target = e.target as HTMLElement;
-      if (target.tagName === "INPUT" || target.tagName === "TEXTAREA") return;
-      e.preventDefault();
-      if (e.shiftKey) api.redo();
-      else api.undo();
+      const inCanvasTextEditor = target.dataset?.testid === "canvas-text-editor";
+      const inField = target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.tagName === "SELECT" || target.isContentEditable;
+      const meta = e.ctrlKey || e.metaKey;
+      // The on-page text box hands undo/redo to the app (a typing burst is a single step).
+      if (inField && !(inCanvasTextEditor && meta)) return;
+      if (meta && e.key.toLowerCase() === "z") {
+        e.preventDefault();
+        if (e.shiftKey) api.redo();
+        else api.undo();
+        return;
+      }
+      if (meta && e.key.toLowerCase() === "y") {
+        e.preventDefault();
+        api.redo();
+        return;
+      }
+      if (meta || e.altKey) return;
+      // Dialogs (text-correction, signature pad) own the keyboard while open.
+      if (textEditRequest || signaturePadOpen) return;
+
+      if (e.key === "Escape") {
+        if (mobilePanel) return; // the drawer's own handler closes it first
+        // Leaving a drawing tool keeps whatever you just drew selected (like PowerPoint), and
+        // keeps a proposed crop area too — it's discarded with "Discard area", not by a stray key.
+        if (api.state.activeTool !== "select") api.setActiveTool("select", { keepSelection: true });
+        else if (api.state.selectedObjectId) api.setSelectedObjectId(null);
+        return;
+      }
+      const selectedId = api.state.selectedObjectId;
+      const selected = selectedId ? api.state.doc.objects.find((o) => o.id === selectedId) : null;
+      if ((e.key === "Delete" || e.key === "Backspace") && selected) {
+        e.preventDefault();
+        api.deleteObject(selected.id);
+        return;
+      }
+      if (e.key === "Enter" && selected?.type === "added-text") {
+        e.preventDefault();
+        api.setEditingObjectId(selected.id);
+      }
     }
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [api]);
+  }, [api, textEditRequest, signaturePadOpen, mobilePanel]);
 
   // Close a mobile drawer panel on Escape.
   useEffect(() => {
@@ -258,6 +317,42 @@ export function EditorWorkspace() {
         </div>
       )}
 
+      {(state.cropDraft || state.activeTool === "crop") && (
+        <div role="status" className="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--border)] bg-[var(--brand-soft)] px-4 py-2 text-xs text-[var(--brand-strong)]">
+          {state.cropDraft ? (
+            <>
+              <span>
+                Crop area selected on page {state.doc.pages.findIndex((p) => p.id === state.cropDraft!.pageId) + 1}. Drag its corners to adjust, or
+                draw a new one.
+              </span>
+              <div className="flex shrink-0 items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => api.applyCrop(false)}
+                  className="rounded-full bg-[var(--brand)] px-3 py-1 font-medium text-white hover:bg-[var(--brand-strong)]"
+                >
+                  Keep this area
+                </button>
+                {state.doc.pages.length > 1 && (
+                  <button
+                    type="button"
+                    onClick={() => api.applyCrop(true)}
+                    className="rounded-full bg-white/70 px-3 py-1 font-medium hover:bg-white"
+                  >
+                    Keep on all pages
+                  </button>
+                )}
+                <button type="button" onClick={() => api.setCropDraft(null)} className="rounded-full px-2 py-1 font-medium hover:bg-black/5">
+                  Discard area
+                </button>
+              </div>
+            </>
+          ) : (
+            <span>Drag on the page to choose the area to keep. Everything outside it is trimmed from the page.</span>
+          )}
+        </div>
+      )}
+
       {state.ocrProgress ? (
         // Runs whether OCR was triggered from this banner or from the properties panel —
         // visible progress at the top of the workspace either way, not just inside a
@@ -368,7 +463,10 @@ export function EditorWorkspace() {
               api={api}
               doc={state.doc}
               toolOptions={toolOptions}
-              onToolOptionsChange={(patch) => setToolOptions((o) => ({ ...o, ...patch }))}
+              onToolOptionsChange={(patch) => {
+                if (patch.color) setColorChosen(true);
+                setToolOptions((o) => ({ ...o, ...patch }));
+              }}
             />
           </div>
         </div>

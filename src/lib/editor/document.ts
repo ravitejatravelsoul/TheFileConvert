@@ -47,10 +47,10 @@ function extractFormFields(parsed: PDFDocument): FormFieldValue[] {
         } else if (field instanceof PDFCheckBox) {
           fields.push({ name, kind: "checkbox", value: field.isChecked() ? "true" : "false" });
         } else if (field instanceof PDFRadioGroup) {
-          fields.push({ name, kind: "radio", value: field.getSelected() ?? "" });
+          fields.push({ name, kind: "radio", value: field.getSelected() ?? "", options: field.getOptions() });
         } else if (field instanceof PDFDropdown) {
           const selected: string[] = field.getSelected() ?? [];
-          fields.push({ name, kind: "dropdown", value: selected[0] ?? "" });
+          fields.push({ name, kind: "dropdown", value: selected[0] ?? "", options: field.getOptions() });
         }
       } catch {
         // A field pdf-lib can enumerate but not read cleanly — skip it rather than fail

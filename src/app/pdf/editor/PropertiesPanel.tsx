@@ -3,7 +3,7 @@
 import { useState } from "react";
 import type { EditorWorkspaceApi } from "./useEditorWorkspace";
 import type { ToolOptions } from "./toolOptions";
-import { PRESET_COLORS, rgbToCss, rgbToHex, hexToRgb } from "./toolOptions";
+import { PRESET_COLORS, rgbToCss, rgbToHex, hexToRgb, optionsFromObject, objectPatchFromOptions } from "./toolOptions";
 import { SUPPORTED_OCR_LANGUAGES } from "@/lib/processors/ocr";
 import { addWatermark, addPageNumbers, addHeaderFooter, type WatermarkOptions, type PageNumberOptions, type HeaderFooterOptions } from "@/lib/processors/pdf";
 import { exportEditorDocument } from "@/lib/editor/export";
@@ -17,9 +17,19 @@ interface PropertiesPanelProps {
   onToolOptionsChange: (patch: Partial<ToolOptions>) => void;
 }
 
-export function PropertiesPanel({ api, doc, toolOptions, onToolOptionsChange }: PropertiesPanelProps) {
+export function PropertiesPanel({ api, doc, toolOptions: defaultOptions, onToolOptionsChange: changeDefaults }: PropertiesPanelProps) {
   const { state } = api;
   const selectedObject = doc.objects.find((o) => o.id === state.selectedObjectId) ?? null;
+  // With an object selected, the color/size/stroke/fill controls show and edit *that object*
+  // (and still update the defaults for the next one drawn); with nothing selected they only
+  // set the defaults.
+  const toolOptions = selectedObject ? optionsFromObject(selectedObject, defaultOptions) : defaultOptions;
+  const onToolOptionsChange = (patch: Partial<ToolOptions>) => {
+    changeDefaults(patch);
+    if (!selectedObject) return;
+    const objectPatch = objectPatchFromOptions(selectedObject, patch);
+    if (objectPatch) api.updateObject(selectedObject.id, objectPatch, { coalesceKey: `opt:${selectedObject.id}:${Object.keys(patch).join(",")}` });
+  };
   const activePage = doc.pages.find((p) => p.id === state.activePageId) ?? null;
   const scannedPages = doc.pages.filter((p) => state.pageClassifications[p.id] && state.pageClassifications[p.id] !== "native");
 
@@ -32,13 +42,26 @@ export function PropertiesPanel({ api, doc, toolOptions, onToolOptionsChange }: 
         </div>
       )}
 
+      {(state.activeTool === "whiteout" || selectedObject?.type === "whiteout") && (
+        <div role="note" className="flex items-start gap-2 rounded-[var(--radius-sm)] bg-amber-50 p-2.5 text-xs text-amber-900 dark:bg-amber-950/40 dark:text-amber-200">
+          <IconWarning className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+          <span>
+            Whiteout only covers what&rsquo;s underneath — the original text or image is still inside the PDF file. It is not secure
+            redaction; don&rsquo;t use it to hide sensitive information.
+          </span>
+        </div>
+      )}
+
       {selectedObject && (
         <Section title="Selected object" defaultOpen>
           <ObjectProperties api={api} object={selectedObject} />
         </Section>
       )}
 
-      <Section title="Drawing options" defaultOpen={!selectedObject}>
+      {/* Always open: with an object selected these controls edit that object (color, size,
+          stroke, fill), so collapsing them the moment something is selected would hide exactly
+          what you'd reach for next. */}
+      <Section title="Drawing options" defaultOpen>
         <div className="space-y-3">
           <div>
             <p className="mb-1.5 text-xs font-medium text-[var(--foreground)]">Color</p>
@@ -68,14 +91,7 @@ export function PropertiesPanel({ api, doc, toolOptions, onToolOptionsChange }: 
           </label>
           <label className="block">
             <span className="mb-1 block text-xs font-medium text-[var(--foreground)]">Font size</span>
-            <input
-              type="number"
-              min={6}
-              max={72}
-              value={toolOptions.fontSize}
-              onChange={(e) => onToolOptionsChange({ fontSize: Number(e.target.value) })}
-              className="w-full rounded-[var(--radius-sm)] border border-[var(--border)] px-2 py-1 text-sm"
-            />
+            <FontSizeField value={toolOptions.fontSize} onCommit={(n) => onToolOptionsChange({ fontSize: n })} />
           </label>
           <label className="flex items-center gap-2 text-xs">
             <input
@@ -175,6 +191,20 @@ export function PropertiesPanel({ api, doc, toolOptions, onToolOptionsChange }: 
                     onChange={(e) => api.setFormFieldValue(field.name, e.target.checked ? "true" : "false")}
                     className="accent-[var(--brand)]"
                   />
+                ) : field.options && field.options.length > 0 && (field.kind === "radio" || field.kind === "dropdown") ? (
+                  <select
+                    id={`field-${field.name}`}
+                    value={field.value}
+                    onChange={(e) => api.setFormFieldValue(field.name, e.target.value)}
+                    className="w-full rounded-[var(--radius-sm)] border border-[var(--border)] px-2 py-1 text-xs"
+                  >
+                    <option value="">{field.kind === "radio" ? "(none selected)" : "(choose…)"}</option>
+                    {field.options.map((o) => (
+                      <option key={o} value={o}>
+                        {o}
+                      </option>
+                    ))}
+                  </select>
                 ) : (
                   <input
                     id={`field-${field.name}`}
@@ -198,6 +228,28 @@ export function PropertiesPanel({ api, doc, toolOptions, onToolOptionsChange }: 
         <WholeDocumentTools api={api} />
       </Section>
     </div>
+  );
+}
+
+/** A number box that lets the user type freely (clearing it, passing through "1" on the way to
+ * "18") and only applies values that are actually valid — a controlled input that clamped or
+ * reset on every keystroke would fight the user's typing. */
+function FontSizeField({ value, onCommit }: { value: number; onCommit: (n: number) => void }) {
+  const [draft, setDraft] = useState<string | null>(null);
+  return (
+    <input
+      type="number"
+      min={6}
+      max={72}
+      value={draft ?? String(value)}
+      onChange={(e) => {
+        setDraft(e.target.value);
+        const n = Number(e.target.value);
+        if (e.target.value !== "" && Number.isFinite(n) && n >= 6 && n <= 72) onCommit(n);
+      }}
+      onBlur={() => setDraft(null)}
+      className="w-full rounded-[var(--radius-sm)] border border-[var(--border)] px-2 py-1 text-sm"
+    />
   );
 }
 
@@ -270,7 +322,7 @@ function ObjectProperties({ api, object }: { api: EditorWorkspaceApi; object: No
             value={object.type === "added-text" ? object.text : object.newText}
             onChange={(e) => {
               if (object.type === "added-text") {
-                api.updateObject(object.id, { text: e.target.value });
+                api.updateObject(object.id, { text: e.target.value }, { coalesceKey: `text:${object.id}` });
               } else if (object.type === "ocr-text-replacement") {
                 // Editing the text here would otherwise leave a stale raster patch (still
                 // showing the old replacement word) — clear it so this falls back to simple
@@ -290,6 +342,33 @@ function ObjectProperties({ api, object }: { api: EditorWorkspaceApi; object: No
           Detected: <span className="italic">&ldquo;{object.originalText}&rdquo;</span>
           {"confidence" in object && ` (${Math.round(object.confidence)}% confidence)`}
         </p>
+      )}
+      {object.type === "added-text" && (
+        <div className="flex items-center gap-3 text-xs">
+          <label className="flex items-center gap-1.5">
+            <input
+              type="checkbox"
+              checked={object.bold}
+              onChange={(e) => api.updateObject(object.id, { bold: e.target.checked })}
+              className="accent-[var(--brand)]"
+            />
+            Bold
+          </label>
+          <div className="flex items-center gap-1" role="group" aria-label="Text alignment">
+            {(["left", "center", "right"] as const).map((a) => (
+              <button
+                key={a}
+                type="button"
+                aria-pressed={object.align === a}
+                aria-label={`Align ${a}`}
+                onClick={() => api.updateObject(object.id, { align: a })}
+                className={`rounded-full px-2 py-0.5 capitalize ${object.align === a ? "bg-[var(--brand)] text-white" : "bg-[var(--surface-muted)] text-[var(--foreground-muted)]"}`}
+              >
+                {a}
+              </button>
+            ))}
+          </div>
+        </div>
       )}
       {object.type === "ocr-text-replacement" && (
         <div className="space-y-2 rounded-[var(--radius-sm)] border border-[var(--border)] p-2">
@@ -404,6 +483,10 @@ function SearchPanel({ api }: { api: EditorWorkspaceApi }) {
 
 function WholeDocumentTools({ api }: { api: EditorWorkspaceApi }) {
   const [watermarkText, setWatermarkText] = useState("");
+  const [watermarkOpacity, setWatermarkOpacity] = useState(30); // percent
+  const [watermarkRotation, setWatermarkRotation] = useState(45);
+  const [pageNumberPosition, setPageNumberPosition] = useState<PageNumberOptions["position"]>("bottom-center");
+  const [pageNumberStart, setPageNumberStart] = useState(1);
   const [headerFooterText, setHeaderFooterText] = useState("");
   const [headerFooterPosition, setHeaderFooterPosition] = useState<HeaderFooterOptions["position"]>("footer");
   const [headerFooterAlign, setHeaderFooterAlign] = useState<HeaderFooterOptions["align"]>("center");
@@ -423,7 +506,7 @@ function WholeDocumentTools({ api }: { api: EditorWorkspaceApi }) {
     if (!watermarkText.trim()) return;
     setBusy("watermark");
     try {
-      const options: WatermarkOptions = { text: watermarkText, opacity: 0.3, fontSize: 48, rotationDegrees: 45 };
+      const options: WatermarkOptions = { text: watermarkText, opacity: watermarkOpacity / 100, fontSize: 48, rotationDegrees: watermarkRotation };
       await bakeThenReload((file) => addWatermark(file, options));
       setWatermarkText("");
     } finally {
@@ -434,7 +517,7 @@ function WholeDocumentTools({ api }: { api: EditorWorkspaceApi }) {
   async function applyPageNumbers() {
     setBusy("numbers");
     try {
-      const options: PageNumberOptions = { position: "bottom-center", startAt: 1, fontSize: 11 };
+      const options: PageNumberOptions = { position: pageNumberPosition, startAt: Math.max(0, Math.floor(pageNumberStart) || 1), fontSize: 11 };
       await bakeThenReload((file) => addPageNumbers(file, options));
     } finally {
       setBusy(null);
@@ -472,6 +555,35 @@ function WholeDocumentTools({ api }: { api: EditorWorkspaceApi }) {
           placeholder="Watermark text"
           className="w-full rounded-[var(--radius-sm)] border border-[var(--border)] px-2 py-1 text-sm"
         />
+        <div className="flex items-center gap-2 text-xs">
+          <label className="flex flex-1 items-center gap-1.5">
+            <span className="text-[var(--foreground-muted)]">Opacity</span>
+            <input
+              type="range"
+              min={5}
+              max={100}
+              value={watermarkOpacity}
+              onChange={(e) => setWatermarkOpacity(Number(e.target.value))}
+              aria-label="Watermark opacity"
+              className="w-full accent-[var(--brand)]"
+            />
+            <span className="w-8 text-right tabular-nums">{watermarkOpacity}%</span>
+          </label>
+        </div>
+        <label className="flex items-center gap-1.5 text-xs">
+          <span className="text-[var(--foreground-muted)]">Angle</span>
+          <select
+            value={watermarkRotation}
+            onChange={(e) => setWatermarkRotation(Number(e.target.value))}
+            aria-label="Watermark angle"
+            className="flex-1 rounded-[var(--radius-sm)] border border-[var(--border)] px-2 py-1 text-xs"
+          >
+            <option value={0}>Horizontal</option>
+            <option value={45}>Diagonal (up)</option>
+            <option value={-45}>Diagonal (down)</option>
+            <option value={90}>Vertical</option>
+          </select>
+        </label>
         <button
           type="button"
           disabled={busy !== null || !watermarkText.trim()}
@@ -480,6 +592,30 @@ function WholeDocumentTools({ api }: { api: EditorWorkspaceApi }) {
         >
           {busy === "watermark" ? "Applying…" : "Add watermark"}
         </button>
+      </div>
+      <div className="flex items-center gap-1.5 text-xs">
+        <select
+          value={pageNumberPosition}
+          onChange={(e) => setPageNumberPosition(e.target.value as PageNumberOptions["position"])}
+          aria-label="Page number position"
+          className="flex-1 rounded-[var(--radius-sm)] border border-[var(--border)] px-2 py-1 text-xs"
+        >
+          <option value="bottom-center">Bottom center</option>
+          <option value="bottom-left">Bottom left</option>
+          <option value="bottom-right">Bottom right</option>
+          <option value="top-center">Top center</option>
+        </select>
+        <label className="flex items-center gap-1">
+          <span className="text-[var(--foreground-muted)]">Start at</span>
+          <input
+            type="number"
+            min={0}
+            value={pageNumberStart}
+            onChange={(e) => setPageNumberStart(Number(e.target.value))}
+            aria-label="First page number"
+            className="w-14 rounded-[var(--radius-sm)] border border-[var(--border)] px-1.5 py-1 text-xs"
+          />
+        </label>
       </div>
       <button
         type="button"

@@ -184,3 +184,72 @@ export function computeFitZoom(
   const heightZoom = available.height / pageDimsAtZoom1.height;
   return Math.max(MIN_FIT_ZOOM, Math.min(widthZoom, heightZoom));
 }
+
+/**
+ * A viewport-space rect as CSS absolute-position style properties. Rects here use `x`/`y`
+ * keys, which are NOT CSS properties — spreading one straight into `style` silently drops the
+ * position (leaving only width/height), which is exactly how a live drag preview once
+ * rendered at the page's top-left instead of under the pointer. Every place that positions a
+ * DOM overlay from a Rect should go through this one helper.
+ */
+export function rectToCssStyle(rect: Rect): { left: number; top: number; width: number; height: number } {
+  return { left: rect.x, top: rect.y, width: rect.width, height: rect.height };
+}
+
+/** Convenience: a PDF-space rect straight to absolute-position CSS for the given viewport. */
+export function pdfRectToCssStyle(spec: ViewportSpec, rect: Rect): { left: number; top: number; width: number; height: number } {
+  return rectToCssStyle(pdfRectToViewport(spec, rect));
+}
+
+/** Clamps a PDF-space rect to lie within `box` ([xMin, yMin, xMax, yMax]) — e.g. a crop area
+ * dragged past the page edge. */
+export function clampRectToBox(rect: Rect, box: [number, number, number, number]): Rect {
+  const x0 = Math.min(Math.max(rect.x, box[0]), box[2]);
+  const y0 = Math.min(Math.max(rect.y, box[1]), box[3]);
+  const x1 = Math.min(Math.max(rect.x + rect.width, box[0]), box[2]);
+  const y1 = Math.min(Math.max(rect.y + rect.height, box[1]), box[3]);
+  return { x: x0, y: y0, width: x1 - x0, height: y1 - y0 };
+}
+
+export type ResizeHandle = "nw" | "ne" | "sw" | "se";
+
+/**
+ * Resizes a *viewport-space* rect by dragging one of its corner handles by (dx, dy) screen
+ * pixels. Handle names describe what the user sees (nw = top-left on screen), so the math is
+ * done in viewport space and converted to PDF space once by the caller — which keeps it right
+ * on rotated pages, where a screen corner is a different corner of the unrotated page.
+ * `keepAspect` locks the width:height ratio (the opposite corner stays fixed); the rect never
+ * shrinks below `minSize` on either side.
+ */
+export function resizeViewportRect(
+  origin: Rect,
+  handle: ResizeHandle,
+  dx: number,
+  dy: number,
+  opts: { keepAspect?: boolean; minSize?: number } = {}
+): Rect {
+  const min = opts.minSize ?? 8;
+  const west = handle.includes("w");
+  const north = handle.startsWith("n");
+  let width = origin.width + (west ? -dx : dx);
+  let height = origin.height + (north ? -dy : dy);
+  if (opts.keepAspect && origin.width > 0 && origin.height > 0) {
+    const sw = width / origin.width;
+    const sh = height / origin.height;
+    // Follow whichever axis the user dragged further from 1:1, so the box tracks the pointer.
+    const s = Math.abs(sw - 1) >= Math.abs(sh - 1) ? sw : sh;
+    const floor = Math.max(min / origin.width, min / origin.height);
+    const scale = Math.max(s, floor);
+    width = origin.width * scale;
+    height = origin.height * scale;
+  } else {
+    width = Math.max(min, width);
+    height = Math.max(min, height);
+  }
+  return {
+    x: west ? origin.x + origin.width - width : origin.x,
+    y: north ? origin.y + origin.height - height : origin.y,
+    width,
+    height,
+  };
+}

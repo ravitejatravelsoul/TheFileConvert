@@ -9,11 +9,14 @@
  */
 
 const MAX_HISTORY = 50;
+const COALESCE_WINDOW_MS = 1500;
 
 export class EditorHistory<T> {
   private past: T[] = [];
   private present: T;
   private future: T[] = [];
+  private lastCoalesceKey: string | null = null;
+  private lastCoalesceAt = 0;
 
   constructor(initial: T) {
     this.present = initial;
@@ -31,16 +34,39 @@ export class EditorHistory<T> {
     return this.future.length > 0;
   }
 
-  /** Records a new state as the current one, clearing any redo stack. */
-  push(next: T): void {
-    this.past.push(this.present);
-    if (this.past.length > MAX_HISTORY) this.past.shift();
+  /**
+   * Records a new state as the current one, clearing any redo stack.
+   *
+   * With a `coalesceKey`, a push that follows another push with the *same* key within
+   * COALESCE_WINDOW_MS replaces the current state instead of stacking a new undo step — so a
+   * burst of edits to the same thing (typing a sentence character by character) undoes as one
+   * step rather than one keystroke at a time.
+   */
+  push(next: T, coalesceKey?: string, now: number = Date.now()): void {
+    const coalesce =
+      coalesceKey !== undefined &&
+      coalesceKey === this.lastCoalesceKey &&
+      now - this.lastCoalesceAt <= COALESCE_WINDOW_MS &&
+      this.past.length > 0;
+    if (!coalesce) {
+      this.past.push(this.present);
+      if (this.past.length > MAX_HISTORY) this.past.shift();
+    }
     this.present = next;
     this.future = [];
+    this.lastCoalesceKey = coalesceKey ?? null;
+    this.lastCoalesceAt = now;
+  }
+
+  /** Ends the current coalescing run, so the next edit — even to the same thing — is its own
+   * undo step (e.g. leaving a text box and coming back later). */
+  breakCoalescing(): void {
+    this.lastCoalesceKey = null;
   }
 
   undo(): T {
     if (this.past.length === 0) return this.present;
+    this.lastCoalesceKey = null;
     const previous = this.past.pop()!;
     this.future.unshift(this.present);
     this.present = previous;
@@ -49,6 +75,7 @@ export class EditorHistory<T> {
 
   redo(): T {
     if (this.future.length === 0) return this.present;
+    this.lastCoalesceKey = null;
     const next = this.future.shift()!;
     this.past.push(this.present);
     this.present = next;

@@ -31,6 +31,17 @@ export function ThumbnailRail({ api, doc, onInsertFile }: ThumbnailRailProps) {
     api.reorderPageList(ids);
   }
 
+  /** Moves a page one position up (-1) or down (+1) — the touch/keyboard alternative to dragging. */
+  function moveBy(pageId: string, delta: -1 | 1) {
+    const ids = doc.pages.map((p) => p.id);
+    const from = ids.indexOf(pageId);
+    const to = from + delta;
+    if (from === -1 || to < 0 || to >= ids.length) return;
+    ids.splice(from, 1);
+    ids.splice(to, 0, pageId);
+    api.reorderPageList(ids);
+  }
+
   return (
     <div className="flex h-full w-36 shrink-0 flex-col gap-2 overflow-y-auto border-r border-[var(--border)] bg-[var(--surface)] p-2">
       <p className="px-1 text-xs font-medium text-[var(--foreground-muted)]">
@@ -66,7 +77,7 @@ export function ThumbnailRail({ api, doc, onInsertFile }: ThumbnailRailProps) {
             <span className="mt-1 block text-center text-[11px] text-[var(--foreground-muted)]">{index + 1}</span>
           </button>
 
-          <div className="absolute right-1 top-1 flex flex-col gap-1 lg:hidden lg:group-hover:flex">
+          <div className="absolute right-1 top-1 flex flex-col gap-1 lg:opacity-0 lg:transition-opacity lg:group-hover:opacity-100 lg:group-focus-within:opacity-100">
             <button
               type="button"
               onClick={() => api.rotatePage(page.id, 90)}
@@ -87,7 +98,27 @@ export function ThumbnailRail({ api, doc, onInsertFile }: ThumbnailRailProps) {
             </button>
           </div>
 
-          <div className="mt-1 flex items-center justify-center gap-1 lg:opacity-0 lg:group-hover:opacity-100">
+          <div className="mt-1 flex flex-wrap items-center justify-center gap-1 lg:opacity-0 lg:transition-opacity lg:group-hover:opacity-100 lg:group-focus-within:opacity-100">
+            <button
+              type="button"
+              onClick={() => moveBy(page.id, -1)}
+              disabled={index === 0}
+              title="Move page up"
+              aria-label={`Move page ${index + 1} up`}
+              className="rounded-full px-1.5 py-0.5 text-[10px] text-[var(--foreground-muted)] hover:bg-[var(--surface-muted)] disabled:opacity-30"
+            >
+              ↑
+            </button>
+            <button
+              type="button"
+              onClick={() => moveBy(page.id, 1)}
+              disabled={index === doc.pages.length - 1}
+              title="Move page down"
+              aria-label={`Move page ${index + 1} down`}
+              className="rounded-full px-1.5 py-0.5 text-[10px] text-[var(--foreground-muted)] hover:bg-[var(--surface-muted)] disabled:opacity-30"
+            >
+              ↓
+            </button>
             <button
               type="button"
               onClick={() => api.duplicatePage(page.id)}

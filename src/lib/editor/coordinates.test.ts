@@ -239,3 +239,71 @@ describe("computeFitZoom", () => {
     expect(topRightViewport.y).toBeCloseTo(0, 6);
   });
 });
+
+describe("rectToCssStyle / pdfRectToCssStyle", () => {
+  it("maps x/y to left/top (a Rect spread into `style` would silently lose its position)", async () => {
+    const { rectToCssStyle } = await import("./coordinates");
+    expect(rectToCssStyle({ x: 12, y: 34, width: 56, height: 78 })).toEqual({ left: 12, top: 34, width: 56, height: 78 });
+  });
+
+  it("positions a PDF rect at the same place pdfRectToViewport puts it, at any rotation", async () => {
+    const { pdfRectToCssStyle, pdfRectToViewport } = await import("./coordinates");
+    for (const rotation of [0, 90, 180, 270] as const) {
+      const spec = { viewBox: [0, 0, 200, 300] as [number, number, number, number], scale: 1.5, rotation };
+      const rect = { x: 20, y: 30, width: 50, height: 40 };
+      const v = pdfRectToViewport(spec, rect);
+      expect(pdfRectToCssStyle(spec, rect)).toEqual({ left: v.x, top: v.y, width: v.width, height: v.height });
+    }
+  });
+});
+
+describe("resizeViewportRect", () => {
+  const origin = { x: 100, y: 100, width: 200, height: 100 };
+
+  it("se handle grows right/down and keeps the top-left fixed", async () => {
+    const { resizeViewportRect } = await import("./coordinates");
+    expect(resizeViewportRect(origin, "se", 30, 10)).toEqual({ x: 100, y: 100, width: 230, height: 110 });
+  });
+
+  it("nw handle moves the top-left and keeps the bottom-right fixed", async () => {
+    const { resizeViewportRect } = await import("./coordinates");
+    const r = resizeViewportRect(origin, "nw", -20, -10);
+    expect(r).toEqual({ x: 80, y: 90, width: 220, height: 110 });
+    expect(r.x + r.width).toBe(300);
+    expect(r.y + r.height).toBe(200);
+  });
+
+  it("never shrinks below the minimum size", async () => {
+    const { resizeViewportRect } = await import("./coordinates");
+    const r = resizeViewportRect(origin, "se", -500, -500, { minSize: 8 });
+    expect(r.width).toBe(8);
+    expect(r.height).toBe(8);
+  });
+
+  it("keeps the aspect ratio when asked, following the axis dragged further", async () => {
+    const { resizeViewportRect } = await import("./coordinates");
+    const r = resizeViewportRect(origin, "se", 100, 5, { keepAspect: true }); // width 1.5x, height 1.05x
+    expect(r.width / r.height).toBeCloseTo(2, 6);
+    expect(r.width).toBeCloseTo(300, 6);
+    expect(r.x).toBe(100);
+    expect(r.y).toBe(100);
+  });
+
+  it("keeps the opposite corner fixed for an aspect-locked nw drag", async () => {
+    const { resizeViewportRect } = await import("./coordinates");
+    const r = resizeViewportRect(origin, "nw", -100, 0, { keepAspect: true });
+    expect(r.x + r.width).toBeCloseTo(300, 6);
+    expect(r.y + r.height).toBeCloseTo(200, 6);
+    expect(r.width / r.height).toBeCloseTo(2, 6);
+  });
+});
+
+describe("clampRectToBox", () => {
+  it("leaves a rect that's inside the box alone and trims one that hangs over an edge", async () => {
+    const { clampRectToBox } = await import("./coordinates");
+    const box: [number, number, number, number] = [0, 0, 300, 400];
+    expect(clampRectToBox({ x: 10, y: 20, width: 30, height: 40 }, box)).toEqual({ x: 10, y: 20, width: 30, height: 40 });
+    expect(clampRectToBox({ x: -20, y: 380, width: 100, height: 100 }, box)).toEqual({ x: 0, y: 380, width: 80, height: 20 });
+    expect(clampRectToBox({ x: 400, y: 500, width: 50, height: 50 }, box).width).toBe(0);
+  });
+});
