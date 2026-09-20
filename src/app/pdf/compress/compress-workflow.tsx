@@ -23,7 +23,7 @@ const LEVELS: { id: CompressLevel; label: string; detail: string }[] = [
 ];
 
 function CompressOptions({ file, run }: { file: File; run: (h: (files: File[]) => Promise<{ name: string; blob: Blob; note?: string }[]>) => void }) {
-  const [level, setLevel] = useState<CompressLevel>("lossless");
+  const [chosen, setChosen] = useState<CompressLevel | null>(null);
   // Keyed by file, so a newly chosen file shows "Inspecting…" until its own result arrives.
   const [inspected, setInspected] = useState<{ file: File; analysis: PdfImageAnalysis | null } | null>(null);
 
@@ -44,6 +44,9 @@ function CompressOptions({ file, run }: { file: File; run: (h: (files: File[]) =
   const analysisFailed = current !== null && current.analysis === null;
 
   const info = analysis ? describeAnalysis(analysis) : null;
+  // Scans and photo-heavy files only shrink meaningfully with a lossy level, so that is pre-selected for them
+  // (clearly labelled as reducing image quality); text/vector files start on the lossless option.
+  const level: CompressLevel = chosen ?? (info?.suggestLossy ? "balanced" : "lossless");
 
   return (
     <div className="space-y-5 pt-2">
@@ -71,7 +74,7 @@ function CompressOptions({ file, run }: { file: File; run: (h: (files: File[]) =
               level === l.id ? "border-[var(--brand)] bg-[var(--brand-soft)]" : "border-[var(--border)] bg-[var(--surface)]"
             }`}
           >
-            <input type="radio" name="compress-level" value={l.id} checked={level === l.id} onChange={() => setLevel(l.id)} className="mt-1 accent-[var(--brand)]" />
+            <input type="radio" name="compress-level" value={l.id} checked={level === l.id} onChange={() => setChosen(l.id)} className="mt-1 accent-[var(--brand)]" />
             <span>
               <span className="block font-medium text-[var(--foreground)]">{l.label}</span>
               <span className="block text-[var(--foreground-muted)]">{l.detail}</span>

@@ -1,0 +1,56 @@
+[
+ {
+  "tool": "pdf-editor-nav",
+  "test": "Zoom in/out, Fit width, Fit page change the zoom",
+  "verdict": "PASS",
+  "detail": "100% → in 115% → out×2 85% → fit width 121% → fit page 81%"
+ },
+ {
+  "tool": "pdf-editor-rot",
+  "test": "displayed page 2 is landscape (rotate 90) and accepts annotations",
+  "verdict": "PASS",
+  "detail": "surface 960x742, objects=2"
+ },
+ {
+  "tool": "pdf-editor-crop",
+  "test": "Crop tool: drag selection then apply",
+  "verdict": "INFO",
+  "detail": "buttons now: "
+ },
+ {
+  "tool": "pdf-editor-sidebar",
+  "test": "watermark on every page (6) after export",
+  "verdict": "PASS",
+  "detail": "6/6"
+ },
+ {
+  "tool": "pdf-editor-sidebar",
+  "test": "header/footer text with {page} placeholder on every page",
+  "verdict": "PASS",
+  "detail": "6/6; page1: AUDIT-HEADER p1"
+ },
+ {
+  "tool": "pdf-editor-sidebar",
+  "test": "page numbers start at 7",
+  "verdict": "PASS",
+  "detail": ",,,,, | p1 tail: it tempor amet aliqua commodo adi AUDIT-WM 7 AUDIT-HEADER p1"
+ },
+ {
+  "tool": "pdf-editor-rot",
+  "test": "rotated page: red rectangle drawn at displayed top-left (centre ≈ 20%,15%) in the exported render",
+  "verdict": "PASS",
+  "detail": "red px=9920 centre=(0.20,0.15) render 792x612"
+ },
+ {
+  "tool": "pdf-editor-crop",
+  "test": "exported page 1 is smaller than 612x792 after crop",
+  "verdict": "PASS",
+  "detail": "page boxes: 306x317 612x792 612x792 612x792 612x792 612x792"
+ },
+ {
+  "tool": "(pdf-editor D)",
+  "test": "browser console/page errors",
+  "verdict": "PASS",
+  "detail": ""
+ }
+]

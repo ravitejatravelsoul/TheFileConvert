@@ -1,0 +1,12 @@
+PASS    (all pages) :: no horizontal page scroll at 412px width on 45 routes
+PASS    mobile-home :: phone header: menu opens and links are reachable — menuButton=1 links=40
+PASS    mobile-tap-targets :: merge list buttons ≥ 32px on touch devices — []
+PASS    pdf-compress-mobile :: phone: default level for a scan is Balanced and result shows exact bytes — default=balanced output=199094 ui="Exact: 3,982,736 bytes → 199,094 bytes (3,783,642 fewer)"
+PASS    image-crop-touch :: finger drag draws a crop box (top-left ≈ red, ~43%) — sliders=43,43,2,2 out=171x128 centre=255,0,0,255
+PASS    pdf-reorder-mobile :: tap ← on page 2 → exported order 2,1,3… — Page 2 of 14|Page 1 of 14|Page 3 of 14
+PASS    data-mobile :: JSON formatter works on phone — {⏎  "a": [⏎    1,⏎    2,⏎    {⏎      "b": null⏎    }⏎  ]⏎}
+PASS    pdf-editor-mobile :: page opens fitted to the phone width — surface width 364 (viewport 412)
+B {"x":24,"y":374,"width":364,"height":471.046875} B2 {"x":24,"y":374,"width":364,"height":471.046875}
+PASS    pdf-editor-mobile :: touch: rectangle by finger drag + text by tap — shapes=1 texts=1
+PASS    pdf-editor-mobile :: phone export contains the typed text — Phone text
+PASS    (mobile) :: browser console/page errors

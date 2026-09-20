@@ -239,3 +239,43 @@ describe("product-acceptance regressions", () => {
     expect(convertTextCase("élan. vital", "sentence")).toBe("Élan. Vital");
   });
 });
+
+describe("formatters never alter the data they format", () => {
+  it("formatJson keeps integers beyond 2^53, number spelling, escapes and duplicate keys", () => {
+    const src = '{"big":12345678901234567890,"n":1.0,"e":1E5,"s":"\\u00e9\\n","a":1,"a":2,"empty":{},"list":[]}';
+    const pretty = formatJson(src, "pretty");
+    expect(pretty).toContain('"big": 12345678901234567890');
+    expect(pretty).toContain('"n": 1.0');
+    expect(pretty).toContain('"e": 1E5');
+    expect(pretty).toContain('"s": "\\u00e9\\n"');
+    expect(pretty).toContain('"empty": {}');
+    expect(pretty).toContain('"list": []');
+    expect(formatJson(pretty, "minify")).toBe(src);
+  });
+
+  it("formatXml escapes text and attributes, and keeps CDATA, comments, processing instructions and mixed content", () => {
+    const src = '<?xml version="1.0"?><!-- top --><r a="x &amp; &quot;y&quot;"><t>Caf&#233; &amp; Co</t><c><![CDATA[<b>raw</b>]]></c><m>hello <b>bold</b> tail</m><?pi data?></r>';
+    const pretty = formatXml(src, "pretty");
+    const reparsed = new DOMParser().parseFromString(pretty, "application/xml");
+    expect(reparsed.querySelector("parsererror")).toBeNull();
+    expect(pretty).toContain("<!-- top -->");
+    expect(pretty).toContain('a="x &amp; &quot;y&quot;"');
+    expect(pretty).toContain("<t>Café &amp; Co</t>");
+    expect(pretty).toContain("<![CDATA[<b>raw</b>]]>");
+    expect(pretty).toContain("<m>hello <b>bold</b> tail</m>");
+    expect(pretty).toContain("<?pi data?>");
+    const mini = formatXml(pretty, "minify");
+    expect(mini).not.toMatch(/>\s+</);
+    expect(new DOMParser().parseFromString(mini, "application/xml").querySelector("parsererror")).toBeNull();
+    expect(mini).toContain("<![CDATA[<b>raw</b>]]>");
+  });
+});
+
+describe("csvToJson delimiter detection", () => {
+  it("reads semicolon, tab and pipe separated files, not just commas", () => {
+    expect(JSON.parse(csvToJson("a;b\n1;2\n"))).toEqual([{ a: "1", b: "2" }]);
+    expect(JSON.parse(csvToJson("a|b\n1|2\n"))).toEqual([{ a: "1", b: "2" }]);
+    expect(JSON.parse(csvToJson("a\tb\n1\t2\n"))).toEqual([{ a: "1", b: "2" }]);
+    expect(JSON.parse(csvToJson('"x,y",z\n1,2\n'))).toEqual([{ "x,y": "1", z: "2" }]);
+  });
+});

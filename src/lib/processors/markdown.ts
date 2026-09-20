@@ -279,7 +279,7 @@ export function markdownToHtmlDocument(source: string, title: string): string {
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>${escapeHtml(title)}</title>
 <style>
-  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; line-height: 1.6; color: #1a1a1a; max-width: 760px; margin: 40px auto; padding: 0 20px; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; line-height: 1.6; color: #1a1a1a; max-width: 760px; margin: 40px auto; padding: 0 20px; overflow-wrap: anywhere; }
   code, pre { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
   pre { background: #f4f4f5; padding: 12px 16px; border-radius: 8px; overflow-x: auto; }
   code { background: #f4f4f5; padding: 2px 5px; border-radius: 4px; }

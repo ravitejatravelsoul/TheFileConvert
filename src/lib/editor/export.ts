@@ -152,10 +152,9 @@ async function drawObject(
       const font = fonts.regular;
       const size = fitFontSize(font, obj.newText, obj, obj.fontSize);
       try {
+        // Real (visible) text, so the correction is already searchable and copyable — a second
+        // invisible copy would make every search/copy of this text appear twice.
         page.drawText(obj.newText, { x: obj.x, y: obj.y, size, font, color: rgb(0, 0, 0) });
-        // Keep the page searchable after a correction: draw an invisible run with the
-        // corrected text at the same position, same technique buildSearchablePdf uses.
-        page.drawText(obj.newText, { x: obj.x, y: obj.y, size, font, opacity: 0 });
       } catch {
         // A character outside Helvetica's supported encoding shouldn't fail the whole
         // export — the region is still whited out, just without replacement text drawn.

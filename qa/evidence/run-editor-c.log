@@ -1,0 +1,4 @@
+PASS    pdf-editor-form :: labelled form page is not mis-flagged as a scanned page — no scanned banner
+PASS    pdf-editor-form :: text, checkbox, dropdown, radio all saved as real AcroForm values — {"name":"Ada Lovelace","agree":true,"plan":["pro"],"size":"large"}
+PASS    pdf-editor-form :: rendered export shows more ink than the blank form (values are visible, not just stored) — dark px blank=2621 filled=3195
+PASS    (pdf-editor C) :: browser console/page errors

@@ -1,0 +1,9 @@
+PASS    pdf-editor-nav :: Zoom in/out, Fit width, Fit page change the zoom — 100% → in 115% → out×2 85% → fit width 121% → fit page 81%
+PASS    pdf-editor-rot :: displayed page 2 is landscape (rotate 90) and accepts annotations — surface 960x742, objects=2
+INFO    pdf-editor-crop :: Crop tool: drag selection then apply — buttons now: 
+PASS    pdf-editor-sidebar :: watermark on every page (6) after export — 6/6
+PASS    pdf-editor-sidebar :: header/footer text with {page} placeholder on every page — 6/6; page1: AUDIT-HEADER p1
+PASS    pdf-editor-sidebar :: page numbers start at 7 — ,,,,, | p1 tail: it tempor amet aliqua commodo adi AUDIT-WM 7 AUDIT-HEADER p1
+PASS    pdf-editor-rot :: rotated page: red rectangle drawn at displayed top-left (centre ≈ 20%,15%) in the exported render — red px=9920 centre=(0.20,0.15) render 792x612
+PASS    pdf-editor-crop :: exported page 1 is smaller than 612x792 after crop — page boxes: 306x317 612x792 612x792 612x792 612x792 612x792
+PASS    (pdf-editor D) :: browser console/page errors

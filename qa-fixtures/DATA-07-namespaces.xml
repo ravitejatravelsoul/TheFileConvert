@@ -1,0 +1,3 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- catalog -->
+<c:catalog xmlns:c="urn:example:catalog" xmlns:x="urn:example:extra"><c:book id="1" x:flag="yes"><c:title>Café &amp; Co</c:title><c:price currency="USD">9.99</c:price></c:book><c:book id="2"><c:title><![CDATA[Raw <b>text</b>]]></c:title><c:empty/></c:book></c:catalog>

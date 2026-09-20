@@ -1,0 +1,362 @@
+[
+ {
+  "tool": "txt-to-html",
+  "test": "1.7 MB TXT → HTML; <appendix> escaped; text preserved",
+  "verdict": "PASS",
+  "detail": "htmlLen=1779898 paragraphs=0 textChars=1753487 escaped=true"
+ },
+ {
+  "tool": "txt-to-html",
+  "test": "download equals on-screen output",
+  "verdict": "PASS",
+  "detail": "document.html 1803298B"
+ },
+ {
+  "tool": "txt-to-html",
+  "test": "escapes & < > quotes; keeps unicode; paragraph split",
+  "verdict": "PASS",
+  "detail": "<body>Tom &amp; Jerry &lt;b&gt;bold&lt;/b&gt; \"quoted\"⏎⏎Second para⏎line2 — café 日本</body>⏎</html>⏎"
+ },
+ {
+  "tool": "markdown-to-html",
+  "test": "headings/bold/italic/lists(nested,numbered)/table/code/quote/hr/unicode; script & javascript: link neutralised",
+  "verdict": "PASS",
+  "detail": "{\"h1\":1,\"h2\":1,\"h3\":2,\"strong\":3,\"em\":2,\"a\":[\"https://example.com/a?b=1&c=2\",\"https://example.com/i.png\"],\"ul\":3,\"ol\":2,\"li\":10,\"table\":1,\"th\":3,\"td\":6,\"pre\":1,\"bq\":1,\"hr\":1,\"script\":0,\"snake\":true,\"jsHref\":false,\"uni\":true,\"img\":0,\"nestedUl\":2,\"tdAlign\":\"\"}"
+ },
+ {
+  "tool": "markdown-to-html",
+  "test": "markdown image ![alt](url) rendered?",
+  "verdict": "INFO",
+  "detail": "<img> count=0; align style= (table alignment markers)"
+ },
+ {
+  "tool": "markdown-to-html",
+  "test": "220-char unbroken string wraps (overflow-wrap) in generated document",
+  "verdict": "PASS",
+  "detail": "present=true; css handles wrap=true"
+ },
+ {
+  "tool": "markdown-to-pdf",
+  "test": "PDF has headings/lists/table/code/quote text; long string not clipped",
+  "verdict": "PASS",
+  "detail": "pages=1 missing=[] note=\"The PDF's built-in fonts can't draw these characters (日 本 語 Ε λ η …), so they were replaced with \"?\". Everything else is\""
+ },
+ {
+  "tool": "markdown-to-pdf",
+  "test": "non-Latin characters in PDF",
+  "verdict": "INFO",
+  "detail": "café:true 日本語:false Ελληνικά:false ✓:false 😀:false — UI says: The PDF's built-in fonts can't draw these characters (日 本 語 Ε λ η …), so they were replaced with \"?\". Everything else is intact."
+ },
+ {
+  "tool": "markdown-to-pdf",
+  "test": "no text drawn into the right page margin",
+  "verdict": "PASS",
+  "detail": "dark px in right 30px strip: 0"
+ },
+ {
+  "tool": "txt-to-pdf",
+  "test": "1.7 MB TXT → PDF: page count, text complete, first/last section",
+  "verdict": "PASS",
+  "detail": "pages=499 words in/out=254800/254800 3092ms size=1169108 note=\"\""
+ },
+ {
+  "tool": "txt-to-pdf",
+  "test": "page 1 is A4/Letter and has ink",
+  "verdict": "PASS",
+  "detail": "595.28x841.89"
+ },
+ {
+  "tool": "txt-to-pdf",
+  "test": "unicode input: file produced, characters kept or user told",
+  "verdict": "PASS",
+  "detail": "text=\"Café ? ??? — “quotes” €5\" ui=\"The PDF's built-in fonts can't draw these characters (✓ 日 本 語), so they were replaced with \"?\". Everything else is intact.\""
+ },
+ {
+  "tool": "txt-to-pdf",
+  "test": "empty input refused",
+  "verdict": "PASS",
+  "detail": "Paste or type some content first."
+ },
+ {
+  "tool": "json-formatter",
+  "test": "pretty-print is valid, equal to input, 2-space indented",
+  "verdict": "PASS",
+  "detail": "bytes 313"
+ },
+ {
+  "tool": "json-formatter",
+  "test": "integer beyond 2^53 (12345678901234567890) survives formatting",
+  "verdict": "PASS",
+  "detail": "exact"
+ },
+ {
+  "tool": "json-formatter",
+  "test": "minify removes whitespace, same data",
+  "verdict": "PASS",
+  "detail": "178 chars"
+ },
+ {
+  "tool": "json-formatter",
+  "test": "validator: malformed JSON → message with reason/position",
+  "verdict": "PASS",
+  "detail": "This isn't valid JSON: Unexpected token ',', ...\"b\": [1, 2,, ], \"c\": \"... is not valid JSON"
+ },
+ {
+  "tool": "json-formatter",
+  "test": "570 KB / 6000 records formatted",
+  "verdict": "PASS",
+  "detail": "2909ms out=1027628"
+ },
+ {
+  "tool": "csv-to-json",
+  "test": "quoted commas, doubled quotes, quoted newline, empty cells, unicode",
+  "verdict": "PASS",
+  "detail": "[{\"id\":\"1\",\"name\":\"Smith, Jane\",\"notes\":\"said \\\"hello\\\"\",\"amount\":\"10.50\"},{\"id\":\"2\",\"name\":\"Ünal\",\"notes\":\"multi\\nline note\",\"amount\":\"\"},{\"id\":\"3\",\"name\":\"\",\"notes\":\"\",\"amount\":\"0\"},{\"id\":\"4\",\"name\":\"Zoë\",\"notes\":\"plain\",\"amount\":\"-3\"},{\"id\":\"5\",\"name\":\"日本語\""
+ },
+ {
+  "tool": "csv-to-json",
+  "test": "number typing",
+  "verdict": "INFO",
+  "detail": "amount values: \"10.50\",\"\",\"0\",\"-3\",\"1e3\""
+ },
+ {
+  "tool": "csv-to-json",
+  "test": "malformed CSV (unclosed quote) → warning/error, not silent garbage",
+  "verdict": "PASS",
+  "detail": "err=\"A quoted value in this CSV is never closed (it starts on row 2). Check for a missing closing quote.\" output="
+ },
+ {
+  "tool": "csv-to-json",
+  "test": "semicolon-delimited CSV",
+  "verdict": "INFO",
+  "detail": "[ { \"a\": \"1\", \"b\": \"2\", \"c\": \"3\" } ]"
+ },
+ {
+  "tool": "json-to-csv",
+  "test": "union of keys, comma/quote/newline escaped (re-parsed with independent CSV parser)",
+  "verdict": "PASS",
+  "detail": "header=id,name,note,nested,list row4=[\"4\",\"Di\",\"\",\"{\\\"a\\\":1}\",\"[1,2]\"]"
+ },
+ {
+  "tool": "json-to-csv",
+  "test": "single object (not array)",
+  "verdict": "INFO",
+  "detail": " Provide a JSON array of objects, e.g. [{\"name\":\"Ada\"}]."
+ },
+ {
+  "tool": "json-to-csv",
+  "test": "array of primitives",
+  "verdict": "INFO",
+  "detail": " Provide a JSON array of objects, e.g. [{\"name\":\"Ada\"}]."
+ },
+ {
+  "tool": "json-to-csv",
+  "test": "invalid JSON → message",
+  "verdict": "PASS",
+  "detail": "This isn't valid JSON."
+ },
+ {
+  "tool": "xml-formatter",
+  "test": "pretty output well-formed; namespaces, attribute, entity, CDATA text preserved",
+  "verdict": "PASS",
+  "detail": "{\"err\":false,\"books\":2,\"flag\":\"yes\",\"title\":\"Café & Co\",\"cdata\":\"Raw <b>text</b>\"} decl=true comment=true"
+ },
+ {
+  "tool": "xml-formatter",
+  "test": "minify well-formed and shorter",
+  "verdict": "PASS",
+  "detail": "357→322"
+ },
+ {
+  "tool": "xml-formatter",
+  "test": "malformed XML → error",
+  "verdict": "PASS",
+  "detail": "This isn't valid XML."
+ },
+ {
+  "tool": "base64-encode-decode",
+  "test": "unicode text encodes to standard Base64 (matches Buffer)",
+  "verdict": "PASS",
+  "detail": "SGVsbG8sIHfDtnJsZCDinJMKU2Vjb25kIGxpbmUg5pel5pys6KqeCg=="
+ },
+ {
+  "tool": "base64-encode-decode",
+  "test": "decode round-trips including unicode/newlines",
+  "verdict": "PASS",
+  "detail": "\"Hello, wörld ✓\\nSecond line 日本語\\n\""
+ },
+ {
+  "tool": "base64-encode-decode",
+  "test": "invalid Base64 → clear error",
+  "verdict": "PASS",
+  "detail": "This isn't valid Base64 text."
+ },
+ {
+  "tool": "base64-encode-decode",
+  "test": "unpadded Base64 accepted",
+  "verdict": "PASS",
+  "detail": "Hello world"
+ },
+ {
+  "tool": "url-encode-decode",
+  "test": "encode equals encodeURIComponent",
+  "verdict": "PASS",
+  "detail": "caf%C3%A9%20au%20lait%20%26%201%2B1%3D2%20%2Fa%2Fb%3Fc%3Dd%23e%20%E6%97%A5%E6%9C%AC"
+ },
+ {
+  "tool": "url-encode-decode",
+  "test": "decode percent-encoded string",
+  "verdict": "PASS",
+  "detail": "q=café au lait&x=1+1=2&path=/a/b?c=d&e"
+ },
+ {
+  "tool": "url-encode-decode",
+  "test": "malformed %-sequence → error",
+  "verdict": "PASS",
+  "detail": "This isn't validly encoded URL text."
+ },
+ {
+  "tool": "text-case-converter",
+  "test": "upper",
+  "verdict": "PASS",
+  "detail": "HELLO WORLD EXAMPLE-TEXT_HERE. SECOND SENTENCE ÜNÏCODE STRASSE"
+ },
+ {
+  "tool": "text-case-converter",
+  "test": "lower",
+  "verdict": "PASS",
+  "detail": "hello world example-text_here. second sentence ünïcode straße"
+ },
+ {
+  "tool": "text-case-converter",
+  "test": "title",
+  "verdict": "PASS",
+  "detail": "Hello World Example-text_here. Second Sentence Ünïcode Straße"
+ },
+ {
+  "tool": "text-case-converter",
+  "test": "sentence",
+  "verdict": "PASS",
+  "detail": "Hello world example-text_here. Second sentence ünïcode straße"
+ },
+ {
+  "tool": "text-case-converter",
+  "test": "camel",
+  "verdict": "PASS",
+  "detail": "helloWorldExampleTextHereSecondSentenceÜnïcodeStraße"
+ },
+ {
+  "tool": "text-case-converter",
+  "test": "kebab",
+  "verdict": "PASS",
+  "detail": "hello-world-example-text-here-second-sentence-ünïcode-straße"
+ },
+ {
+  "tool": "text-case-converter",
+  "test": "snake",
+  "verdict": "PASS",
+  "detail": "hello_world_example_text_here_second_sentence_ünïcode_straße"
+ },
+ {
+  "tool": "word-counter",
+  "test": "9 words, 52 chars, 43 chars w/o spaces, 3 sentences, 2 paragraphs",
+  "verdict": "PASS",
+  "detail": "9 Wo"
+ },
+ {
+  "tool": "word-counter",
+  "test": "empty input shows zeros (not NaN)",
+  "verdict": "PASS",
+  "detail": "0 Words 0 Characters 0 Characters (no spaces) 0 Sentences 0 Paragraphs 1 Reading"
+ },
+ {
+  "tool": "word-counter",
+  "test": "emoji/CJK input",
+  "verdict": "INFO",
+  "detail": "5 Words 23 Characters"
+ },
+ {
+  "tool": "uuid-generator",
+  "test": "5 unique RFC-4122 v4 UUIDs",
+  "verdict": "PASS",
+  "detail": "81cc448a-64e2-466c-94a5-0e5bc6265e3c,e687e146-3cd1-4d96-b43c-f4daca881033"
+ },
+ {
+  "tool": "uuid-generator",
+  "test": "50 unique",
+  "verdict": "PASS",
+  "detail": "50"
+ },
+ {
+  "tool": "uuid-generator",
+  "test": "count 5000 (over limit?)",
+  "verdict": "INFO",
+  "detail": "500 shown; ui: "
+ },
+ {
+  "tool": "hash-generator",
+  "test": "SHA-1(\"abc\") known vector",
+  "verdict": "PASS",
+  "detail": "a9993e364706816aba3e25717850c26c9cd0d89d"
+ },
+ {
+  "tool": "hash-generator",
+  "test": "SHA-256(\"abc\") known vector",
+  "verdict": "PASS",
+  "detail": "ba7816bf8f01cfea414140de5dae2223b00361a3"
+ },
+ {
+  "tool": "hash-generator",
+  "test": "SHA-384(\"abc\") known vector",
+  "verdict": "PASS",
+  "detail": "cb00753f45a35e8bb5a03d699ac65007272c32ab"
+ },
+ {
+  "tool": "hash-generator",
+  "test": "SHA-512(\"abc\") known vector",
+  "verdict": "PASS",
+  "detail": "ddaf35a193617abacc417349ae20413112e6fa4e"
+ },
+ {
+  "tool": "hash-generator",
+  "test": "SHA-256 of empty string",
+  "verdict": "INFO",
+  "detail": "no hash shown / message: Enter some text first."
+ },
+ {
+  "tool": "hash-generator",
+  "test": "SHA-256 of unicode text uses UTF-8",
+  "verdict": "PASS",
+  "detail": ""
+ },
+ {
+  "tool": "hash-generator",
+  "test": "file hash (8 MB JPEG) equals node crypto",
+  "verdict": "PASS",
+  "detail": ""
+ },
+ {
+  "tool": "text-diff",
+  "test": "shows removed b, added B and d, unchanged a/c/same",
+  "verdict": "PASS",
+  "detail": "- b | + B | + d"
+ },
+ {
+  "tool": "text-diff",
+  "test": "identical texts say so",
+  "verdict": "PASS",
+  "detail": ""
+ },
+ {
+  "tool": "text-diff",
+  "test": "3000-line diff finds the single change quickly",
+  "verdict": "PASS",
+  "detail": "1125ms"
+ },
+ {
+  "tool": "(docs+data tools)",
+  "test": "browser console/page errors",
+  "verdict": "PASS",
+  "detail": ""
+ }
+]

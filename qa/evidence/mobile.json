@@ -1,0 +1,68 @@
+[
+ {
+  "tool": "(all pages)",
+  "test": "no horizontal page scroll at 412px width on 45 routes",
+  "verdict": "PASS",
+  "detail": ""
+ },
+ {
+  "tool": "mobile-home",
+  "test": "phone header: menu opens and links are reachable",
+  "verdict": "PASS",
+  "detail": "menuButton=1 links=40"
+ },
+ {
+  "tool": "mobile-tap-targets",
+  "test": "merge list buttons ≥ 32px on touch devices",
+  "verdict": "PASS",
+  "detail": "[]"
+ },
+ {
+  "tool": "pdf-compress-mobile",
+  "test": "phone: default level for a scan is Balanced and result shows exact bytes",
+  "verdict": "PASS",
+  "detail": "default=balanced output=199094 ui=\"Exact: 3,982,736 bytes → 199,094 bytes (3,783,642 fewer)\""
+ },
+ {
+  "tool": "image-crop-touch",
+  "test": "finger drag draws a crop box (top-left ≈ red, ~43%)",
+  "verdict": "PASS",
+  "detail": "sliders=43,43,2,2 out=171x128 centre=255,0,0,255"
+ },
+ {
+  "tool": "pdf-reorder-mobile",
+  "test": "tap ← on page 2 → exported order 2,1,3…",
+  "verdict": "PASS",
+  "detail": "Page 2 of 14|Page 1 of 14|Page 3 of 14"
+ },
+ {
+  "tool": "data-mobile",
+  "test": "JSON formatter works on phone",
+  "verdict": "PASS",
+  "detail": "{⏎  \"a\": [⏎    1,⏎    2,⏎    {⏎      \"b\": null⏎    }⏎  ]⏎}"
+ },
+ {
+  "tool": "pdf-editor-mobile",
+  "test": "page opens fitted to the phone width",
+  "verdict": "PASS",
+  "detail": "surface width 364 (viewport 412)"
+ },
+ {
+  "tool": "pdf-editor-mobile",
+  "test": "touch: rectangle by finger drag + text by tap",
+  "verdict": "PASS",
+  "detail": "shapes=1 texts=1"
+ },
+ {
+  "tool": "pdf-editor-mobile",
+  "test": "phone export contains the typed text",
+  "verdict": "PASS",
+  "detail": "Phone text"
+ },
+ {
+  "tool": "(mobile)",
+  "test": "browser console/page errors",
+  "verdict": "PASS",
+  "detail": ""
+ }
+]

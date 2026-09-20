@@ -1,0 +1,50 @@
+[
+ {
+  "tool": "pdf-editor-scan",
+  "test": "scanned PDF opens; user is told OCR is needed before text can be edited",
+  "verdict": "PASS",
+  "detail": "Scanned page detected — run OCR to edit its text."
+ },
+ {
+  "tool": "pdf-editor-scan",
+  "test": "Recognize Text on current page (32.9s) → words become editable",
+  "verdict": "PASS",
+  "detail": "51 recognised word buttons"
+ },
+ {
+  "tool": "pdf-editor-scan",
+  "test": "edit recognised word John → Jane",
+  "verdict": "PASS",
+  "detail": "ocr replacement objects=1"
+ },
+ {
+  "tool": "pdf-editor-scan",
+  "test": "highlight, rectangle, added text, whiteout on scanned page",
+  "verdict": "PASS",
+  "detail": "objects=5 (ocr-text-replacement,annotation,shape,added-text,whiteout)"
+ },
+ {
+  "tool": "pdf-editor-scan",
+  "test": "export: 2 pages, corrections + annotations visibly changed the scan, other pixels untouched",
+  "verdict": "PASS",
+  "detail": "pages=2 changedPx=1443 of 484704"
+ },
+ {
+  "tool": "pdf-editor-scan",
+  "test": "export: text layer has the corrected word 'Jane' and 'Reviewed by audit'",
+  "verdict": "PASS",
+  "detail": "Jane Reviewed by audit"
+ },
+ {
+  "tool": "pdf-editor-scan",
+  "test": "export: page 2 (untouched) unchanged",
+  "verdict": "PASS",
+  "detail": "size input=3982736 output=3959814"
+ },
+ {
+  "tool": "(pdf-editor B)",
+  "test": "browser console/page errors",
+  "verdict": "PASS",
+  "detail": ""
+ }
+]

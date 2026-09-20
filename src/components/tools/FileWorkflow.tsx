@@ -357,6 +357,10 @@ function SizeComparison({ originalBytes, newBytes, noSavingsHint }: { originalBy
         )}
       </div>
     </div>
+    <p className="px-1 text-center text-xs text-[var(--foreground-muted)]" data-testid="exact-bytes">
+      Exact: {originalBytes.toLocaleString("en-US")} bytes → {newBytes.toLocaleString("en-US")} bytes (
+      {newBytes <= originalBytes ? `${(originalBytes - newBytes).toLocaleString("en-US")} fewer` : `${(newBytes - originalBytes).toLocaleString("en-US")} more`})
+    </p>
     {!meaningfulReduction && noSavingsHint && <p className="px-1 text-sm text-[var(--foreground-muted)]">{noSavingsHint}</p>}
     </div>
   );
@@ -364,7 +368,7 @@ function SizeComparison({ originalBytes, newBytes, noSavingsHint }: { originalBy
 
 function ErrorBanner({ message }: { message: string }) {
   return (
-    <div className="flex items-start gap-2 rounded-[var(--radius-md)] bg-red-50 px-4 py-3 text-sm text-red-700 dark:bg-red-950/40 dark:text-red-300">
+    <div role="alert" className="flex items-start gap-2 rounded-[var(--radius-md)] bg-red-50 px-4 py-3 text-sm text-red-700 dark:bg-red-950/40 dark:text-red-300">
       <IconWarning className="mt-0.5 h-4 w-4 shrink-0" />
       <span>{message}</span>
     </div>

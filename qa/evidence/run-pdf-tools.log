@@ -1,0 +1,46 @@
+PASS    pdf-merge :: 14p + 3p in order — 17 pages; 1/14,2/14,3/14,4/14,5/14,6/14,7/14,8/14,9/14,10/14,11/14,12/14,13/14,14/14,1/3,2/3,3/3
+PASS    pdf-merge :: input order changed via ↑ button respected — 1/3,2/3,3/3,1/14,2/14
+PASS    pdf-merge :: rotated+scanned+form (9 pages, rotations kept, scan renders) — pages=9 rot=0,90,180,270,90,0 scanNonWhite=13212
+PASS    pdf-merge :: corrupt input → error message — We couldn't read this PDF. It may be damaged, encrypted, or incomplete.
+INFO    pdf-merge :: one file left: button state — Merge 1 PDFs disabled=true
+PASS    pdf-split :: 5 per file → 3 files (5,5,4), contiguous pages — files=part-1.pdf,part-2.pdf,part-3.pdf counts=4,5,5 first=1/14,2/14,3/14,4/14,5/14
+PASS    pdf-split :: 1 per file → 14 single-page PDFs — 14 files
+INFO    pdf-split :: 50 per file on 14p — ok: part-1.pdf
+PASS    pdf-extract-pages :: ranges 1-3,5,8-10 — 1,2,3,5,8,9,10
+PASS    pdf-extract-pages :: invalid range "99" rejected with message — None of the pages you entered exist in this PDF.
+PASS    pdf-extract-pages :: invalid range "abc" rejected with message — "abc" isn't a valid page number or range.
+PASS    pdf-extract-pages :: invalid range "0" rejected with message — None of the pages you entered exist in this PDF.
+PASS    pdf-extract-pages :: reversed range "5-2" treated as 2-5 (documented, unit-tested) — 2,3,4,5
+PASS    pdf-extract-pages :: scan page 2 extracted (1 page, renders) — size=1187985
+PASS    pdf-delete-pages :: delete 2,4-6 leaves 1,3,7-14 — 1,3,7,8,9,10,11,12,13,14
+PASS    pdf-delete-pages :: deleting every page is refused with a message — You can't delete every page in the document.
+PASS    pdf-delete-pages :: page 40 of 14 rejected — None of the pages you entered exist in this PDF.
+PASS    pdf-rotate :: 0,90,180,270,90,0 + 90° → 90,180,270,0,180,90 — 90,180,270,0,180,90
+PASS    pdf-rotate :: only selected pages 2,4 rotated 180 — 0,180,0,180,0
+PASS    pdf-rotate :: scan rotated 270 (landscape render) — rot=270 238x184
+PASS    pdf-reorder :: drag page 3 onto 1 → UI order matches exported PDF — ui=3,1,2,4,5 pdf=3,1,2,4,5
+PASS    pdf-reorder :: ↔ buttons then export — 2,1,3,4,5,6,7,8,9,10,11,12,14,13
+PASS    images-to-pdf :: 2 images → 2 A4 pages, first page shows the image — pages=2 595.28x841.89 tl=255,0,0,255 tr=0,255,0,255
+PASS    images-to-pdf :: fit-to-image, transparent PNG + JPG + logo (3 pages) — 1800x1350 1350x750 750x525 bytes=5831395
+PASS    images-to-pdf :: transparent PNG corner becomes white (not black) — corner=255,255,255,255 centre=192,109,68,255
+PASS    images-to-pdf :: US Letter page size 612x792 — 612x792
+INFO    images-to-pdf :: non-image upload — Home | Tools | PDF | Images to PDF | Available | Processed on your device | Images to PDF | Combine JPG and PNG images into a single PDF document. | Processed securely in your browser. Your file never
+PASS    pdf-to-images :: 14 pages → 14 PNG at 2x (1224x1584), text rendered — 14 files 1224x1584 darkpx=118244 names=page-1.png,page-2.png
+PASS    pdf-to-images :: scan → JPG at 1x (612x792), valid JPEG — page-1.jpg,page-2.jpg 612x792
+PASS    pdf-to-images :: rotated pages render with rotation applied (landscape for 90/270) — 612x792,792x612,612x792,792x612,792x612,612x792
+PASS    pdf-add-page-numbers :: start=5 → numbers 5..18 present, drawn bottom-right, original text intact — tails=5,6,7,8,9,10,11,12,13,14,15,16,17,18 box=583-585,760-767 of 612x792
+PASS    pdf-add-page-numbers :: Bottom center on rotated PDF — 1,2,3,4,5,6
+INFO    pdf-add-page-numbers :: position Top left — option absent: Bottom center|Bottom right|Bottom left|Top center
+PASS    pdf-add-page-numbers :: Top center on rotated PDF — 1,2,3,4,5,6
+INFO    pdf-add-page-numbers :: position Top right — option absent: Bottom center|Bottom right|Bottom left|Top center
+PASS    pdf-add-page-numbers :: Bottom left on rotated PDF — 1,2,3,4,5,6
+PASS    pdf-add-page-numbers :: numbers added to scanned PDF (text layer contains 1,2) — 1|2
+PASS    pdf-watermark :: text on all 14 pages, visible mark, original text preserved — pages=14 allHaveMark=true changedPx=3252
+PASS    pdf-watermark :: watermark visible on rotated pages 1-4 (rotation-aware) — changed px=1109,1110,1064,1082 texts=6/6
+PASS    pdf-watermark :: empty watermark text — button disabled
+INFO    pdf-watermark :: non-Latin text handled (file or clear message) — The watermark text contains "✓", which this tool can't draw (it supports standard Latin letters, digits and common punctuation). Please remove or replace it.
+PASS    pdf-metadata :: metadata shown to the user before removal — visible=Audit Title|Audit Author|Audit Subject|Audit Creator
+PASS    pdf-metadata :: removed: title/author/subject/keywords/creator empty; strings absent in file — {}
+PASS    pdf-metadata :: pages intact after removal — 3p
+PAGE ERRORS: none
+PASS    (all pdf tools) :: browser console/page errors

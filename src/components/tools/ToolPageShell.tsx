@@ -27,11 +27,11 @@ export function ToolPageShell({ tool, children, howItWorks, whyUse }: ToolPageSh
   return (
     <div className="container-page py-10 sm:py-14">
       <nav aria-label="Breadcrumb" className="mb-6 flex items-center gap-1.5 text-xs text-[var(--foreground-muted)]">
-        <Link href="/" className="hover:text-[var(--foreground)]">
+        <Link href="/" className="hover:text-[var(--foreground)] [@media(pointer:coarse)]:inline-flex [@media(pointer:coarse)]:min-h-9 [@media(pointer:coarse)]:items-center [@media(pointer:coarse)]:px-1">
           Home
         </Link>
         <IconChevronRight className="h-3 w-3" />
-        <Link href="/tools" className="hover:text-[var(--foreground)]">
+        <Link href="/tools" className="hover:text-[var(--foreground)] [@media(pointer:coarse)]:inline-flex [@media(pointer:coarse)]:min-h-9 [@media(pointer:coarse)]:items-center [@media(pointer:coarse)]:px-1">
           Tools
         </Link>
         <IconChevronRight className="h-3 w-3" />

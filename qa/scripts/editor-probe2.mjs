@@ -1,0 +1,12 @@
+import { launch, open } from "./lib.mjs";
+const { browser, page } = await launch({ viewport: { width: 1440, height: 1000 } });
+await open(page, "/pdf/editor", ["PDF-10-many-pages.pdf"]); await page.locator('[data-testid="page-surface"]').first().waitFor(); await page.waitForTimeout(1500);
+await page.locator("summary", { hasText: "Crop" }).first().click(); await page.waitForTimeout(400);
+console.log(await page.evaluate(() => { const d = [...document.querySelectorAll("details")].find((x) => /Crop/.test(x.querySelector("summary")?.innerText ?? "")); return d.innerText; }));
+await page.getByRole("button", { name: "Crop", exact: true }).click();
+const S = await page.locator('[data-testid="page-surface"]').first().boundingBox();
+await page.mouse.move(S.x + S.width * 0.1, S.y + S.height * 0.1); await page.mouse.down(); await page.mouse.move(S.x + S.width * 0.7, S.y + S.height * 0.6, { steps: 8 }); await page.mouse.up(); await page.waitForTimeout(400);
+console.log("---after drag---"); console.log(await page.evaluate(() => [...document.querySelectorAll("button")].filter((e) => e.offsetParent).map((e) => e.getAttribute("aria-label") || e.innerText.trim()).filter((t) => /crop|apply|reset|cancel|clear|all pages|done/i.test(t)).join(" | ")));
+console.log(await page.evaluate(() => document.querySelector("details[open]")?.innerText));
+await page.screenshot({ path: "qa/evidence/editor-probe2.png" });
+await browser.close();

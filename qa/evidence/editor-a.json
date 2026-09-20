@@ -1,0 +1,110 @@
+[
+ {
+  "tool": "pdf-editor",
+  "test": "opens a 14-page native PDF; page surface visible",
+  "verdict": "PASS",
+  "detail": "surface 641x829 px (k=1.047)"
+ },
+ {
+  "tool": "pdf-editor",
+  "test": "Text tool: click page, type, commit → text object created",
+  "verdict": "PASS",
+  "detail": "added-text objects=1 all=1"
+ },
+ {
+  "tool": "pdf-editor",
+  "test": "Highlight + Underline + Strike drags create 3 annotations",
+  "verdict": "PASS",
+  "detail": "annotations=3"
+ },
+ {
+  "tool": "pdf-editor",
+  "test": "Draw: freehand stroke",
+  "verdict": "PASS",
+  "detail": "types=added-text,native-text-replacement,annotation,drawing"
+ },
+ {
+  "tool": "pdf-editor",
+  "test": "Rectangle, Ellipse, Line, Arrow drags create 4 shapes",
+  "verdict": "PASS",
+  "detail": "shapes=4"
+ },
+ {
+  "tool": "pdf-editor",
+  "test": "Whiteout region created",
+  "verdict": "PASS",
+  "detail": "objects=11"
+ },
+ {
+  "tool": "pdf-editor",
+  "test": "Image: choose PNG, place on page",
+  "verdict": "PASS",
+  "detail": "image objects=1"
+ },
+ {
+  "tool": "pdf-editor",
+  "test": "Sign: draw signature, place on page",
+  "verdict": "PASS",
+  "detail": "objects by type=added-text,native-text-replacement,annotation,annotation,annotation,drawing,shape,shape,shape,shape,whiteout,image,signature"
+ },
+ {
+  "tool": "pdf-editor",
+  "test": "Undo removes the last object, Redo restores it",
+  "verdict": "PASS",
+  "detail": "13 → 12 → 13"
+ },
+ {
+  "tool": "pdf-editor",
+  "test": "Search 'ipsum' finds matches across pages",
+  "verdict": "PASS",
+  "detail": ""
+ },
+ {
+  "tool": "pdf-editor",
+  "test": "rotate p3, duplicate p2, delete last, add blank page → thumbnails",
+  "verdict": "INFO",
+  "detail": "after dup 15, now 15"
+ },
+ {
+  "tool": "pdf-editor",
+  "test": "export: added text present in text layer",
+  "verdict": "PASS",
+  "detail": "idunt ullamco minim consequat nostrud ut AUDIT-ADDED-TEXT Page 1 EDITED-BY-AUDIT"
+ },
+ {
+  "tool": "pdf-editor",
+  "test": "export: edited native text — new text visible & searchable once; old text stays underneath (disclosed limitation)",
+  "verdict": "LIMITED",
+  "detail": "new text occurrences in text layer=1; old \"Page 1 of 14\" still extractable=true — FAQ/Properties panel say corrections cover, not remove"
+ },
+ {
+  "tool": "pdf-editor",
+  "test": "export: whiteout — is the covered text still extractable?",
+  "verdict": "INFO",
+  "detail": "text under whiteout still in text layer: true (whiteout is visual cover; check UI wording)"
+ },
+ {
+  "tool": "pdf-editor",
+  "test": "export: shapes/annotations painted (rect edge, ellipse, whiteout white)",
+  "verdict": "PASS",
+  "detail": "checked scan line y=300"
+ },
+ {
+  "tool": "pdf-editor",
+  "test": "export: page count after ops (14 +1 dup −1 del +1 blank = 15)",
+  "verdict": "PASS",
+  "detail": "15 pages; rotations p1-4=0,0,0,90"
+ },
+ {
+  "tool": "pdf-editor",
+  "test": "export: page 3 rotated 90 (after duplicate p2 → old p3 is p4)",
+  "verdict": "INFO",
+  "detail": "angles: 0,0,0,90,0,0,0,0,0,0,0,0,0,0,0"
+ },
+ {
+  "tool": "(pdf-editor A)",
+  "test": "browser console/page errors",
+  "verdict": "PASS",
+  "detail": ""
+ }
+]

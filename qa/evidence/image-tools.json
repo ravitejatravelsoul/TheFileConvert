@@ -1,0 +1,194 @@
+[
+ {
+  "tool": "image-resize",
+  "test": "200px wide, ratio locked → 200x150, colours correct, PNG",
+  "verdict": "PASS",
+  "detail": "200x150 heightField=150 fmt=png"
+ },
+ {
+  "tool": "image-resize",
+  "test": "100x100 unlocked as JPG",
+  "verdict": "PASS",
+  "detail": "100x100 jpeg"
+ },
+ {
+  "tool": "image-resize",
+  "test": "100x100 unlocked as WebP",
+  "verdict": "PASS",
+  "detail": "100x100 webp"
+ },
+ {
+  "tool": "image-resize",
+  "test": "4200x3000 photo → 1000 wide (JPG in → default format)",
+  "verdict": "PASS",
+  "detail": "1000x714 jpeg 298502B"
+ },
+ {
+  "tool": "image-resize",
+  "test": "width 0 refused",
+  "verdict": "PASS",
+  "detail": "Width and height must be at least 1 pixel."
+ },
+ {
+  "tool": "image-crop",
+  "test": "top-left quarter → 200x150 all red",
+  "verdict": "PASS",
+  "detail": "200x150 255,0,0,255"
+ },
+ {
+  "tool": "image-crop",
+  "test": "bottom-right quarter → all yellow",
+  "verdict": "PASS",
+  "detail": "200x150 255,255,0,255"
+ },
+ {
+  "tool": "image-crop",
+  "test": "mouse drag draws a new box top-left (~43% of image, all red)",
+  "verdict": "PASS",
+  "detail": "sliders=43,43,2,2 out=172x129 255,0,0,255"
+ },
+ {
+  "tool": "image-crop",
+  "test": "touch — see mobile run",
+  "verdict": "INFO",
+  "detail": "covered in qa/scripts/mobile.mjs"
+ },
+ {
+  "tool": "image-rotate",
+  "test": "90° clockwise",
+  "verdict": "PASS",
+  "detail": "300x400 quad=0/0/255 255/0/0 255/255/0 0/255/0"
+ },
+ {
+  "tool": "image-rotate",
+  "test": "180°",
+  "verdict": "PASS",
+  "detail": "400x300 quad=255/255/0 0/0/255 0/255/0 255/0/0"
+ },
+ {
+  "tool": "image-rotate",
+  "test": "No rotation + flip H",
+  "verdict": "PASS",
+  "detail": "400x300 quad=0/255/0 255/0/0 255/255/0 0/0/255"
+ },
+ {
+  "tool": "image-rotate",
+  "test": "No rotation + flip V",
+  "verdict": "PASS",
+  "detail": "400x300 quad=0/0/255 255/255/0 255/0/0 0/255/0"
+ },
+ {
+  "tool": "image-rotate",
+  "test": "portrait photo 90° → 1600x1000 JPEG",
+  "verdict": "PASS",
+  "detail": "1600x1000 jpeg"
+ },
+ {
+  "tool": "image-metadata-remove",
+  "test": "input contains AuditCam EXIF; output does not; pixels same size/similar",
+  "verdict": "PASS",
+  "detail": "inHas=true outHas=false 1200x800 psnr=46.2 fmt=jpeg 341869B"
+ },
+ {
+  "tool": "image-metadata-remove",
+  "test": "PNG in → valid image, same colours",
+  "verdict": "PASS",
+  "detail": "png 400x300"
+ },
+ {
+  "tool": "svg-to-png",
+  "test": "640x420 SVG → PNG at native size, orange rect + transparent background",
+  "verdict": "PASS",
+  "detail": "640x420 bgAlpha=0 rect=234,88,12,255"
+ },
+ {
+  "tool": "svg-to-png",
+  "test": "width 1280 → 1280x840 crisp",
+  "verdict": "PASS",
+  "detail": "1280x840"
+ },
+ {
+  "tool": "svg-to-png",
+  "test": "script/onload/external image in SVG: no script ran, no dialog",
+  "verdict": "PASS",
+  "detail": "converted 300x150 px=255,0,0,255; dialogs=0"
+ },
+ {
+  "tool": "svg-to-png",
+  "test": "broken SVG → clear error",
+  "verdict": "PASS",
+  "detail": "This SVG couldn't be rendered. It may use unsupported features."
+ },
+ {
+  "tool": "jpg-to-png",
+  "test": "IMAGE-12-portrait.jpg → png",
+  "verdict": "PASS",
+  "detail": "1000x1600 → 1000x1600 png psnr=99 bytes 442765→3247826 (-633.5%) no 'compress' wording"
+ },
+ {
+  "tool": "png-to-jpg",
+  "test": "IMAGE-03-photo.png → jpeg",
+  "verdict": "PASS",
+  "detail": "2600x1800 → 2600x1800 jpeg psnr=35.3 bytes 6293938→1760059 (72.0%) no 'compress' wording"
+ },
+ {
+  "tool": "jpg-to-webp",
+  "test": "IMAGE-13-landscape.jpg → webp",
+  "verdict": "PASS",
+  "detail": "1800x1000 → 1800x1000 webp psnr=40.5 bytes 494269→578750 (-17.1%) no 'compress' wording"
+ },
+ {
+  "tool": "webp-to-jpg",
+  "test": "IMAGE-07-photo.webp → jpeg",
+  "verdict": "PASS",
+  "detail": "2000x1500 → 2000x1500 jpeg psnr=35.7 bytes 986482→1193201 (-21.0%) no 'compress' wording"
+ },
+ {
+  "tool": "png-to-webp",
+  "test": "IMAGE-03-photo.png → webp",
+  "verdict": "PASS",
+  "detail": "2600x1800 → 2600x1800 webp psnr=39.6 bytes 6293938→1759412 (72.0%) no 'compress' wording"
+ },
+ {
+  "tool": "webp-to-png",
+  "test": "IMAGE-07-photo.webp → png",
+  "verdict": "PASS",
+  "detail": "2000x1500 → 2000x1500 png psnr=99 bytes 986482→6823938 (-591.7%) no 'compress' wording"
+ },
+ {
+  "tool": "png-to-jpg",
+  "test": "transparent PNG → JPG: warned, background is white (not black)",
+  "verdict": "PASS",
+  "detail": "warning=\"IMAGE-04-transparent.png\" corner=255,255,255,255"
+ },
+ {
+  "tool": "png-to-webp",
+  "test": "alpha preserved in WebP",
+  "verdict": "PASS",
+  "detail": "corner alpha=0"
+ },
+ {
+  "tool": "webp-to-png",
+  "test": "alpha preserved in PNG",
+  "verdict": "PASS",
+  "detail": "corner alpha=0"
+ },
+ {
+  "tool": "jpg-to-png",
+  "test": "2 files → ZIP of 2 PNGs",
+  "verdict": "PASS",
+  "detail": "IMAGE-12-portrait-converted.png,IMAGE-13-landscape-converted.png"
+ },
+ {
+  "tool": "jpg-to-png",
+  "test": "non-image upload refused",
+  "verdict": "PASS",
+  "detail": " DOC-02-markdown.md: This file type isn't supported by JPG to PNG. "
+ },
+ {
+  "tool": "(all image tools)",
+  "test": "browser console/page errors",
+  "verdict": "PASS",
+  "detail": ""
+ }
+]

@@ -1,0 +1,18 @@
+PASS    pdf-editor :: opens a 14-page native PDF; page surface visible — surface 641x829 px (k=1.047)
+PASS    pdf-editor :: Text tool: click page, type, commit → text object created — added-text objects=1 all=1
+PASS    pdf-editor :: Highlight + Underline + Strike drags create 3 annotations — annotations=3
+PASS    pdf-editor :: Draw: freehand stroke — types=added-text,native-text-replacement,annotation,drawing
+PASS    pdf-editor :: Rectangle, Ellipse, Line, Arrow drags create 4 shapes — shapes=4
+PASS    pdf-editor :: Whiteout region created — objects=11
+PASS    pdf-editor :: Image: choose PNG, place on page — image objects=1
+PASS    pdf-editor :: Sign: draw signature, place on page — objects by type=added-text,native-text-replacement,annotation,annotation,annotation,drawing,shape,shape,shape,shape,whiteout,image,signature
+PASS    pdf-editor :: Undo removes the last object, Redo restores it — 13 → 12 → 13
+PASS    pdf-editor :: Search 'ipsum' finds matches across pages
+INFO    pdf-editor :: rotate p3, duplicate p2, delete last, add blank page → thumbnails — after dup 15, now 15
+PASS    pdf-editor :: export: added text present in text layer — idunt ullamco minim consequat nostrud ut AUDIT-ADDED-TEXT Page 1 EDITED-BY-AUDIT
+LIMITED pdf-editor :: export: edited native text — new text visible & searchable once; old text stays underneath (disclosed limitation) — new text occurrences in text layer=1; old "Page 1 of 14" still extractable=true — FAQ/Properties panel say corrections cover, not remove
+INFO    pdf-editor :: export: whiteout — is the covered text still extractable? — text under whiteout still in text layer: true (whiteout is visual cover; check UI wording)
+PASS    pdf-editor :: export: shapes/annotations painted (rect edge, ellipse, whiteout white) — checked scan line y=300
+PASS    pdf-editor :: export: page count after ops (14 +1 dup −1 del +1 blank = 15) — 15 pages; rotations p1-4=0,0,0,90
+INFO    pdf-editor :: export: page 3 rotated 90 (after duplicate p2 → old p3 is p4) — angles: 0,0,0,90,0,0,0,0,0,0,0,0,0,0,0
+PASS    (pdf-editor A) :: browser console/page errors

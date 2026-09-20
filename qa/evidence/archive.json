@@ -1,0 +1,80 @@
+[
+ {
+  "tool": "zip-create",
+  "test": "7 files (unicode name, spaces, duplicate names, 8 MB JPEG) → every file's bytes present in ZIP",
+  "verdict": "PASS",
+  "detail": "entries=7 missingBytes=[] names=PDF-10-many-pages.pdf | IMAGE-11-quadrants.png | DOC-02-markdown.md | ünï cödé 日本語 file.txt | with spaces.txt | copy-with spaces.txt | IMAGE-01-photo-large.jpg"
+ },
+ {
+  "tool": "zip-create",
+  "test": "two files with the same name (with spaces.txt ×2) both kept",
+  "verdict": "PASS",
+  "detail": "with spaces.txt | copy-with spaces.txt"
+ },
+ {
+  "tool": "zip-create",
+  "test": "ZIP opens with an independent reader and is not larger than inputs + overhead",
+  "verdict": "PASS",
+  "detail": "zip=8111069 inputs=8111220"
+ },
+ {
+  "tool": "zip-create",
+  "test": "1 file allowed",
+  "verdict": "INFO",
+  "detail": "Create ZIP from 1 file disabled=false"
+ },
+ {
+  "tool": "zip-extract",
+  "test": "pre-extract listing shows all 7 entries with full paths",
+  "verdict": "PASS",
+  "detail": "readme.txt | docs/notes with spaces.txt | docs/deep/er/ünï-cödé-日本語.txt | data/blob.bin | data/table.csv | images/logo.png | images/photo.jpg"
+ },
+ {
+  "tool": "zip-extract",
+  "test": "all 7 files extracted byte-identical (incl. 200 KB binary, unicode & spaced names)",
+  "verdict": "PASS",
+  "detail": "identical=7/7 missing=[] different=[] resultNames=readme.txt | docs/notes with spaces.txt | docs/deep/er/ünï-cödé-日本語.txt | data/blob.bin | data/table.csv | images/logo.png | images/photo.jpg"
+ },
+ {
+  "tool": "zip-extract",
+  "test": "folder structure preserved in extracted names",
+  "verdict": "PASS",
+  "detail": "readme.txt | docs/notes with spaces.txt | docs/deep/er/ünï-cödé-日本語.txt | data/blob.bin | data/table.csv | images/logo.png | images/photo.jpg"
+ },
+ {
+  "tool": "zip-extract",
+  "test": "per-file Download gives exact bytes",
+  "verdict": "PASS",
+  "detail": "readme.txt"
+ },
+ {
+  "tool": "zip-extract",
+  "test": "corrupt ZIP → clear error, no crash",
+  "verdict": "PASS",
+  "detail": "We couldn't read this archive. It may be damaged or not a ZIP file."
+ },
+ {
+  "tool": "zip-extract",
+  "test": "../../evil.txt and /abs/evil2.txt entries can't escape (sanitised or refused)",
+  "verdict": "PASS",
+  "detail": "evil.txt | /abs/evil2.txt | ok/fine.txt → extracted: evil.txt | abs/evil2.txt | ok/fine.txt"
+ },
+ {
+  "tool": "zip-extract",
+  "test": "nothing written outside the download directory",
+  "verdict": "PASS",
+  "detail": ""
+ },
+ {
+  "tool": "zip-extract",
+  "test": "non-ZIP file rejected",
+  "verdict": "PASS",
+  "detail": " DOC-02-markdown.md: This file type isn't supported by Extract ZIP Archive. "
+ },
+ {
+  "tool": "(archive tools)",
+  "test": "browser console/page errors",
+  "verdict": "PASS",
+  "detail": ""
+ }
+]

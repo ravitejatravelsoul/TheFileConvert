@@ -1,0 +1,476 @@
+[
+ {
+  "fixture": "PDF-01-text-heavy.pdf",
+  "mode": "lossless",
+  "input": 1480721,
+  "analysis": "1.4 MB · This PDF has no embedded images — it is text and vector content. | Lossless optimization is all that applies here, and it usually saves only a few percent (often nothing if the file was already optimized).",
+  "ms": 878,
+  "output": 1480721,
+  "file": "C:\\Users\\ravit\\Desktop\\my projects\\thefileconvert\\qa\\evidence\\compress-out\\PDF-01-text-heavy.lossless.pdf",
+  "ui": "1.4 MB | 1.4 MB | No significant change | Exact: 1,480,721 bytes → 1,480,721 bytes (0 fewer) | Optimized the file structure. | 1.4 MB"
+ },
+ {
+  "fixture": "PDF-01-text-heavy.pdf",
+  "mode": "balanced",
+  "input": 1480721,
+  "analysis": "1.4 MB · This PDF has no embedded images — it is text and vector content. | Lossless optimization is all that applies here, and it usually saves only a few percent (often nothing if the file was already optimized).",
+  "ms": 886,
+  "output": 1480721,
+  "file": "C:\\Users\\ravit\\Desktop\\my projects\\thefileconvert\\qa\\evidence\\compress-out\\PDF-01-text-heavy.balanced.pdf",
+  "ui": "1.4 MB | 1.4 MB | No significant change | Exact: 1,480,721 bytes → 1,480,721 bytes (0 fewer) | Optimized the file structure. | 1.4 MB"
+ },
+ {
+  "fixture": "PDF-01-text-heavy.pdf",
+  "mode": "small",
+  "input": 1480721,
+  "analysis": "1.4 MB · This PDF has no embedded images — it is text and vector content. | Lossless optimization is all that applies here, and it usually saves only a few percent (often nothing if the file was already optimized).",
+  "ms": 883,
+  "output": 1480721,
+  "file": "C:\\Users\\ravit\\Desktop\\my projects\\thefileconvert\\qa\\evidence\\compress-out\\PDF-01-text-heavy.small.pdf",
+  "ui": "1.4 MB | 1.4 MB | No significant change | Exact: 1,480,721 bytes → 1,480,721 bytes (0 fewer) | Optimized the file structure. | 1.4 MB"
+ },
+ {
+  "fixture": "PDF-02-scan-photo.pdf",
+  "mode": "lossless",
+  "input": 5120464,
+  "analysis": "4.9 MB · 3 embedded images make up 100% of this file. | Lossless optimization will barely change a file like this. To actually shrink it, choose Balanced or Smallest below (this lowers image quality).",
+  "ms": 97,
+  "output": 5120464,
+  "file": "C:\\Users\\ravit\\Desktop\\my projects\\thefileconvert\\qa\\evidence\\compress-out\\PDF-02-scan-photo.lossless.pdf",
+  "ui": "4.9 MB | 4.9 MB | No significant change | Exact: 5,120,464 bytes → 5,120,464 bytes (0 fewer) | Optimized the file structure. | 4.9 MB"
+ },
+ {
+  "fixture": "PDF-02-scan-photo.pdf",
+  "mode": "balanced",
+  "input": 5120464,
+  "analysis": "4.9 MB · 3 embedded images make up 100% of this file. | Lossless optimization will barely change a file like this. To actually shrink it, choose Balanced or Smallest below (this lowers image quality).",
+  "ms": 348,
+  "output": 1634097,
+  "file": "C:\\Users\\ravit\\Desktop\\my projects\\thefileconvert\\qa\\evidence\\compress-out\\PDF-02-scan-photo.balanced.pdf",
+  "ui": "4.9 MB | 1.6 MB | 68% smaller | Exact: 5,120,464 bytes → 1,634,097 bytes (3,486,367 fewer) | Re-encoded 3 images at reduced quality, optimized the file structure. | 1.6 MB"
+ },
+ {
+  "fixture": "PDF-02-scan-photo.pdf",
+  "mode": "small",
+  "input": 5120464,
+  "analysis": "4.9 MB · 3 embedded images make up 100% of this file. | Lossless optimization will barely change a file like this. To actually shrink it, choose Balanced or Smallest below (this lowers image quality).",
+  "ms": 352,
+  "output": 584310,
+  "file": "C:\\Users\\ravit\\Desktop\\my projects\\thefileconvert\\qa\\evidence\\compress-out\\PDF-02-scan-photo.small.pdf",
+  "ui": "4.9 MB | 570.6 KB | 89% smaller | Exact: 5,120,464 bytes → 584,310 bytes (4,536,154 fewer) | Re-encoded 3 images at reduced quality, optimized the file structure. | 570.6 KB"
+ },
+ {
+  "fixture": "PDF-03-large-scan.pdf",
+  "mode": "lossless",
+  "input": 23274446,
+  "analysis": "22.2 MB · 4 embedded images make up 100% of this file. | Lossless optimization will barely change a file like this. To actually shrink it, choose Balanced or Smallest below (this lowers image quality).",
+  "ms": 139,
+  "output": 23274446,
+  "file": "C:\\Users\\ravit\\Desktop\\my projects\\thefileconvert\\qa\\evidence\\compress-out\\PDF-03-large-scan.lossless.pdf",
+  "ui": "22.2 MB | 22.2 MB | No significant change | Exact: 23,274,446 bytes → 23,274,446 bytes (0 fewer) | Optimized the file structure. | 22.2 MB"
+ },
+ {
+  "fixture": "PDF-03-large-scan.pdf",
+  "mode": "balanced",
+  "input": 23274446,
+  "analysis": "22.2 MB · 4 embedded images make up 100% of this file. | Lossless optimization will barely change a file like this. To actually shrink it, choose Balanced or Smallest below (this lowers image quality).",
+  "ms": 863,
+  "output": 2374706,
+  "file": "C:\\Users\\ravit\\Desktop\\my projects\\thefileconvert\\qa\\evidence\\compress-out\\PDF-03-large-scan.balanced.pdf",
+  "ui": "22.2 MB | 2.3 MB | 90% smaller | Exact: 23,274,446 bytes → 2,374,706 bytes (20,899,740 fewer) | Re-encoded 4 images at reduced quality, optimized the file structure. | 2.3 MB"
+ },
+ {
+  "fixture": "PDF-03-large-scan.pdf",
+  "mode": "small",
+  "input": 23274446,
+  "analysis": "22.2 MB · 4 embedded images make up 100% of this file. | Lossless optimization will barely change a file like this. To actually shrink it, choose Balanced or Smallest below (this lowers image quality).",
+  "ms": 868,
+  "output": 764187,
+  "file": "C:\\Users\\ravit\\Desktop\\my projects\\thefileconvert\\qa\\evidence\\compress-out\\PDF-03-large-scan.small.pdf",
+  "ui": "22.2 MB | 746.3 KB | 97% smaller | Exact: 23,274,446 bytes → 764,187 bytes (22,510,259 fewer) | Re-encoded 4 images at reduced quality, optimized the file structure. | 746.3 KB"
+ },
+ {
+  "fixture": "PDF-04-mixed.pdf",
+  "mode": "lossless",
+  "input": 2072076,
+  "analysis": "2.0 MB · 1 embedded image makes up 99% of this file. | Lossless optimization will barely change a file like this. To actually shrink it, choose Balanced or Smallest below (this lowers image quality).",
+  "ms": 96,
+  "output": 2072076,
+  "file": "C:\\Users\\ravit\\Desktop\\my projects\\thefileconvert\\qa\\evidence\\compress-out\\PDF-04-mixed.lossless.pdf",
+  "ui": "2.0 MB | 2.0 MB | No significant change | Exact: 2,072,076 bytes → 2,072,076 bytes (0 fewer) | Optimized the file structure. | 2.0 MB"
+ },
+ {
+  "fixture": "PDF-04-mixed.pdf",
+  "mode": "balanced",
+  "input": 2072076,
+  "analysis": "2.0 MB · 1 embedded image makes up 99% of this file. | Lossless optimization will barely change a file like this. To actually shrink it, choose Balanced or Smallest below (this lowers image quality).",
+  "ms": 216,
+  "output": 527592,
+  "file": "C:\\Users\\ravit\\Desktop\\my projects\\thefileconvert\\qa\\evidence\\compress-out\\PDF-04-mixed.balanced.pdf",
+  "ui": "2.0 MB | 515.2 KB | 75% smaller | Exact: 2,072,076 bytes → 527,592 bytes (1,544,484 fewer) | Re-encoded 1 image at reduced quality, optimized the file structure. | 515.2 KB"
+ },
+ {
+  "fixture": "PDF-04-mixed.pdf",
+  "mode": "small",
+  "input": 2072076,
+  "analysis": "2.0 MB · 1 embedded image makes up 99% of this file. | Lossless optimization will barely change a file like this. To actually shrink it, choose Balanced or Smallest below (this lowers image quality).",
+  "ms": 136,
+  "output": 138846,
+  "file": "C:\\Users\\ravit\\Desktop\\my projects\\thefileconvert\\qa\\evidence\\compress-out\\PDF-04-mixed.small.pdf",
+  "ui": "2.0 MB | 135.6 KB | 93% smaller | Exact: 2,072,076 bytes → 138,846 bytes (1,933,230 fewer) | Re-encoded 1 image at reduced quality, optimized the file structure. | 135.6 KB"
+ },
+ {
+  "fixture": "PDF-05-bloated.pdf",
+  "mode": "lossless",
+  "input": 37720142,
+  "analysis": "36.0 MB · 6 embedded images make up 98% of this file. 5 of them are exact repeats that can be merged with no quality loss. | Lossless mode should still help: merging the repeated images alone saves roughly 81% with no quality loss. Balanced or Smallest go further by lowering image quality.",
+  "ms": 260,
+  "output": 7003090,
+  "file": "C:\\Users\\ravit\\Desktop\\my projects\\thefileconvert\\qa\\evidence\\compress-out\\PDF-05-bloated.lossless.pdf",
+  "ui": "36.0 MB | 6.7 MB | 81% smaller | Exact: 37,720,142 bytes → 7,003,090 bytes (30,717,052 fewer) | Merged 5 duplicate images, optimized the file structure. | 6.7 MB"
+ },
+ {
+  "fixture": "PDF-05-bloated.pdf",
+  "mode": "balanced",
+  "input": 37720142,
+  "analysis": "36.0 MB · 6 embedded images make up 98% of this file. 5 of them are exact repeats that can be merged with no quality loss. | Lossless mode should still help: merging the repeated images alone saves roughly 81% with no quality loss. Balanced or Smallest go further by lowering image quality.",
+  "ms": 349,
+  "output": 1317696,
+  "file": "C:\\Users\\ravit\\Desktop\\my projects\\thefileconvert\\qa\\evidence\\compress-out\\PDF-05-bloated.balanced.pdf",
+  "ui": "36.0 MB | 1.3 MB | 97% smaller | Exact: 37,720,142 bytes → 1,317,696 bytes (36,402,446 fewer) | Re-encoded 1 image at reduced quality, merged 5 duplicate images, optimized the file structure. | 1.3 MB"
+ },
+ {
+  "fixture": "PDF-05-bloated.pdf",
+  "mode": "small",
+  "input": 37720142,
+  "analysis": "36.0 MB · 6 embedded images make up 98% of this file. 5 of them are exact repeats that can be merged with no quality loss. | Lossless mode should still help: merging the repeated images alone saves roughly 81% with no quality loss. Balanced or Smallest go further by lowering image quality.",
+  "ms": 356,
+  "output": 957375,
+  "file": "C:\\Users\\ravit\\Desktop\\my projects\\thefileconvert\\qa\\evidence\\compress-out\\PDF-05-bloated.small.pdf",
+  "ui": "36.0 MB | 934.9 KB | 97% smaller | Exact: 37,720,142 bytes → 957,375 bytes (36,762,767 fewer) | Re-encoded 1 image at reduced quality, merged 5 duplicate images, optimized the file structure. | 934.9 KB"
+ },
+ {
+  "fixture": "PDF-06-optimized.pdf",
+  "mode": "lossless",
+  "input": 9150,
+  "analysis": "8.9 KB · This PDF has no embedded images — it is text and vector content. | Lossless optimization is all that applies here, and it usually saves only a few percent (often nothing if the file was already optimized).",
+  "ms": 69,
+  "output": 9150,
+  "file": "C:\\Users\\ravit\\Desktop\\my projects\\thefileconvert\\qa\\evidence\\compress-out\\PDF-06-optimized.lossless.pdf",
+  "ui": "8.9 KB | 8.9 KB | No significant change | Exact: 9,150 bytes → 9,150 bytes (0 fewer) | PDF-06-optimized-compressed.pdf | Optimized the file structure."
+ },
+ {
+  "fixture": "PDF-06-optimized.pdf",
+  "mode": "balanced",
+  "input": 9150,
+  "analysis": "8.9 KB · This PDF has no embedded images — it is text and vector content. | Lossless optimization is all that applies here, and it usually saves only a few percent (often nothing if the file was already optimized).",
+  "ms": 77,
+  "output": 9150,
+  "file": "C:\\Users\\ravit\\Desktop\\my projects\\thefileconvert\\qa\\evidence\\compress-out\\PDF-06-optimized.balanced.pdf",
+  "ui": "8.9 KB | 8.9 KB | No significant change | Exact: 9,150 bytes → 9,150 bytes (0 fewer) | PDF-06-optimized-compressed.pdf | Optimized the file structure."
+ },
+ {
+  "fixture": "PDF-06-optimized.pdf",
+  "mode": "small",
+  "input": 9150,
+  "analysis": "8.9 KB · This PDF has no embedded images — it is text and vector content. | Lossless optimization is all that applies here, and it usually saves only a few percent (often nothing if the file was already optimized).",
+  "ms": 70,
+  "output": 9150,
+  "file": "C:\\Users\\ravit\\Desktop\\my projects\\thefileconvert\\qa\\evidence\\compress-out\\PDF-06-optimized.small.pdf",
+  "ui": "8.9 KB | 8.9 KB | No significant change | Exact: 9,150 bytes → 9,150 bytes (0 fewer) | PDF-06-optimized-compressed.pdf | Optimized the file structure."
+ },
+ {
+  "fixture": "PDF-07-rotated.pdf",
+  "mode": "lossless",
+  "input": 13377,
+  "analysis": "13.1 KB · This PDF has no embedded images — it is text and vector content. | Lossless optimization is all that applies here, and it usually saves only a few percent (often nothing if the file was already optimized).",
+  "ms": 72,
+  "output": 13377,
+  "file": "C:\\Users\\ravit\\Desktop\\my projects\\thefileconvert\\qa\\evidence\\compress-out\\PDF-07-rotated.lossless.pdf",
+  "ui": "13.1 KB | 13.1 KB | No significant change | Exact: 13,377 bytes → 13,377 bytes (0 fewer) | Optimized the file structure. | 13.1 KB"
+ },
+ {
+  "fixture": "PDF-07-rotated.pdf",
+  "mode": "balanced",
+  "input": 13377,
+  "analysis": "13.1 KB · This PDF has no embedded images — it is text and vector content. | Lossless optimization is all that applies here, and it usually saves only a few percent (often nothing if the file was already optimized).",
+  "ms": 81,
+  "output": 13377,
+  "file": "C:\\Users\\ravit\\Desktop\\my projects\\thefileconvert\\qa\\evidence\\compress-out\\PDF-07-rotated.balanced.pdf",
+  "ui": "13.1 KB | 13.1 KB | No significant change | Exact: 13,377 bytes → 13,377 bytes (0 fewer) | Optimized the file structure. | 13.1 KB"
+ },
+ {
+  "fixture": "PDF-07-rotated.pdf",
+  "mode": "small",
+  "input": 13377,
+  "analysis": "13.1 KB · This PDF has no embedded images — it is text and vector content. | Lossless optimization is all that applies here, and it usually saves only a few percent (often nothing if the file was already optimized).",
+  "ms": 99,
+  "output": 13377,
+  "file": "C:\\Users\\ravit\\Desktop\\my projects\\thefileconvert\\qa\\evidence\\compress-out\\PDF-07-rotated.small.pdf",
+  "ui": "13.1 KB | 13.1 KB | No significant change | Exact: 13,377 bytes → 13,377 bytes (0 fewer) | Optimized the file structure. | 13.1 KB"
+ },
+ {
+  "fixture": "PDF-08-metadata.pdf",
+  "mode": "lossless",
+  "input": 10877,
+  "analysis": "10.6 KB · This PDF has no embedded images — it is text and vector content. | Lossless optimization is all that applies here, and it usually saves only a few percent (often nothing if the file was already optimized).",
+  "ms": 70,
+  "output": 7087,
+  "file": "C:\\Users\\ravit\\Desktop\\my projects\\thefileconvert\\qa\\evidence\\compress-out\\PDF-08-metadata.lossless.pdf",
+  "ui": "10.6 KB | 6.9 KB | 35% smaller | Exact: 10,877 bytes → 7,087 bytes (3,790 fewer) | Optimized the file structure. | 6.9 KB"
+ },
+ {
+  "fixture": "PDF-08-metadata.pdf",
+  "mode": "balanced",
+  "input": 10877,
+  "analysis": "10.6 KB · This PDF has no embedded images — it is text and vector content. | Lossless optimization is all that applies here, and it usually saves only a few percent (often nothing if the file was already optimized).",
+  "ms": 94,
+  "output": 7087,
+  "file": "C:\\Users\\ravit\\Desktop\\my projects\\thefileconvert\\qa\\evidence\\compress-out\\PDF-08-metadata.balanced.pdf",
+  "ui": "10.6 KB | 6.9 KB | 35% smaller | Exact: 10,877 bytes → 7,087 bytes (3,790 fewer) | Optimized the file structure. | 6.9 KB"
+ },
+ {
+  "fixture": "PDF-08-metadata.pdf",
+  "mode": "small",
+  "input": 10877,
+  "analysis": "10.6 KB · This PDF has no embedded images — it is text and vector content. | Lossless optimization is all that applies here, and it usually saves only a few percent (often nothing if the file was already optimized).",
+  "ms": 88,
+  "output": 7087,
+  "file": "C:\\Users\\ravit\\Desktop\\my projects\\thefileconvert\\qa\\evidence\\compress-out\\PDF-08-metadata.small.pdf",
+  "ui": "10.6 KB | 6.9 KB | 35% smaller | Exact: 10,877 bytes → 7,087 bytes (3,790 fewer) | Optimized the file structure. | 6.9 KB"
+ },
+ {
+  "fixture": "PDF-09-form.pdf",
+  "mode": "lossless",
+  "input": 5415,
+  "analysis": "5.3 KB · This PDF has no embedded images — it is text and vector content. | Lossless optimization is all that applies here, and it usually saves only a few percent (often nothing if the file was already optimized).",
+  "ms": 76,
+  "output": 5415,
+  "file": "C:\\Users\\ravit\\Desktop\\my projects\\thefileconvert\\qa\\evidence\\compress-out\\PDF-09-form.lossless.pdf",
+  "ui": "5.3 KB | 5.3 KB | No significant change | Exact: 5,415 bytes → 5,415 bytes (0 fewer) | Optimized the file structure. | 5.3 KB"
+ },
+ {
+  "fixture": "PDF-09-form.pdf",
+  "mode": "balanced",
+  "input": 5415,
+  "analysis": "5.3 KB · This PDF has no embedded images — it is text and vector content. | Lossless optimization is all that applies here, and it usually saves only a few percent (often nothing if the file was already optimized).",
+  "ms": 74,
+  "output": 5415,
+  "file": "C:\\Users\\ravit\\Desktop\\my projects\\thefileconvert\\qa\\evidence\\compress-out\\PDF-09-form.balanced.pdf",
+  "ui": "5.3 KB | 5.3 KB | No significant change | Exact: 5,415 bytes → 5,415 bytes (0 fewer) | Optimized the file structure. | 5.3 KB"
+ },
+ {
+  "fixture": "PDF-09-form.pdf",
+  "mode": "small",
+  "input": 5415,
+  "analysis": "5.3 KB · This PDF has no embedded images — it is text and vector content. | Lossless optimization is all that applies here, and it usually saves only a few percent (often nothing if the file was already optimized).",
+  "ms": 87,
+  "output": 5415,
+  "file": "C:\\Users\\ravit\\Desktop\\my projects\\thefileconvert\\qa\\evidence\\compress-out\\PDF-09-form.small.pdf",
+  "ui": "5.3 KB | 5.3 KB | No significant change | Exact: 5,415 bytes → 5,415 bytes (0 fewer) | Optimized the file structure. | 5.3 KB"
+ },
+ {
+  "fixture": "PDF-10-many-pages.pdf",
+  "mode": "lossless",
+  "input": 30276,
+  "analysis": "29.6 KB · This PDF has no embedded images — it is text and vector content. | Lossless optimization is all that applies here, and it usually saves only a few percent (often nothing if the file was already optimized).",
+  "ms": 76,
+  "output": 30276,
+  "file": "C:\\Users\\ravit\\Desktop\\my projects\\thefileconvert\\qa\\evidence\\compress-out\\PDF-10-many-pages.lossless.pdf",
+  "ui": "29.6 KB | 29.6 KB | No significant change | Exact: 30,276 bytes → 30,276 bytes (0 fewer) | Optimized the file structure. | 29.6 KB"
+ },
+ {
+  "fixture": "PDF-10-many-pages.pdf",
+  "mode": "balanced",
+  "input": 30276,
+  "analysis": "29.6 KB · This PDF has no embedded images — it is text and vector content. | Lossless optimization is all that applies here, and it usually saves only a few percent (often nothing if the file was already optimized).",
+  "ms": 95,
+  "output": 30276,
+  "file": "C:\\Users\\ravit\\Desktop\\my projects\\thefileconvert\\qa\\evidence\\compress-out\\PDF-10-many-pages.balanced.pdf",
+  "ui": "29.6 KB | 29.6 KB | No significant change | Exact: 30,276 bytes → 30,276 bytes (0 fewer) | Optimized the file structure. | 29.6 KB"
+ },
+ {
+  "fixture": "PDF-10-many-pages.pdf",
+  "mode": "small",
+  "input": 30276,
+  "analysis": "29.6 KB · This PDF has no embedded images — it is text and vector content. | Lossless optimization is all that applies here, and it usually saves only a few percent (often nothing if the file was already optimized).",
+  "ms": 85,
+  "output": 30276,
+  "file": "C:\\Users\\ravit\\Desktop\\my projects\\thefileconvert\\qa\\evidence\\compress-out\\PDF-10-many-pages.small.pdf",
+  "ui": "29.6 KB | 29.6 KB | No significant change | Exact: 30,276 bytes → 30,276 bytes (0 fewer) | Optimized the file structure. | 29.6 KB"
+ },
+ {
+  "fixture": "PDF-11-corrupt.pdf",
+  "mode": "lossless",
+  "input": 1200,
+  "analysis": "",
+  "ms": 56,
+  "error": "Home\nTools\nPDF\nCompress PDF\nAvailable\nProcessed on your device\nCompress PDF\n\nShrink a PDF by merging repeated images and tidying its structure — or, if you choose, re-saving its photos and scans at lo"
+ },
+ {
+  "fixture": "PDF-11-corrupt.pdf",
+  "mode": "balanced",
+  "input": 1200,
+  "analysis": "",
+  "ms": 76,
+  "error": "Home\nTools\nPDF\nCompress PDF\nAvailable\nProcessed on your device\nCompress PDF\n\nShrink a PDF by merging repeated images and tidying its structure — or, if you choose, re-saving its photos and scans at lo"
+ },
+ {
+  "fixture": "PDF-11-corrupt.pdf",
+  "mode": "small",
+  "input": 1200,
+  "analysis": "",
+  "ms": 72,
+  "error": "Home\nTools\nPDF\nCompress PDF\nAvailable\nProcessed on your device\nCompress PDF\n\nShrink a PDF by merging repeated images and tidying its structure — or, if you choose, re-saving its photos and scans at lo"
+ },
+ {
+  "fixture": "PDF-12-scanned-ocr.pdf",
+  "mode": "lossless",
+  "input": 2387094,
+  "analysis": "2.3 MB · 2 embedded images make up 100% of this file. | Lossless optimization will barely change a file like this. To actually shrink it, choose Balanced or Smallest below (this lowers image quality).",
+  "ms": 127,
+  "output": 2387094,
+  "file": "C:\\Users\\ravit\\Desktop\\my projects\\thefileconvert\\qa\\evidence\\compress-out\\PDF-12-scanned-ocr.lossless.pdf",
+  "ui": "2.3 MB | 2.3 MB | No significant change | Exact: 2,387,094 bytes → 2,387,094 bytes (0 fewer) | Optimized the file structure. | 2.3 MB"
+ },
+ {
+  "fixture": "PDF-12-scanned-ocr.pdf",
+  "mode": "balanced",
+  "input": 2387094,
+  "analysis": "2.3 MB · 2 embedded images make up 100% of this file. | Lossless optimization will barely change a file like this. To actually shrink it, choose Balanced or Smallest below (this lowers image quality).",
+  "ms": 273,
+  "output": 874113,
+  "file": "C:\\Users\\ravit\\Desktop\\my projects\\thefileconvert\\qa\\evidence\\compress-out\\PDF-12-scanned-ocr.balanced.pdf",
+  "ui": "2.3 MB | 853.6 KB | 63% smaller | Exact: 2,387,094 bytes → 874,113 bytes (1,512,981 fewer) | Re-encoded 2 images at reduced quality, optimized the file structure. | 853.6 KB"
+ },
+ {
+  "fixture": "PDF-12-scanned-ocr.pdf",
+  "mode": "small",
+  "input": 2387094,
+  "analysis": "2.3 MB · 2 embedded images make up 100% of this file. | Lossless optimization will barely change a file like this. To actually shrink it, choose Balanced or Smallest below (this lowers image quality).",
+  "ms": 277,
+  "output": 334383,
+  "file": "C:\\Users\\ravit\\Desktop\\my projects\\thefileconvert\\qa\\evidence\\compress-out\\PDF-12-scanned-ocr.small.pdf",
+  "ui": "2.3 MB | 326.5 KB | 86% smaller | Exact: 2,387,094 bytes → 334,383 bytes (2,052,711 fewer) | Re-encoded 2 images at reduced quality, optimized the file structure. | 326.5 KB"
+ },
+ {
+  "fixture": "PDF-13-scan-flate.pdf",
+  "mode": "lossless",
+  "input": 8771816,
+  "analysis": "8.4 MB · 2 embedded images make up 100% of this file — stored losslessly (uncompressed-quality scan data). | Lossless optimization cannot shrink this kind of scan without changing it. Balanced or Smallest re-encode the pages as JPEG, which usually cuts the size by a large factor (this lowers image quality).",
+  "ms": 143,
+  "output": 8771816,
+  "file": "C:\\Users\\ravit\\Desktop\\my projects\\thefileconvert\\qa\\evidence\\compress-out\\PDF-13-scan-flate.lossless.pdf",
+  "ui": "8.4 MB | 8.4 MB | No significant change | Exact: 8,771,816 bytes → 8,771,816 bytes (0 fewer) | Optimized the file structure. | 8.4 MB"
+ },
+ {
+  "fixture": "PDF-13-scan-flate.pdf",
+  "mode": "balanced",
+  "input": 8771816,
+  "analysis": "8.4 MB · 2 embedded images make up 100% of this file — stored losslessly (uncompressed-quality scan data). | Lossless optimization cannot shrink this kind of scan without changing it. Balanced or Smallest re-encode the pages as JPEG, which usually cuts the size by a large factor (this lowers image quality).",
+  "ms": 397,
+  "output": 1039448,
+  "file": "C:\\Users\\ravit\\Desktop\\my projects\\thefileconvert\\qa\\evidence\\compress-out\\PDF-13-scan-flate.balanced.pdf",
+  "ui": "8.4 MB | 1015.1 KB | 88% smaller | Exact: 8,771,816 bytes → 1,039,448 bytes (7,732,368 fewer) | Re-encoded 2 images at reduced quality, optimized the file structure. | 1015.1 KB"
+ },
+ {
+  "fixture": "PDF-13-scan-flate.pdf",
+  "mode": "small",
+  "input": 8771816,
+  "analysis": "8.4 MB · 2 embedded images make up 100% of this file — stored losslessly (uncompressed-quality scan data). | Lossless optimization cannot shrink this kind of scan without changing it. Balanced or Smallest re-encode the pages as JPEG, which usually cuts the size by a large factor (this lowers image quality).",
+  "ms": 289,
+  "output": 376948,
+  "file": "C:\\Users\\ravit\\Desktop\\my projects\\thefileconvert\\qa\\evidence\\compress-out\\PDF-13-scan-flate.small.pdf",
+  "ui": "8.4 MB | 368.1 KB | 96% smaller | Exact: 8,771,816 bytes → 376,948 bytes (8,394,868 fewer) | Re-encoded 2 images at reduced quality, optimized the file structure. | 368.1 KB"
+ },
+ {
+  "fixture": "PDF-14-scan-ascii85-flate.pdf",
+  "mode": "lossless",
+  "input": 10964469,
+  "analysis": "10.5 MB · 2 embedded images make up 100% of this file — stored losslessly (uncompressed-quality scan data). | Lossless optimization cannot shrink this kind of scan without changing it. Balanced or Smallest re-encode the pages as JPEG, which usually cuts the size by a large factor (this lowers image quality).",
+  "ms": 155,
+  "output": 10964469,
+  "file": "C:\\Users\\ravit\\Desktop\\my projects\\thefileconvert\\qa\\evidence\\compress-out\\PDF-14-scan-ascii85-flate.lossless.pdf",
+  "ui": "10.5 MB | 10.5 MB | No significant change | Exact: 10,964,469 bytes → 10,964,469 bytes (0 fewer) | Optimized the file structure. | 10.5 MB"
+ },
+ {
+  "fixture": "PDF-14-scan-ascii85-flate.pdf",
+  "mode": "balanced",
+  "input": 10964469,
+  "analysis": "10.5 MB · 2 embedded images make up 100% of this file — stored losslessly (uncompressed-quality scan data). | Lossless optimization cannot shrink this kind of scan without changing it. Balanced or Smallest re-encode the pages as JPEG, which usually cuts the size by a large factor (this lowers image quality).",
+  "ms": 523,
+  "output": 1039448,
+  "file": "C:\\Users\\ravit\\Desktop\\my projects\\thefileconvert\\qa\\evidence\\compress-out\\PDF-14-scan-ascii85-flate.balanced.pdf",
+  "ui": "10.5 MB | 1015.1 KB | 91% smaller | Exact: 10,964,469 bytes → 1,039,448 bytes (9,925,021 fewer) | Re-encoded 2 images at reduced quality, optimized the file structure. | 1015.1 KB"
+ },
+ {
+  "fixture": "PDF-14-scan-ascii85-flate.pdf",
+  "mode": "small",
+  "input": 10964469,
+  "analysis": "10.5 MB · 2 embedded images make up 100% of this file — stored losslessly (uncompressed-quality scan data). | Lossless optimization cannot shrink this kind of scan without changing it. Balanced or Smallest re-encode the pages as JPEG, which usually cuts the size by a large factor (this lowers image quality).",
+  "ms": 518,
+  "output": 376948,
+  "file": "C:\\Users\\ravit\\Desktop\\my projects\\thefileconvert\\qa\\evidence\\compress-out\\PDF-14-scan-ascii85-flate.small.pdf",
+  "ui": "10.5 MB | 368.1 KB | 97% smaller | Exact: 10,964,469 bytes → 376,948 bytes (10,587,521 fewer) | Re-encoded 2 images at reduced quality, optimized the file structure. | 368.1 KB"
+ },
+ {
+  "fixture": "PDF-15-scan-flate-predictor.pdf",
+  "mode": "lossless",
+  "input": 9776880,
+  "analysis": "9.3 MB · 2 embedded images make up 100% of this file — stored losslessly (uncompressed-quality scan data). | Lossless optimization cannot shrink this kind of scan without changing it. Balanced or Smallest re-encode the pages as JPEG, which usually cuts the size by a large factor (this lowers image quality).",
+  "ms": 146,
+  "output": 9776880,
+  "file": "C:\\Users\\ravit\\Desktop\\my projects\\thefileconvert\\qa\\evidence\\compress-out\\PDF-15-scan-flate-predictor.lossless.pdf",
+  "ui": "9.3 MB | 9.3 MB | No significant change | Exact: 9,776,880 bytes → 9,776,880 bytes (0 fewer) | Optimized the file structure. | 9.3 MB"
+ },
+ {
+  "fixture": "PDF-15-scan-flate-predictor.pdf",
+  "mode": "balanced",
+  "input": 9776880,
+  "analysis": "9.3 MB · 2 embedded images make up 100% of this file — stored losslessly (uncompressed-quality scan data). | Lossless optimization cannot shrink this kind of scan without changing it. Balanced or Smallest re-encode the pages as JPEG, which usually cuts the size by a large factor (this lowers image quality).",
+  "ms": 464,
+  "output": 1039449,
+  "file": "C:\\Users\\ravit\\Desktop\\my projects\\thefileconvert\\qa\\evidence\\compress-out\\PDF-15-scan-flate-predictor.balanced.pdf",
+  "ui": "9.3 MB | 1015.1 KB | 89% smaller | Exact: 9,776,880 bytes → 1,039,449 bytes (8,737,431 fewer) | Re-encoded 2 images at reduced quality, optimized the file structure. | 1015.1 KB"
+ },
+ {
+  "fixture": "PDF-15-scan-flate-predictor.pdf",
+  "mode": "small",
+  "input": 9776880,
+  "analysis": "9.3 MB · 2 embedded images make up 100% of this file — stored losslessly (uncompressed-quality scan data). | Lossless optimization cannot shrink this kind of scan without changing it. Balanced or Smallest re-encode the pages as JPEG, which usually cuts the size by a large factor (this lowers image quality).",
+  "ms": 428,
+  "output": 376949,
+  "file": "C:\\Users\\ravit\\Desktop\\my projects\\thefileconvert\\qa\\evidence\\compress-out\\PDF-15-scan-flate-predictor.small.pdf",
+  "ui": "9.3 MB | 368.1 KB | 96% smaller | Exact: 9,776,880 bytes → 376,949 bytes (9,399,931 fewer) | Re-encoded 2 images at reduced quality, optimized the file structure. | 368.1 KB"
+ },
+ {
+  "fixture": "TheFileConvert_Scanned_OCR_Test.pdf",
+  "mode": "lossless",
+  "input": 3982736,
+  "analysis": "3.8 MB · 2 embedded images make up 99% of this file — stored losslessly (uncompressed-quality scan data). | Lossless optimization cannot shrink this kind of scan without changing it. Balanced or Smallest re-encode the pages as JPEG, which usually cuts the size by a large factor (this lowers image quality).",
+  "ms": 90,
+  "output": 3981768,
+  "file": "C:\\Users\\ravit\\Desktop\\my projects\\thefileconvert\\qa\\evidence\\compress-out\\TheFileConvert_Scanned_OCR_Test.lossless.pdf",
+  "ui": "3.8 MB | 3.8 MB | No significant change | Exact: 3,982,736 bytes → 3,981,768 bytes (968 fewer) | Optimized the file structure. | 3.8 MB"
+ },
+ {
+  "fixture": "TheFileConvert_Scanned_OCR_Test.pdf",
+  "mode": "balanced",
+  "input": 3982736,
+  "analysis": "3.8 MB · 2 embedded images make up 99% of this file — stored losslessly (uncompressed-quality scan data). | Lossless optimization cannot shrink this kind of scan without changing it. Balanced or Smallest re-encode the pages as JPEG, which usually cuts the size by a large factor (this lowers image quality).",
+  "ms": 944,
+  "output": 199094,
+  "file": "C:\\Users\\ravit\\Desktop\\my projects\\thefileconvert\\qa\\evidence\\compress-out\\TheFileConvert_Scanned_OCR_Test.balanced.pdf",
+  "ui": "3.8 MB | 194.4 KB | 95% smaller | Exact: 3,982,736 bytes → 199,094 bytes (3,783,642 fewer) | Re-encoded 2 images at reduced quality, optimized the file structure. | 194.4 KB"
+ },
+ {
+  "fixture": "TheFileConvert_Scanned_OCR_Test.pdf",
+  "mode": "small",
+  "input": 3982736,
+  "analysis": "3.8 MB · 2 embedded images make up 99% of this file — stored losslessly (uncompressed-quality scan data). | Lossless optimization cannot shrink this kind of scan without changing it. Balanced or Smallest re-encode the pages as JPEG, which usually cuts the size by a large factor (this lowers image quality).",
+  "ms": 537,
+  "output": 112522,
+  "file": "C:\\Users\\ravit\\Desktop\\my projects\\thefileconvert\\qa\\evidence\\compress-out\\TheFileConvert_Scanned_OCR_Test.small.pdf",
+  "ui": "3.8 MB | 109.9 KB | 97% smaller | Exact: 3,982,736 bytes → 112,522 bytes (3,870,214 fewer) | Re-encoded 2 images at reduced quality, optimized the file structure. | 109.9 KB"
+ }
+]

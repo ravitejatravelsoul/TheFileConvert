@@ -1,0 +1,62 @@
+[
+ {
+  "fixture": "PDF-13-scan-flate.pdf",
+  "mode": "lossless",
+  "input": 8771816,
+  "analysis": "8.4 MB · 2 embedded images make up 100% of this file — stored losslessly (uncompressed-quality scan data). | Lossless optimization cannot shrink this kind of scan without changing it. Balanced or Smallest re-encode the pages as JPEG, which usually cuts the size by a large factor (this lowers image quality).",
+  "ms": 77,
+  "output": 8771816,
+  "file": "C:\\Users\\ravit\\Desktop\\my projects\\thefileconvert\\qa\\evidence\\compress-out\\PDF-13-scan-flate.lossless.pdf",
+  "ui": "8.4 MB | 8.4 MB | No significant change | Optimized the file structure. | 8.4 MB | Compress PDF works in two ways, and it shows you which one can help your file before you press anything. Lossless (the default) never changes how a page looks: it merges images that are embedded more than once and rewrites the file structure more compactly. That helps files with many pages, fonts, or repeated images, but a PDF that is mostly scanned pages or photos will barely shrink this way. For those, Balanced and Smallest re-save the embedded JPEG images at lower quality (and fewer pixels if they are larger than needed) — a real, visible trade-off that you opt into. The result screen reports the true before and after sizes; if a file cannot get smaller it says so instead of pretending."
+ },
+ {
+  "fixture": "PDF-13-scan-flate.pdf",
+  "mode": "balanced",
+  "input": 8771816,
+  "analysis": "8.4 MB · 2 embedded images make up 100% of this file — stored losslessly (uncompressed-quality scan data). | Lossless optimization cannot shrink this kind of scan without changing it. Balanced or Smallest re-encode the pages as JPEG, which usually cuts the size by a large factor (this lowers image quality).",
+  "ms": 408,
+  "output": 1039448,
+  "file": "C:\\Users\\ravit\\Desktop\\my projects\\thefileconvert\\qa\\evidence\\compress-out\\PDF-13-scan-flate.balanced.pdf",
+  "ui": "8.4 MB | 1015.1 KB | 88% smaller | Re-encoded 2 images at reduced quality, optimized the file structure. | 1015.1 KB | Compress PDF works in two ways, and it shows you which one can help your file before you press anything. Lossless (the default) never changes how a page looks: it merges images that are embedded more than once and rewrites the file structure more compactly. That helps files with many pages, fonts, or repeated images, but a PDF that is mostly scanned pages or photos will barely shrink this way. For those, Balanced and Smallest re-save the embedded JPEG images at lower quality (and fewer pixels if they are larger than needed) — a real, visible trade-off that you opt into. The result screen reports the true before and after sizes; if a file cannot get smaller it says so instead of pretending."
+ },
+ {
+  "fixture": "PDF-13-scan-flate.pdf",
+  "mode": "small",
+  "input": 8771816,
+  "analysis": "8.4 MB · 2 embedded images make up 100% of this file — stored losslessly (uncompressed-quality scan data). | Lossless optimization cannot shrink this kind of scan without changing it. Balanced or Smallest re-encode the pages as JPEG, which usually cuts the size by a large factor (this lowers image quality).",
+  "ms": 313,
+  "output": 376948,
+  "file": "C:\\Users\\ravit\\Desktop\\my projects\\thefileconvert\\qa\\evidence\\compress-out\\PDF-13-scan-flate.small.pdf",
+  "ui": "8.4 MB | 368.1 KB | 96% smaller | Re-encoded 2 images at reduced quality, optimized the file structure. | 368.1 KB | Compress PDF works in two ways, and it shows you which one can help your file before you press anything. Lossless (the default) never changes how a page looks: it merges images that are embedded more than once and rewrites the file structure more compactly. That helps files with many pages, fonts, or repeated images, but a PDF that is mostly scanned pages or photos will barely shrink this way. For those, Balanced and Smallest re-save the embedded JPEG images at lower quality (and fewer pixels if they are larger than needed) — a real, visible trade-off that you opt into. The result screen reports the true before and after sizes; if a file cannot get smaller it says so instead of pretending."
+ },
+ {
+  "fixture": "TheFileConvert_Scanned_OCR_Test.pdf",
+  "mode": "lossless",
+  "input": 3982736,
+  "analysis": "3.8 MB · 2 embedded images make up 99% of this file — stored losslessly (uncompressed-quality scan data). | Lossless optimization cannot shrink this kind of scan without changing it. Balanced or Smallest re-encode the pages as JPEG, which usually cuts the size by a large factor (this lowers image quality).",
+  "ms": 63,
+  "output": 3981768,
+  "file": "C:\\Users\\ravit\\Desktop\\my projects\\thefileconvert\\qa\\evidence\\compress-out\\TheFileConvert_Scanned_OCR_Test.lossless.pdf",
+  "ui": "3.8 MB | 3.8 MB | No significant change | Optimized the file structure. | 3.8 MB | Compress PDF works in two ways, and it shows you which one can help your file before you press anything. Lossless (the default) never changes how a page looks: it merges images that are embedded more than once and rewrites the file structure more compactly. That helps files with many pages, fonts, or repeated images, but a PDF that is mostly scanned pages or photos will barely shrink this way. For those, Balanced and Smallest re-save the embedded JPEG images at lower quality (and fewer pixels if they are larger than needed) — a real, visible trade-off that you opt into. The result screen reports the true before and after sizes; if a file cannot get smaller it says so instead of pretending."
+ },
+ {
+  "fixture": "TheFileConvert_Scanned_OCR_Test.pdf",
+  "mode": "balanced",
+  "input": 3982736,
+  "analysis": "3.8 MB · 2 embedded images make up 99% of this file — stored losslessly (uncompressed-quality scan data). | Lossless optimization cannot shrink this kind of scan without changing it. Balanced or Smallest re-encode the pages as JPEG, which usually cuts the size by a large factor (this lowers image quality).",
+  "ms": 540,
+  "output": 199094,
+  "file": "C:\\Users\\ravit\\Desktop\\my projects\\thefileconvert\\qa\\evidence\\compress-out\\TheFileConvert_Scanned_OCR_Test.balanced.pdf",
+  "ui": "3.8 MB | 194.4 KB | 95% smaller | Re-encoded 2 images at reduced quality, optimized the file structure. | 194.4 KB | Compress PDF works in two ways, and it shows you which one can help your file before you press anything. Lossless (the default) never changes how a page looks: it merges images that are embedded more than once and rewrites the file structure more compactly. That helps files with many pages, fonts, or repeated images, but a PDF that is mostly scanned pages or photos will barely shrink this way. For those, Balanced and Smallest re-save the embedded JPEG images at lower quality (and fewer pixels if they are larger than needed) — a real, visible trade-off that you opt into. The result screen reports the true before and after sizes; if a file cannot get smaller it says so instead of pretending."
+ },
+ {
+  "fixture": "TheFileConvert_Scanned_OCR_Test.pdf",
+  "mode": "small",
+  "input": 3982736,
+  "analysis": "3.8 MB · 2 embedded images make up 99% of this file — stored losslessly (uncompressed-quality scan data). | Lossless optimization cannot shrink this kind of scan without changing it. Balanced or Smallest re-encode the pages as JPEG, which usually cuts the size by a large factor (this lowers image quality).",
+  "ms": 445,
+  "output": 112522,
+  "file": "C:\\Users\\ravit\\Desktop\\my projects\\thefileconvert\\qa\\evidence\\compress-out\\TheFileConvert_Scanned_OCR_Test.small.pdf",
+  "ui": "3.8 MB | 109.9 KB | 97% smaller | Re-encoded 2 images at reduced quality, optimized the file structure. | 109.9 KB | Compress PDF works in two ways, and it shows you which one can help your file before you press anything. Lossless (the default) never changes how a page looks: it merges images that are embedded more than once and rewrites the file structure more compactly. That helps files with many pages, fonts, or repeated images, but a PDF that is mostly scanned pages or photos will barely shrink this way. For those, Balanced and Smallest re-save the embedded JPEG images at lower quality (and fewer pixels if they are larger than needed) — a real, visible trade-off that you opt into. The result screen reports the true before and after sizes; if a file cannot get smaller it says so instead of pretending."
+ }
+]

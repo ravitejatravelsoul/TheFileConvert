@@ -1,0 +1,38 @@
+[
+ {
+  "tool": "pdf-ocr",
+  "test": "synthetic 2-page scan, standard: 2 pages in 19.4s",
+  "verdict": "PASS",
+  "detail": "word recall 97% (642/662); searchable phrases: quick brown fox:true INV-2024-0158:false invoice ref:true; visual diff vs original scan MAD=0; 2 pages recognized. 85 words may need review.; pdf 2392683B (input 2387094B)"
+ },
+ {
+  "tool": "pdf-ocr",
+  "test": "synthetic 2-page scan, accurate: 2 pages in 19.4s",
+  "verdict": "PASS",
+  "detail": "word recall 97% (642/662); searchable phrases: quick brown fox:true INV-2024-0158:false invoice ref:true; visual diff vs original scan MAD=0; 2 pages recognized. 85 words may need review.; pdf 2392683B (input 2387094B)"
+ },
+ {
+  "tool": "pdf-ocr",
+  "test": "user's scanned test PDF (2 pages) in 4.0s",
+  "verdict": "PASS",
+  "detail": "recall 100% (34/34); key values in searchable PDF: John Smith:true 02/08/2026:true 12/20/2026:true 4738 0192 6501:true $182.50:true OFFICIAL RECORD:true; 2 pages recognized. 5 words may need review."
+ },
+ {
+  "tool": "pdf-ocr",
+  "test": "text PDF: tells user it already has text (does not OCR by default)",
+  "verdict": "PASS",
+  "detail": "Turn scanned PDFs into searchable PDFs directly in your browser. | Every page already has selectable text. You can still run OCR on any page below if you want to. | Use if pages were scanned sideways | button=Recognize 0 pages"
+ },
+ {
+  "tool": "pdf-ocr",
+  "test": "corrupt PDF → readable message",
+  "verdict": "PASS",
+  "detail": "We couldn't read this PDF. It may be damaged, encrypted, or incomplete."
+ },
+ {
+  "tool": "(ocr)",
+  "test": "browser console/page errors",
+  "verdict": "PASS",
+  "detail": ""
+ }
+]

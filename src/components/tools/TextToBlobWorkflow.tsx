@@ -88,7 +88,7 @@ export function TextToBlobWorkflow({
       </div>
 
       {error && (
-        <div className="flex items-start gap-2 rounded-[var(--radius-md)] bg-red-50 px-4 py-3 text-sm text-red-700 dark:bg-red-950/40 dark:text-red-300">
+        <div role="alert" className="flex items-start gap-2 rounded-[var(--radius-md)] bg-red-50 px-4 py-3 text-sm text-red-700 dark:bg-red-950/40 dark:text-red-300">
           <IconWarning className="mt-0.5 h-4 w-4 shrink-0" />
           <span>{error}</span>
         </div>

@@ -1,0 +1,26 @@
+[
+ {
+  "tool": "pdf-editor-form",
+  "test": "labelled form page is not mis-flagged as a scanned page",
+  "verdict": "PASS",
+  "detail": "no scanned banner"
+ },
+ {
+  "tool": "pdf-editor-form",
+  "test": "text, checkbox, dropdown, radio all saved as real AcroForm values",
+  "verdict": "PASS",
+  "detail": "{\"name\":\"Ada Lovelace\",\"agree\":true,\"plan\":[\"pro\"],\"size\":\"large\"}"
+ },
+ {
+  "tool": "pdf-editor-form",
+  "test": "rendered export shows more ink than the blank form (values are visible, not just stored)",
+  "verdict": "PASS",
+  "detail": "dark px blank=2621 filled=3195"
+ },
+ {
+  "tool": "(pdf-editor C)",
+  "test": "browser console/page errors",
+  "verdict": "PASS",
+  "detail": ""
+ }
+]

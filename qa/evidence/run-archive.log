@@ -1,0 +1,13 @@
+PASS    zip-create :: 7 files (unicode name, spaces, duplicate names, 8 MB JPEG) → every file's bytes present in ZIP — entries=7 missingBytes=[] names=PDF-10-many-pages.pdf | IMAGE-11-quadrants.png | DOC-02-markdown.md | ünï cödé 日本語 file.txt | with spaces.txt | copy-with spaces.txt | IMAGE-01-photo-large.jpg
+PASS    zip-create :: two files with the same name (with spaces.txt ×2) both kept — with spaces.txt | copy-with spaces.txt
+PASS    zip-create :: ZIP opens with an independent reader and is not larger than inputs + overhead — zip=8111069 inputs=8111220
+INFO    zip-create :: 1 file allowed — Create ZIP from 1 file disabled=false
+PASS    zip-extract :: pre-extract listing shows all 7 entries with full paths — readme.txt | docs/notes with spaces.txt | docs/deep/er/ünï-cödé-日本語.txt | data/blob.bin | data/table.csv | images/logo.png | images/photo.jpg
+PASS    zip-extract :: all 7 files extracted byte-identical (incl. 200 KB binary, unicode & spaced names) — identical=7/7 missing=[] different=[] resultNames=readme.txt | docs/notes with spaces.txt | docs/deep/er/ünï-cödé-日本語.txt | data/blob.bin | data/table.csv | images/logo.png | images/photo.jpg
+PASS    zip-extract :: folder structure preserved in extracted names — readme.txt | docs/notes with spaces.txt | docs/deep/er/ünï-cödé-日本語.txt | data/blob.bin | data/table.csv | images/logo.png | images/photo.jpg
+PASS    zip-extract :: per-file Download gives exact bytes — readme.txt
+PASS    zip-extract :: corrupt ZIP → clear error, no crash — We couldn't read this archive. It may be damaged or not a ZIP file.
+PASS    zip-extract :: ../../evil.txt and /abs/evil2.txt entries can't escape (sanitised or refused) — evil.txt | /abs/evil2.txt | ok/fine.txt → extracted: evil.txt | abs/evil2.txt | ok/fine.txt
+PASS    zip-extract :: nothing written outside the download directory
+PASS    zip-extract :: non-ZIP file rejected —  DOC-02-markdown.md: This file type isn't supported by Extract ZIP Archive. 
+PASS    (archive tools) :: browser console/page errors

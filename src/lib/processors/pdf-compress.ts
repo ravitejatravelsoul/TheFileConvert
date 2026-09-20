@@ -1,4 +1,5 @@
 import { PDFArray, PDFDict, PDFDocument, PDFName, PDFNumber, PDFRawStream, PDFRef, type PDFObject } from "pdf-lib";
+import { decodeFlateImage, filterChain, isFlateChain, type RawImage } from "./pdf-image-decode";
 
 /**
  * Browser-local PDF size reduction, in three honest levels:
@@ -10,8 +11,10 @@ import { PDFArray, PDFDict, PDFDocument, PDFName, PDFNumber, PDFRawStream, PDFRe
  *    they are larger than needed, fewer pixels. This is lossy and is only ever applied when the user
  *    chooses it. An image is only replaced if the result is actually smaller.
  *
- * Only JPEG (DCTDecode) 8-bit RGB/Gray images without special decode arrays are recompressed; other
- * image encodings (Flate/PNG-style, JBIG2, CCITT, CMYK, image masks) are left untouched and counted.
+ * Recompressed: JPEG (DCTDecode) and lossless Flate (optionally ASCII85-wrapped, PNG predictors) 8-bit
+ * RGB/Gray images without decode arrays — the latter is what most scanner apps and PDF generators emit,
+ * and is where the big savings are. Other encodings (JBIG2, CCITT, CMYK, indexed, image masks) are left
+ * untouched and counted.
  */
 
 export type CompressLevel = "lossless" | "balanced" | "small";
@@ -35,6 +38,9 @@ export interface PdfImageAnalysis {
   totalBytes: number;
   imageCount: number;
   jpegCount: number;
+  /** Lossless (Flate) RGB/Gray images that can be re-encoded. */
+  flateCount?: number;
+  flateBytes?: number;
   /** Bytes taken by all embedded image data. */
   imageBytes: number;
   /** Bytes in JPEG images that could be recompressed. */
@@ -48,6 +54,8 @@ interface ImageEntry {
   ref: PDFRef;
   stream: PDFRawStream;
   isJpeg: boolean;
+  /** Lossless Flate RGB/Gray 8-bit image this tool can decode and re-encode. */
+  isFlate: boolean;
   bytes: Uint8Array;
 }
 
@@ -67,7 +75,8 @@ function collectImages(doc: PDFDocument): ImageEntry[] {
   for (const [ref, obj] of doc.context.enumerateIndirectObjects()) {
     if (!(obj instanceof PDFRawStream)) continue;
     if (nameOf(obj.dict.get(PDFName.of("Subtype"))) !== "Image") continue;
-    out.push({ ref, stream: obj, isJpeg: filterOf(obj.dict) === "DCTDecode", bytes: obj.contents });
+    const isJpeg = filterOf(obj.dict) === "DCTDecode";
+    out.push({ ref, stream: obj, isJpeg, isFlate: !isJpeg && isFlateChain(filterChain(obj.dict)) && isRecompressible(obj.dict), bytes: obj.contents });
   }
   return out;
 }
@@ -120,6 +129,8 @@ export async function analyzePdfImages(bytes: ArrayBuffer | Uint8Array): Promise
     jpegCount: images.filter((i) => i.isJpeg).length,
     imageBytes: images.reduce((s, i) => s + i.bytes.length, 0),
     jpegBytes: images.filter((i) => i.isJpeg).reduce((s, i) => s + i.bytes.length, 0),
+    flateCount: images.filter((i) => i.isFlate).length,
+    flateBytes: images.filter((i) => i.isFlate).reduce((s, i) => s + i.bytes.length, 0),
     duplicateCount: dups.size,
     duplicateBytes,
   };
@@ -136,8 +147,12 @@ export function describeAnalysis(a: PdfImageAnalysis): { headline: string; advic
   if (share < 0.25) {
     return { headline: `${a.imageCount} embedded image${a.imageCount === 1 ? "" : "s"} (${pct}% of the file).${dup}`, advice: "Mostly text: expect little from lossless optimization.", suggestLossy: false };
   }
-  if (a.jpegCount === 0) {
-    return { headline: `${a.imageCount} embedded image${a.imageCount === 1 ? "" : "s"} (${pct}% of the file), none of them JPEG.${dup}`, advice: "This tool can only recompress JPEG images. Other image encodings are kept exactly as they are, so savings will be small.", suggestLossy: false };
+  const flate = a.flateCount ?? 0;
+  if (a.jpegCount + flate === 0) {
+    return { headline: `${a.imageCount} embedded image${a.imageCount === 1 ? "" : "s"} (${pct}% of the file), none in a format this tool can recompress.${dup}`, advice: "This tool can only recompress JPEG and lossless (Flate) RGB/grayscale images. Other image encodings (such as black-and-white JBIG2/CCITT, CMYK or indexed colour) are kept exactly as they are, so savings will be small.", suggestLossy: false };
+  }
+  if (a.jpegCount === 0 && flate > 0) {
+    return { headline: `${a.imageCount} embedded image${a.imageCount === 1 ? "" : "s"} ${a.imageCount === 1 ? "makes" : "make"} up ${pct}% of this file — stored losslessly (uncompressed-quality scan data).${dup}`, advice: "Lossless optimization cannot shrink this kind of scan without changing it. Balanced or Smallest re-encode the pages as JPEG, which usually cuts the size by a large factor (this lowers image quality).", suggestLossy: true };
   }
   const dupShare = a.totalBytes > 0 ? a.duplicateBytes / a.totalBytes : 0;
   const headline = `${a.imageCount} embedded image${a.imageCount === 1 ? "" : "s"} ${a.imageCount === 1 ? "makes" : "make"} up ${pct}% of this file.${dup}`;
@@ -159,6 +174,8 @@ export interface CompressResult {
 }
 
 /** Re-encodes a JPEG. Injected so the pdf-lib logic is testable without a canvas. */
+export type RawReencoder = (img: RawImage, opts: { quality: number; maxLongSide: number }) => Promise<{ bytes: Uint8Array; width: number; height: number } | null>;
+
 export type JpegReencoder = (jpeg: Uint8Array, opts: { quality: number; maxLongSide: number }) => Promise<{ bytes: Uint8Array; width: number; height: number } | null>;
 
 /** Browser implementation: decode with the browser's own JPEG decoder, downscale if needed, re-encode. */
@@ -185,6 +202,38 @@ export const canvasReencoder: JpegReencoder = async (jpeg, { quality, maxLongSid
   }
 };
 
+/** Browser implementation for decoded (raw pixel) images: paint into a canvas, downscale if needed, JPEG-encode. */
+export const canvasRawReencoder: RawReencoder = async (img, { quality, maxLongSide }) => {
+  const { width, height, channels, pixels } = img;
+  const rgba = new Uint8ClampedArray(width * height * 4);
+  for (let i = 0, p = 0, q = 0; i < width * height; i++) {
+    if (channels === 3) { rgba[q++] = pixels[p++]; rgba[q++] = pixels[p++]; rgba[q++] = pixels[p++]; } else { const g = pixels[p++]; rgba[q++] = g; rgba[q++] = g; rgba[q++] = g; }
+    rgba[q++] = 255;
+  }
+  const src = document.createElement("canvas");
+  src.width = width;
+  src.height = height;
+  const sctx = src.getContext("2d");
+  if (!sctx) return null;
+  sctx.putImageData(new ImageData(rgba, width, height), 0, 0);
+  const scale = Math.min(1, maxLongSide / Math.max(width, height));
+  const w = Math.max(1, Math.round(width * scale));
+  const h = Math.max(1, Math.round(height * scale));
+  let target = src;
+  if (scale < 1) {
+    target = document.createElement("canvas");
+    target.width = w;
+    target.height = h;
+    const tctx = target.getContext("2d");
+    if (!tctx) return null;
+    tctx.imageSmoothingQuality = "high";
+    tctx.drawImage(src, 0, 0, w, h);
+  }
+  const out = await new Promise<Blob | null>((resolve) => target.toBlob(resolve, "image/jpeg", quality));
+  if (!out) return null;
+  return { bytes: new Uint8Array(await out.arrayBuffer()), width: w, height: h };
+};
+
 function isRecompressible(dict: PDFDict): boolean {
   const cs = nameOf(dict.get(PDFName.of("ColorSpace")));
   if (cs !== "DeviceRGB" && cs !== "DeviceGray") return false;
@@ -197,7 +246,8 @@ function isRecompressible(dict: PDFDict): boolean {
 export async function compressPdfDocument(
   input: Uint8Array,
   level: CompressLevel,
-  reencode: JpegReencoder = canvasReencoder
+  reencode: JpegReencoder = canvasReencoder,
+  reencodeRaw: RawReencoder = canvasRawReencoder
 ): Promise<CompressResult> {
   const doc = await PDFDocument.load(input, { ignoreEncryption: true, updateMetadata: false });
   const images = collectImages(doc);
@@ -228,13 +278,18 @@ export async function compressPdfDocument(
     const { quality, maxLongSide } = LEVEL_SETTINGS[level];
     for (const img of images) {
       if (dups.has(img.ref)) continue;
-      if (!img.isJpeg || !isRecompressible(img.stream.dict)) {
+      if ((!img.isJpeg && !img.isFlate) || !isRecompressible(img.stream.dict)) {
         imagesSkipped++;
         continue;
       }
       let result: Awaited<ReturnType<JpegReencoder>> = null;
       try {
-        result = await reencode(img.bytes, { quality, maxLongSide });
+        if (img.isJpeg) {
+          result = await reencode(img.bytes, { quality, maxLongSide });
+        } else {
+          const raw = await decodeFlateImage(img.stream.dict, img.bytes);
+          result = raw ? await reencodeRaw(raw, { quality, maxLongSide }) : null;
+        }
       } catch {
         result = null;
       }
@@ -246,6 +301,9 @@ export async function compressPdfDocument(
       dict.set(PDFName.of("Width"), PDFNumber.of(result.width));
       dict.set(PDFName.of("Height"), PDFNumber.of(result.height));
       dict.set(PDFName.of("ColorSpace"), PDFName.of("DeviceRGB")); // canvas output is always RGB
+      dict.set(PDFName.of("Filter"), PDFName.of("DCTDecode"));
+      dict.delete(PDFName.of("DecodeParms"));
+      dict.delete(PDFName.of("DP"));
       dict.set(PDFName.of("Length"), PDFNumber.of(result.bytes.length));
       doc.context.assign(img.ref, PDFRawStream.of(dict, result.bytes));
       imagesRecompressed++;

@@ -14,6 +14,9 @@ const eslintConfig = defineConfig([
     "next-env.d.ts",
     // Vendored, minified third-party runtime assets — not our source, never linted.
     "public/tesseract/**",
+    // QA harness scripts and generated fixtures (not shipped).
+    "qa/**",
+    "qa-fixtures/**",
   ]),
 ]);
 

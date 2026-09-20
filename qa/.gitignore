@@ -1,0 +1,6 @@
+evidence/out/
+evidence/compress-out/
+evidence/image-out/
+evidence/tmp-archive/
+evidence/*.png
+evidence/dev.log

@@ -1,0 +1,272 @@
+[
+ {
+  "tool": "pdf-merge",
+  "test": "14p + 3p in order",
+  "verdict": "PASS",
+  "detail": "17 pages; 1/14,2/14,3/14,4/14,5/14,6/14,7/14,8/14,9/14,10/14,11/14,12/14,13/14,14/14,1/3,2/3,3/3"
+ },
+ {
+  "tool": "pdf-merge",
+  "test": "input order changed via ↑ button respected",
+  "verdict": "PASS",
+  "detail": "1/3,2/3,3/3,1/14,2/14"
+ },
+ {
+  "tool": "pdf-merge",
+  "test": "rotated+scanned+form (9 pages, rotations kept, scan renders)",
+  "verdict": "PASS",
+  "detail": "pages=9 rot=0,90,180,270,90,0 scanNonWhite=13212"
+ },
+ {
+  "tool": "pdf-merge",
+  "test": "corrupt input → error message",
+  "verdict": "PASS",
+  "detail": "We couldn't read this PDF. It may be damaged, encrypted, or incomplete."
+ },
+ {
+  "tool": "pdf-merge",
+  "test": "one file left: button state",
+  "verdict": "INFO",
+  "detail": "Merge 1 PDFs disabled=true"
+ },
+ {
+  "tool": "pdf-split",
+  "test": "5 per file → 3 files (5,5,4), contiguous pages",
+  "verdict": "PASS",
+  "detail": "files=part-1.pdf,part-2.pdf,part-3.pdf counts=4,5,5 first=1/14,2/14,3/14,4/14,5/14"
+ },
+ {
+  "tool": "pdf-split",
+  "test": "1 per file → 14 single-page PDFs",
+  "verdict": "PASS",
+  "detail": "14 files"
+ },
+ {
+  "tool": "pdf-split",
+  "test": "50 per file on 14p",
+  "verdict": "INFO",
+  "detail": "ok: part-1.pdf"
+ },
+ {
+  "tool": "pdf-extract-pages",
+  "test": "ranges 1-3,5,8-10",
+  "verdict": "PASS",
+  "detail": "1,2,3,5,8,9,10"
+ },
+ {
+  "tool": "pdf-extract-pages",
+  "test": "invalid range \"99\" rejected with message",
+  "verdict": "PASS",
+  "detail": "None of the pages you entered exist in this PDF."
+ },
+ {
+  "tool": "pdf-extract-pages",
+  "test": "invalid range \"abc\" rejected with message",
+  "verdict": "PASS",
+  "detail": "\"abc\" isn't a valid page number or range."
+ },
+ {
+  "tool": "pdf-extract-pages",
+  "test": "invalid range \"0\" rejected with message",
+  "verdict": "PASS",
+  "detail": "None of the pages you entered exist in this PDF."
+ },
+ {
+  "tool": "pdf-extract-pages",
+  "test": "reversed range \"5-2\" treated as 2-5 (documented, unit-tested)",
+  "verdict": "PASS",
+  "detail": "2,3,4,5"
+ },
+ {
+  "tool": "pdf-extract-pages",
+  "test": "scan page 2 extracted (1 page, renders)",
+  "verdict": "PASS",
+  "detail": "size=1187985"
+ },
+ {
+  "tool": "pdf-delete-pages",
+  "test": "delete 2,4-6 leaves 1,3,7-14",
+  "verdict": "PASS",
+  "detail": "1,3,7,8,9,10,11,12,13,14"
+ },
+ {
+  "tool": "pdf-delete-pages",
+  "test": "deleting every page is refused with a message",
+  "verdict": "PASS",
+  "detail": "You can't delete every page in the document."
+ },
+ {
+  "tool": "pdf-delete-pages",
+  "test": "page 40 of 14 rejected",
+  "verdict": "PASS",
+  "detail": "None of the pages you entered exist in this PDF."
+ },
+ {
+  "tool": "pdf-rotate",
+  "test": "0,90,180,270,90,0 + 90° → 90,180,270,0,180,90",
+  "verdict": "PASS",
+  "detail": "90,180,270,0,180,90"
+ },
+ {
+  "tool": "pdf-rotate",
+  "test": "only selected pages 2,4 rotated 180",
+  "verdict": "PASS",
+  "detail": "0,180,0,180,0"
+ },
+ {
+  "tool": "pdf-rotate",
+  "test": "scan rotated 270 (landscape render)",
+  "verdict": "PASS",
+  "detail": "rot=270 238x184"
+ },
+ {
+  "tool": "pdf-reorder",
+  "test": "drag page 3 onto 1 → UI order matches exported PDF",
+  "verdict": "PASS",
+  "detail": "ui=3,1,2,4,5 pdf=3,1,2,4,5"
+ },
+ {
+  "tool": "pdf-reorder",
+  "test": "↔ buttons then export",
+  "verdict": "PASS",
+  "detail": "2,1,3,4,5,6,7,8,9,10,11,12,14,13"
+ },
+ {
+  "tool": "images-to-pdf",
+  "test": "2 images → 2 A4 pages, first page shows the image",
+  "verdict": "PASS",
+  "detail": "pages=2 595.28x841.89 tl=255,0,0,255 tr=0,255,0,255"
+ },
+ {
+  "tool": "images-to-pdf",
+  "test": "fit-to-image, transparent PNG + JPG + logo (3 pages)",
+  "verdict": "PASS",
+  "detail": "1800x1350 1350x750 750x525 bytes=5831395"
+ },
+ {
+  "tool": "images-to-pdf",
+  "test": "transparent PNG corner becomes white (not black)",
+  "verdict": "PASS",
+  "detail": "corner=255,255,255,255 centre=192,109,68,255"
+ },
+ {
+  "tool": "images-to-pdf",
+  "test": "US Letter page size 612x792",
+  "verdict": "PASS",
+  "detail": "612x792"
+ },
+ {
+  "tool": "images-to-pdf",
+  "test": "non-image upload",
+  "verdict": "INFO",
+  "detail": "Home | Tools | PDF | Images to PDF | Available | Processed on your device | Images to PDF | Combine JPG and PNG images into a single PDF document. | Processed securely in your browser. Your file never"
+ },
+ {
+  "tool": "pdf-to-images",
+  "test": "14 pages → 14 PNG at 2x (1224x1584), text rendered",
+  "verdict": "PASS",
+  "detail": "14 files 1224x1584 darkpx=118244 names=page-1.png,page-2.png"
+ },
+ {
+  "tool": "pdf-to-images",
+  "test": "scan → JPG at 1x (612x792), valid JPEG",
+  "verdict": "PASS",
+  "detail": "page-1.jpg,page-2.jpg 612x792"
+ },
+ {
+  "tool": "pdf-to-images",
+  "test": "rotated pages render with rotation applied (landscape for 90/270)",
+  "verdict": "PASS",
+  "detail": "612x792,792x612,612x792,792x612,792x612,612x792"
+ },
+ {
+  "tool": "pdf-add-page-numbers",
+  "test": "start=5 → numbers 5..18 present, drawn bottom-right, original text intact",
+  "verdict": "PASS",
+  "detail": "tails=5,6,7,8,9,10,11,12,13,14,15,16,17,18 box=583-585,760-767 of 612x792"
+ },
+ {
+  "tool": "pdf-add-page-numbers",
+  "test": "Bottom center on rotated PDF",
+  "verdict": "PASS",
+  "detail": "1,2,3,4,5,6"
+ },
+ {
+  "tool": "pdf-add-page-numbers",
+  "test": "position Top left",
+  "verdict": "INFO",
+  "detail": "option absent: Bottom center|Bottom right|Bottom left|Top center"
+ },
+ {
+  "tool": "pdf-add-page-numbers",
+  "test": "Top center on rotated PDF",
+  "verdict": "PASS",
+  "detail": "1,2,3,4,5,6"
+ },
+ {
+  "tool": "pdf-add-page-numbers",
+  "test": "position Top right",
+  "verdict": "INFO",
+  "detail": "option absent: Bottom center|Bottom right|Bottom left|Top center"
+ },
+ {
+  "tool": "pdf-add-page-numbers",
+  "test": "Bottom left on rotated PDF",
+  "verdict": "PASS",
+  "detail": "1,2,3,4,5,6"
+ },
+ {
+  "tool": "pdf-add-page-numbers",
+  "test": "numbers added to scanned PDF (text layer contains 1,2)",
+  "verdict": "PASS",
+  "detail": "1|2"
+ },
+ {
+  "tool": "pdf-watermark",
+  "test": "text on all 14 pages, visible mark, original text preserved",
+  "verdict": "PASS",
+  "detail": "pages=14 allHaveMark=true changedPx=3252"
+ },
+ {
+  "tool": "pdf-watermark",
+  "test": "watermark visible on rotated pages 1-4 (rotation-aware)",
+  "verdict": "PASS",
+  "detail": "changed px=1109,1110,1064,1082 texts=6/6"
+ },
+ {
+  "tool": "pdf-watermark",
+  "test": "empty watermark text",
+  "verdict": "PASS",
+  "detail": "button disabled"
+ },
+ {
+  "tool": "pdf-watermark",
+  "test": "non-Latin text handled (file or clear message)",
+  "verdict": "INFO",
+  "detail": "The watermark text contains \"✓\", which this tool can't draw (it supports standard Latin letters, digits and common punctuation). Please remove or replace it."
+ },
+ {
+  "tool": "pdf-metadata",
+  "test": "metadata shown to the user before removal",
+  "verdict": "PASS",
+  "detail": "visible=Audit Title|Audit Author|Audit Subject|Audit Creator"
+ },
+ {
+  "tool": "pdf-metadata",
+  "test": "removed: title/author/subject/keywords/creator empty; strings absent in file",
+  "verdict": "PASS",
+  "detail": "{}"
+ },
+ {
+  "tool": "pdf-metadata",
+  "test": "pages intact after removal",
+  "verdict": "PASS",
+  "detail": "3p"
+ },
+ {
+  "tool": "(all pdf tools)",
+  "test": "browser console/page errors",
+  "verdict": "PASS",
+  "detail": ""
+ }
+]

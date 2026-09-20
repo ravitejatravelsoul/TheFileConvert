@@ -1,14 +1,63 @@
 export class ProcessorError extends Error {}
 
+/**
+ * Re-lays-out JSON text token by token instead of going through JSON.parse/stringify, so numbers keep
+ * every digit (12345678901234567890 must not silently become 12345678901234567000) and strings, key order
+ * and duplicate keys are exactly what the user typed. The input is validated with JSON.parse first.
+ */
+function relayoutJson(input: string, pretty: boolean): string {
+  const out: string[] = [];
+  let depth = 0;
+  let i = 0;
+  const nl = () => (pretty ? "\n" + "  ".repeat(depth) : "");
+  while (i < input.length) {
+    const c = input[i];
+    if (c === " " || c === "\t" || c === "\n" || c === "\r") {
+      i++;
+    } else if (c === '"') {
+      let j = i + 1;
+      while (input[j] !== '"') j += input[j] === "\\" ? 2 : 1;
+      out.push(input.slice(i, j + 1));
+      i = j + 1;
+    } else if (c === "{" || c === "[") {
+      let j = i + 1;
+      while (/\s/.test(input[j] ?? "")) j++;
+      if (input[j] === (c === "{" ? "}" : "]")) {
+        out.push(c + input[j]);
+        i = j + 1;
+      } else {
+        depth++;
+        out.push(c + nl());
+        i++;
+      }
+    } else if (c === "}" || c === "]") {
+      depth--;
+      out.push(nl() + c);
+      i++;
+    } else if (c === ",") {
+      out.push("," + nl());
+      i++;
+    } else if (c === ":") {
+      out.push(pretty ? ": " : ":");
+      i++;
+    } else {
+      let j = i;
+      while (j < input.length && !/[\s,:\]}]/.test(input[j])) j++;
+      out.push(input.slice(i, j));
+      i = j;
+    }
+  }
+  return out.join("");
+}
+
 export function formatJson(input: string, mode: "pretty" | "minify"): string {
-  let parsed: unknown;
   try {
-    parsed = JSON.parse(input);
+    JSON.parse(input);
   } catch (e) {
     const message = e instanceof Error ? e.message : "Invalid JSON.";
     throw new ProcessorError(`This isn't valid JSON: ${message}`);
   }
-  return mode === "pretty" ? JSON.stringify(parsed, null, 2) : JSON.stringify(parsed);
+  return relayoutJson(input, mode === "pretty");
 }
 
 export function validateJson(input: string): { valid: boolean; error?: string } {
@@ -31,40 +80,71 @@ export function formatXml(input: string, mode: "pretty" | "minify"): string {
     throw new ProcessorError("This isn't valid XML.");
   }
 
-  if (mode === "minify") {
-    return trimmed.replace(/>\s+</g, "><").trim();
-  }
-
   // Keep the <?xml … ?> declaration (version/encoding) — the parsed tree doesn't carry it.
   const declaration = trimmed.match(/^<\?xml[^>]*\?>/)?.[0];
-  const body = prettyPrintXmlNode(doc.documentElement, 0);
-  return declaration ? `${declaration}\n${body}` : body;
+  const pretty = mode === "pretty";
+  const parts: string[] = [];
+  for (const node of Array.from(doc.childNodes)) {
+    if (node.nodeType === Node.TEXT_NODE && !node.textContent?.trim()) continue;
+    parts.push(serializeXml(node, 0, pretty));
+  }
+  const body = parts.join(pretty ? "\n" : "");
+  return declaration ? `${declaration}${pretty ? "\n" : ""}${body}` : body;
 }
 
-function prettyPrintXmlNode(node: Element, depth: number): string {
-  const indent = "  ".repeat(depth);
-  const children = Array.from(node.childNodes).filter(
-    (n) => !(n.nodeType === Node.TEXT_NODE && !n.textContent?.trim())
-  );
+const escapeXmlText = (t: string) => t.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+const escapeXmlAttr = (t: string) =>
+  t.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;").replace(/\t/g, "&#9;").replace(/\n/g, "&#10;").replace(/\r/g, "&#13;");
 
-  const attrs = Array.from(node.attributes)
-    .map((a) => ` ${a.name}="${a.value}"`)
+/** Serializes any node so the output is well-formed and lossless: text/attribute escaping, CDATA, comments,
+ * processing instructions, the DOCTYPE and mixed content (text next to elements) are all kept. */
+function serializeXml(node: Node, depth: number, pretty: boolean): string {
+  const indent = pretty ? "  ".repeat(depth) : "";
+  switch (node.nodeType) {
+    case Node.TEXT_NODE:
+      return escapeXmlText(node.textContent ?? "");
+    case Node.CDATA_SECTION_NODE:
+      return `<![CDATA[${node.textContent ?? ""}]]>`;
+    case Node.COMMENT_NODE:
+      return `${indent}<!--${node.textContent ?? ""}-->`;
+    case Node.PROCESSING_INSTRUCTION_NODE: {
+      const pi = node as ProcessingInstruction;
+      return `${indent}<?${pi.target}${pi.data ? " " + pi.data : ""}?>`;
+    }
+    case Node.DOCUMENT_TYPE_NODE: {
+      const dt = node as DocumentType;
+      const ids = dt.publicId ? ` PUBLIC "${dt.publicId}" "${dt.systemId}"` : dt.systemId ? ` SYSTEM "${dt.systemId}"` : "";
+      return `<!DOCTYPE ${dt.name}${ids}>`;
+    }
+    case Node.ELEMENT_NODE:
+      break;
+    default:
+      return "";
+  }
+  const el = node as Element;
+  const attrs = Array.from(el.attributes)
+    .map((a) => ` ${a.name}="${escapeXmlAttr(a.value)}"`)
     .join("");
+  const open = `<${el.tagName}${attrs}`;
+  const kids = Array.from(el.childNodes);
+  if (kids.length === 0) return `${indent}${open}/>`;
 
-  if (children.length === 0) {
-    return `${indent}<${node.tagName}${attrs}/>`;
+  const hasStructure = kids.some((n) => n.nodeType === Node.ELEMENT_NODE || n.nodeType === Node.COMMENT_NODE || n.nodeType === Node.PROCESSING_INSTRUCTION_NODE);
+  const hasRealText = kids.some((n) => (n.nodeType === Node.TEXT_NODE && n.textContent?.trim()) || n.nodeType === Node.CDATA_SECTION_NODE);
+
+  if (!hasStructure) {
+    // Only text / CDATA: keep it inline; pretty mode trims padding whitespace around plain text.
+    const inner = kids
+      .map((n) => (n.nodeType === Node.TEXT_NODE && pretty ? escapeXmlText((n.textContent ?? "").trim()) : serializeXml(n, 0, false)))
+      .join("");
+    return `${indent}${open}>${inner}</${el.tagName}>`;
   }
-
-  if (children.length === 1 && children[0].nodeType === Node.TEXT_NODE) {
-    return `${indent}<${node.tagName}${attrs}>${children[0].textContent?.trim() ?? ""}</${node.tagName}>`;
+  if (hasRealText) {
+    // Mixed content: whitespace is significant, so the children are written exactly as they are.
+    return `${indent}${open}>${kids.map((n) => serializeXml(n, 0, false)).join("")}</${el.tagName}>`;
   }
-
-  const inner = children
-    .filter((n): n is Element => n.nodeType === Node.ELEMENT_NODE)
-    .map((el) => prettyPrintXmlNode(el, depth + 1))
-    .join("\n");
-
-  return `${indent}<${node.tagName}${attrs}>\n${inner}\n${indent}</${node.tagName}>`;
+  const inner = kids.filter((n) => n.nodeType !== Node.TEXT_NODE).map((n) => serializeXml(n, depth + 1, pretty));
+  return pretty ? `${indent}${open}>\n${inner.join("\n")}\n${indent}</${el.tagName}>` : `${open}>${inner.join("")}</${el.tagName}>`;
 }
 
 export interface CsvParseOptions {
@@ -130,8 +210,18 @@ function csvEscapeField(field: string, delimiter: string): string {
   return field;
 }
 
+/** Picks the delimiter from the header line: comma, semicolon (common in European Excel exports), tab or pipe. */
+export function detectCsvDelimiter(input: string): string {
+  const firstLine = input.replace(/^﻿/, "").split(/\r?\n/, 1)[0] ?? "";
+  // Ignore anything inside quotes when counting.
+  const bare = firstLine.replace(/"[^"]*"/g, "");
+  const counts = [",", ";", "	", "|"].map((d) => [d, bare.split(d).length - 1] as const);
+  const best = counts.reduce((a, b) => (b[1] > a[1] ? b : a));
+  return best[1] > 0 ? best[0] : ",";
+}
+
 export function csvToJson(input: string): string {
-  const rows = parseCsv(input);
+  const rows = parseCsv(input, { delimiter: detectCsvDelimiter(input) });
   if (rows.length === 0) throw new ProcessorError("Paste some CSV data first.");
   const [header, ...dataRows] = rows;
   const objects = dataRows.map((row) => {

@@ -1,0 +1,60 @@
+PASS    txt-to-html :: 1.7 MB TXT → HTML; <appendix> escaped; text preserved — htmlLen=1779898 paragraphs=0 textChars=1753487 escaped=true
+PASS    txt-to-html :: download equals on-screen output — document.html 1803298B
+PASS    txt-to-html :: escapes & < > quotes; keeps unicode; paragraph split — <body>Tom &amp; Jerry &lt;b&gt;bold&lt;/b&gt; "quoted"⏎⏎Second para⏎line2 — café 日本</body>⏎</html>⏎
+PASS    markdown-to-html :: headings/bold/italic/lists(nested,numbered)/table/code/quote/hr/unicode; script & javascript: link neutralised — {"h1":1,"h2":1,"h3":2,"strong":3,"em":2,"a":["https://example.com/a?b=1&c=2","https://example.com/i.png"],"ul":3,"ol":2,"li":10,"table":1,"th":3,"td":6,"pre":1,"bq":1,"hr":1,"script":0,"snake":true,"jsHref":false,"uni":true,"img":0,"nestedUl":2,"tdAlign":""}
+INFO    markdown-to-html :: markdown image ![alt](url) rendered? — <img> count=0; align style= (table alignment markers)
+PASS    markdown-to-html :: 220-char unbroken string wraps (overflow-wrap) in generated document — present=true; css handles wrap=true
+PASS    markdown-to-pdf :: PDF has headings/lists/table/code/quote text; long string not clipped — pages=1 missing=[] note="The PDF's built-in fonts can't draw these characters (日 本 語 Ε λ η …), so they were replaced with "?". Everything else is"
+INFO    markdown-to-pdf :: non-Latin characters in PDF — café:true 日本語:false Ελληνικά:false ✓:false 😀:false — UI says: The PDF's built-in fonts can't draw these characters (日 本 語 Ε λ η …), so they were replaced with "?". Everything else is intact.
+PASS    markdown-to-pdf :: no text drawn into the right page margin — dark px in right 30px strip: 0
+PASS    txt-to-pdf :: 1.7 MB TXT → PDF: page count, text complete, first/last section — pages=499 words in/out=254800/254800 3092ms size=1169108 note=""
+PASS    txt-to-pdf :: page 1 is A4/Letter and has ink — 595.28x841.89
+PASS    txt-to-pdf :: unicode input: file produced, characters kept or user told — text="Café ? ??? — “quotes” €5" ui="The PDF's built-in fonts can't draw these characters (✓ 日 本 語), so they were replaced with "?". Everything else is intact."
+PASS    txt-to-pdf :: empty input refused — Paste or type some content first.
+PASS    json-formatter :: pretty-print is valid, equal to input, 2-space indented — bytes 313
+PASS    json-formatter :: integer beyond 2^53 (12345678901234567890) survives formatting — exact
+PASS    json-formatter :: minify removes whitespace, same data — 178 chars
+PASS    json-formatter :: validator: malformed JSON → message with reason/position — This isn't valid JSON: Unexpected token ',', ..."b": [1, 2,, ], "c": "... is not valid JSON
+PASS    json-formatter :: 570 KB / 6000 records formatted — 2909ms out=1027628
+PASS    csv-to-json :: quoted commas, doubled quotes, quoted newline, empty cells, unicode — [{"id":"1","name":"Smith, Jane","notes":"said \"hello\"","amount":"10.50"},{"id":"2","name":"Ünal","notes":"multi\nline note","amount":""},{"id":"3","name":"","notes":"","amount":"0"},{"id":"4","name":"Zoë","notes":"plain","amount":"-3"},{"id":"5","name":"日本語"
+INFO    csv-to-json :: number typing — amount values: "10.50","","0","-3","1e3"
+PASS    csv-to-json :: malformed CSV (unclosed quote) → warning/error, not silent garbage — err="A quoted value in this CSV is never closed (it starts on row 2). Check for a missing closing quote." output=
+INFO    csv-to-json :: semicolon-delimited CSV — [ { "a": "1", "b": "2", "c": "3" } ]
+PASS    json-to-csv :: union of keys, comma/quote/newline escaped (re-parsed with independent CSV parser) — header=id,name,note,nested,list row4=["4","Di","","{\"a\":1}","[1,2]"]
+INFO    json-to-csv :: single object (not array) —  Provide a JSON array of objects, e.g. [{"name":"Ada"}].
+INFO    json-to-csv :: array of primitives —  Provide a JSON array of objects, e.g. [{"name":"Ada"}].
+PASS    json-to-csv :: invalid JSON → message — This isn't valid JSON.
+PASS    xml-formatter :: pretty output well-formed; namespaces, attribute, entity, CDATA text preserved — {"err":false,"books":2,"flag":"yes","title":"Café & Co","cdata":"Raw <b>text</b>"} decl=true comment=true
+PASS    xml-formatter :: minify well-formed and shorter — 357→322
+PASS    xml-formatter :: malformed XML → error — This isn't valid XML.
+PASS    base64-encode-decode :: unicode text encodes to standard Base64 (matches Buffer) — SGVsbG8sIHfDtnJsZCDinJMKU2Vjb25kIGxpbmUg5pel5pys6KqeCg==
+PASS    base64-encode-decode :: decode round-trips including unicode/newlines — "Hello, wörld ✓\nSecond line 日本語\n"
+PASS    base64-encode-decode :: invalid Base64 → clear error — This isn't valid Base64 text.
+PASS    base64-encode-decode :: unpadded Base64 accepted — Hello world
+PASS    url-encode-decode :: encode equals encodeURIComponent — caf%C3%A9%20au%20lait%20%26%201%2B1%3D2%20%2Fa%2Fb%3Fc%3Dd%23e%20%E6%97%A5%E6%9C%AC
+PASS    url-encode-decode :: decode percent-encoded string — q=café au lait&x=1+1=2&path=/a/b?c=d&e
+PASS    url-encode-decode :: malformed %-sequence → error — This isn't validly encoded URL text.
+PASS    text-case-converter :: upper — HELLO WORLD EXAMPLE-TEXT_HERE. SECOND SENTENCE ÜNÏCODE STRASSE
+PASS    text-case-converter :: lower — hello world example-text_here. second sentence ünïcode straße
+PASS    text-case-converter :: title — Hello World Example-text_here. Second Sentence Ünïcode Straße
+PASS    text-case-converter :: sentence — Hello world example-text_here. Second sentence ünïcode straße
+PASS    text-case-converter :: camel — helloWorldExampleTextHereSecondSentenceÜnïcodeStraße
+PASS    text-case-converter :: kebab — hello-world-example-text-here-second-sentence-ünïcode-straße
+PASS    text-case-converter :: snake — hello_world_example_text_here_second_sentence_ünïcode_straße
+PASS    word-counter :: 9 words, 52 chars, 43 chars w/o spaces, 3 sentences, 2 paragraphs — 9 Wo
+PASS    word-counter :: empty input shows zeros (not NaN) — 0 Words 0 Characters 0 Characters (no spaces) 0 Sentences 0 Paragraphs 1 Reading
+INFO    word-counter :: emoji/CJK input — 5 Words 23 Characters
+PASS    uuid-generator :: 5 unique RFC-4122 v4 UUIDs — 81cc448a-64e2-466c-94a5-0e5bc6265e3c,e687e146-3cd1-4d96-b43c-f4daca881033
+PASS    uuid-generator :: 50 unique — 50
+INFO    uuid-generator :: count 5000 (over limit?) — 500 shown; ui: 
+PASS    hash-generator :: SHA-1("abc") known vector — a9993e364706816aba3e25717850c26c9cd0d89d
+PASS    hash-generator :: SHA-256("abc") known vector — ba7816bf8f01cfea414140de5dae2223b00361a3
+PASS    hash-generator :: SHA-384("abc") known vector — cb00753f45a35e8bb5a03d699ac65007272c32ab
+PASS    hash-generator :: SHA-512("abc") known vector — ddaf35a193617abacc417349ae20413112e6fa4e
+INFO    hash-generator :: SHA-256 of empty string — no hash shown / message: Enter some text first.
+PASS    hash-generator :: SHA-256 of unicode text uses UTF-8
+PASS    hash-generator :: file hash (8 MB JPEG) equals node crypto
+PASS    text-diff :: shows removed b, added B and d, unchanged a/c/same — - b | + B | + d
+PASS    text-diff :: identical texts say so
+PASS    text-diff :: 3000-line diff finds the single change quickly — 1125ms
+PASS    (docs+data tools) :: browser console/page errors
