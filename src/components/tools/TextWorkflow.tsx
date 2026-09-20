@@ -37,7 +37,7 @@ export function TextWorkflow({
   const handleProcess = async () => {
     setError(null);
     if (!input.trim()) {
-      setError("Paste or type some text first.");
+      setError("Paste or type some content first.");
       return;
     }
     try {

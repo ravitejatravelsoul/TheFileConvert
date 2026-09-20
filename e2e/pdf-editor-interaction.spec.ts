@@ -18,6 +18,18 @@ async function openFile(page: Page, filePath: string, { actualSize = true } = {}
   if (actualSize) await page.getByRole("button", { name: "Actual size (100%)" }).click();
 }
 
+// Below the lg breakpoint the Properties panel and the page rail are on-demand drawers with a
+// "Close panel" button, not permanent columns. These run `fn` with the named panel visible and
+// close the drawer afterwards, so one test body covers both layouts.
+async function withPanel(page: Page, isMobile: boolean, panel: "Properties" | "Pages", fn: () => Promise<void>) {
+  if (isMobile) await page.getByRole("button", { name: new RegExp(`^${panel}`) }).click();
+  await fn();
+  if (isMobile) {
+    await page.getByRole("button", { name: "Close panel" }).click();
+    await expect(page.getByRole("button", { name: "Close panel" })).toBeHidden();
+  }
+}
+
 const surface = (page: Page) => page.locator('[data-testid="page-surface"]').first();
 
 async function surfaceBox(page: Page) {
@@ -204,37 +216,42 @@ test.describe("PDF Editor: text is edited directly on the page", () => {
   });
 
   test("the selected text's color and size are edited from the panel, and Delete removes it", async ({ page, isMobile }) => {
-    test.skip(isMobile, "needs the desktop side panel/page rail; the mobile drawers are covered by the advanced suite");
     await openFile(page, path.join(FIXTURES, "sample-a.pdf"));
     const sb = await surfaceBox(page);
     await page.getByRole("button", { name: "Text", exact: true }).click();
     await page.mouse.click(sb.x + 60, sb.y + 300);
+    await page.getByTestId("canvas-text-editor").waitFor();
     await page.keyboard.type("Sized");
     await page.keyboard.press("Escape");
     const before = await page.locator("[data-object-type=added-text]").boundingBox();
-    await page.getByRole("button", { name: "Red", exact: true }).click();
-    await page.getByLabel("Font size").fill("28");
+    await withPanel(page, isMobile, "Properties", async () => {
+      await page.getByRole("button", { name: "Red", exact: true }).click();
+      await page.getByLabel("Font size").fill("28");
+      await page.getByLabel("Font size").blur();
+    });
     const el = page.locator("[data-object-type=added-text] div").first();
     await expect(el).toHaveCSS("color", "rgb(219, 38, 38)");
     const after = await page.locator("[data-object-type=added-text]").boundingBox();
     expect(after!.height).toBeGreaterThan(before!.height * 1.5);
-    await page.getByLabel("Font size").blur();
     await page.keyboard.press("Delete");
     await expect(page.locator("[data-object-type=added-text]")).toHaveCount(0);
   });
 
   test("typing into the properties-panel text box isn't cut off after one character", async ({ page, isMobile }) => {
-    test.skip(isMobile, "needs the desktop side panel/page rail; the mobile drawers are covered by the advanced suite");
     await openFile(page, path.join(FIXTURES, "sample-a.pdf"));
     const sb = await surfaceBox(page);
     await page.getByRole("button", { name: "Text", exact: true }).click();
     await page.mouse.click(sb.x + 60, sb.y + 300);
+    await page.getByTestId("canvas-text-editor").waitFor();
     await page.keyboard.press("Escape");
-    const panelText = page.locator("textarea").first();
-    await panelText.click();
-    await page.keyboard.press("Control+a");
-    await page.keyboard.type("typed in the panel", { delay: 20 });
-    await expect(panelText).toHaveValue("typed in the panel");
+    await withPanel(page, isMobile, "Properties", async () => {
+      const panelText = page.locator("textarea").first();
+      await panelText.click();
+      await page.keyboard.press("Control+a");
+      await page.keyboard.type("typed in the panel", { delay: 20 });
+      await expect(panelText).toHaveValue("typed in the panel");
+    });
+    await expect(page.locator("[data-object-type=added-text]")).toContainText("typed in the panel");
   });
 });
 
@@ -315,46 +332,53 @@ test.describe("PDF Editor: shapes, images, crop, search, pages", () => {
   });
 
   test("search covers every page from the start and Next/Prev jump to the match", async ({ page, isMobile }) => {
-    test.skip(isMobile, "needs the desktop side panel/page rail; the mobile drawers are covered by the advanced suite");
     await openFile(page, path.join(FIXTURES, "multi-page.pdf"));
-    await page.locator("summary", { hasText: /^Search/ }).click();
-    await page.getByLabel("Search document text").fill("Page");
-    await expect(page.getByText("1 of 5")).toBeVisible(); // 5 pages, none visited yet
-    await page.getByRole("button", { name: "Next", exact: true }).click();
-    await expect(page.getByText("2 of 5")).toBeVisible();
-    await expect(page.locator('div.group[class*="border-[var(--brand)]"]').getByRole("button", { name: "Go to page 2" })).toBeVisible();
+    await withPanel(page, isMobile, "Properties", async () => {
+      await page.locator("summary", { hasText: /^Search/ }).click();
+      await page.getByLabel("Search document text").fill("Page");
+      await expect(page.getByText("1 of 5")).toBeVisible(); // 5 pages, none visited yet
+      await page.getByRole("button", { name: "Next", exact: true }).click();
+      await expect(page.getByText("2 of 5")).toBeVisible();
+    });
+    await withPanel(page, isMobile, "Pages", async () => {
+      await expect(page.locator('div.group[class*="border-[var(--brand)]"]').getByRole("button", { name: "Go to page 2" })).toBeVisible();
+    });
     await expect(page.locator("[data-testid=page-surface] [class*='ring-yellow-500']")).toHaveCount(1);
   });
 
   test("pages can be moved with the Move up/down buttons (works without dragging)", async ({ page, isMobile }) => {
-    test.skip(isMobile, "needs the desktop side panel/page rail; the mobile drawers are covered by the advanced suite");
     await openFile(page, path.join(FIXTURES, "multi-page.pdf"));
-    await page.getByRole("button", { name: "Go to page 1" }).hover();
-    await page.getByRole("button", { name: "Move page 1 down" }).click();
+    await withPanel(page, isMobile, "Pages", async () => {
+      if (!isMobile) await page.getByRole("button", { name: "Go to page 1" }).hover();
+      await page.getByRole("button", { name: "Move page 1 down" }).click();
+    });
     const bytes = await exportAndSave(page, "moved.pdf");
     const first = (await pdfTextItems(bytes, 1)).map((i) => i.str).join(" ");
     expect(first).toContain("Page 2 of 5");
   });
 
   test("Whiteout shows the not-secure-redaction warning while it's the active tool", async ({ page, isMobile }) => {
-    test.skip(isMobile, "needs the desktop side panel/page rail; the mobile drawers are covered by the advanced suite");
     await openFile(page, path.join(FIXTURES, "sample-a.pdf"));
     await page.getByRole("button", { name: "Whiteout", exact: true }).click();
-    await expect(page.getByRole("note")).toContainText(/not secure\s+redaction/i);
+    await withPanel(page, isMobile, "Properties", async () => {
+      await expect(page.getByRole("note")).toContainText(/not secure\s+redaction/i);
+    });
   });
 });
 
 test.describe("PDF Editor: added text on a rotated page", () => {
   test("keeps its layout (one line, real width) and turns with the page instead of wrapping into a sliver", async ({ page, isMobile }) => {
-    test.skip(isMobile, "uses the desktop page rail to rotate");
     await openFile(page, path.join(FIXTURES, "sample-a.pdf"));
     const sb = await surfaceBox(page);
     await page.getByRole("button", { name: "Text", exact: true }).click();
     await page.mouse.click(sb.x + 60, sb.y + 300);
+    await page.getByTestId("canvas-text-editor").waitFor();
     await page.keyboard.type("A single line of text");
     await page.keyboard.press("Escape");
-    await page.getByRole("button", { name: "Go to page 1" }).hover();
-    await page.getByRole("button", { name: "Rotate page 1 clockwise" }).click();
+    await withPanel(page, isMobile, "Pages", async () => {
+      if (!isMobile) await page.getByRole("button", { name: "Go to page 1" }).hover();
+      await page.getByRole("button", { name: "Rotate page 1 clockwise" }).click();
+    });
     const metrics = await page.locator("[data-object-type=added-text] div").first().evaluate((el) => {
       const cs = getComputedStyle(el);
       return { height: (el as HTMLElement).offsetHeight, width: (el as HTMLElement).offsetWidth, line: parseFloat(cs.fontSize) * 1.2 };
@@ -454,5 +478,91 @@ test.describe("PDF Editor: a page wider than its viewport", () => {
     const surfaceWidth = (await surfaceBox(page)).width;
     const canvasWidth = (await page.locator('[data-testid="page-surface"] canvas').first().boundingBox())!.width;
     expect(Math.abs(surfaceWidth - canvasWidth)).toBeLessThan(1.5);
+  });
+});
+
+// Real touch input (Chromium's touch event dispatch, which the browser turns into pointer events with
+// pointerType "touch") on the phone layout. Physical-device testing is separate; this is the closest
+// automated equivalent.
+test.describe("PDF Editor on a phone: touch input", () => {
+  async function touchTools(page: Page) {
+    const cdp = await page.context().newCDPSession(page);
+    const send = (type: "touchStart" | "touchMove" | "touchEnd", pts: [number, number][]) =>
+      cdp.send("Input.dispatchTouchEvent", { type, touchPoints: pts.map(([x, y], i) => ({ x, y, id: i, radiusX: 2, radiusY: 2, force: 1 })) });
+    return {
+      async path(points: [number, number][], onMiddle?: () => Promise<void>) {
+        await send("touchStart", [points[0]]);
+        for (let i = 1; i < points.length; i++) {
+          await send("touchMove", [points[i]]);
+          if (onMiddle && i === Math.floor(points.length / 2)) await onMiddle();
+        }
+        await send("touchEnd", []);
+        // Chromium swallows the first tap after a touch drag on a pointer-captured surface (reproduced on a
+        // bare page); absorb it on the header so the next real tap lands.
+        await page.touchscreen.tap(2, 2);
+      },
+      line(from: [number, number], to: [number, number], steps = 8): [number, number][] {
+        return Array.from({ length: steps + 1 }, (_, i) => [from[0] + ((to[0] - from[0]) * i) / steps, from[1] + ((to[1] - from[1]) * i) / steps] as [number, number]);
+      },
+    };
+  }
+
+  test("tap places text and typing works; highlight/underline stay armed; strokes render live; crop applies", async ({ page, isMobile }) => {
+    test.skip(!isMobile, "phone layout only");
+    await openFile(page, path.join(FIXTURES, "multi-page.pdf"), { actualSize: false });
+    const touch = await touchTools(page);
+    const sb = await surfaceBox(page);
+    const tool = async (name: string) => {
+      const btn = page.getByRole("button", { name, exact: true });
+      await btn.tap();
+      if ((await btn.getAttribute("aria-pressed")) === "false") await btn.tap();
+    };
+
+    // Text: tap, type, tap away.
+    await tool("Text");
+    await page.touchscreen.tap(sb.x + 100, sb.y + sb.height * 0.6);
+    await page.getByTestId("canvas-text-editor").waitFor();
+    await page.keyboard.type("Typed on a phone");
+    await page.touchscreen.tap(sb.x + sb.width - 6, sb.y + 6);
+    await expect(page.locator("[data-object-type=added-text]")).toContainText("Typed on a phone");
+
+    // Highlight ×3, then underline ×3, each without reselecting the tool.
+    await tool("Highlight");
+    for (let i = 0; i < 3; i++) await touch.path(touch.line([sb.x + 20, sb.y + 30 + i * 26], [sb.x + 180, sb.y + 44 + i * 26], 6));
+    await expect(page.getByRole("button", { name: "Highlight", exact: true })).toHaveAttribute("aria-pressed", "true");
+    await tool("Underline");
+    for (let i = 0; i < 3; i++) await touch.path(touch.line([sb.x + 20, sb.y + 130 + i * 20], [sb.x + 180, sb.y + 131 + i * 20], 6)); // flat drags
+    await expect(page.locator("[data-object-type=annotation]")).toHaveCount(6);
+
+    // A freehand stroke is visible while the finger is still down.
+    await tool("Draw");
+    let liveDuring = 0;
+    await touch.path(
+      Array.from({ length: 12 }, (_, i) => [sb.x + 30 + i * 12, sb.y + sb.height * 0.75 + Math.sin(i / 2) * 12] as [number, number]),
+      async () => {
+        liveDuring = await page.locator("[data-testid=live-stroke]").count();
+      }
+    );
+    expect(liveDuring).toBe(1);
+    await expect(page.locator("[data-object-type=drawing]")).toHaveCount(1);
+
+    // A rectangle lands exactly where it was dragged.
+    await tool("Rectangle");
+    const [x0, y0, x1, y1] = [sb.x + 40, sb.y + sb.height * 0.85, sb.x + 140, sb.y + sb.height * 0.85 + 40];
+    await touch.path(touch.line([x0, y0], [x1, y1], 6));
+    const r = (await page.locator("[data-object-type=shape]").last().boundingBox())!;
+    for (const [a, b] of [[r.x, x0], [r.y, y0], [r.x + r.width, x1], [r.y + r.height, y1]]) expect(Math.abs(a - b)).toBeLessThan(2);
+
+    // Crop by touch, applied from the action bar, and it reaches the exported file.
+    await tool("Crop");
+    const cb = await surfaceBox(page); // the page may have scrolled while drawing
+    const viewportHeight = page.viewportSize()!.height;
+    await touch.path(touch.line([cb.x + 10, cb.y + 10], [cb.x + cb.width - 20, Math.min(cb.y + cb.height - 40, viewportHeight - 60)], 8)); // stay on screen
+    await page.getByRole("button", { name: "Keep this area" }).tap();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth - innerWidth)).toBeLessThanOrEqual(0); // no sideways scroll
+    const bytes = await exportAndSave(page, "touch-session.pdf");
+    const first = (await PDFDocument.load(bytes)).getPage(0);
+    expect(first.getCropBox().width).toBeLessThan(first.getMediaBox().width);
+    expect((await pdfTextItems(bytes, 1)).map((i) => i.str).join(" ")).toContain("Typed on a phone");
   });
 });

@@ -338,7 +338,11 @@ export function PageSurface({
           const targetRectPx = pdfRectToViewport(spec, changedPdfBox);
           const targetPaddingPx = targetPaddingPt * spec.scale;
           const targetEstimate = estimateRegionColors(source, targetRectPx, targetPaddingPx);
-          const targetMaxExtraPx = targetRectPx.width;
+          // Room to grow only as far as the replacement can actually need (by its length relative to
+          // the original, plus a little slack): a patch reaching a whole word-width past the text
+          // just drags extra cloned paper texture into the page, which shows up as a faint strip.
+          const growth = Math.max(0, newText.length / Math.max(1, text.length) - 1);
+          const targetMaxExtraPx = Math.min(targetRectPx.width, targetRectPx.width * growth * 1.25 + targetRectPx.height * 0.3);
           const targetSafeExpansionPx = !targetEstimate.complex
             ? findSafeExpansionPx(source, targetRectPx, targetEstimate.backgroundColor, targetMaxExtraPx)
             : 0;

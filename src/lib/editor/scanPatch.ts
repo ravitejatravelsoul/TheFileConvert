@@ -195,6 +195,33 @@ function snapshotToCanvas(source: PixelSource, rect: PixelRect): HTMLCanvasEleme
   return canvas;
 }
 
+/** The solid "core" ink color of a scanned word: the mean of its darkest-most-contrasting pixels.
+ * A re-rendered thin stroke never reaches the scan's own peak darkness at the same weight (it is
+ * anti-aliased across more pixels), so filling the replacement with the *typical* ink color — which
+ * the region estimate uses — leaves it visibly paler than its neighbors; the peak color is the
+ * right fill. Returns null when there is too little ink to say. */
+export function peakInkColor(source: PixelSource, rect: PixelRect, background: RgbColor): RgbColor | null {
+  const bg = [background.r * 255, background.g * 255, background.b * 255];
+  const x0 = Math.round(rect.x);
+  const y0 = Math.round(rect.y);
+  const w = Math.max(1, Math.round(rect.width));
+  const h = Math.max(1, Math.round(rect.height));
+  const px: { d: number; c: [number, number, number] }[] = [];
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      const [r, g, b, a] = source.getPixel(x0 + x, y0 + y);
+      if (a < 10) continue;
+      const d = Math.hypot(r - bg[0], g - bg[1], b - bg[2]);
+      if (d >= INK_MATCH_MIN_THRESHOLD) px.push({ d, c: [r, g, b] });
+    }
+  }
+  if (px.length < MIN_INK_PIXELS_FOR_MATCHING) return null;
+  px.sort((p, q) => q.d - p.d);
+  const take = px.slice(0, Math.max(3, Math.floor(px.length * 0.1)));
+  const mean = [0, 1, 2].map((i) => take.reduce((s, p) => s + p.c[i], 0) / take.length);
+  return { r: mean[0] / 255, g: mean[1] / 255, b: mean[2] / 255 };
+}
+
 function rgbToCssColor(c: RgbColor): string {
   return `rgb(${Math.round(c.r * 255)}, ${Math.round(c.g * 255)}, ${Math.round(c.b * 255)})`;
 }
@@ -346,9 +373,52 @@ export function composeOcrPatch(input: ComposeOcrPatchInput): ComposeOcrPatchRes
     // known: it's the OCR box), not from the replacement itself — a changed piece like "y" or
     // "5" has a different ink height than the box it replaces (descenders, x-height), and sizing
     // it to fit that box made it visibly smaller/larger than its neighbors.
-    const sizeText = useReference ? styleReferenceText! : originalText;
-    const sizeHeightPx = matchHeightPx;
+    // A same-length digit swap replaces glyphs that have no descenders and whose own tight box is
+    // known: size and seat them from that box (the digit's real top and bottom) instead of from the
+    // whole field, whose "/" or "." glyphs reach past the digits and skew both measurements.
+    const digitSwap = /^[0-9]+$/.test(originalText) && /^[0-9]+$/.test(newText);
+    const sizeText = digitSwap ? originalText : useReference ? styleReferenceText! : originalText;
+    // The digit's real ink extent (rows of the ink mask that actually contain ink) — the OCR box
+    // around it is a little taller than the ink, which made the replacement digit too big and sit
+    // too low. Falls back to the box when the mask has no ink.
+    let inkTop = -1;
+    let inkBottom = -1;
+    for (let y = 0; y < wordInkMask.height; y++) {
+      for (let x = 0; x < wordInkMask.width; x++) {
+        if (wordInkMask.ink[y * wordInkMask.width + x]) {
+          if (inkTop < 0) inkTop = y;
+          inkBottom = y;
+          break;
+        }
+      }
+    }
+    const inkHeightPx = inkTop >= 0 ? inkBottom - inkTop + 1 : wordRectPx.height;
+    const sizeHeightPx = digitSwap ? inkHeightPx * pixelScale : matchHeightPx;
     let size = sizeText.trim() ? calibrateFontSize(ctx, sizeText, fontCandidate, sizeHeightPx) : calibrateFontSize(ctx, newText, fontCandidate, targetInkHeightPx);
+    // Whole-word replacements are seated from the original word's own dense text band — the rows
+    // holding the bulk of its ink, i.e. the x-height — not from the OCR box (whose bottom includes
+    // descenders and halo) or a neighbor-derived line estimate: the band's bottom edge is the real
+    // baseline and its height the real x-height, so the new word lands on the same line at the same
+    // size as its neighbors instead of a pixel or two low and a shade small.
+    let seatedBaselinePx: number | null = null;
+    if (!digitSwap && !useReference && wordInkMask.height >= 6) {
+      const rowInk: number[] = [];
+      for (let y = 0; y < wordInkMask.height; y++) {
+        let n = 0;
+        for (let x = 0; x < wordInkMask.width; x++) n += wordInkMask.ink[y * wordInkMask.width + x];
+        rowInk.push(n);
+      }
+      const maxInk = Math.max(...rowInk);
+      const dense = rowInk.map((n, i) => [n, i] as const).filter(([n]) => maxInk >= 4 && n > maxInk * 0.5).map(([, i]) => i);
+      if (dense.length >= 3) {
+        const bandTop = dense[0];
+        const bandBottom = dense[dense.length - 1];
+        ctx.font = fontString(fontCandidate, size);
+        const fontXHeight = ctx.measureText("x").actualBoundingBoxAscent;
+        if (fontXHeight > 0) size = Math.min(size * 1.12, Math.max(size * 0.9, size * (((bandBottom - bandTop + 1) * pixelScale) / fontXHeight)));
+        seatedBaselinePx = wordRectPx.y + bandBottom + 0.7;
+      }
+    }
     ctx.font = fontString(fontCandidate, size);
     const availableWidthPx = patchRectPx.width * pixelScale;
     let naturalWidth = ctx.measureText(newText).width;
@@ -371,8 +441,22 @@ export function composeOcrPatch(input: ComposeOcrPatchInput): ComposeOcrPatchRes
       if (naturalWidth > availableWidthPx) overflow = true;
     }
 
-    const baselineLocalPx = (input.baselinePx - patchRectPx.y) * pixelScale;
-    ctx.fillStyle = rgbToCssColor(textColor);
+    const baselineLocalPx = ((digitSwap && inkTop >= 0 ? wordRectPx.y + inkBottom + 0.7 : (seatedBaselinePx ?? input.baselinePx)) - patchRectPx.y) * pixelScale;
+    // Fill with the neighbors' peak ink color (never lighter than the plain estimate).
+    const peaks: RgbColor[] = [];
+    const own = peakInkColor(source, styleReferenceRectPx ?? wordRectPx, backgroundColor);
+    if (own) peaks.push(own);
+    for (const v of styleVoters ?? []) {
+      const p = peakInkColor(v.source, v.rectPx, v.backgroundColor);
+      if (p) peaks.push(p);
+    }
+    const luma = (c: RgbColor) => 0.299 * c.r + 0.587 * c.g + 0.114 * c.b;
+    let fill = textColor;
+    if (peaks.length > 0) {
+      const avg = { r: peaks.reduce((s, p) => s + p.r, 0) / peaks.length, g: peaks.reduce((s, p) => s + p.g, 0) / peaks.length, b: peaks.reduce((s, p) => s + p.b, 0) / peaks.length };
+      if (luma(avg) < luma(textColor)) fill = avg;
+    }
+    ctx.fillStyle = rgbToCssColor(fill);
     ctx.textBaseline = "alphabetic";
     ctx.filter = `blur(${BLUR_PX}px)`;
     ctx.fillText(newText, 0, baselineLocalPx);

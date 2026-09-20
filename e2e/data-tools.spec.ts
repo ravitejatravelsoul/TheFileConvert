@@ -57,3 +57,42 @@ test.describe("Data conversion workflow", () => {
     expect(parsed[1].bio).toContain("\n");
   });
 });
+
+test.describe("Text and document converters: whitespace-only input counts as empty", () => {
+  const converters: { route: string; button: string }[] = [
+    { route: "/document/txt-to-pdf", button: "Convert to PDF" },
+    { route: "/document/markdown-to-pdf", button: "Convert to PDF" },
+    { route: "/document/txt-to-html", button: "Convert to HTML" },
+    { route: "/document/markdown-to-html", button: "Convert to HTML" },
+    { route: "/data/json-formatter", button: "Format JSON" },
+    { route: "/data/csv-to-json", button: "Convert to JSON" },
+    { route: "/data/json-to-csv", button: "Convert to CSV" },
+    { route: "/data/xml-formatter", button: "Format XML" },
+    { route: "/data/base64", button: "Encode" },
+    { route: "/data/url-encode-decode", button: "Encode" },
+    { route: "/data/case-converter", button: "Convert case" },
+  ];
+
+  for (const { route, button } of converters) {
+    test(`${route}: spaces, tabs and blank lines show the empty-input message and produce nothing`, async ({ page }) => {
+      await page.goto(route);
+      await page.locator("textarea").first().fill("   \n\t  \n ");
+      await page.getByRole("button", { name: button }).click();
+      await expect(page.getByText("Paste or type some content first.")).toBeVisible();
+      // No result was produced: no download offered, no output text.
+      await expect(page.getByRole("button", { name: /^Download/ })).toHaveCount(0);
+      const outputs = page.getByPlaceholder("Your result will appear here.");
+      if (await outputs.count()) await expect(outputs.first()).toHaveValue("");
+    });
+  }
+
+  test("real content still converts after an empty attempt", async ({ page }) => {
+    await page.goto("/document/txt-to-pdf");
+    await page.locator("textarea").first().fill("  ");
+    await page.getByRole("button", { name: "Convert to PDF" }).click();
+    await expect(page.getByText("Paste or type some content first.")).toBeVisible();
+    await page.locator("textarea").first().fill("Hello");
+    await page.getByRole("button", { name: "Convert to PDF" }).click();
+    await expect(page.getByRole("button", { name: /^Download/ }).first()).toBeVisible();
+  });
+});
