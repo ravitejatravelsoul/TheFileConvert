@@ -76,7 +76,7 @@ export function Footer() {
         </div>
 
         <div className="mt-12 flex flex-col gap-4 border-t border-[var(--border)] pt-6 text-xs text-[var(--foreground-muted)] sm:flex-row sm:items-center sm:justify-between">
-          <p>&copy; {new Date().getFullYear()} TheFileConvert. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} Raviteja Vemulapelli. All rights reserved.</p>
           <div className="flex gap-5">
             <Link href="/privacy" className="hover:text-[var(--foreground)]">
               Privacy
