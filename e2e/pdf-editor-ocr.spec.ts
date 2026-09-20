@@ -21,6 +21,7 @@ async function openFile(page: Page, filePath: string) {
   await page.goto("/pdf/editor");
   await page.locator('input[type="file"]').setInputFiles(filePath);
   await expect(page.locator('[data-testid="page-surface"]').first()).toBeVisible({ timeout: 15_000 });
+  await page.getByRole("button", { name: "Actual size (100%)" }).click(); // these tests assume 100% (a phone opens fit to width)
 }
 
 async function openMobilePanel(page: Page, isMobile: boolean, panel: "Pages" | "Properties") {

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { setPageCropBox, setCropBoxForAllPages } from "./document";
+import { setPageCropBox, setCropBoxForAllPages, visiblePageBox } from "./document";
 import type { EditorDocument, EditorPage } from "./types";
 
 function makePage(id: string, mediaBox: [number, number, number, number]): EditorPage {
@@ -51,5 +51,25 @@ describe("setCropBoxForAllPages", () => {
     const next = setCropBoxForAllPages(doc, [10, 10, 200, 300]);
     expect(next.pages[0].cropBox).toEqual([10, 10, 200, 300]);
     expect(next.pages[1].cropBox).toBeUndefined();
+  });
+});
+
+describe("visiblePageBox", () => {
+  const media = { x: 0, y: 0, width: 612, height: 792 };
+
+  it("is the media box when the page has no narrower crop box", () => {
+    expect(visiblePageBox(media, media)).toEqual(media);
+  });
+
+  it("is the crop box when it sits inside the media box (what pdf.js renders)", () => {
+    expect(visiblePageBox(media, { x: 12, y: 24, width: 587, height: 752 })).toEqual({ x: 12, y: 24, width: 587, height: 752 });
+  });
+
+  it("clips a crop box that overhangs the media box", () => {
+    expect(visiblePageBox(media, { x: -10, y: 700, width: 700, height: 200 })).toEqual({ x: 0, y: 700, width: 612, height: 92 });
+  });
+
+  it("ignores a degenerate crop box that doesn't overlap the page", () => {
+    expect(visiblePageBox(media, { x: 900, y: 900, width: 50, height: 50 })).toEqual(media);
   });
 });

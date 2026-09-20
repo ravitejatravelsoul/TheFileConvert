@@ -16,7 +16,7 @@
  */
 
 import { computeInkMask, findTextureDonorRect, detectProtectedLines, type PixelSource, type PixelRect } from "./regionColor";
-import { pickBestFontCandidate, FONT_CANDIDATES, DEFAULT_FONT_CANDIDATE, type FontCandidate, type Bitmap } from "./glyphMatch";
+import { pickBestFontCandidateForReferences, type StyleReference, FONT_CANDIDATES, DEFAULT_FONT_CANDIDATE, type FontCandidate, type Bitmap } from "./glyphMatch";
 import type { RgbColor } from "./types";
 
 /** Per-page "document style profile" cache (spec section 8): once a font candidate has been
@@ -27,6 +27,7 @@ import type { RgbColor } from "./types";
 const pageStyleCache = new Map<string, FontCandidate>();
 
 const MIN_INK_PIXELS_FOR_MATCHING = 10;
+const INK_MATCH_MIN_THRESHOLD = 60;
 const MIN_SHRINK_FACTOR = 0.72;
 const LETTER_SPACING_SQUEEZE_PX = -0.4;
 const BLUR_PX = 0.25;
@@ -66,6 +67,9 @@ export interface ComposeOcrPatchInput {
    * word's own original text, not just the changed substring. Ignored unless
    * styleReferenceRectPx is also given. */
   styleReferenceText?: string;
+  /** Other words on the same line, in (probably) the same typeface — each is extra evidence for
+   * the font match, and the word being edited counts double against them. */
+  styleVoters?: { source: PixelSource; rectPx: PixelRect; text: string; backgroundColor: RgbColor; textColor: RgbColor }[];
 }
 
 export interface ComposeOcrPatchResult {
@@ -209,6 +213,7 @@ export function composeOcrPatch(input: ComposeOcrPatchInput): ComposeOcrPatchRes
     styleCacheKey,
     styleReferenceRectPx,
     styleReferenceText,
+    styleVoters,
   } = input;
 
   const pixelWidth = Math.max(1, Math.round(patchRectPx.width * pixelScale));
@@ -225,9 +230,19 @@ export function composeOcrPatch(input: ComposeOcrPatchInput): ComposeOcrPatchRes
   // rect (the whole original word) when one was given and actually has more ink to go on —
   // "12/20/2026" gives the matcher far more to work with than just "6" (spec section 9).
   // Falls back to a per-page cache when neither has enough ink (e.g. very short words).
-  const wordInkMask = computeInkMask(source, wordRectPx, backgroundColor);
+  // A soft, anti-aliased scan has a wide halo of lightly-tinted pixels around every stroke; at
+  // the default (low) threshold those count as ink, the mask reads far heavier than the real
+  // strokes, and the matcher then picks a bold face. Font matching therefore judges "ink" at
+  // roughly half the way from paper to the text color instead.
+  const contrast = Math.hypot(
+    (backgroundColor.r - textColor.r) * 255,
+    (backgroundColor.g - textColor.g) * 255,
+    (backgroundColor.b - textColor.b) * 255
+  );
+  const matchThreshold = Math.max(INK_MATCH_MIN_THRESHOLD, contrast * 0.5);
+  const wordInkMask = computeInkMask(source, wordRectPx, backgroundColor, matchThreshold);
   const wordInkCount = wordInkMask.ink.reduce((sum, v) => sum + v, 0);
-  const referenceInkMask = styleReferenceRectPx ? computeInkMask(source, styleReferenceRectPx, backgroundColor) : null;
+  const referenceInkMask = styleReferenceRectPx ? computeInkMask(source, styleReferenceRectPx, backgroundColor, matchThreshold) : null;
   const referenceInkCount = referenceInkMask ? referenceInkMask.ink.reduce((sum, v) => sum + v, 0) : 0;
 
   const useReference = referenceInkMask !== null && referenceInkCount > wordInkCount && referenceInkCount >= MIN_INK_PIXELS_FOR_MATCHING;
@@ -238,7 +253,18 @@ export function composeOcrPatch(input: ComposeOcrPatchInput): ComposeOcrPatchRes
 
   let fontCandidate: FontCandidate;
   if (matchInkCount >= MIN_INK_PIXELS_FOR_MATCHING) {
-    const { candidate } = pickBestFontCandidate(matchMask, (c) => rasterizeTextToBitmap(matchText, c, matchHeightPx));
+    const references: StyleReference[] = [{ bitmap: matchMask, render: (c) => rasterizeTextToBitmap(matchText, c, matchHeightPx), weight: 2 }];
+    for (const voter of styleVoters ?? []) {
+      const voterContrast = Math.hypot(
+        (voter.backgroundColor.r - voter.textColor.r) * 255,
+        (voter.backgroundColor.g - voter.textColor.g) * 255,
+        (voter.backgroundColor.b - voter.textColor.b) * 255
+      );
+      const mask = computeInkMask(voter.source, voter.rectPx, voter.backgroundColor, Math.max(INK_MATCH_MIN_THRESHOLD, voterContrast * 0.5));
+      if (mask.ink.reduce((sum, v) => sum + v, 0) < MIN_INK_PIXELS_FOR_MATCHING) continue;
+      references.push({ bitmap: mask, render: (c) => rasterizeTextToBitmap(voter.text, c, voter.rectPx.height * pixelScale) });
+    }
+    const { candidate } = pickBestFontCandidateForReferences(references);
     fontCandidate = candidate;
     pageStyleCache.set(styleCacheKey, candidate);
   } else {
@@ -316,7 +342,13 @@ export function composeOcrPatch(input: ComposeOcrPatchInput): ComposeOcrPatchRes
   let overflow = false;
   if (newText.trim()) {
     const targetInkHeightPx = wordRectPx.height * pixelScale;
-    let size = calibrateFontSize(ctx, newText, fontCandidate, targetInkHeightPx);
+    // Size comes from the *whole original word* rendered in the matched face (its ink height is
+    // known: it's the OCR box), not from the replacement itself — a changed piece like "y" or
+    // "5" has a different ink height than the box it replaces (descenders, x-height), and sizing
+    // it to fit that box made it visibly smaller/larger than its neighbors.
+    const sizeText = useReference ? styleReferenceText! : originalText;
+    const sizeHeightPx = matchHeightPx;
+    let size = sizeText.trim() ? calibrateFontSize(ctx, sizeText, fontCandidate, sizeHeightPx) : calibrateFontSize(ctx, newText, fontCandidate, targetInkHeightPx);
     ctx.font = fontString(fontCandidate, size);
     const availableWidthPx = patchRectPx.width * pixelScale;
     let naturalWidth = ctx.measureText(newText).width;

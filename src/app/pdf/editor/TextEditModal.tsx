@@ -83,7 +83,7 @@ export function TextEditModal({ request, api, onClose }: TextEditModalProps) {
       fontCandidateId: usePatch ? patch!.fontCandidateId : undefined,
       // The *whole word's* own box, so the invisible searchable-text run below isn't
       // squeezed into a box sized for just the changed characters when they differ.
-      searchAnchor: usePatch ? box : undefined,
+      searchAnchor: usePatch ? (request.wordPdfBox ?? box) : undefined,
     });
     onClose();
   }

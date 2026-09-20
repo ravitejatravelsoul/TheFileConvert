@@ -188,7 +188,7 @@ export interface InkMask {
 /** Builds a spatial ink/background mask for a rect (rather than just color samples) — used
  * both to compare a scanned glyph's shape against rendered font candidates (glyphMatch.ts)
  * and to know exactly which pixels a redraw needs to cover. */
-export function computeInkMask(source: PixelSource, rect: PixelRect, background: RgbColor): InkMask {
+export function computeInkMask(source: PixelSource, rect: PixelRect, background: RgbColor, threshold = INK_DISTANCE_THRESHOLD): InkMask {
   const bg: [number, number, number] = [background.r * 255, background.g * 255, background.b * 255];
   const x0 = Math.round(rect.x);
   const y0 = Math.round(rect.y);
@@ -198,7 +198,7 @@ export function computeInkMask(source: PixelSource, rect: PixelRect, background:
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
       const [r, g, b, a] = source.getPixel(x0 + x, y0 + y);
-      if (a >= 10 && colorDistanceSq([r, g, b], bg) >= INK_DISTANCE_THRESHOLD * INK_DISTANCE_THRESHOLD) {
+      if (a >= 10 && colorDistanceSq([r, g, b], bg) >= threshold * threshold) {
         ink[y * width + x] = 1;
       }
     }

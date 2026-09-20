@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { normalizeToGrid, compareGrids, inkDensity, pickBestFontCandidate, FONT_CANDIDATES, type Bitmap, type FontCandidate } from "./glyphMatch";
+import { normalizeToGrid, compareGrids, inkDensity, pickBestFontCandidate,
+  pickBestFontCandidateForReferences,
+  inkAspectRatio, FONT_CANDIDATES, type Bitmap, type FontCandidate } from "./glyphMatch";
 
 /** Two vertical bars with a gap between them (like a simplified "11" or the two strokes of
  * a digit) — used to build a case where a thicker rendering's bars merge into a solid block,
@@ -139,5 +141,59 @@ describe("inkDensity", () => {
 
   it("returns 0 for an empty grid", () => {
     expect(inkDensity(new Uint8Array(0))).toBe(0);
+  });
+});
+
+describe("inkAspectRatio", () => {
+  it("is the ink bounding box's width over its height, ignoring empty margins", () => {
+    const bmp = { width: 40, height: 20, ink: new Uint8Array(40 * 20) };
+    for (let y = 5; y < 10; y++) for (let x = 10; x < 30; x++) bmp.ink[y * 40 + x] = 1; // 20 wide, 5 tall
+    expect(inkAspectRatio(bmp)).toBe(4);
+  });
+
+  it("is null when there is no ink", () => {
+    expect(inkAspectRatio({ width: 4, height: 4, ink: new Uint8Array(16) })).toBeNull();
+  });
+});
+
+describe("pickBestFontCandidateForReferences", () => {
+  const narrow: FontCandidate = { id: "narrow", family: "serif", bold: false, italic: false };
+  const wide: FontCandidate = { id: "wide", family: "sans-serif", bold: false, italic: false };
+  const block = (w: number, h: number): Bitmap => {
+    const bmp = { width: w + 4, height: h + 4, ink: new Uint8Array((w + 4) * (h + 4)) };
+    for (let y = 2; y < 2 + h; y++) for (let x = 2; x < 2 + w; x++) bmp.ink[y * (w + 4) + x] = 1;
+    return bmp;
+  };
+
+  it("uses the width-to-height proportions of the word, not just its squeezed shape", () => {
+    const reference = block(60, 10);
+    const result = pickBestFontCandidateForReferences(
+      [{ bitmap: reference, render: (c) => (c.id === "narrow" ? block(60, 10) : block(90, 10)) }],
+      [wide, narrow]
+    );
+    expect(result.candidate.id).toBe("narrow");
+  });
+
+  it("lets several agreeing neighbours outvote a single misleading word", () => {
+    const good = block(60, 10);
+    const misleading = block(90, 10);
+    const render = (c: FontCandidate) => (c.id === "narrow" ? block(60, 10) : block(90, 10));
+    const result = pickBestFontCandidateForReferences(
+      [
+        { bitmap: misleading, render, weight: 1 },
+        { bitmap: good, render, weight: 1 },
+        { bitmap: good, render, weight: 1 },
+      ],
+      [wide, narrow]
+    );
+    expect(result.candidate.id).toBe("narrow");
+  });
+
+  it("prefers an upright face over an italic one that scores about the same", () => {
+    const upright: FontCandidate = { id: "upright", family: "serif", bold: false, italic: false };
+    const italic: FontCandidate = { id: "italic", family: "serif", bold: false, italic: true };
+    const bmp = block(30, 10);
+    const result = pickBestFontCandidateForReferences([{ bitmap: bmp, render: () => block(30, 10) }], [italic, upright]);
+    expect(result.candidate.id).toBe("upright");
   });
 });

@@ -19,9 +19,25 @@ async function parsePdf(file: File): Promise<PDFDocument> {
   }
 }
 
+type Box = { x: number; y: number; width: number; height: number };
+
+/** MediaBox ∩ CropBox (pdf-lib's getCropBox already falls back to the MediaBox when none is set). */
+export function visiblePageBox(media: Box, crop: Box): Box {
+  const x0 = Math.max(media.x, crop.x);
+  const y0 = Math.max(media.y, crop.y);
+  const x1 = Math.min(media.x + media.width, crop.x + crop.width);
+  const y1 = Math.min(media.y + media.height, crop.y + crop.height);
+  if (x1 - x0 < 1 || y1 - y0 < 1) return media; // a degenerate CropBox: ignore it
+  return { x: x0, y: y0, width: x1 - x0, height: y1 - y0 };
+}
+
 function pagesFromParsedDoc(parsed: PDFDocument, sourceFileId: string): EditorPage[] {
   return parsed.getPages().map((p, i) => {
-    const box = p.getMediaBox();
+    // The visible page area, not the raw MediaBox: pdf.js renders (and every viewer shows) the
+    // CropBox where there is one. Using the MediaBox here put every overlay — text regions, search
+    // highlights, objects — out of line with the rendered page for any PDF that carries a CropBox,
+    // including one exported from this editor after a crop.
+    const box = visiblePageBox(p.getMediaBox(), p.getCropBox());
     return {
       id: generateUuidV4(),
       sourceFileId,

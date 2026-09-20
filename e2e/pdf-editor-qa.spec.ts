@@ -9,6 +9,7 @@ async function openFile(page: Page, filePath: string) {
   await page.goto("/pdf/editor");
   await page.locator('input[type="file"]').setInputFiles(filePath);
   await expect(page.locator('[data-testid="page-surface"]').first()).toBeVisible({ timeout: 15_000 });
+  await page.getByRole("button", { name: "Actual size (100%)" }).click(); // these tests assume 100% (a phone opens fit to width)
 }
 
 async function openMobilePanel(page: Page, isMobile: boolean, panel: "Pages" | "Properties") {
@@ -189,6 +190,7 @@ test.describe("PDF Editor: privacy regression (signature / image / form / crop /
     await page.goto("/pdf/editor", { waitUntil: "networkidle" });
     await page.locator('input[type="file"]').setInputFiles(path.join(FIXTURES, "acroform.pdf"));
     await expect(page.locator('[data-testid="page-surface"]').first()).toBeVisible({ timeout: 15_000 });
+    await page.getByRole("button", { name: "Actual size (100%)" }).click(); // a phone opens fit to width
 
     requests.length = 0; // only care about traffic from here on
 

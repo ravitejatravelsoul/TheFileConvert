@@ -10,10 +10,12 @@ import { PDFDocument } from "pdf-lib";
 
 const FIXTURES = path.join(__dirname, "fixtures");
 
-async function openFile(page: Page, filePath: string) {
+async function openFile(page: Page, filePath: string, { actualSize = true } = {}) {
   await page.goto("/pdf/editor");
   await page.locator('input[type="file"]').setInputFiles(filePath);
   await expect(page.locator('[data-testid="page-surface"]').first()).toBeVisible({ timeout: 15_000 });
+  // A phone opens the page fit to its width; most of these tests measure against 100%.
+  if (actualSize) await page.getByRole("button", { name: "Actual size (100%)" }).click();
 }
 
 const surface = (page: Page) => page.locator('[data-testid="page-surface"]').first();
@@ -285,9 +287,8 @@ test.describe("PDF Editor: shapes, images, crop, search, pages", () => {
     expect(Math.abs(after.width / after.height - before.width / before.height)).toBeLessThan(0.02);
   });
 
-  test("a crop area can be adjusted by its handles, is kept on the page, and applied from the action bar", async ({ page, isMobile }) => {
-    test.skip(isMobile, "the page is wider than a phone screen (it scrolls sideways), so a drag can't reach its far corner");
-    await openFile(page, path.join(FIXTURES, "multi-page.pdf"));
+  test("a crop area can be adjusted by its handles, is kept on the page, and applied from the action bar", async ({ page }) => {
+        await openFile(page, path.join(FIXTURES, "multi-page.pdf"));
     await page.getByRole("button", { name: "Crop", exact: true }).click();
     await expect(page.getByRole("status")).toContainText("Drag on the page");
     const sb = await surfaceBox(page);
@@ -340,5 +341,118 @@ test.describe("PDF Editor: shapes, images, crop, search, pages", () => {
     await openFile(page, path.join(FIXTURES, "sample-a.pdf"));
     await page.getByRole("button", { name: "Whiteout", exact: true }).click();
     await expect(page.getByRole("note")).toContainText(/not secure\s+redaction/i);
+  });
+});
+
+test.describe("PDF Editor: added text on a rotated page", () => {
+  test("keeps its layout (one line, real width) and turns with the page instead of wrapping into a sliver", async ({ page, isMobile }) => {
+    test.skip(isMobile, "uses the desktop page rail to rotate");
+    await openFile(page, path.join(FIXTURES, "sample-a.pdf"));
+    const sb = await surfaceBox(page);
+    await page.getByRole("button", { name: "Text", exact: true }).click();
+    await page.mouse.click(sb.x + 60, sb.y + 300);
+    await page.keyboard.type("A single line of text");
+    await page.keyboard.press("Escape");
+    await page.getByRole("button", { name: "Go to page 1" }).hover();
+    await page.getByRole("button", { name: "Rotate page 1 clockwise" }).click();
+    const metrics = await page.locator("[data-object-type=added-text] div").first().evaluate((el) => {
+      const cs = getComputedStyle(el);
+      return { height: (el as HTMLElement).offsetHeight, width: (el as HTMLElement).offsetWidth, line: parseFloat(cs.fontSize) * 1.2 };
+    });
+    expect(metrics.height).toBeLessThan(metrics.line * 1.5); // still a single line
+    expect(metrics.width).toBeGreaterThan(metrics.height * 3);
+    const box = (await page.locator("[data-object-type=added-text]").boundingBox())!;
+    expect(box.height).toBeGreaterThan(box.width); // the box is turned with the page
+  });
+});
+
+test.describe("PDF Editor: underline and strikethrough as a flat drag", () => {
+  test("dragging straight along a line (almost no height) still creates the underline / strikethrough", async ({ page }) => {
+    await openFile(page, path.join(FIXTURES, "sample-a.pdf"));
+    const sb = await surfaceBox(page);
+    await page.getByRole("button", { name: "Underline", exact: true }).click();
+    await drag(page, sb.x + 40, sb.y + 120, sb.x + 220, sb.y + 122, 6);
+    await expect(page.locator("[data-object-type=annotation]")).toHaveCount(1);
+    await page.getByRole("button", { name: "Strike", exact: true }).click();
+    await drag(page, sb.x + 40, sb.y + 180, sb.x + 220, sb.y + 181, 6);
+    await expect(page.locator("[data-object-type=annotation]")).toHaveCount(2);
+    // The underline sits on the dragged line (its bottom edge), the strikethrough through it.
+    const [u, s] = await Promise.all([
+      page.locator("[data-object-type=annotation]").nth(0).boundingBox(),
+      page.locator("[data-object-type=annotation]").nth(1).boundingBox(),
+    ]);
+    expect(Math.abs(u!.y + u!.height - (sb.y + 121))).toBeLessThan(3); // bottom ≈ dragged y (within a few px)
+    expect(Math.abs(s!.y + s!.height / 2 - (sb.y + 180.5))).toBeLessThan(3);
+  });
+});
+
+test.describe("PDF Editor: typing right after placing text", () => {
+  test("the first character typed immediately after clicking is not lost", async ({ page }) => {
+    await openFile(page, path.join(FIXTURES, "sample-a.pdf"));
+    const sb = await surfaceBox(page);
+    await page.getByRole("button", { name: "Text", exact: true }).click();
+    await page.mouse.click(sb.x + 60, sb.y + 320);
+    await page.keyboard.type("Reviewed by QA"); // no waiting for the editor to appear
+    await expect(page.getByTestId("canvas-text-editor")).toHaveValue("Reviewed by QA");
+  });
+});
+
+test.describe("PDF Editor: pages that carry a CropBox", () => {
+  test("the page is laid out on its visible (cropped) area, and the crop survives a round trip", async ({ page }) => {
+    const doc = await PDFDocument.create();
+    const p = doc.addPage([612, 792]);
+    p.drawText("Cropped source page", { x: 80, y: 700, size: 18 });
+    p.setCropBox(50, 100, 400, 500);
+    const file = test.info().outputPath("with-cropbox.pdf");
+    fs.writeFileSync(file, await doc.save());
+    await openFile(page, file);
+    await page.getByRole("button", { name: "Zoom in", exact: true }).waitFor();
+    const sb = await surfaceBox(page);
+    // 400 x 500 pt at the current zoom — not the 612 x 792 MediaBox.
+    expect(Math.abs(sb.width / sb.height - 400 / 500)).toBeLessThan(0.02);
+    const bytes = await exportAndSave(page, "with-cropbox-out.pdf");
+    const out = (await PDFDocument.load(bytes)).getPage(0).getCropBox();
+    expect(Math.round(out.x)).toBe(50);
+    expect(Math.round(out.width)).toBe(400);
+  });
+});
+
+test.describe("PDF Editor on a phone", () => {
+  test("opens fit to the screen, has finger-sized controls, and both drawers can be closed and used", async ({ page, isMobile }) => {
+    test.skip(!isMobile, "phone layout only");
+    await openFile(page, path.join(FIXTURES, "multi-page.pdf"), { actualSize: false });
+    const vp = page.viewportSize()!;
+    const sb = await surfaceBox(page);
+    expect(sb.x + sb.width).toBeLessThanOrEqual(vp.width); // fit to width: no sideways panning to reach the page
+    expect(await page.evaluate(() => document.documentElement.scrollWidth - innerWidth)).toBeLessThanOrEqual(0);
+
+    for (const name of ["Select", "Highlight", "Undo", "Zoom in", "Export PDF"]) {
+      const box = (await page.getByRole("button", { name: new RegExp(`^${name}`) }).first().boundingBox())!;
+      expect(Math.min(box.width, box.height), `${name} touch target`).toBeGreaterThanOrEqual(40);
+    }
+
+    // Pages drawer: closable, and the rotate control on the first page isn't covered by the close button.
+    await page.getByRole("button", { name: /^Pages/ }).click();
+    const close = page.getByRole("button", { name: "Close panel" });
+    await expect(close).toBeVisible();
+    await page.getByRole("button", { name: "Rotate page 1 clockwise" }).tap();
+    await close.tap();
+    await expect(close).toBeHidden();
+
+    await page.getByRole("button", { name: /^Properties/ }).click();
+    await expect(close).toBeVisible();
+    await close.tap();
+    await expect(close).toBeHidden();
+  });
+});
+
+test.describe("PDF Editor: a page wider than its viewport", () => {
+  test("the page keeps its size (and its drawing overlay matches its canvas) and scrolls instead of being squeezed", async ({ page }) => {
+    await page.setViewportSize({ width: 480, height: 800 });
+    await openFile(page, path.join(FIXTURES, "multi-page.pdf")); // wider than the viewport at 100%
+    await expect.poll(async () => (await surfaceBox(page)).width).toBeGreaterThan(480); // wider than the 480px viewport
+    const surfaceWidth = (await surfaceBox(page)).width;
+    const canvasWidth = (await page.locator('[data-testid="page-surface"] canvas').first().boundingBox())!.width;
+    expect(Math.abs(surfaceWidth - canvasWidth)).toBeLessThan(1.5);
   });
 });

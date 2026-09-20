@@ -74,6 +74,16 @@ export function EditorWorkspace() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentMatchPageId, state.searchMatchIndex, state.searchQuery, state.searchNavTick]);
 
+  // On a phone or small tablet the page at 100% is far wider than the screen, so it opens fit to
+  // width (the desktop layout keeps 100%). Only the first time a document is shown.
+  const autoFitDoneRef = useRef(false);
+  useEffect(() => {
+    if (autoFitDoneRef.current || !activePage) return;
+    autoFitDoneRef.current = true;
+    if (window.matchMedia("(max-width: 1023px)").matches && state.zoomMode === "custom") api.setZoom(1, "fit-width");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activePage?.id]);
+
   // Fit-width / fit-page zoom calculation.
   useEffect(() => {
     if (state.zoomMode === "custom" || !activePage) return;
@@ -286,7 +296,7 @@ export function EditorWorkspace() {
         <Link
           href="/"
           aria-label="Back to TheFileConvert"
-          className="flex shrink-0 items-center gap-1.5 rounded-md px-1.5 py-1 text-[var(--foreground-muted)] hover:bg-[var(--surface-muted)] hover:text-[var(--foreground)]"
+          className="flex shrink-0 items-center gap-1.5 rounded-md px-1.5 py-1 [@media(pointer:coarse)]:min-h-11 [@media(pointer:coarse)]:min-w-11 [@media(pointer:coarse)]:justify-center text-[var(--foreground-muted)] hover:bg-[var(--surface-muted)] hover:text-[var(--foreground)]"
         >
           <IconPdf className="h-4 w-4 text-[var(--brand)]" />
           <span className="hidden text-xs font-semibold sm:inline">TheFileConvert</span>
@@ -329,7 +339,7 @@ export function EditorWorkspace() {
                 <button
                   type="button"
                   onClick={() => api.applyCrop(false)}
-                  className="rounded-full bg-[var(--brand)] px-3 py-1 font-medium text-white hover:bg-[var(--brand-strong)]"
+                  className="rounded-full bg-[var(--brand)] px-3 py-1 font-medium text-white hover:bg-[var(--brand-strong)] [@media(pointer:coarse)]:min-h-11 [@media(pointer:coarse)]:px-4"
                 >
                   Keep this area
                 </button>
@@ -383,7 +393,7 @@ export function EditorWorkspace() {
                     setDetectionBannerDismissedForDocId(currentDocId);
                     await api.runOcr(scannedPageIds);
                   }}
-                  className="rounded-full bg-[var(--brand)] px-3 py-1 font-medium text-white hover:bg-[var(--brand-strong)]"
+                  className="rounded-full bg-[var(--brand)] px-3 py-1 font-medium text-white hover:bg-[var(--brand-strong)] [@media(pointer:coarse)]:min-h-11 [@media(pointer:coarse)]:px-4"
                 >
                   {detection.cta}
                 </button>
@@ -392,7 +402,7 @@ export function EditorWorkspace() {
                 type="button"
                 onClick={() => setDetectionBannerDismissedForDocId(currentDocId)}
                 aria-label="Dismiss"
-                className="rounded-full px-1.5 py-1 text-[var(--brand-strong)] hover:bg-black/5"
+                className="rounded-full px-1.5 py-1 text-[var(--brand-strong)] hover:bg-black/5 [@media(pointer:coarse)]:min-h-11 [@media(pointer:coarse)]:min-w-11"
               >
                 ✕
               </button>
@@ -405,14 +415,14 @@ export function EditorWorkspace() {
         <button
           type="button"
           onClick={() => setMobilePanel("thumbnails")}
-          className="rounded-full bg-[var(--surface-muted)] px-3 py-1 text-xs font-medium text-[var(--foreground)]"
+          className="min-h-11 rounded-full bg-[var(--surface-muted)] px-4 py-1 text-xs font-medium text-[var(--foreground)]"
         >
           Pages ({state.doc.pages.length})
         </button>
         <button
           type="button"
           onClick={() => setMobilePanel("properties")}
-          className="rounded-full bg-[var(--surface-muted)] px-3 py-1 text-xs font-medium text-[var(--foreground)]"
+          className="min-h-11 rounded-full bg-[var(--surface-muted)] px-4 py-1 text-xs font-medium text-[var(--foreground)]"
         >
           Properties
         </button>
@@ -423,7 +433,9 @@ export function EditorWorkspace() {
           {mobilePanel === "thumbnails" && (
             <div className="absolute inset-0 bg-black/40 lg:hidden" onClick={() => setMobilePanel(null)} aria-hidden="true" />
           )}
-          <div className="relative h-full lg:h-auto">
+          <div className="relative flex h-full flex-col bg-[var(--surface)] lg:block lg:h-auto lg:bg-transparent">
+            <DrawerClose onClose={() => setMobilePanel(null)} />
+            <div className="min-h-0 flex-1 lg:flex-none">
             <ThumbnailRail
               api={api}
               doc={state.doc}
@@ -432,10 +444,12 @@ export function EditorWorkspace() {
                 insertFileInputRef.current?.click();
               }}
             />
+            </div>
           </div>
         </div>
 
-        <div ref={scrollContainerRef} className="flex min-w-0 flex-1 items-start justify-center overflow-auto bg-[var(--surface-muted)] p-6">
+        <div ref={scrollContainerRef} className="flex min-w-0 flex-1 items-start overflow-auto bg-[var(--surface-muted)] p-6">
+          {/* mx-auto (not justify-center) centers a narrow page but lets a wide one scroll from its left edge. */}
           {activePage && (
             <PageSurface
               api={api}
@@ -458,7 +472,9 @@ export function EditorWorkspace() {
           {mobilePanel === "properties" && (
             <div className="absolute inset-0 bg-black/40 lg:hidden" onClick={() => setMobilePanel(null)} aria-hidden="true" />
           )}
-          <div className="relative h-full lg:h-auto">
+          <div className="relative flex h-full flex-col bg-[var(--surface)] lg:block lg:h-auto lg:bg-transparent">
+            <DrawerClose onClose={() => setMobilePanel(null)} />
+            <div className="min-h-0 flex-1 overflow-y-auto lg:flex-none lg:overflow-visible">
             <PropertiesPanel
               api={api}
               doc={state.doc}
@@ -468,6 +484,7 @@ export function EditorWorkspace() {
                 setToolOptions((o) => ({ ...o, ...patch }));
               }}
             />
+            </div>
           </div>
         </div>
       </div>
@@ -477,6 +494,24 @@ export function EditorWorkspace() {
 
       {textEditRequest && <TextEditModal request={textEditRequest} api={api} onClose={() => setTextEditRequest(null)} />}
       {signaturePadOpen && <SignaturePad onConfirm={handleSignatureConfirm} onClose={() => setSignaturePadOpen(false)} />}
+    </div>
+  );
+}
+
+/** A visible way to dismiss a mobile drawer (tapping the dimmed area also works, but isn't
+ * discoverable and there is no Escape key on a phone). Hidden on desktop, where the panels are
+ * permanent columns. */
+function DrawerClose({ onClose }: { onClose: () => void }) {
+  return (
+    <div className="flex shrink-0 justify-end border-b border-[var(--border)] p-1 lg:hidden">
+      <button
+        type="button"
+        onClick={onClose}
+        aria-label="Close panel"
+        className="flex h-11 w-11 items-center justify-center rounded-full bg-[var(--surface-muted)] text-lg text-[var(--foreground)]"
+      >
+        ✕
+      </button>
     </div>
   );
 }

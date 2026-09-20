@@ -71,7 +71,7 @@ function ToolButton({
         aria-label={label}
         aria-pressed={pressed}
         disabled={disabled}
-        className={`inline-flex h-8 w-8 items-center justify-center rounded-md transition-colors disabled:opacity-30 ${
+        className={`inline-flex h-8 w-8 [@media(pointer:coarse)]:h-11 [@media(pointer:coarse)]:w-11 items-center justify-center rounded-md transition-colors disabled:opacity-30 ${
           pressed
             ? "bg-[var(--brand)] text-white"
             : "text-[var(--foreground-muted)] hover:bg-[var(--surface-muted)] hover:text-[var(--foreground)]"
@@ -124,7 +124,15 @@ export function Toolbar({ api, onRequestImage, onRequestSign, onExport, onToggle
         <ToolButton label="Zoom out" onClick={() => api.setZoom(Math.max(0.4, state.zoom - 0.15))}>
           <IconZoomOut className="h-4 w-4" />
         </ToolButton>
-        <span className="w-11 text-center text-xs text-[var(--foreground-muted)]">{Math.round(state.zoom * 100)}%</span>
+        <button
+          type="button"
+          onClick={() => api.setZoom(1)}
+          aria-label="Actual size (100%)"
+          title="Actual size (100%)"
+          className="w-11 rounded-md text-center text-xs text-[var(--foreground-muted)] hover:bg-[var(--surface-muted)] hover:text-[var(--foreground)] [@media(pointer:coarse)]:h-11"
+        >
+          {Math.round(state.zoom * 100)}%
+        </button>
         <ToolButton label="Zoom in" onClick={() => api.setZoom(Math.min(3, state.zoom + 0.15))}>
           <IconZoomIn className="h-4 w-4" />
         </ToolButton>
@@ -146,7 +154,7 @@ export function Toolbar({ api, onRequestImage, onRequestSign, onExport, onToggle
           type="button"
           onClick={onExport}
           disabled={api.exporting}
-          className="inline-flex items-center gap-1.5 rounded-full bg-[var(--button-bg)] px-4 py-2 text-xs font-medium text-white hover:bg-[var(--button-bg-hover)] disabled:opacity-60"
+          className="inline-flex [@media(pointer:coarse)]:min-h-11 items-center gap-1.5 rounded-full bg-[var(--button-bg)] px-4 py-2 text-xs font-medium text-white hover:bg-[var(--button-bg-hover)] disabled:opacity-60"
         >
           <IconDownload className="h-3.5 w-3.5" />
           {api.exporting ? "Preparing your PDF…" : "Export PDF"}

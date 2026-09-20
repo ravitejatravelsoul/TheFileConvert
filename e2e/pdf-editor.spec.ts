@@ -10,6 +10,7 @@ async function openFile(page: Page, filePath: string) {
   await page.goto("/pdf/editor");
   await page.locator('input[type="file"]').setInputFiles(filePath);
   await expect(page.locator('[data-testid="page-surface"]').first()).toBeVisible({ timeout: 15_000 });
+  await page.getByRole("button", { name: "Actual size (100%)" }).click(); // these tests assume 100% (a phone opens fit to width)
 }
 
 async function exportAndSave(page: Page, name: string) {
@@ -202,6 +203,7 @@ test.describe("PDF Editor: OCR integration", () => {
     await page.goto("/pdf/editor", { waitUntil: "networkidle" });
     await page.locator('input[type="file"]').setInputFiles(path.join(OCR_FIXTURES, "native-text.pdf"));
     await expect(page.locator('[data-testid="page-surface"]').first()).toBeVisible({ timeout: 15_000 });
+    await page.getByRole("button", { name: "Actual size (100%)" }).click(); // a phone opens fit to width
     await page.waitForTimeout(1000);
 
     const tesseractRelated = requests.filter((u) => u.toLowerCase().includes("tesseract"));
@@ -218,6 +220,7 @@ test.describe("PDF Editor: privacy / network", () => {
     await page.locator('input[type="file"]').setInputFiles(path.join(OCR_FIXTURES, "native-text.pdf"));
     await expect(page.locator('[data-testid="page-surface"]').first()).toBeVisible({ timeout: 15_000 });
 
+    await page.getByRole("button", { name: "Actual size (100%)" }).click(); // a phone opens fit to width
     requests.length = 0;
     await page.getByRole("button", { name: "Text", exact: true }).click();
     await page.locator('[data-testid="page-surface"]').first().click({ position: { x: 60, y: 600 } });

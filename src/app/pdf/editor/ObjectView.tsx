@@ -162,7 +162,7 @@ function ObjectContent({ object, spec, width, height, editing, onStopEdit, onTex
         <AddedTextContent
           object={object}
           spec={spec}
-          boxHeightPx={height}
+          boxHeightPx={object.height * spec.scale}
           editing={editing}
           onStopEdit={onStopEdit}
           onTextChange={onTextChange}
@@ -324,10 +324,22 @@ function AddedTextContent({ object, spec, boxHeightPx, editing, onStopEdit, onTe
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [object.text, object.width, object.bold, object.fontSize, spec.scale, editing]);
 
+  // Focus the moment the editor appears, so the very first keystroke after clicking lands in it
+  // (waiting a tick, as below, left a window where a fast typist's first letter was dropped).
+  useLayoutEffect(() => {
+    if (!editing) return;
+    const ta = taRef.current;
+    if (!ta) return;
+    ta.focus({ preventScroll: true });
+    if (selectAllOnEdit) ta.select();
+    else ta.setSelectionRange(ta.value.length, ta.value.length);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [editing]);
+
   useEffect(() => {
     if (!editing) return;
-    // Focus after the current pointer gesture finishes: focusing during the pointerdown that
-    // created/entered edit mode gets undone by the browser's own mousedown focus handling.
+    // Focus again after the current pointer gesture finishes: focus taken during the pointerdown
+    // that created/entered edit mode can be undone by the browser's own mousedown focus handling.
     const t = setTimeout(() => {
       const ta = taRef.current;
       if (!ta) return;
@@ -338,8 +350,29 @@ function AddedTextContent({ object, spec, boxHeightPx, editing, onStopEdit, onTe
     return () => clearTimeout(t);
   }, [editing, selectAllOnEdit]);
 
+  // Text lives in the page's own (unrotated) frame and turns with the page — that's how the export
+  // draws it. On a page shown rotated by 90/270 the on-screen box is the swapped shape, so lay the
+  // text out at its real width and rotate that layer into place, or it would wrap to a sliver.
+  const frame = (content: React.ReactNode) =>
+    spec.rotation === 0 ? (
+      content
+    ) : (
+      <div
+        style={{
+          position: "absolute",
+          left: "50%",
+          top: "50%",
+          width: object.width * spec.scale,
+          height: object.height * spec.scale,
+          transform: `translate(-50%, -50%) rotate(${spec.rotation}deg)`,
+        }}
+      >
+        {content}
+      </div>
+    );
+
   if (editing) {
-    return (
+    return frame(
       <textarea
         ref={taRef}
         aria-label="Edit text on page"
@@ -367,7 +400,7 @@ function AddedTextContent({ object, spec, boxHeightPx, editing, onStopEdit, onTe
     );
   }
 
-  return (
+  return frame(
     <div ref={divRef} style={{ ...common, cursor: "inherit" }}>
       {object.text || "​"}
     </div>

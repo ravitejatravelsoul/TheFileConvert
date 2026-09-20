@@ -46,6 +46,9 @@ export interface EditableRegionRequest {
    * calibrated padding (see computeEditPadding), so it's slightly larger than the raw OCR
    * word/line box it was derived from. */
   pdfBox: Rect;
+  /** The recognized word's own box, without the padding `pdfBox` adds — where the word's ink
+   * (and so its baseline) really is. Used to place the invisible searchable-text run. */
+  wordPdfBox?: Rect;
   ocrColors?: OcrColorEstimate;
   /** Renders a real, export-identical raster preview of what typing `newText` would look
    * like (scanned-text pipeline only — see scanPatch.ts) — synchronous, cheap enough to call
@@ -74,6 +77,8 @@ interface PageSurfaceProps {
 }
 
 const MIN_OBJECT_SIZE = 8;
+/** Height (points) given to an underline/strikethrough dragged as a flat line. */
+const LINE_ANNOTATION_HEIGHT = 12;
 
 /** Tools that stay armed after each use, so several annotations in a row don't need the tool
  * re-selected every time. They end when another tool is chosen, on Escape, or on Select. */
@@ -218,7 +223,9 @@ export function PageSurface({
     for (let i = 1; i <= steps; i++) {
       const testX = wordRectPx.x + wordRectPx.width + i * stepSize;
       let allBackground = true;
-      const sampleYs = [wordRectPx.y, wordRectPx.y + wordRectPx.height / 2, wordRectPx.y + wordRectPx.height];
+      // Inside the word's own height, not on its edges: the bottom edge routinely sits right on a
+      // form's underline or table rule, which would read as "not blank" and forbid any growth.
+      const sampleYs = [0.25, 0.5, 0.75].map((f) => wordRectPx.y + wordRectPx.height * f);
       for (const testY of sampleYs) {
         const [r, g, b, a] = source.getPixel(testX, testY);
         if (a < 10) continue;
@@ -248,7 +255,14 @@ export function PageSurface({
    * section 11) used in place of this word's own box bottom. `chars`, when given (word-level
    * edits only), enables patching just the characters that actually changed instead of the
    * whole word — see computePatchForText below. */
-  function requestOcrEdit(text: string, pdfBox: Rect, confidence: number, baselinePdfY?: number, chars?: CharBox[]) {
+  function requestOcrEdit(
+    text: string,
+    pdfBox: Rect,
+    confidence: number,
+    baselinePdfY?: number,
+    chars?: CharBox[],
+    voterWords?: { text: string; pdfBox: Rect; confidence: number }[]
+  ) {
     const paddingPt = computeEditPadding(pdfBox.height, confidence);
     const wordRectPx = pdfRectToViewport(spec, pdfBox);
     const paddingPx = paddingPt * spec.scale;
@@ -290,6 +304,18 @@ export function PageSurface({
     // line-overlap safety check (see scanPatch.ts's `unsafe`), so it can succeed in plenty of
     // cases the old flag would have blocked outright (e.g. a word merely *near* a ruling
     // line, not actually overlapping it).
+    // Same-line neighbors set in the same typeface, each with its own small pixel buffer, so the
+    // font matcher judges the document's face from several words rather than only the edited one.
+    const styleVoters = source
+      ? (voterWords ?? []).flatMap((v) => {
+          const rectPx = pdfRectToViewport(spec, v.pdfBox);
+          const pad = computeEditPadding(v.pdfBox.height, v.confidence) * spec.scale;
+          const voterSource = canvasPixelSource({ x: rectPx.x - pad * 2, y: rectPx.y - pad * 2, width: rectPx.width + pad * 4, height: rectPx.height + pad * 4 });
+          if (!voterSource) return [];
+          const colors = estimateRegionColors(voterSource, rectPx, pad);
+          return [{ source: voterSource, rectPx, text: v.text, backgroundColor: colors.backgroundColor, textColor: colors.textColor }];
+        })
+      : [];
     const composePreview = source
       ? (newText: string) => {
           // Recomputed fresh on every keystroke: which characters actually changed shifts as
@@ -298,7 +324,16 @@ export function PageSurface({
           // at click time — this is the core of the "patch only what changed" fix (spec
           // sections 2-5).
           const span = computeChangedSpan(text, newText);
-          const changedPdfBox = computeChangedSubRect(chars, text, span) ?? pdfBox;
+          // Only a same-length swap of digits (2026 -> 2028, $182.50 -> $182.60) is patched as
+          // just the changed characters. Anything else (letters, or a longer/shorter result such
+          // as degree -> graduate) redraws the whole word in one face: a partial patch there leaves
+          // half old glyphs beside half new ones, has no room to grow, and its per-character
+          // boxes are too imprecise to cut a letter cleanly.
+          const digitSwap =
+            span.originalMiddle.length === span.replacementMiddle.length &&
+            /^[0-9]+$/.test(span.originalMiddle) &&
+            /^[0-9]+$/.test(span.replacementMiddle);
+          const changedPdfBox = (digitSwap ? computeChangedSubRect(chars, text, span) : null) ?? pdfBox;
           const targetPaddingPt = computeEditPadding(changedPdfBox.height, confidence);
           const targetRectPx = pdfRectToViewport(spec, changedPdfBox);
           const targetPaddingPx = targetPaddingPt * spec.scale;
@@ -308,19 +343,22 @@ export function PageSurface({
             ? findSafeExpansionPx(source, targetRectPx, targetEstimate.backgroundColor, targetMaxExtraPx)
             : 0;
           const targetSafeExpansionPt = targetSafeExpansionPx / spec.scale;
+          // A replacement with descenders (g, j, p, q, y) needs room below the original word's box
+          // when that word had none ("Smith" -> "Smyth"), or its tails would be clipped.
+          const descenderRoomPt = /[gjpqy,;]/.test(newText) && !/[gjpqy,;]/.test(text) ? changedPdfBox.height * 0.3 : 0;
           const paddedTargetPdfBox: Rect = {
             x: changedPdfBox.x - targetPaddingPt,
-            y: changedPdfBox.y - targetPaddingPt,
+            y: changedPdfBox.y - targetPaddingPt - descenderRoomPt,
             width: changedPdfBox.width + targetPaddingPt * 2 + targetSafeExpansionPt,
-            height: changedPdfBox.height + targetPaddingPt * 2,
+            height: changedPdfBox.height + targetPaddingPt * 2 + descenderRoomPt,
           };
           const patch = composeOcrPatch({
             source,
             wordRectPx: targetRectPx,
             patchRectPx: pdfRectToViewport(spec, paddedTargetPdfBox),
             baselinePx,
-            originalText: span.originalMiddle,
-            newText: span.replacementMiddle,
+            originalText: digitSwap ? span.originalMiddle : text,
+            newText: digitSwap ? span.replacementMiddle : newText,
             backgroundColor: targetEstimate.backgroundColor,
             textColor: targetEstimate.textColor,
             pixelScale: PATCH_PIXEL_SCALE,
@@ -331,6 +369,7 @@ export function PageSurface({
             // ink than the tight changed-substring box.
             styleReferenceRectPx: wordRectPx,
             styleReferenceText: text,
+            styleVoters,
           });
           return patch ? { patch, pdfBox: paddedTargetPdfBox } : null;
         }
@@ -342,6 +381,7 @@ export function PageSurface({
       text,
       confidence,
       pdfBox: paddedPdfBox,
+      wordPdfBox: pdfBox,
       ocrColors: { ...estimate, paddingPt },
       composePreview,
     });
@@ -563,8 +603,16 @@ export function PageSurface({
 
       // A drag too small to be an object (a stray click) is ignored, and — for the persistent
       // tools — leaves the tool armed rather than dropping back to Select.
-      if (width > MIN_OBJECT_SIZE && height > MIN_OBJECT_SIZE) {
-        const created = buildDrawnObject(activeTool, { x: x0, y: y0, width, height }, toolOptions, page.id, api.newObjectId(), {
+      // Underline and strikethrough are a *line*: dragging straight along a word (almost no height)
+      // is exactly how they're used, so a flat drag is enough — it gets a text-line-high box whose
+      // bottom edge (underline) or middle (strikethrough) sits on the line that was dragged.
+      let rect = { x: x0, y: y0, width, height };
+      if ((activeTool === "underline" || activeTool === "strikethrough") && width > MIN_OBJECT_SIZE && height <= MIN_OBJECT_SIZE) {
+        const centerY = (dragState.startPdf.y + pdfPoint.y) / 2;
+        rect = { x: x0, y: activeTool === "underline" ? centerY : centerY - LINE_ANNOTATION_HEIGHT / 2, width, height: LINE_ANNOTATION_HEIGHT };
+      }
+      if (rect.width > MIN_OBJECT_SIZE && rect.height > MIN_OBJECT_SIZE) {
+        const created = buildDrawnObject(activeTool, rect, toolOptions, page.id, api.newObjectId(), {
           start: dragState.startPdf,
           end: pdfPoint,
         });
@@ -676,7 +724,7 @@ export function PageSurface({
 
   return (
     <div
-      className="relative inline-block select-none"
+      className="relative mx-auto inline-block shrink-0 select-none"
       style={{ width: dims.width, height: dims.height }}
       data-testid="page-surface"
       data-page-id={page.id}
@@ -764,7 +812,40 @@ export function PageSurface({
                 );
                 const baselinePdfY =
                   sameLine.length > 0 ? median(sameLine.map((w) => w.pdfBox.y)) : undefined;
-                requestOcrEdit(word.text, word.pdfBox, word.confidence, baselinePdfY, word.chars);
+                // Up to four nearest words of the same kind (digits vs. capitals vs. ordinary
+                // text) in the same run of text — reached by hopping word to word across ordinary
+                // spaces, so a bold label or a separate field further along the line (a form's
+                // "Name:" / "UNTIL") isn't evidence about this word's face.
+                const kindOf = (t: string) => (/\d/.test(t) ? "digit" : t === t.toUpperCase() ? "caps" : "text");
+                const maxGap = word.pdfBox.height * 1.2;
+                // Words with and without descenders/ascenders have different box bottoms, so line
+                // membership here is judged on the vertical centre, not the bottom edge.
+                const centreY = (b: Rect) => b.y + b.height / 2;
+                const lineMates = (ocrResult?.words ?? []).filter((w) => w !== word && Math.abs(centreY(w.pdfBox) - centreY(word.pdfBox)) < word.pdfBox.height * 0.5);
+                const run = new Set<typeof word>();
+                const walk = (dir: 1 | -1) => {
+                  let edge = word.pdfBox;
+                  const ordered = lineMates.filter((w) => (dir === 1 ? w.pdfBox.x > word.pdfBox.x : w.pdfBox.x < word.pdfBox.x)).sort((a, b) => dir * (a.pdfBox.x - b.pdfBox.x));
+                  for (const w of ordered) {
+                    const gap = dir === 1 ? w.pdfBox.x - (edge.x + edge.width) : edge.x - (w.pdfBox.x + w.pdfBox.width);
+                    if (gap > maxGap) break;
+                    run.add(w);
+                    edge = w.pdfBox;
+                  }
+                };
+                walk(1);
+                walk(-1);
+                // Digits and all-caps fields (a date, an amount, a heading) sit apart from their
+                // siblings with big gaps, so for those any same-line word of the same kind and
+                // similar height counts, however far away.
+                if (kindOf(word.text) !== "text") {
+                  for (const w of lineMates) if (Math.abs(w.pdfBox.height / word.pdfBox.height - 1) < 0.2) run.add(w);
+                }
+                const voterWords = [...run]
+                  .filter((w) => kindOf(w.text) === kindOf(word.text) && w.text.replace(/\W/g, "").length >= 2)
+                  .sort((a, b) => Math.abs(a.pdfBox.x - word.pdfBox.x) - Math.abs(b.pdfBox.x - word.pdfBox.x))
+                  .slice(0, 4);
+                requestOcrEdit(word.text, word.pdfBox, word.confidence, baselinePdfY, word.chars, voterWords);
               }}
             />
           );

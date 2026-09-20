@@ -28,11 +28,14 @@ export interface FontCandidate {
  * monospace, each with a bold and an italic variant. Kept intentionally short (10
  * candidates) — this runs synchronously on every keystroke of a live preview, so it must
  * stay cheap (see scanPatch.ts's perf note). */
+// Times-like faces come first in the serif stack on purpose: scanned documents are overwhelmingly
+// set in Times/Liberation Serif, and Georgia's old-style (text) figures make digits look nothing
+// like them, which sent digit corrections to a sans face that stood out against the scan.
 export const FONT_CANDIDATES: FontCandidate[] = [
-  { id: "serif-regular", family: "Georgia, 'Times New Roman', Times, serif", bold: false, italic: false },
-  { id: "serif-bold", family: "Georgia, 'Times New Roman', Times, serif", bold: true, italic: false },
-  { id: "serif-italic", family: "Georgia, 'Times New Roman', Times, serif", bold: false, italic: true },
-  { id: "serif-bold-italic", family: "Georgia, 'Times New Roman', Times, serif", bold: true, italic: true },
+  { id: "serif-regular", family: "'Times New Roman', Times, 'Liberation Serif', 'Nimbus Roman', Georgia, serif", bold: false, italic: false },
+  { id: "serif-bold", family: "'Times New Roman', Times, 'Liberation Serif', 'Nimbus Roman', Georgia, serif", bold: true, italic: false },
+  { id: "serif-italic", family: "'Times New Roman', Times, 'Liberation Serif', 'Nimbus Roman', Georgia, serif", bold: false, italic: true },
+  { id: "serif-bold-italic", family: "'Times New Roman', Times, 'Liberation Serif', 'Nimbus Roman', Georgia, serif", bold: true, italic: true },
   { id: "sans-regular", family: "Arial, Helvetica, 'Segoe UI', sans-serif", bold: false, italic: false },
   { id: "sans-bold", family: "Arial, Helvetica, 'Segoe UI', sans-serif", bold: true, italic: false },
   { id: "sans-italic", family: "Arial, Helvetica, 'Segoe UI', sans-serif", bold: false, italic: true },
@@ -129,9 +132,85 @@ export function inkDensity(grid: Uint8Array): number {
  * silhouette happens to overlap slightly more. */
 const DENSITY_PENALTY_WEIGHT = 1.6;
 
+/** How strongly a mismatch in the ink's overall width-to-height ratio counts against a candidate.
+ * Shape overlap is measured after squeezing both words onto the same grid, which throws away
+ * exactly the cue that best separates a narrow serif face from a wider sans one (and a regular
+ * from a bold): how wide the word really is next to how tall it is. */
+const ASPECT_PENALTY_WEIGHT = 1.5;
+
+/** Width / height of a bitmap's ink bounding box, or null when it has no ink. */
+export function inkAspectRatio(bmp: Bitmap): number | null {
+  const box = boundingBoxOfInk(bmp);
+  if (!box) return null;
+  return (box.x1 - box.x0 + 1) / (box.y1 - box.y0 + 1);
+}
+
+/** Grid width for comparing a bitmap: proportional to its ink's aspect ratio (one column per
+ * 1/GRID_H of height), clamped to a range that stays cheap on every keystroke. */
+function gridWidthFor(bmp: Bitmap): number {
+  const aspect = inkAspectRatio(bmp) ?? 1;
+  return Math.max(GRID_W, Math.min(240, Math.round(aspect * GRID_H)));
+}
+
+/** One piece of evidence about the document's typeface: a real scanned word's ink bitmap, how
+ * to render its known text in a candidate face, and how much that evidence counts. */
+/** Italic faces are rare in scanned documents and easy to mistake for upright text on a thin
+ * scan, so an italic candidate has to beat the upright ones by a clear margin. */
+const ITALIC_PRIOR_PENALTY = 0.06;
+
+export interface StyleReference {
+  bitmap: Bitmap;
+  render: (candidate: FontCandidate) => Bitmap | null;
+  weight?: number;
+}
+
+/** Scores every candidate against *all* the given references and returns the best overall. One
+ * word alone is a noisy witness (a few letters, soft edges); the words beside it on the same
+ * line are set in the same face, so summing their scores picks weight and family far more
+ * reliably than any single word does. */
+export function pickBestFontCandidateForReferences(
+  references: StyleReference[],
+  candidates: FontCandidate[] = FONT_CANDIDATES
+): { candidate: FontCandidate; score: number } {
+  const prepared = references.map((ref) => ({
+    ref,
+    // Wide enough that a whole word (or a short run of words) keeps roughly one grid column per
+    // pixel-column of its own ink, instead of being squeezed onto the same 32 columns a single
+    // glyph gets — at that resolution a 40-character sentence is just a smear.
+    gridW: gridWidthFor(ref.bitmap),
+    aspect: inkAspectRatio(ref.bitmap),
+    weight: ref.weight ?? 1,
+    grid: null as Uint8Array | null,
+  }));
+  let best: { candidate: FontCandidate; combined: number; iou: number } | null = null;
+  for (const candidate of candidates) {
+    let combined = 0;
+    let iouSum = 0;
+    let weightSum = 0;
+    for (const p of prepared) {
+      const rendered = p.ref.render(candidate);
+      if (!rendered) continue;
+      const refGrid = p.grid ?? (p.grid = normalizeToGrid(p.ref.bitmap, p.gridW));
+      const candidateGrid = normalizeToGrid(rendered, p.gridW);
+      const iou = compareGrids(refGrid, candidateGrid);
+      const densityGap = Math.abs(inkDensity(candidateGrid) - inkDensity(refGrid));
+      const candidateAspect = inkAspectRatio(rendered);
+      const aspectGap = p.aspect && candidateAspect ? Math.abs(Math.log(candidateAspect / p.aspect)) : 0;
+      combined += p.weight * (iou - DENSITY_PENALTY_WEIGHT * densityGap - ASPECT_PENALTY_WEIGHT * aspectGap - (candidate.italic ? ITALIC_PRIOR_PENALTY : 0));
+      iouSum += p.weight * iou;
+      weightSum += p.weight;
+    }
+    if (weightSum === 0) continue;
+    combined /= weightSum;
+    if (!best || combined > best.combined) best = { candidate, combined, iou: iouSum / weightSum };
+  }
+  if (!best) return { candidate: candidates[0], score: 0 };
+  return { candidate: best.candidate, score: Math.max(0, best.iou) };
+}
+
 /** Picks the font candidate whose rendering of the *original* OCR text most closely
  * resembles the actual scanned glyph bitmap, combining shape overlap (IoU) with how closely
- * its stroke weight (ink density) matches the reference — see DENSITY_PENALTY_WEIGHT.
+ * its stroke weight (ink density) and overall proportions match — see DENSITY_PENALTY_WEIGHT.
  * `renderCandidate` is supplied by the caller (browser-only canvas rendering lives in
  * scanPatch.ts) so this function itself stays pure and unit-testable with synthetic bitmaps. */
 export function pickBestFontCandidate(
@@ -139,22 +218,5 @@ export function pickBestFontCandidate(
   renderCandidate: (candidate: FontCandidate) => Bitmap | null,
   candidates: FontCandidate[] = FONT_CANDIDATES
 ): { candidate: FontCandidate; score: number } {
-  const originalGrid = normalizeToGrid(originalBitmap);
-  const referenceDensity = inkDensity(originalGrid);
-  const scored: { candidate: FontCandidate; iou: number; combined: number }[] = [];
-  for (const candidate of candidates) {
-    const rendered = renderCandidate(candidate);
-    if (!rendered) continue;
-    const candidateGrid = normalizeToGrid(rendered);
-    const iou = compareGrids(originalGrid, candidateGrid);
-    const densityGap = Math.abs(inkDensity(candidateGrid) - referenceDensity);
-    scored.push({ candidate, iou, combined: iou - DENSITY_PENALTY_WEIGHT * densityGap });
-  }
-  if (scored.length === 0) return { candidate: candidates[0], score: 0 };
-
-  let best = scored[0];
-  for (const entry of scored) {
-    if (entry.combined > best.combined) best = entry;
-  }
-  return { candidate: best.candidate, score: Math.max(0, best.iou) };
+  return pickBestFontCandidateForReferences([{ bitmap: originalBitmap, render: renderCandidate }], candidates);
 }
