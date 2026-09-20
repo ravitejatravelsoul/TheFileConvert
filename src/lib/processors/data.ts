@@ -35,7 +35,10 @@ export function formatXml(input: string, mode: "pretty" | "minify"): string {
     return trimmed.replace(/>\s+</g, "><").trim();
   }
 
-  return prettyPrintXmlNode(doc.documentElement, 0);
+  // Keep the <?xml … ?> declaration (version/encoding) — the parsed tree doesn't carry it.
+  const declaration = trimmed.match(/^<\?xml[^>]*\?>/)?.[0];
+  const body = prettyPrintXmlNode(doc.documentElement, 0);
+  return declaration ? `${declaration}\n${body}` : body;
 }
 
 function prettyPrintXmlNode(node: Element, depth: number): string {
@@ -108,6 +111,10 @@ export function parseCsv(input: string, options: CsvParseOptions = { delimiter: 
     }
   }
 
+  if (inQuotes) {
+    throw new ProcessorError(`A quoted value in this CSV is never closed (it starts on row ${rows.length + 1}). Check for a missing closing quote.`);
+  }
+
   if (field.length > 0 || row.length > 0) {
     row.push(field);
     rows.push(row);
@@ -144,7 +151,11 @@ export function jsonToCsv(input: string): string {
   } catch {
     throw new ProcessorError("This isn't valid JSON.");
   }
-  if (!Array.isArray(parsed) || parsed.length === 0 || typeof parsed[0] !== "object") {
+  if (
+    !Array.isArray(parsed) ||
+    parsed.length === 0 ||
+    parsed.some((row) => row === null || typeof row !== "object" || Array.isArray(row))
+  ) {
     throw new ProcessorError("Provide a JSON array of objects, e.g. [{\"name\":\"Ada\"}].");
   }
 
@@ -162,13 +173,20 @@ export function jsonToCsv(input: string): string {
       columns
         .map((col) => {
           const value = row[col];
-          const text = value === undefined || value === null ? "" : String(value);
+          // Nested objects/arrays go into the cell as JSON text (String() would give "[object Object]").
+          const text = value === undefined || value === null ? "" : typeof value === "object" ? JSON.stringify(value) : String(value);
           return csvEscapeField(text, ",");
         })
         .join(",")
     );
   }
   return lines.join("\n");
+}
+
+/** Words for camelCase / kebab-case / snake_case: runs of letters or digits in any script (so "café" stays
+ * "café"), with apostrophes inside a word dropped rather than treated as separators ("it's" -> "its"). */
+function identifierWords(input: string): string[] {
+  return input.replace(/(\p{L})['’](\p{L})/gu, "$1$2").match(/[\p{L}\p{N}]+/gu) ?? [];
 }
 
 export type TextCase = "upper" | "lower" | "title" | "sentence" | "camel" | "kebab" | "snake";
@@ -180,21 +198,18 @@ export function convertTextCase(input: string, targetCase: TextCase): string {
     case "lower":
       return input.toLowerCase();
     case "title":
-      return input.replace(/\w\S*/g, (word) => word[0].toUpperCase() + word.slice(1).toLowerCase());
+      // Whitespace-separated words; the first *letter* of each (any script) is capitalized.
+      return input.replace(/\S+/gu, (word) => word.toLowerCase().replace(/\p{L}/u, (letter) => letter.toUpperCase()));
     case "sentence":
-      return input
-        .toLowerCase()
-        .replace(/(^\s*\w|[.!?]\s*\w)/g, (match) => match.toUpperCase());
+      return input.toLowerCase().replace(/(^\s*\p{L}|[.!?]\s*\p{L})/gu, (match) => match.toUpperCase());
     case "camel": {
-      const words = input.match(/[a-zA-Z0-9]+/g) ?? [];
-      return words
-        .map((w, i) => (i === 0 ? w.toLowerCase() : w[0].toUpperCase() + w.slice(1).toLowerCase()))
-        .join("");
+      const words = identifierWords(input);
+      return words.map((w, i) => (i === 0 ? w.toLowerCase() : w[0].toUpperCase() + w.slice(1).toLowerCase())).join("");
     }
     case "kebab":
-      return (input.match(/[a-zA-Z0-9]+/g) ?? []).map((w) => w.toLowerCase()).join("-");
+      return identifierWords(input).map((w) => w.toLowerCase()).join("-");
     case "snake":
-      return (input.match(/[a-zA-Z0-9]+/g) ?? []).map((w) => w.toLowerCase()).join("_");
+      return identifierWords(input).map((w) => w.toLowerCase()).join("_");
     default:
       return input;
   }

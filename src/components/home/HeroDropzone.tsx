@@ -5,28 +5,32 @@ import Link from "next/link";
 import { DropZone } from "@/components/tools/DropZone";
 import { getExtension, formatBytes } from "@/lib/format";
 import { getToolsAcceptingExtension } from "@/lib/tools/registry";
+import { setPendingFiles } from "@/lib/file-handoff";
 import { CategoryIcon } from "@/components/tools/CategoryIcon";
 import { IconChevronRight, IconTrash } from "@/components/icons";
 import type { ToolDefinition } from "@/lib/tools/types";
 
+const INITIAL_SUGGESTIONS = 6;
+
+/** Most specific first: a tool built for exactly this file type (JPG to PNG for a JPG) outranks a general
+ * one that also happens to accept it, and tools that take any file come last. Ties keep registry order. */
 function rankTools(tools: ToolDefinition[]): ToolDefinition[] {
-  return [...tools].sort((a, b) => {
-    const aWild = a.acceptedExtensions.includes("*") ? 1 : 0;
-    const bWild = b.acceptedExtensions.includes("*") ? 1 : 0;
-    return aWild - bWild;
-  });
+  const specificity = (t: ToolDefinition) => (t.acceptedExtensions.includes("*") ? 1000 : t.acceptedExtensions.length);
+  return tools.map((t, i) => ({ t, i })).sort((a, b) => specificity(a.t) - specificity(b.t) || a.i - b.i).map((x) => x.t);
 }
 
 export function HeroDropzone() {
   const [file, setFile] = useState<File | null>(null);
   const [matches, setMatches] = useState<ToolDefinition[]>([]);
+  const [showAll, setShowAll] = useState(false);
 
   const handleFiles = (files: File[]) => {
     const picked = files[0];
     if (!picked) return;
     setFile(picked);
     const ext = getExtension(picked.name);
-    setMatches(rankTools(getToolsAcceptingExtension(ext)).slice(0, 6));
+    setMatches(rankTools(getToolsAcceptingExtension(ext)));
+    setShowAll(false);
   };
 
   if (!file) {
@@ -63,10 +67,11 @@ export function HeroDropzone() {
         <>
           <p className="mt-6 text-sm font-medium text-[var(--foreground-muted)]">Available actions</p>
           <div className="mt-3 grid gap-2.5 sm:grid-cols-2">
-            {matches.map((tool) => (
+            {(showAll ? matches : matches.slice(0, INITIAL_SUGGESTIONS)).map((tool) => (
               <Link
                 key={tool.id}
                 href={tool.href}
+                onClick={() => setPendingFiles(file ? [file] : [])}
                 className="group flex items-center gap-3 rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--surface)] px-4 py-3 transition-all hover:border-[var(--brand)] hover:shadow-[var(--shadow-soft)]"
               >
                 <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--brand-soft)] text-[var(--brand)]">
@@ -79,6 +84,15 @@ export function HeroDropzone() {
               </Link>
             ))}
           </div>
+          {matches.length > INITIAL_SUGGESTIONS && (
+            <button
+              type="button"
+              onClick={() => setShowAll((v) => !v)}
+              className="mt-3 text-sm font-medium text-[var(--brand)] hover:underline"
+            >
+              {showAll ? "Show fewer" : `Show all ${matches.length} tools for this file`}
+            </button>
+          )}
         </>
       ) : (
         <p className="mt-6 text-sm text-[var(--foreground-muted)]">

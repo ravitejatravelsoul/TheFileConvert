@@ -53,6 +53,34 @@ function drawToCanvas(
   return canvas;
 }
 
+/** True if any pixel of the image is (even partly) transparent. Looks at a downscaled copy, so it stays
+ * cheap on very large images; JPEG can never carry transparency, so it isn't even decoded. */
+export async function hasTransparency(file: File): Promise<boolean> {
+  if (file.type === "image/jpeg" || /\.jpe?g$/i.test(file.name)) return false;
+  let bitmap: ImageBitmap;
+  try {
+    bitmap = await createImageBitmap(file);
+  } catch {
+    return false;
+  }
+  try {
+    const scale = Math.min(1, 512 / Math.max(bitmap.width, bitmap.height));
+    const w = Math.max(1, Math.round(bitmap.width * scale));
+    const h = Math.max(1, Math.round(bitmap.height * scale));
+    const canvas = document.createElement("canvas");
+    canvas.width = w;
+    canvas.height = h;
+    const ctx = canvas.getContext("2d", { willReadFrequently: true });
+    if (!ctx) return false;
+    ctx.drawImage(bitmap, 0, 0, w, h);
+    const data = ctx.getImageData(0, 0, w, h).data;
+    for (let i = 3; i < data.length; i += 4) if (data[i] < 250) return true;
+    return false;
+  } finally {
+    bitmap.close();
+  }
+}
+
 export interface ImageDimensions {
   width: number;
   height: number;

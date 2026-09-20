@@ -208,3 +208,34 @@ describe("diffLines", () => {
     expect(result).toContainEqual({ type: "added", text: "c" });
   });
 });
+
+describe("product-acceptance regressions", () => {
+  it("jsonToCsv writes nested objects/arrays as JSON text, never [object Object]", () => {
+    const csv = jsonToCsv('[{"a":{"b":1},"c":[1,2]}]');
+    expect(csv).not.toContain("[object Object]");
+    expect(csv.split("\n")[1]).toBe('"{""b"":1}","[1,2]"');
+  });
+
+  it("jsonToCsv rejects arrays that contain non-objects instead of crashing or guessing", () => {
+    expect(() => jsonToCsv('[{"a":1}, 3]')).toThrow(/array of objects/);
+    expect(() => jsonToCsv('[{"a":1}, null]')).toThrow(/array of objects/);
+  });
+
+  it("parseCsv reports an unclosed quote instead of swallowing the rest of the file", () => {
+    expect(() => parseCsv('a,b\n"unterminated,1\n')).toThrow(/never closed/);
+    expect(parseCsv('a,"b, c"\n1,2\n')).toEqual([["a", "b, c"], ["1", "2"]]);
+  });
+
+  it("formatXml keeps the XML declaration when pretty-printing", () => {
+    const out = formatXml('<?xml version="1.0" encoding="UTF-8"?><a><b>1</b></a>', "pretty");
+    expect(out.startsWith('<?xml version="1.0" encoding="UTF-8"?>\n<a>')).toBe(true);
+  });
+
+  it("case conversions keep accented letters and treat apostrophes inside words as part of the word", () => {
+    expect(convertTextCase("café au lait", "kebab")).toBe("café-au-lait");
+    expect(convertTextCase("it's a Ünïcode test", "snake")).toBe("its_a_ünïcode_test");
+    expect(convertTextCase("it's fine", "camel")).toBe("itsFine");
+    expect(convertTextCase("élan vital", "title")).toBe("Élan Vital");
+    expect(convertTextCase("élan. vital", "sentence")).toBe("Élan. Vital");
+  });
+});

@@ -269,9 +269,9 @@ export const pdfTools: ToolDefinition[] = [
     slug: "compress",
     href: "/pdf/compress",
     name: "Compress PDF",
-    description: "Losslessly re-save a PDF with optimized internal structure. Best on text-heavy PDFs; won't shrink ones dominated by embedded images.",
+    description: "Shrink a PDF by merging repeated images and tidying its structure — or, if you choose, re-saving its photos and scans at lower quality. Tells you what to expect before you start.",
     longDescription:
-      "This tool re-encodes the PDF's internal object structure using compressed cross-reference streams — it never re-samples or degrades embedded images, so it's completely safe. That safety has a real limit worth knowing: on PDFs whose size is mostly one or two large embedded photos or scans, this typically saves close to nothing, because the image data itself isn't touched. It helps most on PDFs with a lot of internal structure — many pages, fonts, form fields, or annotations — and little to no embedded imagery. If your PDF doesn't shrink, that's expected for that file, not a bug.",
+      "Compress PDF works in two ways, and it shows you which one can help your file before you press anything. Lossless (the default) never changes how a page looks: it merges images that are embedded more than once and rewrites the file structure more compactly. That helps files with many pages, fonts, or repeated images, but a PDF that is mostly scanned pages or photos will barely shrink this way. For those, Balanced and Smallest re-save the embedded JPEG images at lower quality (and fewer pixels if they are larger than needed) — a real, visible trade-off that you opt into. The result screen reports the true before and after sizes; if a file cannot get smaller it says so instead of pretending.",
     category: "pdf",
     acceptedExtensions: PDF_EXT,
     acceptedMimeTypes: PDF_MIME,
@@ -287,12 +287,17 @@ export const pdfTools: ToolDefinition[] = [
       {
         question: "Why didn't my PDF get any smaller?",
         answer:
-          "If your PDF is mostly one or more large embedded images (a scan, a photo-heavy document), this is expected. This tool optimizes the PDF's internal structure without ever re-compressing embedded images, so files where images dominate the size won't shrink much, if at all. It works best on PDFs with a lot of pages, fonts, or form fields and relatively little embedded imagery.",
+          "Lossless mode only merges repeated images and tidies the file structure, so a PDF made of scanned pages or photos barely changes. Choose Balanced or Smallest to re-save those images at lower quality — that is the only way to shrink such a file. A PDF that is mostly text is usually already close to its minimum size.",
       },
       {
-        question: "Is this the same as the image compression other PDF tools offer?",
+        question: "Does compressing reduce quality?",
         answer:
-          "No. Some PDF compressors re-sample embedded images at lower resolution or quality to shrink file size, which can visibly degrade photos and scans. This tool never does that — it only touches the document's internal structure, so the visual result is identical to the original.",
+          "Only if you choose Balanced or Smallest, and the page tells you exactly what changes: image JPEG quality (about 72% or 50%) and a cap on image resolution (2000 px or 1400 px on the long side). Text and vector graphics are never touched. Lossless leaves every page visually identical.",
+      },
+      {
+        question: "What kinds of images can it recompress?",
+        answer:
+          "JPEG images embedded in the PDF (which is what scanners and cameras normally produce). Other image encodings are left exactly as they are, and the analysis shown after you upload tells you how many images are affected.",
       },
     ],
   },

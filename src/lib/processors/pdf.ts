@@ -1,4 +1,4 @@
-import { PDFDocument, StandardFonts, degrees, rgb } from "pdf-lib";
+import { PDFDict, PDFDocument, PDFName, StandardFonts, degrees, rgb, type PDFFont, type PDFPage } from "pdf-lib";
 
 export interface NamedBlob {
   name: string;
@@ -47,14 +47,20 @@ export async function getPdfMetadata(file: File): Promise<PdfBasicMetadata> {
 }
 
 export async function removePdfMetadata(file: File): Promise<Blob> {
-  const doc = await loadPdf(file);
-  doc.setTitle("");
-  doc.setAuthor("");
-  doc.setSubject("");
-  doc.setKeywords([]);
-  doc.setCreator("");
-  doc.setProducer("");
-  const bytes = await doc.save();
+  const bytes0 = await file.arrayBuffer();
+  let doc: PDFDocument;
+  try {
+    // updateMetadata: false — don't let the library stamp its own producer/date onto the file.
+    doc = await PDFDocument.load(bytes0, { ignoreEncryption: true, updateMetadata: false });
+  } catch {
+    throw new ProcessorError("We couldn't read this PDF. It may be damaged, encrypted, or incomplete.");
+  }
+  // Remove every document-information entry (not just blank the common ones) and the XMP metadata
+  // stream, which carries its own copy of title/author/dates.
+  const info = doc.context.lookup(doc.context.trailerInfo.Info);
+  if (info instanceof PDFDict) for (const key of [...info.keys()]) info.delete(key);
+  doc.catalog.delete(PDFName.of("Metadata"));
+  const bytes = await doc.save({ updateFieldAppearances: false });
   return new Blob([bytes as BlobPart], { type: "application/pdf" });
 }
 
@@ -218,8 +224,11 @@ export async function imagesToPdf(files: File[], options: ImagesToPdfOptions): P
     const image = isPng ? await doc.embedPng(bytes) : await doc.embedJpg(bytes);
 
     if (options.pageSize === "fit") {
-      const page = doc.addPage([image.width, image.height]);
-      page.drawImage(image, { x: 0, y: 0, width: image.width, height: image.height });
+      // Pixels at the standard 96 dpi -> points (x0.75), so a 1600 px image is a 12-inch page, not a 22-inch one.
+      const w = image.width * 0.75;
+      const h = image.height * 0.75;
+      const page = doc.addPage([w, h]);
+      page.drawImage(image, { x: 0, y: 0, width: w, height: h });
       continue;
     }
 
@@ -272,21 +281,36 @@ export function watermarkOrigin(
   };
 }
 
+/** The built-in PDF fonts only cover Latin-1-style text. Say which character can't be drawn instead of
+ * failing with an internal encoding error. */
+function assertDrawable(font: PDFFont, text: string, what: string) {
+  for (const ch of text) {
+    try {
+      font.widthOfTextAtSize(ch, 10);
+    } catch {
+      throw new ProcessorError(`The ${what} contains "${ch}", which this tool can't draw (it supports standard Latin letters, digits and common punctuation). Please remove or replace it.`);
+    }
+  }
+}
+
 export async function addWatermark(file: File, options: WatermarkOptions): Promise<Blob> {
   const doc = await loadPdf(file);
   const font = await doc.embedFont(StandardFonts.HelveticaBold);
+  assertDrawable(font, options.text, "watermark text");
   for (const page of doc.getPages()) {
-    const { width, height } = page.getSize();
+    const shown = displayedPage(page);
     const textWidth = font.widthOfTextAtSize(options.text, options.fontSize);
-    const origin = watermarkOrigin(width, height, textWidth, options.fontSize, options.rotationDegrees);
+    // Centre and angle are worked out for the page as displayed, then mapped into the page's own space.
+    const at = watermarkOrigin(shown.width, shown.height, textWidth, options.fontSize, options.rotationDegrees);
+    const { x, y } = shown.toPage(at.x, at.y);
     page.drawText(options.text, {
-      x: origin.x,
-      y: origin.y,
+      x,
+      y,
       size: options.fontSize,
       font,
       color: rgb(0.5, 0.5, 0.5),
       opacity: options.opacity,
-      rotate: degrees(options.rotationDegrees),
+      rotate: degrees(options.rotationDegrees + shown.angle),
     });
   }
   const bytes = await doc.save();
@@ -319,16 +343,38 @@ function pageNumberCoords(
   }
 }
 
+/** The page as a viewer shows it: its visible box (CropBox, else MediaBox) with /Rotate applied. Stamps are
+ * positioned in these *displayed* coordinates (origin bottom-left, y up) and then mapped back into the
+ * page's own coordinate space, so "bottom center" is the bottom of what the reader sees even on a page
+ * stored rotated. */
+export function displayedPage(page: PDFPage): { width: number; height: number; toPage: (dx: number, dy: number) => { x: number; y: number }; angle: number } {
+  const box = page.getCropBox();
+  const angle = (((page.getRotation().angle % 360) + 360) % 360) as 0 | 90 | 180 | 270;
+  const W = box.width;
+  const H = box.height;
+  switch (angle) {
+    case 90:
+      return { width: H, height: W, angle, toPage: (dx, dy) => ({ x: box.x + W - dy, y: box.y + dx }) };
+    case 180:
+      return { width: W, height: H, angle, toPage: (dx, dy) => ({ x: box.x + W - dx, y: box.y + H - dy }) };
+    case 270:
+      return { width: H, height: W, angle, toPage: (dx, dy) => ({ x: box.x + dy, y: box.y + H - dx }) };
+    default:
+      return { width: W, height: H, angle: 0, toPage: (dx, dy) => ({ x: box.x + dx, y: box.y + dy }) };
+  }
+}
+
 export async function addPageNumbers(file: File, options: PageNumberOptions): Promise<Blob> {
   const doc = await loadPdf(file);
   const font = await doc.embedFont(StandardFonts.Helvetica);
   const pages = doc.getPages();
   pages.forEach((page, index) => {
     const label = String(options.startAt + index);
-    const { width, height } = page.getSize();
+    const shown = displayedPage(page);
     const textWidth = font.widthOfTextAtSize(label, options.fontSize);
-    const { x, y } = pageNumberCoords(options.position, width, height, textWidth);
-    page.drawText(label, { x, y, size: options.fontSize, font, color: rgb(0.2, 0.2, 0.2) });
+    const at = pageNumberCoords(options.position, shown.width, shown.height, textWidth);
+    const { x, y } = shown.toPage(at.x, at.y);
+    page.drawText(label, { x, y, size: options.fontSize, font, color: rgb(0.2, 0.2, 0.2), rotate: degrees(shown.angle) });
   });
   const bytes = await doc.save();
   return new Blob([bytes as BlobPart], { type: "application/pdf" });
@@ -351,17 +397,19 @@ export async function addHeaderFooter(file: File, options: HeaderFooterOptions):
   }
   const doc = await loadPdf(file);
   const font = await doc.embedFont(StandardFonts.Helvetica);
+  assertDrawable(font, options.text.replace(/\{page\}/g, ""), "header/footer text");
   const margin = 24;
   doc.getPages().forEach((page, index) => {
     const label = options.text.replace(/\{page\}/g, String(index + 1));
-    const { width, height } = page.getSize();
+    const shown = displayedPage(page);
     const textWidth = font.widthOfTextAtSize(label, options.fontSize);
-    let x: number;
-    if (options.align === "left") x = margin;
-    else if (options.align === "right") x = width - textWidth - margin;
-    else x = width / 2 - textWidth / 2;
-    const y = options.position === "header" ? height - margin : margin;
-    page.drawText(label, { x, y, size: options.fontSize, font, color: rgb(0.2, 0.2, 0.2) });
+    let dx: number;
+    if (options.align === "left") dx = margin;
+    else if (options.align === "right") dx = shown.width - textWidth - margin;
+    else dx = shown.width / 2 - textWidth / 2;
+    const dy = options.position === "header" ? shown.height - margin : margin;
+    const { x, y } = shown.toPage(dx, dy);
+    page.drawText(label, { x, y, size: options.fontSize, font, color: rgb(0.2, 0.2, 0.2), rotate: degrees(shown.angle) });
   });
   const bytes = await doc.save();
   return new Blob([bytes as BlobPart], { type: "application/pdf" });

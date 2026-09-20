@@ -1,7 +1,7 @@
 "use client";
 
 import { TextToBlobWorkflow } from "@/components/tools/TextToBlobWorkflow";
-import { markdownToPdf } from "@/lib/processors/text-documents";
+import { markdownToPdf, replacedCharactersNote } from "@/lib/processors/text-documents";
 
 export function MarkdownToPdfWorkflow() {
   return (
@@ -9,7 +9,10 @@ export function MarkdownToPdfWorkflow() {
       inputPlaceholder={"# Hello\n\nThis is **bold** and this is *italic*."}
       acceptFileExtension=".md,text/markdown"
       actionLabel="Convert to PDF"
-      onProcess={async (input) => ({ name: "document.pdf", blob: await markdownToPdf(input) })}
+      onProcess={async (input) => {
+        const { blob, replacedCharacters } = await markdownToPdf(input);
+        return { name: "document.pdf", blob, note: replacedCharactersNote(replacedCharacters) };
+      }}
     />
   );
 }

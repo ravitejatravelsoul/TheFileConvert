@@ -45,7 +45,7 @@ export const imageTools: ToolDefinition[] = [
     slug: "crop",
     href: "/image/crop",
     name: "Crop Image",
-    description: "Trim an image down to the exact region you want to keep.",
+    description: "Drag on the picture to choose the area to keep, and get exactly that region as a new image.",
     category: "image",
     acceptedExtensions: IMAGE_EXT,
     acceptedMimeTypes: IMAGE_MIME,

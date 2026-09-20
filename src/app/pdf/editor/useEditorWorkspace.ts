@@ -505,22 +505,37 @@ export function useEditorWorkspace() {
     const q = state.searchQuery.trim().toLowerCase();
     if (!q) return matches;
     for (const page of state.doc.pages) {
-      for (const region of state.nativeRegionsByPage[page.id] ?? []) {
-        if (region.text.toLowerCase().includes(q)) {
-          matches.push({ pageId: page.id, text: region.text, pdfBox: region.pdfBox });
+      // Search what the page will *say*, not what it said originally: a corrected word replaces the text it
+      // covers, and text added in the editor is searchable too.
+      const pageObjects = state.doc.objects.filter((o) => o.pageId === page.id);
+      const replacements = pageObjects.filter((o): o is Extract<typeof o, { type: "native-text-replacement" | "ocr-text-replacement" }> => o.type === "native-text-replacement" || o.type === "ocr-text-replacement");
+      const currentText = (text: string, box: { x: number; y: number; width: number; height: number }) => {
+        let out = text;
+        for (const r of replacements) {
+          const overlaps = r.x < box.x + box.width && r.x + r.width > box.x && r.y < box.y + box.height && r.y + r.height > box.y;
+          if (overlaps && r.originalText && out.includes(r.originalText)) out = out.replace(r.originalText, r.newText);
         }
+        return out;
+      };
+      for (const region of state.nativeRegionsByPage[page.id] ?? []) {
+        const text = currentText(region.text, region.pdfBox);
+        if (text.toLowerCase().includes(q)) matches.push({ pageId: page.id, text, pdfBox: region.pdfBox });
       }
       const ocr = state.ocrResultsByPage[page.id];
       if (ocr) {
         for (const line of ocr.lines) {
-          if (line.text.toLowerCase().includes(q)) {
-            matches.push({ pageId: page.id, text: line.text, pdfBox: line.pdfBox });
-          }
+          const text = currentText(line.text, line.pdfBox);
+          if (text.toLowerCase().includes(q)) matches.push({ pageId: page.id, text, pdfBox: line.pdfBox });
+        }
+      }
+      for (const o of pageObjects) {
+        if (o.type === "added-text" && o.text.toLowerCase().includes(q)) {
+          matches.push({ pageId: page.id, text: o.text, pdfBox: { x: o.x, y: o.y, width: o.width, height: o.height } });
         }
       }
     }
     return matches;
-  }, [state.searchQuery, state.doc.pages, state.nativeRegionsByPage, state.ocrResultsByPage]);
+  }, [state.searchQuery, state.doc.pages, state.doc.objects, state.nativeRegionsByPage, state.ocrResultsByPage]);
 
   const setSearchQuery = useCallback((query: string) => {
     setState((s) => ({ ...s, searchQuery: query, searchMatchIndex: 0 }));

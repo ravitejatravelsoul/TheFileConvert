@@ -27,15 +27,19 @@ export async function renderPageToCanvas(
   doc: PDFDocumentProxy,
   pageNumber: number,
   scale: number,
-  rotate: 0 | 90 | 180 | 270 = 0,
+  /** Total rotation to render at. Omit to use the page's own /Rotate (so a page that is stored
+   * rotated comes out the way every PDF viewer shows it); pdf.js treats an explicit value as
+   * absolute, not as an addition to the page's rotation. */
+  rotate?: 0 | 90 | 180 | 270,
   /** Device pixels per CSS pixel. The canvas is drawn at `scale * pixelRatio` and sized back down
    * to `scale` in CSS, so on a HiDPI/scaled display the page is crisp instead of being
    * upscaled (blurry) by the browser. 1 keeps the old one-pixel-per-CSS-pixel canvas. */
   pixelRatio = 1
 ): Promise<HTMLCanvasElement> {
   const page = await doc.getPage(pageNumber);
-  const cssViewport = page.getViewport({ scale, rotation: rotate });
-  const viewport = pixelRatio === 1 ? cssViewport : page.getViewport({ scale: scale * pixelRatio, rotation: rotate });
+  const rotation = rotate ?? page.rotate;
+  const cssViewport = page.getViewport({ scale, rotation });
+  const viewport = pixelRatio === 1 ? cssViewport : page.getViewport({ scale: scale * pixelRatio, rotation });
   const canvas = document.createElement("canvas");
   canvas.width = Math.ceil(viewport.width);
   canvas.height = Math.ceil(viewport.height);

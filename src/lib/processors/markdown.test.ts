@@ -18,10 +18,10 @@ describe("parseMarkdown", () => {
   it("parses unordered and ordered list items", () => {
     const blocks = parseMarkdown("- one\n- two\n\n1. first\n2. second");
     expect(blocks).toEqual([
-      { type: "listitem", ordered: false, text: "one" },
-      { type: "listitem", ordered: false, text: "two" },
-      { type: "listitem", ordered: true, text: "first" },
-      { type: "listitem", ordered: true, text: "second" },
+      { type: "listitem", ordered: false, text: "one", depth: 0, number: undefined },
+      { type: "listitem", ordered: false, text: "two", depth: 0, number: undefined },
+      { type: "listitem", ordered: true, text: "first", depth: 0, number: 1 },
+      { type: "listitem", ordered: true, text: "second", depth: 0, number: 2 },
     ]);
   });
 
@@ -67,4 +67,46 @@ describe("markdownToHtmlBody", () => {
     expect(html).toContain('<a href="https://example.com"');
     expect(html).toContain("click here</a>");
   });
+});
+
+describe("markdown: product-acceptance regressions", () => {
+  it("does not emit links that run script (javascript:, data:, vbscript:, obfuscated)", () => {
+    for (const evil of ["javascript:alert(1)", "JaVaScRiPt:alert(1)", "data:text/html;base64,PHNjcmlwdD4=", "vbscript:x", "java\tscript:alert(1)"]) {
+      const html = markdownToHtmlBody(`[click](${evil})`);
+      expect(html).not.toMatch(/href=/i);
+      expect(html).toContain("click");
+    }
+    expect(markdownToHtmlBody("[a](https://x.test/?a=1&b=2)")).toContain('href="https://x.test/?a=1&amp;b=2"');
+    expect(markdownToHtmlBody("[a](/relative/page)")).toContain('href="/relative/page"');
+    expect(markdownToHtmlBody("[a](mailto:me@example.com)")).toContain("mailto:me@example.com");
+  });
+
+  it("leaves underscores inside identifiers alone but still supports _emphasis_", () => {
+    const html = markdownToHtmlBody("use my_var_name and call _this_ one");
+    expect(html).toContain("my_var_name");
+    expect(html).toContain("<em>this</em>");
+  });
+
+  it("does not apply emphasis inside code spans", () => {
+    expect(markdownToHtmlBody("`a*b*c` and **x**")).toBe("<p><code>a*b*c</code> and <strong>x</strong></p>");
+  });
+
+  it("renders pipe tables", () => {
+    const html = markdownToHtmlBody("| Name | Qty |\n| ---- | --- |\n| Apple | 3 |\n| Pear | 5 |");
+    expect(html).toContain("<table>");
+    expect(html).toContain("<th>Name</th>");
+    expect(html).toContain("<td>Pear</td><td>5</td>");
+  });
+
+  it("nests indented list items and keeps ordered numbering in the parse", () => {
+    const html = markdownToHtmlBody("- a\n  - b\n  - c\n- d");
+    expect(html).toBe("<ul><li>a<ul><li>b</li><li>c</li></ul></li><li>d</li></ul>");
+    const blocks = parseMarkdown("3. three\n4. four");
+    expect(blocks[0]).toMatchObject({ ordered: true, number: 3 });
+  });
+});
+
+it("markdown table separator rows may use a single hyphen per column", () => {
+  expect(markdownToHtmlBody("| A | B |\n| - | - |\n| 1 | 2 |")).toContain("<table>");
+  expect(markdownToHtmlBody("a | b\n:-: | --:\n1 | 2")).toContain("<table>");
 });

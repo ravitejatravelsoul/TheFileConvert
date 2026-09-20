@@ -1,0 +1,6 @@
+id,name,notes,amount
+1,"Smith, Jane","said ""hello""",10.50
+2,Ünal,"multi
+line note",
+3,"",,0
+4,Zoë,plain,-3

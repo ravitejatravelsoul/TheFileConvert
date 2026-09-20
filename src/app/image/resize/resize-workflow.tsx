@@ -13,6 +13,7 @@ import {
 } from "@/lib/processors/image";
 import { getToolById } from "@/lib/tools/registry";
 import { safeOutputName } from "@/lib/format";
+import { useImageOutputFormat, TransparencyNote } from "@/components/tools/useImageOutputFormat";
 
 const tool = getToolById("image-resize")!;
 
@@ -26,7 +27,7 @@ function ResizeConfig({
   const [width, setWidth] = useState(800);
   const [height, setHeight] = useState(600);
   const [lockAspect, setLockAspect] = useState(true);
-  const [format, setFormat] = useState<ImageOutputFormat>("jpeg");
+  const { format, setFormat, transparentNames } = useImageOutputFormat(files);
   const [originalDims, setOriginalDims] = useState<{ width: number; height: number } | null>(null);
 
   useEffect(() => {
@@ -89,6 +90,7 @@ function ResizeConfig({
           ]}
         />
       </Field>
+      <TransparencyNote format={format} transparentNames={transparentNames} />
       <Button
         disabled={files.length === 0}
         onClick={() =>

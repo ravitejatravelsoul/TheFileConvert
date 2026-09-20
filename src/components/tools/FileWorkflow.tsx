@@ -7,11 +7,14 @@ import { IconCheck, IconDownload, IconTrash, IconWarning } from "@/components/ic
 import { formatBytes, percentSmaller } from "@/lib/format";
 import { validateFileForTool, isOverRecommendedSize } from "@/lib/security/validators";
 import { triggerDownload, downloadAllAsZip, revokeAllObjectUrls } from "@/lib/download";
+import { takePendingFiles } from "@/lib/file-handoff";
 import type { ToolDefinition } from "@/lib/tools/types";
 
 export interface FileWorkflowResult {
   name: string;
   blob: Blob;
+  /** One honest line about what was actually done to this file, shown under its name. */
+  note?: string;
 }
 
 type WorkflowStatus = "empty" | "ready" | "processing" | "done" | "error";
@@ -28,6 +31,8 @@ interface FileWorkflowProps {
   tool: ToolDefinition;
   multiple?: boolean;
   zipDownloadName?: string;
+  /** Shown under the size comparison when the output is not meaningfully smaller than the input. */
+  noSavingsHint?: string;
   children: (ctx: RunContext) => React.ReactNode;
 }
 
@@ -38,7 +43,7 @@ function acceptAttr(tool: ToolDefinition): string | undefined {
   return [...exts, ...mimes].join(",");
 }
 
-export function FileWorkflow({ tool, multiple, zipDownloadName, children }: FileWorkflowProps) {
+export function FileWorkflow({ tool, multiple, zipDownloadName, noSavingsHint, children }: FileWorkflowProps) {
   const allowMultiple = multiple ?? tool.supportsMultiple;
   const [files, setFiles] = useState<File[]>([]);
   const [fileWarning, setFileWarning] = useState<string | null>(null);
@@ -83,10 +88,32 @@ export function FileWorkflow({ tool, multiple, zipDownloadName, children }: File
     [allowMultiple, tool]
   );
 
+  // A file picked on the home page arrives here via a one-shot in-memory handoff.
+  useEffect(() => {
+    const handed = takePendingFiles();
+    // Syncing with an external one-shot source on first mount; addFiles validates asynchronously.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (handed.length > 0) void addFiles(handed);
+    // Only on first mount.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const removeFile = useCallback((index: number) => {
     setFiles((prev) => {
       const next = prev.filter((_, i) => i !== index);
       if (next.length === 0) setStatus("empty");
+      return next;
+    });
+  }, []);
+
+  // Order matters for merge / images-to-PDF / ZIP: files are processed top to bottom, so the list
+  // has to be reorderable, not just removable.
+  const moveFile = useCallback((index: number, delta: -1 | 1) => {
+    setFiles((prev) => {
+      const target = index + delta;
+      if (target < 0 || target >= prev.length) return prev;
+      const next = [...prev];
+      [next[index], next[target]] = [next[target], next[index]];
       return next;
     });
   }, []);
@@ -164,7 +191,7 @@ export function FileWorkflow({ tool, multiple, zipDownloadName, children }: File
         </div>
 
         {files.length === 1 && results.length === 1 && (
-          <SizeComparison originalBytes={files[0].size} newBytes={results[0].blob.size} />
+          <SizeComparison originalBytes={files[0].size} newBytes={results[0].blob.size} noSavingsHint={noSavingsHint} />
         )}
 
         <ul className="space-y-2">
@@ -173,7 +200,10 @@ export function FileWorkflow({ tool, multiple, zipDownloadName, children }: File
               key={`${r.name}-${i}`}
               className="flex items-center justify-between rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--surface)] px-4 py-3"
             >
-              <span className="truncate text-sm font-medium text-[var(--foreground)]">{r.name}</span>
+              <div className="min-w-0">
+                <span className="block truncate text-sm font-medium text-[var(--foreground)]">{r.name}</span>
+                {r.note && <span className="block text-xs text-[var(--foreground-muted)]">{r.note}</span>}
+              </div>
               <div className="flex items-center gap-3 shrink-0">
                 <span className="text-xs text-[var(--foreground-muted)]">{formatBytes(r.blob.size)}</span>
                 <button
@@ -234,10 +264,30 @@ export function FileWorkflow({ tool, multiple, zipDownloadName, children }: File
               <p className="truncate text-sm font-medium text-[var(--foreground)]">{file.name}</p>
               <p className="text-xs text-[var(--foreground-muted)]">{formatBytes(file.size)}</p>
             </div>
+            {allowMultiple && files.length > 1 && (
+              <div className="ml-3 flex shrink-0 items-center gap-1">
+                <button
+                  onClick={() => moveFile(i, -1)}
+                  disabled={i === 0}
+                  aria-label={`Move ${file.name} up`}
+                  className="inline-flex h-8 w-8 items-center justify-center rounded-full text-[var(--foreground-muted)] transition-colors hover:bg-[var(--surface-muted)] hover:text-[var(--foreground)] disabled:opacity-30 disabled:hover:bg-transparent [@media(pointer:coarse)]:h-10 [@media(pointer:coarse)]:w-10"
+                >
+                  <span aria-hidden="true">↑</span>
+                </button>
+                <button
+                  onClick={() => moveFile(i, 1)}
+                  disabled={i === files.length - 1}
+                  aria-label={`Move ${file.name} down`}
+                  className="inline-flex h-8 w-8 items-center justify-center rounded-full text-[var(--foreground-muted)] transition-colors hover:bg-[var(--surface-muted)] hover:text-[var(--foreground)] disabled:opacity-30 disabled:hover:bg-transparent [@media(pointer:coarse)]:h-10 [@media(pointer:coarse)]:w-10"
+                >
+                  <span aria-hidden="true">↓</span>
+                </button>
+              </div>
+            )}
             <button
               onClick={() => removeFile(i)}
               aria-label={`Remove ${file.name}`}
-              className="ml-3 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[var(--foreground-muted)] transition-colors hover:bg-[var(--surface-muted)] hover:text-red-500"
+              className="ml-1 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[var(--foreground-muted)] transition-colors hover:bg-[var(--surface-muted)] hover:text-red-500 [@media(pointer:coarse)]:h-10 [@media(pointer:coarse)]:w-10"
             >
               <IconTrash className="h-4 w-4" />
             </button>
@@ -276,7 +326,7 @@ export function FileWorkflow({ tool, multiple, zipDownloadName, children }: File
   );
 }
 
-function SizeComparison({ originalBytes, newBytes }: { originalBytes: number; newBytes: number }) {
+function SizeComparison({ originalBytes, newBytes, noSavingsHint }: { originalBytes: number; newBytes: number; noSavingsHint?: string }) {
   const saved = percentSmaller(originalBytes, newBytes);
   // A meaningful claim needs a real, visible reduction — anything smaller than that is
   // noise (or the file quietly growing slightly), and showing "1% smaller" or nothing at
@@ -286,6 +336,7 @@ function SizeComparison({ originalBytes, newBytes }: { originalBytes: number; ne
   const grew = newBytes > originalBytes && grewPercent >= 2;
 
   return (
+    <div className="space-y-2">
     <div className="grid grid-cols-3 gap-3 rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--surface)] p-4 text-center">
       <div>
         <p className="text-xs text-[var(--foreground-muted)]">Original</p>
@@ -298,13 +349,15 @@ function SizeComparison({ originalBytes, newBytes }: { originalBytes: number; ne
       <div>
         <p className="text-xs text-[var(--foreground-muted)]">Result</p>
         {meaningfulReduction ? (
-          <p className="mt-1 font-semibold text-[var(--accent-mint)]">{saved}% smaller</p>
+          <p className="mt-1 font-semibold text-[var(--accent-mint)]">{saved >= 99 ? "99%+" : saved}% smaller</p>
         ) : grew ? (
           <p className="mt-1 font-semibold text-[var(--foreground)]">{grewPercent}% larger — keep your original</p>
         ) : (
           <p className="mt-1 font-semibold text-[var(--foreground-muted)]">No significant change</p>
         )}
       </div>
+    </div>
+    {!meaningfulReduction && noSavingsHint && <p className="px-1 text-sm text-[var(--foreground-muted)]">{noSavingsHint}</p>}
     </div>
   );
 }

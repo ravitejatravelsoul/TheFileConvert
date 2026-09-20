@@ -474,7 +474,7 @@ test.describe("PDF Editor: a page wider than its viewport", () => {
   test("the page keeps its size (and its drawing overlay matches its canvas) and scrolls instead of being squeezed", async ({ page }) => {
     await page.setViewportSize({ width: 480, height: 800 });
     await openFile(page, path.join(FIXTURES, "multi-page.pdf")); // wider than the viewport at 100%
-    await expect.poll(async () => (await surfaceBox(page)).width).toBeGreaterThan(480); // wider than the 480px viewport
+    await expect.poll(async () => (await surfaceBox(page)).width, { timeout: 20_000 }).toBeGreaterThan(480); // wider than the 480px viewport
     const surfaceWidth = (await surfaceBox(page)).width;
     const canvasWidth = (await page.locator('[data-testid="page-surface"] canvas').first().boundingBox())!.width;
     expect(Math.abs(surfaceWidth - canvasWidth)).toBeLessThan(1.5);

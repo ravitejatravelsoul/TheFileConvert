@@ -300,6 +300,21 @@ export function OcrWorkflow() {
           </div>
         )}
 
+        {(() => {
+          const poor = completedResults.filter((r) => confidenceTier(r.meanConfidence) === "low").sort((a, b) => a.pageIndex - b.pageIndex);
+          if (poor.length === 0) return null;
+          return (
+            <div role="alert" className="flex items-start gap-2 rounded-[var(--radius-md)] bg-red-50 px-4 py-3 text-sm text-red-700 dark:bg-red-950/40 dark:text-red-300">
+              <IconWarning className="mt-0.5 h-4 w-4 shrink-0" />
+              <span>
+                {poor.length === 1 ? `Page ${poor[0].pageIndex + 1} was` : `Pages ${poor.map((r) => r.pageIndex + 1).join(", ")} were`} very hard to read (
+                {poor.map((r) => `${Math.round(r.meanConfidence)}%`).join(", ")} average confidence), so the recognized text is probably unreliable and
+                searching that page may not work. A sharper or higher-contrast scan, the &ldquo;Enhance scan&rdquo; option, or the right language will help.
+              </span>
+            </div>
+          );
+        })()}
+
         {completedResults.length > 0 && (
           <details className="rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--surface)] p-4">
             <summary className="cursor-pointer text-sm font-medium text-[var(--foreground)]">

@@ -38,6 +38,12 @@ export function TextDiffWorkflow() {
 
       <Button onClick={() => setDiff(diffLines(original, changed))}>Compare</Button>
 
+      {diff && diff.every((line) => line.type === "same") && (
+        <p role="status" className="rounded-[var(--radius-md)] bg-[var(--accent-mint-soft)] px-4 py-3 text-sm text-[var(--accent-mint)]">
+          No differences — the two texts are identical.
+        </p>
+      )}
+
       {diff && (
         <div className="overflow-hidden rounded-[var(--radius-md)] border border-[var(--border)] font-mono text-sm">
           {diff.map((line, i) => (

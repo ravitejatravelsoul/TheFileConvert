@@ -46,7 +46,7 @@ function MetadataViewer({ file, run }: { file: File; run: (h: (files: File[]) =>
         ))}
       </dl>
       <Button onClick={() => run(async (f) => [{ name: "metadata-removed.pdf", blob: await removePdfMetadata(f[0]) }])}>
-        Remove metadata &amp; download
+        Remove metadata
       </Button>
     </div>
   );

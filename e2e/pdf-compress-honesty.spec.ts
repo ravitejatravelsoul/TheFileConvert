@@ -17,10 +17,12 @@ test.describe("PDF compression is honest about its limits", () => {
 
   test("an image-dominated PDF is disclosed as unlikely to shrink, and the result never lies about it", async ({ page }) => {
     await page.goto("/pdf/compress");
-    // The tool's own description must set expectations before processing.
-    await expect(page.getByText(/won't shrink ones dominated by embedded images/i)).toBeVisible();
+    // The tool sets expectations before processing: what the file contains, and what each mode can do.
+    await expect(page.getByText(/merging repeated images/i).first()).toBeVisible();
 
     await page.locator('input[type="file"]').setInputFiles(path.join(FIXTURES, "with-image.pdf"));
+    await expect(page.getByText(/embedded image/i).first()).toBeVisible({ timeout: 20_000 });
+    await page.getByLabel(/^Lossless/).check(); // the lossless mode must not claim savings it can't deliver
     await page.getByRole("button", { name: /Compress with-image.pdf/i }).click();
     await expect(page.getByText("Done!")).toBeVisible();
 

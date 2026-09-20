@@ -9,7 +9,7 @@ interface TextToBlobWorkflowProps {
   inputPlaceholder?: string;
   acceptFileExtension?: string;
   actionLabel: string;
-  onProcess: (input: string) => Promise<{ name: string; blob: Blob }>;
+  onProcess: (input: string) => Promise<{ name: string; blob: Blob; note?: string }>;
 }
 
 export function TextToBlobWorkflow({
@@ -21,7 +21,7 @@ export function TextToBlobWorkflow({
   const [input, setInput] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [status, setStatus] = useState<"idle" | "processing" | "done">("idle");
-  const [result, setResult] = useState<{ name: string; blob: Blob } | null>(null);
+  const [result, setResult] = useState<{ name: string; blob: Blob; note?: string } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFilePick = async (file: File | undefined) => {
@@ -72,7 +72,14 @@ export function TextToBlobWorkflow({
         />
         <textarea
           value={input}
-          onChange={(e) => setInput(e.target.value)}
+          onChange={(e) => {
+            setInput(e.target.value);
+            // The old result no longer matches what's in the box; don't leave a stale Download button.
+            if (result) {
+              setResult(null);
+              setStatus("idle");
+            }
+          }}
           placeholder={inputPlaceholder}
           rows={14}
           className="w-full resize-y rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--surface)] p-4 text-sm text-[var(--foreground)] outline-none transition-colors focus:border-[var(--brand)]"
@@ -91,6 +98,12 @@ export function TextToBlobWorkflow({
         <div className="flex items-center gap-2 rounded-[var(--radius-md)] bg-[var(--accent-mint-soft)] px-4 py-3 text-sm text-[var(--accent-mint)]">
           <IconCheck className="h-4 w-4 shrink-0" />
           <span>{result.name} is ready.</span>
+        </div>
+      )}
+      {status === "done" && result?.note && (
+        <div role="note" className="flex items-start gap-2 rounded-[var(--radius-md)] bg-[var(--brand-soft)] px-4 py-3 text-sm text-[var(--brand-strong)]">
+          <IconWarning className="mt-0.5 h-4 w-4 shrink-0" />
+          <span>{result.note}</span>
         </div>
       )}
 
