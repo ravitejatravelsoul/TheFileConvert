@@ -1,6 +1,11 @@
 import { test, expect } from "@playwright/test";
 
 test.describe("Per-page SEO metadata", () => {
+  test("the homepage declares the production domain as its canonical URL", async ({ page }) => {
+    await page.goto("/");
+    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute("href", "https://thefileconvert.com");
+  });
+
   test("a tool page has its own OpenGraph/Twitter title, not the homepage's", async ({ page }) => {
     await page.goto("/pdf/merge");
     const ogTitle = await page.locator('meta[property="og:title"]').getAttribute("content");

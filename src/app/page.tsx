@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { Hero } from "@/components/home/Hero";
 import { PopularTools } from "@/components/home/PopularTools";
 import { CategoriesShowcase } from "@/components/home/CategoriesShowcase";
@@ -6,6 +7,10 @@ import { PrivacySection } from "@/components/home/PrivacySection";
 import { WhySection } from "@/components/home/WhySection";
 import { FaqSection } from "@/components/home/FaqSection";
 import { FinalCta } from "@/components/home/FinalCta";
+
+// The homepage needs its own canonical: without one, the same page served from any other host name
+// (a *.vercel.app alias, www) has nothing pointing search engines at the real domain.
+export const metadata: Metadata = { alternates: { canonical: "/" } };
 
 const structuredData = {
   "@context": "https://schema.org",
