@@ -1,0 +1,32 @@
+[
+ {
+  "tool": "v2-mobile",
+  "test": "PDF compress: custom target on phone, downloaded, reopens",
+  "verdict": "PASS",
+  "detail": "overflow=0 badge=\"Target ✓ under 700 KB\" size=471312 pages=2"
+ },
+ {
+  "tool": "v2-mobile",
+  "test": "Image compress: custom target on phone, downloaded, reopens",
+  "verdict": "PASS",
+  "detail": "badge=\"Target ✓ under 300 KB\" size=279671 2940x2100"
+ },
+ {
+  "tool": "v2-mobile",
+  "test": "PNG→JPG converter on phone: downloads, reopens",
+  "verdict": "PASS",
+  "detail": "1000x700 size=22141"
+ },
+ {
+  "tool": "v2-mobile",
+  "test": "editor opens fit to phone width; 35599ms OCR; edit+text+highlight+draw+crop all touch-driven; export reopens",
+  "verdict": "PASS",
+  "detail": "fitsWidth=true openOverflow=0 afterOverflow=0 drawer=true crop=true objects=ocr-text-replacement,added-text,annotation,drawing exportText=\"Priya Mobile V2\" smallTargets=[{\"t\":\"Home\",\"w\":32,\"h\":16},{\"t\":\"Tools\",\"w\":29,\"h\":16},{\"t\":\"Edit recognized line: OFFICIAL\",\"w\":186,\"h\":7},{\"t\":\"Edit recognized line: Student \",\"w\":68,\"h\":6}]"
+ },
+ {
+  "tool": "(v2 mobile)",
+  "test": "browser console/page errors",
+  "verdict": "PASS",
+  "detail": ""
+ }
+]

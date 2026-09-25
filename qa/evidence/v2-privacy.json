@@ -1,0 +1,32 @@
+[
+ {
+  "tool": "privacy-v2",
+  "test": "PDF compress: no non-GET requests, no third-party hosts",
+  "verdict": "PASS",
+  "detail": "nonGET= thirdParty="
+ },
+ {
+  "tool": "privacy-v2",
+  "test": "Image compress: no non-GET requests, no third-party hosts",
+  "verdict": "PASS",
+  "detail": "nonGET= thirdParty="
+ },
+ {
+  "tool": "privacy-v2",
+  "test": "converter: no non-GET requests, no third-party hosts",
+  "verdict": "PASS",
+  "detail": "nonGET= thirdParty="
+ },
+ {
+  "tool": "privacy-v2",
+  "test": "OCR: only same-origin GETs (tesseract assets ok), no scan pixels/content POSTed, no third-party host",
+  "verdict": "PASS",
+  "detail": "nonGET= thirdParty="
+ },
+ {
+  "tool": "privacy-v2",
+  "test": "PDF editor: no non-GET requests, no third-party hosts",
+  "verdict": "PASS",
+  "detail": "nonGET= thirdParty="
+ }
+]

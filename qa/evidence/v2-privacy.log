@@ -1,0 +1,6 @@
+PASS    privacy-v2 :: PDF compress: no non-GET requests, no third-party hosts — nonGET= thirdParty=
+PASS    privacy-v2 :: Image compress: no non-GET requests, no third-party hosts — nonGET= thirdParty=
+PASS    privacy-v2 :: converter: no non-GET requests, no third-party hosts — nonGET= thirdParty=
+PASS    privacy-v2 :: OCR: only same-origin GETs (tesseract assets ok), no scan pixels/content POSTed, no third-party host — nonGET= thirdParty=
+PASS    privacy-v2 :: PDF editor: no non-GET requests, no third-party hosts — nonGET= thirdParty=
+EXIT 0

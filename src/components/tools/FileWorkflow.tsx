@@ -22,12 +22,17 @@ export interface FileWorkflowResult {
 
 type WorkflowStatus = "empty" | "ready" | "processing" | "done" | "error";
 
+/** `report` is an optional second argument a handler can call with a short present-tense label
+ * ("Trying high quality…") to replace the generic "Processing…" text while it runs. Purely cosmetic —
+ * handlers that never call it behave exactly as before. */
+export type FileWorkflowRun = (handler: (files: File[], report: (label: string) => void) => Promise<FileWorkflowResult[]>) => void;
+
 interface RunContext {
   files: File[];
   status: WorkflowStatus;
   removeFile: (index: number) => void;
   reset: () => void;
-  run: (handler: (files: File[]) => Promise<FileWorkflowResult[]>) => void;
+  run: FileWorkflowRun;
 }
 
 interface FileWorkflowProps {
@@ -129,12 +134,18 @@ export function FileWorkflow({ tool, multiple, zipDownloadName, noSavingsHint, c
     setStatus("empty");
   }, []);
 
+  const [progressLabel, setProgressLabel] = useState<string | null>(null);
+
   const run = useCallback(
-    (handler: (files: File[]) => Promise<FileWorkflowResult[]>) => {
+    (handler: (files: File[], report: (label: string) => void) => Promise<FileWorkflowResult[]>) => {
       const runId = ++runIdRef.current;
       setStatus("processing");
       setError(null);
-      handler(files)
+      setProgressLabel(null);
+      const report = (label: string) => {
+        if (runIdRef.current === runId) setProgressLabel(label);
+      };
+      handler(files, report)
         .then((out) => {
           if (runIdRef.current !== runId) return;
           setResults(out);
@@ -172,7 +183,9 @@ export function FileWorkflow({ tool, multiple, zipDownloadName, noSavingsHint, c
     return (
       <div className="card-surface flex flex-col items-center gap-4 p-12 text-center animate-fade-in">
         <div className="h-10 w-10 animate-spin rounded-full border-[3px] border-[var(--border)] border-t-[var(--brand)]" />
-        <p className="font-medium text-[var(--foreground)]">Processing your file{files.length > 1 ? "s" : ""}…</p>
+        <p className="font-medium text-[var(--foreground)]" aria-live="polite">
+          {progressLabel ?? `Processing your file${files.length > 1 ? "s" : ""}…`}
+        </p>
         <p className="text-sm text-[var(--foreground-muted)]">
           This is happening in your browser — nothing is uploaded anywhere.
         </p>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { FileWorkflow, type FileWorkflowResult } from "@/components/tools/FileWorkflow";
+import { FileWorkflow, type FileWorkflowRun } from "@/components/tools/FileWorkflow";
 import { Button } from "@/components/ui/Button";
 import { analyzePdfImages, compressPdfToTarget, describeAnalysis, type PdfImageAnalysis } from "@/lib/processors/pdf-compress";
 import { getToolById } from "@/lib/tools/registry";
@@ -25,7 +25,7 @@ function targetLabel(bytes: number): string {
   return bytes >= MB ? `${(bytes / MB).toFixed(bytes % MB === 0 ? 0 : 1)} MB` : `${Math.round(bytes / KB)} KB`;
 }
 
-function CompressOptions({ file, run }: { file: File; run: (h: (files: File[]) => Promise<FileWorkflowResult[]>) => void }) {
+function CompressOptions({ file, run }: { file: File; run: FileWorkflowRun }) {
   const [preset, setPreset] = useState<PresetId>("1mb");
   const [customValue, setCustomValue] = useState(1);
   const [customUnit, setCustomUnit] = useState<"KB" | "MB">("MB");
@@ -102,14 +102,18 @@ function CompressOptions({ file, run }: { file: File; run: (h: (files: File[]) =
 
       <Button
         onClick={() =>
-          run(async (f) => {
+          run(async (f, report) => {
+            report("Analyzing file…");
             const buf = new Uint8Array(await f[0].arrayBuffer());
             let result;
             try {
-              result = await compressPdfToTarget(buf, targetBytes);
+              result = await compressPdfToTarget(buf, targetBytes, undefined, undefined, (label) =>
+                report(label.startsWith("lossless") ? "Checking if it already fits…" : `Trying ${label}…`)
+              );
             } catch {
               throw new Error("We couldn't read this PDF. It may be damaged, encrypted, or incomplete.");
             }
+            report("Finalizing PDF…");
             const savedPct = result.originalBytes > 0 ? Math.round(((result.originalBytes - result.newBytes) / result.originalBytes) * 100) : 0;
             const note = result.targetAchieved
               ? `Reached your target at ${result.rungLabel} (${formatBytes(result.originalBytes)} → ${formatBytes(result.newBytes)}, ${Math.max(0, savedPct)}% smaller).`

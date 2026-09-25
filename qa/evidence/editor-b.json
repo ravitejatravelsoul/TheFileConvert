@@ -7,7 +7,7 @@
  },
  {
   "tool": "pdf-editor-scan",
-  "test": "Recognize Text on current page (32.9s) → words become editable",
+  "test": "Recognize Text on current page (35.6s) → words become editable",
   "verdict": "PASS",
   "detail": "51 recognised word buttons"
  },
@@ -39,7 +39,7 @@
   "tool": "pdf-editor-scan",
   "test": "export: page 2 (untouched) unchanged",
   "verdict": "PASS",
-  "detail": "size input=3982736 output=3959814"
+  "detail": "size input=3982736 output=3959813"
  },
  {
   "tool": "(pdf-editor B)",

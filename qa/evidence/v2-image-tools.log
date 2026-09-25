@@ -1,0 +1,33 @@
+PASS    image-resize :: 200px wide, ratio locked → 200x150, colours correct, PNG — 200x150 heightField=150 fmt=png
+PASS    image-resize :: 100x100 unlocked as JPG — 100x100 jpeg
+PASS    image-resize :: 100x100 unlocked as WebP — 100x100 webp
+PASS    image-resize :: 4200x3000 photo → 1000 wide (JPG in → default format) — 1000x714 jpeg 298502B
+PASS    image-resize :: width 0 refused — Width and height must be at least 1 pixel.
+PASS    image-crop :: top-left quarter → 200x150 all red — 200x150 255,0,0,255
+PASS    image-crop :: bottom-right quarter → all yellow — 200x150 255,255,0,255
+PASS    image-crop :: mouse drag draws a new box top-left (~43% of image, all red) — sliders=43,43,2,2 out=172x129 255,0,0,255
+INFO    image-crop :: touch — see mobile run — covered in qa/scripts/mobile.mjs
+PASS    image-rotate :: 90° clockwise — 300x400 quad=0/0/255 255/0/0 255/255/0 0/255/0
+PASS    image-rotate :: 180° — 400x300 quad=255/255/0 0/0/255 0/255/0 255/0/0
+PASS    image-rotate :: No rotation + flip H — 400x300 quad=0/255/0 255/0/0 255/255/0 0/0/255
+PASS    image-rotate :: No rotation + flip V — 400x300 quad=0/0/255 255/255/0 255/0/0 0/255/0
+PASS    image-rotate :: portrait photo 90° → 1600x1000 JPEG — 1600x1000 jpeg
+PASS    image-metadata-remove :: input contains AuditCam EXIF; output does not; pixels same size/similar — inHas=true outHas=false 1200x800 psnr=46.2 fmt=jpeg 341869B
+PASS    image-metadata-remove :: PNG in → valid image, same colours — png 400x300
+PASS    svg-to-png :: 640x420 SVG → PNG at native size, orange rect + transparent background — 640x420 bgAlpha=0 rect=234,88,12,255
+PASS    svg-to-png :: width 1280 → 1280x840 crisp — 1280x840
+PASS    svg-to-png :: script/onload/external image in SVG: no script ran, no dialog — converted 300x150 px=255,0,0,255; dialogs=0
+PASS    svg-to-png :: broken SVG → clear error — This SVG couldn't be rendered. It may use unsupported features.
+PASS    jpg-to-png :: IMAGE-12-portrait.jpg → png — 1000x1600 → 1000x1600 png psnr=99 bytes 442765→3247826 (-633.5%) no 'compress' wording
+PASS    png-to-jpg :: IMAGE-03-photo.png → jpeg — 2600x1800 → 2600x1800 jpeg psnr=35.3 bytes 6293938→1760059 (72.0%) no 'compress' wording
+PASS    jpg-to-webp :: IMAGE-13-landscape.jpg → webp — 1800x1000 → 1800x1000 webp psnr=40.5 bytes 494269→578750 (-17.1%) no 'compress' wording
+PASS    webp-to-jpg :: IMAGE-07-photo.webp → jpeg — 2000x1500 → 2000x1500 jpeg psnr=35.7 bytes 986482→1193201 (-21.0%) no 'compress' wording
+PASS    png-to-webp :: IMAGE-03-photo.png → webp — 2600x1800 → 2600x1800 webp psnr=39.6 bytes 6293938→1759412 (72.0%) no 'compress' wording
+PASS    webp-to-png :: IMAGE-07-photo.webp → png — 2000x1500 → 2000x1500 png psnr=99 bytes 986482→6823938 (-591.7%) no 'compress' wording
+PASS    png-to-jpg :: transparent PNG → JPG: warned, background is white (not black) — warning="IMAGE-04-transparent.png" corner=255,255,255,255
+PASS    png-to-webp :: alpha preserved in WebP — corner alpha=0
+PASS    webp-to-png :: alpha preserved in PNG — corner alpha=0
+PASS    jpg-to-png :: 2 files → ZIP of 2 PNGs — IMAGE-12-portrait-converted.png,IMAGE-13-landscape-converted.png
+PASS    jpg-to-png :: non-image upload refused —  DOC-02-markdown.md: This file type isn't supported by JPG to PNG. 
+PASS    (all image tools) :: browser console/page errors
+EXIT 0

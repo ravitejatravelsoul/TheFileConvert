@@ -81,7 +81,7 @@
   "tool": "pdf-extract-pages",
   "test": "scan page 2 extracted (1 page, renders)",
   "verdict": "PASS",
-  "detail": "size=1187985"
+  "detail": "size=1187986"
  },
  {
   "tool": "pdf-delete-pages",

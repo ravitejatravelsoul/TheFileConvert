@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { FileWorkflow, type FileWorkflowResult } from "@/components/tools/FileWorkflow";
+import { FileWorkflow, type FileWorkflowResult, type FileWorkflowRun } from "@/components/tools/FileWorkflow";
 import { Button } from "@/components/ui/Button";
 import { compressImageToTarget, getImageDimensions, extensionForFormat, type ImageDimensions } from "@/lib/processors/image";
 import { getToolById } from "@/lib/tools/registry";
@@ -25,7 +25,7 @@ function targetLabel(bytes: number): string {
   return bytes >= MB ? `${(bytes / MB).toFixed(bytes % MB === 0 ? 0 : 1)} MB` : `${Math.round(bytes / KB)} KB`;
 }
 
-function CompressConfig({ files, run }: { files: File[]; run: (handler: (files: File[]) => Promise<FileWorkflowResult[]>) => void }) {
+function CompressConfig({ files, run }: { files: File[]; run: FileWorkflowRun }) {
   const [preset, setPreset] = useState<PresetId>("500kb");
   const [customValue, setCustomValue] = useState(500);
   const [customUnit, setCustomUnit] = useState<"KB" | "MB">("KB");
@@ -95,10 +95,12 @@ function CompressConfig({ files, run }: { files: File[]; run: (handler: (files: 
       <Button
         disabled={files.length === 0}
         onClick={() =>
-          run(async (fs) =>
-            Promise.all(
+          run(async (fs, report) => {
+            report(fs.length > 1 ? "Analyzing images…" : "Analyzing file…");
+            const out = await Promise.all(
               fs.map(async (file): Promise<FileWorkflowResult> => {
-                const result = await compressImageToTarget(file, targetBytes);
+                const label = fs.length > 1 ? `${file.name}: ` : "";
+                const result = await compressImageToTarget(file, targetBytes, (l) => report(`${label}Trying ${l}…`));
                 const unchanged = result.blob === file;
                 if (unchanged) {
                   return {
@@ -122,8 +124,10 @@ function CompressConfig({ files, run }: { files: File[]; run: (handler: (files: 
                   badge: result.targetAchieved ? { text: `Target ✓ under ${targetLabel(targetBytes)}`, tone: "success" } : { text: "Closest safe result", tone: "warning" },
                 };
               })
-            )
-          )
+            );
+            report("Finalizing…");
+            return out;
+          })
         }
       >
         Compress to under {targetLabel(targetBytes)}
