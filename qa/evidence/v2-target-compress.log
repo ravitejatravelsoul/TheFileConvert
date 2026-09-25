@@ -1,0 +1,18 @@
+PASS    pdf-compress-v2 :: PDF-01-text-heavy.pdf (1480721B) → Under 500 KB in 4.7s — output=1480721B badge="Closest safe result" note="Couldn't reach 500 KB without making the document hard to read. This is the smallest safe result: 1.4 MB." pages=700 ink=17873
+PASS    pdf-compress-v2 :: PDF-03-large-scan.pdf (23274446B) → Under 5 MB in 3.8s — output=3679932B badge="Target ✓ under 5 MB" note="Reached your target at high quality (22.2 MB → 3.5 MB, 84% smaller)." pages=4 ink=41208
+PASS    pdf-compress-v2 :: PDF-03-large-scan.pdf (23274446B) → Under 2 MB in 5.3s — output=1801604B badge="Target ✓ under 2 MB" note="Reached your target at good quality (22.2 MB → 1.7 MB, 92% smaller)." pages=4 ink=38165
+PASS    pdf-compress-v2 :: PDF-03-large-scan.pdf (23274446B) → Under 1 MB in 6.8s — output=1024610B badge="Target ✓ under 1 MB" note="Reached your target at medium quality (22.2 MB → 1000.6 KB, 96% smaller)." pages=4 ink=42182
+PASS    pdf-compress-v2 :: PDF-12-scanned-ocr.pdf (2387094B) → Under 500 KB in 2.0s — output=440159B badge="Target ✓ under 500 KB" note="Reached your target at medium quality (2.3 MB → 429.8 KB, 82% smaller)." pages=2 ink=41966
+PASS    pdf-compress-v2 :: 50 KB target on a heavy scan is honestly reported as closest-safe, file still opens with all pages — badge="Closest safe result" note="Couldn't reach 50 KB without making the document hard to read. This is the smallest safe result: 142.9 KB." size=146362 pages=4
+PASS    pdf-compress-v2 :: real scan 3982736B → Under 1 MB in 1.5s — output=471312B badge="Target ✓ under 1 MB" note="Reached your target at very high quality (3.8 MB → 460.3 KB, 88% smaller)."
+PASS    pdf-compress-v2 :: PDF-06 already under target: badge still says Target ✓ (trivially true), no inflated claim — badge="Target ✓ under 5 MB" note="Reached your target at lossless (no quality loss) (8.9 KB → 8.9 KB, 0% smaller)."
+PASS    image-compress-v2 :: IMAGE-01-photo-large.jpg (8078741B) → Under 1 MB in 4.7s — output=868412B 4200x3000 badge="Target ✓ under 1 MB" note="Reached your target at 25% quality."
+PASS    image-compress-v2 :: IMAGE-01-photo-large.jpg (8078741B) → Under 500 KB in 8.3s — output=451590B 3570x2550 badge="Target ✓ under 500 KB" note="Reached your target at 25% quality. Also reduced to 3570 × 2550 px."
+PASS    image-compress-v2 :: IMAGE-01-photo-large.jpg (8078741B) → Under 250 KB in 13.5s — output=171309B 2310x1650 badge="Target ✓ under 250 KB" note="Reached your target at 25% quality. Also reduced to 2310 × 1650 px."
+PASS    image-compress-v2 :: IMAGE-01-photo-large.jpg (8078741B) → Under 100 KB in 16.1s — output=87919B 1680x1200 badge="Target ✓ under 100 KB" note="Reached your target at 25% quality. Also reduced to 1680 × 1200 px."
+PASS    image-compress-v2 :: IMAGE-02-photo-huge.jpg (24750851B) → Under 1 MB in 29.8s — output=939396B 4900x3500 badge="Target ✓ under 1 MB" note="Reached your target at 25% quality. Also reduced to 4900 × 3500 px."
+PASS    image-compress-v2 :: IMAGE-04-transparent.png (3491495B) → Under 500 KB in 4.5s — output=317058B 2400x1800 badge="Target ✓ under 500 KB" note="Reached your target at 72% quality. Converted to WEBP to reach your target while preserving transparency."
+PASS    image-compress-v2 :: transparent PNG → target compression keeps transparency (WebP), format-change disclosed — note="Reached your target at 36% quality. Converted to WEBP to reach your target while preserving transparency." cornerAlpha=0
+PASS    image-compress-v2 :: 5 KB target on a 7000x5000 photo: honest closest-safe result, not a fake 5 KB claim — badge="Closest safe result"
+PASS    (v2 target compress) :: browser console/page errors
+EXIT 0

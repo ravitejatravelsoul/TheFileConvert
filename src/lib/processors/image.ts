@@ -212,6 +212,89 @@ export async function rotateFlipImage(file: File, options: RotateFlipOptions): P
   return canvasToBlob(canvas, options.format, options.quality);
 }
 
+// ---------------------------------------------------------------------------------------------
+// Target-size compression (V2): "how small do I need this image?" instead of a quality slider.
+// ---------------------------------------------------------------------------------------------
+
+const QUALITY_LADDER = [0.92, 0.82, 0.72, 0.6, 0.48, 0.36, 0.25];
+/** Dimensions are only reduced once quality alone can't reach the target. */
+const SCALE_LADDER = [1, 0.85, 0.7, 0.55, 0.4];
+
+export interface ImageTargetAttempt {
+  scale: number;
+  quality: number;
+  bytes: number;
+}
+
+export interface ImageTargetResult {
+  blob: Blob;
+  format: ImageOutputFormat;
+  width: number;
+  height: number;
+  originalBytes: number;
+  newBytes: number;
+  targetBytes: number;
+  targetAchieved: boolean;
+  quality: number;
+  scale: number;
+  /** Set when the output format differs from the input's, so the caller can tell the user why. */
+  formatChanged: boolean;
+  attempts: ImageTargetAttempt[];
+}
+
+/**
+ * Compresses toward a target file size. Picks WebP for images with transparency (the only one of the
+ * three output formats that keeps it efficiently) and otherwise keeps JPEG input as JPEG or uses WebP —
+ * then walks quality from high to low at full size, and only shrinks dimensions (in fixed steps) if the
+ * lowest quality alone still doesn't reach the target. Stops at the first setting that fits.
+ */
+export async function compressImageToTarget(file: File, targetBytes: number, onProgress?: (label: string) => void): Promise<ImageTargetResult> {
+  const transparent = await hasTransparency(file);
+  const isJpegInput = file.type === "image/jpeg" || /\.jpe?g$/i.test(file.name);
+  const format: ImageOutputFormat = transparent ? "webp" : isJpegInput ? "jpeg" : "webp";
+  const formatChanged = (transparent && !/\.webp$/i.test(file.name) && file.type !== "image/webp") || (!transparent && !isJpegInput && file.type !== "image/webp");
+  const dims = await getImageDimensions(file);
+
+  // Nothing to do: the format wouldn't change and the file already fits. Re-encoding an already
+  // well-compressed image can make it bigger (recompression artifacts) — never hand that back as if it
+  // were a result. This mirrors the PDF engine's free lossless-first step.
+  if (!formatChanged && file.size <= targetBytes) {
+    return { blob: file, format, width: dims.width, height: dims.height, originalBytes: file.size, newBytes: file.size, targetBytes, targetAchieved: true, quality: 1, scale: 1, formatChanged: false, attempts: [{ scale: 1, quality: 1, bytes: file.size }] };
+  }
+
+  const attempts: ImageTargetAttempt[] = [];
+  let best: { blob: Blob; width: number; height: number; quality: number; scale: number } | null = null;
+
+  for (const scale of SCALE_LADDER) {
+    const width = Math.max(1, Math.round(dims.width * scale));
+    const height = Math.max(1, Math.round(dims.height * scale));
+    for (const quality of QUALITY_LADDER) {
+      onProgress?.(`${Math.round(quality * 100)}% quality${scale < 1 ? `, ${Math.round(scale * 100)}% size` : ""}`);
+      const blob = await resizeImage(file, { width, height, format, quality });
+      attempts.push({ scale, quality, bytes: blob.size });
+      if (!best || blob.size < best.blob.size) best = { blob, width, height, quality, scale };
+      if (blob.size <= targetBytes) {
+        return { blob, format, width, height, originalBytes: file.size, newBytes: blob.size, targetBytes, targetAchieved: true, quality, scale, formatChanged, attempts };
+      }
+    }
+  }
+
+  return {
+    blob: best!.blob,
+    format,
+    width: best!.width,
+    height: best!.height,
+    originalBytes: file.size,
+    newBytes: best!.blob.size,
+    targetBytes,
+    targetAchieved: false,
+    quality: best!.quality,
+    scale: best!.scale,
+    formatChanged,
+    attempts,
+  };
+}
+
 export interface SvgToPngOptions {
   width: number;
   height: number;

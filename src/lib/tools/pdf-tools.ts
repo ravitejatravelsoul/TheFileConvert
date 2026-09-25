@@ -269,9 +269,9 @@ export const pdfTools: ToolDefinition[] = [
     slug: "compress",
     href: "/pdf/compress",
     name: "Compress PDF",
-    description: "Shrink a PDF by merging repeated images and tidying its structure — or, if you choose, re-saving its photos and scans at lower quality. Tells you what to expect before you start.",
+    description: "Pick how small you need the file — under 500 KB, 1 MB, 2 MB, 5 MB, or a custom size — and it works toward that target automatically, in your browser.",
     longDescription:
-      "Compress PDF works in two ways, and it shows you which one can help your file before you press anything. Lossless (the default) never changes how a page looks: it merges images that are embedded more than once and rewrites the file structure more compactly. That helps files with many pages, fonts, or repeated images, but a PDF that is mostly scanned pages or photos will barely shrink this way. For those, Balanced and Smallest re-save the embedded JPEG images at lower quality (and fewer pixels if they are larger than needed) — a real, visible trade-off that you opt into. The result screen reports the true before and after sizes; if a file cannot get smaller it says so instead of pretending.",
+      "Choose a target size instead of a vague quality level. Compress PDF first tries a lossless pass (merging repeated images, tidying the file structure) at no quality cost; if that already meets your target, it stops there. Otherwise it works down a ladder of image quality and resolution settings, from very high to low, and stops at the first one that reaches your target — so you get the best quality that still fits. If even the lowest setting on the ladder can't get there without the document becoming hard to read, it says so and hands you the smallest safe result instead of quietly wrecking the file.",
     category: "pdf",
     acceptedExtensions: PDF_EXT,
     acceptedMimeTypes: PDF_MIME,
@@ -280,24 +280,24 @@ export const pdfTools: ToolDefinition[] = [
     status: "available",
     supportsMultiple: false,
     maxRecommendedSizeMb: 150,
-    keywords: ["compress pdf", "reduce pdf size", "shrink pdf"],
+    keywords: ["compress pdf", "reduce pdf size", "shrink pdf", "pdf under 1mb", "pdf under 500kb"],
     workflow: "file",
     relatedToolIds: ["pdf-metadata", "pdf-to-images"],
     faq: [
       {
-        question: "Why didn't my PDF get any smaller?",
+        question: "Why didn't my PDF reach the size I asked for?",
         answer:
-          "Lossless mode only merges repeated images and tidies the file structure, so a PDF made of scanned pages or photos barely changes. Choose Balanced or Smallest to re-save those images at lower quality — that is the only way to shrink such a file. A PDF that is mostly text is usually already close to its minimum size.",
+          "If the document couldn't be compressed that far without becoming hard to read, the tool stops before that point and gives you the smallest size it could safely reach instead — clearly labelled as the closest result, not the target you asked for.",
       },
       {
         question: "Does compressing reduce quality?",
         answer:
-          "Only if you choose Balanced or Smallest, and the page tells you exactly what changes: image JPEG quality (about 72% or 50%) and a cap on image resolution (2000 px or 1400 px on the long side). Text and vector graphics are never touched. Lossless leaves every page visually identical.",
+          "Only as far as needed to hit your target. A lossless pass is always tried first (merging repeated images, tidying the file structure) at no quality cost; images are only re-saved at lower quality if that alone isn't enough, and the result screen tells you which setting was used.",
       },
       {
         question: "What kinds of images can it recompress?",
         answer:
-          "JPEG images embedded in the PDF (which is what scanners and cameras normally produce). Other image encodings are left exactly as they are, and the analysis shown after you upload tells you how many images are affected.",
+          "JPEG images, and lossless (Flate) RGB/grayscale images — which covers most scanner and \"print to PDF\" output. Other encodings (JBIG2, CCITT, CMYK, indexed) are left exactly as they are.",
       },
     ],
   },

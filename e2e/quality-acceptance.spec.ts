@@ -131,35 +131,38 @@ test.describe("PDF pages keep their displayed orientation", () => {
   });
 });
 
-test.describe("PDF compress tells the truth", () => {
-  test("shows what the file contains first, merges duplicate images losslessly, reports real sizes", async ({ page }) => {
+test.describe("PDF compress (target-size) tells the truth", () => {
+  test("a target the free lossless pass already meets merges duplicate images and reports real sizes", async ({ page }) => {
     await upload(page, "/pdf/compress", "pdf-dup-images.pdf");
     await expect(page.getByText(/exact repeats/)).toBeVisible({ timeout: 20_000 });
     await expect(page.getByText(/4 embedded images/)).toBeVisible();
-    await page.getByLabel(/^Lossless/).check();
-    await page.getByRole("button", { name: /^Compress / }).click();
+    await page.getByRole("button", { name: "Under 5 MB", exact: true }).click();
+    await page.getByRole("button", { name: /^Compress to under/ }).click();
     await page.getByText("Done!").waitFor();
-    await expect(page.getByText(/Merged 3 duplicate images/)).toBeVisible();
+    await expect(page.getByText(/Target ✓/)).toBeVisible();
     const out = await download(page, /^Download/);
     expect(out.length).toBeLessThan(fs.statSync(fixture("pdf-dup-images.pdf")).size * 0.4);
     expect((await PDFDocument.load(out)).getPageCount()).toBe(4);
   });
 
-  test("an image-only scan barely changes losslessly (and says so first) but shrinks a lot when the user opts into lower quality", async ({ page }) => {
+  test("an image-only scan: a loose target needs no quality loss, a tight one walks the ladder and shrinks a lot", async ({ page }) => {
     const original = fs.statSync(fixture("pdf-scanned-small.pdf")).size;
     await upload(page, "/pdf/compress", "pdf-scanned-small.pdf");
-    await expect(page.getByText(/Lossless optimization will barely change/)).toBeVisible({ timeout: 20_000 });
-    await page.getByLabel(/^Lossless/).check();
-    await page.getByRole("button", { name: /^Compress / }).click();
+    await page.getByRole("button", { name: "Custom", exact: true }).click();
+    await page.locator("input[type=number]").fill(String(Math.round((original / 1024) * 1.5)));
+    await page.locator("select").selectOption("KB");
+    await page.getByRole("button", { name: /^Compress to under/ }).click();
     await page.getByText("Done!").waitFor();
+    await expect(page.getByText(/lossless \(no quality loss\)/)).toBeVisible();
     await expect(page.getByText("No significant change")).toBeVisible();
-    await expect(page.getByText(/little left to squeeze/)).toBeVisible();
 
     await upload(page, "/pdf/compress", "pdf-scanned-small.pdf");
-    await page.getByLabel(/^Balanced/).check();
-    await page.getByRole("button", { name: /^Compress / }).click();
+    await page.getByRole("button", { name: "Custom", exact: true }).click();
+    await page.locator("input[type=number]").fill(String(Math.round((original / 1024) * 0.5)));
+    await page.locator("select").selectOption("KB");
+    await page.getByRole("button", { name: /^Compress to under/ }).click();
     await page.getByText("Done!").waitFor();
-    await expect(page.getByText(/Re-encoded 2 images at reduced quality/)).toBeVisible();
+    await expect(page.getByText(/^Target ✓/)).toBeVisible();
     const out = await download(page, /^Download/);
     expect(out.length).toBeLessThan(original * 0.7);
     expect((await PDFDocument.load(out)).getPageCount()).toBe(2);
@@ -167,27 +170,31 @@ test.describe("PDF compress tells the truth", () => {
 });
 
 test.describe("Image tools protect transparency and say what they did", () => {
-  test("compress: a transparent PNG defaults to a format that keeps transparency", async ({ page }) => {
+  test("compress (target-size): a transparent PNG is automatically kept in a format that preserves transparency", async ({ page }) => {
     await upload(page, "/image/compress", "img-photo-transparent.png");
-    await expect(page.locator("select").first()).toHaveValue("webp");
-    await page.getByRole("button", { name: /^Compress 1 image/ }).click();
+    await page.getByRole("button", { name: "Under 500 KB", exact: true }).click();
+    await page.getByRole("button", { name: /^Compress to under/ }).click();
     await page.getByText("Done!").waitFor();
+    // No format picker in V2 — transparency is never silently flattened to JPEG/black.
     expect((await pixelAt(await download(page, /^Download/), 2, 2))[3]).toBeLessThan(10);
   });
 
-  test("compress: choosing JPG for a transparent image warns first, and fills white rather than black", async ({ page }) => {
+  test("compress (target-size): a very tight target on a transparent image still keeps transparency, and says it converted format", async ({ page }) => {
     await upload(page, "/image/compress", "img-photo-transparent.png");
-    await page.locator("select").first().selectOption("jpeg");
-    await expect(page.getByRole("note").first()).toContainText(/transparent areas/);
-    await page.getByRole("button", { name: /^Compress 1 image/ }).click();
+    await page.getByRole("button", { name: "Custom", exact: true }).click();
+    await page.locator("input[type=number]").fill("50");
+    await page.locator("select").selectOption("KB");
+    await page.getByRole("button", { name: /^Compress to under/ }).click();
     await page.getByText("Done!").waitFor();
-    const [r, g, b] = await pixelAt(await download(page, /^Download/), 2, 2);
-    expect(Math.min(r, g, b)).toBeGreaterThan(240);
+    await expect(page.getByText(/preserving transparency/)).toBeVisible();
+    const [, , , a] = await pixelAt(await download(page, /^Download/), 2, 2);
+    expect(a).toBeLessThan(10);
   });
 
-  test("compress: an already-optimized JPG comes back unchanged instead of larger", async ({ page }) => {
+  test("compress (target-size): an already-small JPG under the target comes back unchanged instead of possibly larger", async ({ page }) => {
     await upload(page, "/image/compress", "img-photo-small-optimized.jpg");
-    await page.getByRole("button", { name: /^Compress 1 image/ }).click();
+    await page.getByRole("button", { name: "Under 1 MB", exact: true }).click();
+    await page.getByRole("button", { name: /^Compress to under/ }).click();
     await page.getByText("Done!").waitFor();
     await expect(page.getByText(/original is returned unchanged/)).toBeVisible();
     expect((await download(page, /^Download/)).equals(fs.readFileSync(fixture("img-photo-small-optimized.jpg")))).toBe(true);

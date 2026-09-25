@@ -1,0 +1,6 @@
+PASS    v2-mobile :: PDF compress: custom target on phone, downloaded, reopens — overflow=0 badge="Target ✓ under 700 KB" size=471312 pages=2
+PASS    v2-mobile :: Image compress: custom target on phone, downloaded, reopens — badge="Target ✓ under 300 KB" size=279671 2940x2100
+PASS    v2-mobile :: PNG→JPG converter on phone: downloads, reopens — 1000x700 size=22141
+PASS    v2-mobile :: editor opens fit to phone width; 35599ms OCR; edit+text+highlight+draw+crop all touch-driven; export reopens — fitsWidth=true openOverflow=0 afterOverflow=0 drawer=true crop=true objects=ocr-text-replacement,added-text,annotation,drawing exportText="Priya Mobile V2" smallTargets=[{"t":"Home","w":32,"h":16},{"t":"Tools","w":29,"h":16},{"t":"Edit recognized line: OFFICIAL","w":186,"h":7},{"t":"Edit recognized line: Student ","w":68,"h":6}]
+PASS    (v2 mobile) :: browser console/page errors
+EXIT 0

@@ -326,6 +326,9 @@ function AddedTextContent({ object, spec, boxHeightPx, editing, onStopEdit, onTe
 
   // Focus the moment the editor appears, so the very first keystroke after clicking lands in it
   // (waiting a tick, as below, left a window where a fast typist's first letter was dropped).
+  // The value at that moment is remembered so the delayed re-focus below can tell a still-untouched
+  // box from one a fast typist has already started replacing.
+  const valueAtFocusRef = useRef<string | null>(null);
   useLayoutEffect(() => {
     if (!editing) return;
     const ta = taRef.current;
@@ -333,6 +336,7 @@ function AddedTextContent({ object, spec, boxHeightPx, editing, onStopEdit, onTe
     ta.focus({ preventScroll: true });
     if (selectAllOnEdit) ta.select();
     else ta.setSelectionRange(ta.value.length, ta.value.length);
+    valueAtFocusRef.current = ta.value;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [editing]);
 
@@ -340,10 +344,15 @@ function AddedTextContent({ object, spec, boxHeightPx, editing, onStopEdit, onTe
     if (!editing) return;
     // Focus again after the current pointer gesture finishes: focus taken during the pointerdown
     // that created/entered edit mode can be undone by the browser's own mousedown focus handling.
+    // A fast typist (or a script) can already have replaced the placeholder text by the time this
+    // fires — re-selecting unconditionally would then wipe out those keystrokes. Only re-apply the
+    // selection if the box still holds exactly what it held when we first focused it; either way,
+    // still re-focus, since that part only steals back focus and never touches existing content.
     const t = setTimeout(() => {
       const ta = taRef.current;
       if (!ta) return;
       ta.focus();
+      if (ta.value !== valueAtFocusRef.current) return;
       if (selectAllOnEdit) ta.select();
       else ta.setSelectionRange(ta.value.length, ta.value.length);
     }, 0);

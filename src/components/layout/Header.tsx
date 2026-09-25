@@ -7,49 +7,48 @@ import { LinkButton } from "@/components/ui/Button";
 import { IconMenu, IconClose, IconChevronDown } from "@/components/icons";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
+// V2 keeps the top nav to a handful of categories a non-technical user recognizes at a glance —
+// everything else still has a working, SEO-indexed URL (see the sitemap), it just isn't advertised here.
 const NAV_LINKS = [
   {
-    label: "PDF",
-    href: "/pdf",
+    label: "Compress",
+    href: "/pdf/compress",
+    items: [
+      { label: "Compress PDF", href: "/pdf/compress" },
+      { label: "Compress Image", href: "/image/compress" },
+    ],
+  },
+  {
+    label: "Convert",
+    href: "/convert/jpg-to-png",
+    items: [
+      { label: "JPG to PNG", href: "/convert/jpg-to-png" },
+      { label: "PNG to JPG", href: "/convert/png-to-jpg" },
+      { label: "JPG to WebP", href: "/convert/jpg-to-webp" },
+      { label: "WebP to PNG", href: "/convert/webp-to-png" },
+      { label: "SVG to PNG", href: "/image/svg-to-png" },
+      { label: "Images to PDF", href: "/pdf/images-to-pdf" },
+      { label: "PDF to Images", href: "/pdf/to-images" },
+      { label: "All tools", href: "/tools" },
+    ],
+  },
+  {
+    label: "Edit PDF",
+    href: "/pdf/editor",
     items: [
       { label: "PDF Editor", href: "/pdf/editor" },
+      { label: "OCR PDF", href: "/pdf/ocr" },
+    ],
+  },
+  {
+    label: "PDF Tools",
+    href: "/pdf/merge",
+    items: [
       { label: "Merge PDF", href: "/pdf/merge" },
       { label: "Split PDF", href: "/pdf/split" },
-      { label: "Compress PDF", href: "/pdf/compress" },
-      { label: "PDF to Images", href: "/pdf/to-images" },
-      { label: "Images to PDF", href: "/pdf/images-to-pdf" },
-      { label: "All PDF tools", href: "/pdf" },
-    ],
-  },
-  {
-    label: "Images",
-    href: "/image",
-    items: [
-      { label: "Compress Image", href: "/image/compress" },
-      { label: "Resize Image", href: "/image/resize" },
-      { label: "JPG to PNG", href: "/convert/jpg-to-png" },
-      { label: "PNG to WebP", href: "/convert/png-to-webp" },
-      { label: "All image tools", href: "/image" },
-    ],
-  },
-  {
-    label: "Documents",
-    href: "/document",
-    items: [
-      { label: "Markdown to PDF", href: "/document/markdown-to-pdf" },
-      { label: "TXT to PDF", href: "/document/txt-to-pdf" },
-      { label: "CSV to JSON", href: "/data/csv-to-json" },
-      { label: "All document tools", href: "/document" },
-    ],
-  },
-  {
-    label: "More tools",
-    href: "/tools",
-    items: [
-      { label: "Data & developer tools", href: "/data" },
-      { label: "Archive tools", href: "/archive" },
-      { label: "Audio & video (roadmap)", href: "/media" },
-      { label: "All tools", href: "/tools" },
+      { label: "Reorder Pages", href: "/pdf/reorder" },
+      { label: "Rotate Pages", href: "/pdf/rotate" },
+      { label: "Delete Pages", href: "/pdf/delete-pages" },
     ],
   },
 ];

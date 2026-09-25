@@ -22,7 +22,7 @@ test.describe("Security edge cases fail safely", () => {
     page.on("pageerror", (e) => errors.push(e.message));
     await page.goto("/pdf/compress");
     await page.locator('input[type="file"]').setInputFiles(path.join(FIXTURES, "corrupted.pdf"));
-    await page.getByRole("button", { name: /Compress corrupted.pdf/i }).click();
+    await page.getByRole("button", { name: /^Compress to under/ }).click();
     await expect(page.getByText(/couldn't read this PDF|damaged/i)).toBeVisible();
     expect(errors).toEqual([]);
   });

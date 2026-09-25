@@ -1,0 +1,11 @@
+PASS    pdf-editor-scan :: scanned PDF opens; user is told OCR is needed before text can be edited — Scanned page detected — run OCR to edit its text.
+PASS    pdf-editor-scan :: Recognize Text on current page (35.6s) → words become editable — 51 recognised word buttons
+PASS    pdf-editor-scan :: edit recognised word John → Jane — ocr replacement objects=1
+PASS    pdf-editor-scan :: highlight, rectangle, added text, whiteout on scanned page — objects=5 (ocr-text-replacement,annotation,shape,added-text,whiteout)
+PASS    pdf-editor-scan :: export: 2 pages, corrections + annotations visibly changed the scan, other pixels untouched — pages=2 changedPx=1443 of 484704
+PASS    pdf-editor-scan :: export: text layer has the corrected word 'Jane' and 'Reviewed by audit' — Jane Reviewed by audit
+PASS    pdf-editor-scan :: export: page 2 (untouched) unchanged — size input=3982736 output=3959813
+FORM CONTROLS: 
+PAGE ERRORS: none
+PASS    (pdf-editor B) :: browser console/page errors
+EXIT 0

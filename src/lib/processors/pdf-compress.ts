@@ -243,11 +243,13 @@ function isRecompressible(dict: PDFDict): boolean {
   return true;
 }
 
-export async function compressPdfDocument(
+/** The actual compression work, parameterized directly by quality/size rather than a named level —
+ * shared by the fixed-level API below and by the target-size search in {@link compressPdfToTarget}. */
+async function compressCore(
   input: Uint8Array,
-  level: CompressLevel,
-  reencode: JpegReencoder = canvasReencoder,
-  reencodeRaw: RawReencoder = canvasRawReencoder
+  settings: { quality: number; maxLongSide: number } | null,
+  reencode: JpegReencoder,
+  reencodeRaw: RawReencoder
 ): Promise<CompressResult> {
   const doc = await PDFDocument.load(input, { ignoreEncryption: true, updateMetadata: false });
   const images = collectImages(doc);
@@ -273,9 +275,9 @@ export async function compressPdfDocument(
     }
   }
 
-  // 2. Optional lossy JPEG recompression.
-  if (level !== "lossless") {
-    const { quality, maxLongSide } = LEVEL_SETTINGS[level];
+  // 2. Optional lossy recompression.
+  if (settings) {
+    const { quality, maxLongSide } = settings;
     for (const img of images) {
       if (dups.has(img.ref)) continue;
       if ((!img.isJpeg && !img.isFlate) || !isRecompressible(img.stream.dict)) {
@@ -323,5 +325,118 @@ export async function compressPdfDocument(
     imagesSkipped,
     duplicatesMerged,
     summary: parts.join(", ").replace(/^./, (c) => c.toUpperCase()) + ".",
+  };
+}
+
+export async function compressPdfDocument(
+  input: Uint8Array,
+  level: CompressLevel,
+  reencode: JpegReencoder = canvasReencoder,
+  reencodeRaw: RawReencoder = canvasRawReencoder
+): Promise<CompressResult> {
+  return compressCore(input, level === "lossless" ? null : LEVEL_SETTINGS[level], reencode, reencodeRaw);
+}
+
+// ---------------------------------------------------------------------------------------------
+// Target-size compression (V2): "how small do I need this file?" instead of a named quality level.
+// ---------------------------------------------------------------------------------------------
+
+/** A ladder of image settings from least to most aggressive, searched in order so the first rung that
+ * reaches the target is used — i.e. the highest quality that still meets the request. Fixed, ordered
+ * steps (rather than a continuous search) keep this fast and predictable: most files hit their target
+ * within the first one or two rungs, and the search always stops at the first success. */
+const TARGET_LADDER: { label: string; quality: number; maxLongSide: number }[] = [
+  { label: "very high quality", quality: 0.9, maxLongSide: 2600 },
+  { label: "high quality", quality: 0.8, maxLongSide: 2200 },
+  { label: "good quality", quality: 0.7, maxLongSide: 1800 },
+  { label: "medium quality", quality: 0.6, maxLongSide: 1500 },
+  { label: "lower quality", quality: 0.45, maxLongSide: 1200 },
+  { label: "low quality", quality: 0.32, maxLongSide: 1000 },
+  { label: "lowest quality", quality: 0.22, maxLongSide: 800 },
+];
+
+export interface TargetCompressAttempt {
+  label: string;
+  bytes: number;
+}
+
+export interface TargetCompressResult {
+  blob: Blob;
+  originalBytes: number;
+  newBytes: number;
+  targetBytes: number;
+  /** True if `newBytes <= targetBytes`. When false, `blob` is still the smallest result this document
+   * could safely reach — the caller should present it as "closest safe result", not as success. */
+  targetAchieved: boolean;
+  rungLabel: string;
+  imagesRecompressed: number;
+  duplicatesMerged: number;
+  /** Every setting that was tried, in order, with the size it produced — for showing the search or for QA. */
+  attempts: TargetCompressAttempt[];
+}
+
+/**
+ * Compresses toward a target file size: tries lossless first (free — no quality lost), then walks
+ * {@link TARGET_LADDER} from best to worst quality and stops at the first setting whose result is at or
+ * under the target. If no setting reaches it, returns the smallest one actually achieved instead of
+ * silently over-compressing past what the ladder allows.
+ */
+export async function compressPdfToTarget(
+  input: Uint8Array,
+  targetBytes: number,
+  reencode: JpegReencoder = canvasReencoder,
+  reencodeRaw: RawReencoder = canvasRawReencoder,
+  onProgress?: (label: string) => void
+): Promise<TargetCompressResult> {
+  onProgress?.("lossless (no quality loss)");
+  const lossless = await compressCore(input, null, reencode, reencodeRaw);
+  const attempts: TargetCompressAttempt[] = [{ label: "lossless (no quality loss)", bytes: lossless.newBytes }];
+  if (lossless.newBytes <= targetBytes) {
+    return {
+      blob: lossless.blob,
+      originalBytes: input.length,
+      newBytes: lossless.newBytes,
+      targetBytes,
+      targetAchieved: true,
+      rungLabel: "lossless (no quality loss)",
+      imagesRecompressed: 0,
+      duplicatesMerged: lossless.duplicatesMerged,
+      attempts,
+    };
+  }
+
+  let best = lossless;
+  for (const rung of TARGET_LADDER) {
+    onProgress?.(rung.label);
+    const result = await compressCore(input, rung, reencode, reencodeRaw);
+    attempts.push({ label: rung.label, bytes: result.newBytes });
+    if (result.newBytes < best.newBytes) best = result;
+    if (result.newBytes <= targetBytes) {
+      return {
+        blob: result.blob,
+        originalBytes: input.length,
+        newBytes: result.newBytes,
+        targetBytes,
+        targetAchieved: true,
+        rungLabel: rung.label,
+        imagesRecompressed: result.imagesRecompressed,
+        duplicatesMerged: result.duplicatesMerged,
+        attempts,
+      };
+    }
+  }
+
+  // Never reached the target without going past the lowest quality this tool offers: hand back the
+  // smallest safe result instead of pretending the request succeeded.
+  return {
+    blob: best.blob,
+    originalBytes: input.length,
+    newBytes: best.newBytes,
+    targetBytes,
+    targetAchieved: false,
+    rungLabel: "closest safe result",
+    imagesRecompressed: best.imagesRecompressed,
+    duplicatesMerged: best.duplicatesMerged,
+    attempts,
   };
 }

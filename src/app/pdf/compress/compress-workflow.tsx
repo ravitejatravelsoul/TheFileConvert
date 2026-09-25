@@ -1,30 +1,34 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { FileWorkflow } from "@/components/tools/FileWorkflow";
+import { FileWorkflow, type FileWorkflowRun } from "@/components/tools/FileWorkflow";
 import { Button } from "@/components/ui/Button";
-import {
-  analyzePdfImages,
-  compressPdfDocument,
-  describeAnalysis,
-  LEVEL_SETTINGS,
-  type CompressLevel,
-  type PdfImageAnalysis,
-} from "@/lib/processors/pdf-compress";
+import { analyzePdfImages, compressPdfToTarget, describeAnalysis, type PdfImageAnalysis } from "@/lib/processors/pdf-compress";
 import { getToolById } from "@/lib/tools/registry";
 import { safeOutputName, formatBytes } from "@/lib/format";
 
 const tool = getToolById("pdf-compress")!;
 
-const LEVELS: { id: CompressLevel; label: string; detail: string }[] = [
-  { id: "lossless", label: "Lossless (safe)", detail: "Pages look exactly the same. Only merges repeated images and tidies the file structure." },
-  { id: "balanced", label: LEVEL_SETTINGS.balanced.label + " — reduce image quality", detail: LEVEL_SETTINGS.balanced.tradeoff },
-  { id: "small", label: LEVEL_SETTINGS.small.label + " — reduce image quality more", detail: LEVEL_SETTINGS.small.tradeoff },
+const MB = 1024 * 1024;
+const KB = 1024;
+
+type PresetId = "500kb" | "1mb" | "2mb" | "5mb" | "custom";
+const PRESETS: { id: PresetId; label: string; bytes?: number }[] = [
+  { id: "500kb", label: "Under 500 KB", bytes: 500 * KB },
+  { id: "1mb", label: "Under 1 MB", bytes: 1 * MB },
+  { id: "2mb", label: "Under 2 MB", bytes: 2 * MB },
+  { id: "5mb", label: "Under 5 MB", bytes: 5 * MB },
+  { id: "custom", label: "Custom" },
 ];
 
-function CompressOptions({ file, run }: { file: File; run: (h: (files: File[]) => Promise<{ name: string; blob: Blob; note?: string }[]>) => void }) {
-  const [chosen, setChosen] = useState<CompressLevel | null>(null);
-  // Keyed by file, so a newly chosen file shows "Inspecting…" until its own result arrives.
+function targetLabel(bytes: number): string {
+  return bytes >= MB ? `${(bytes / MB).toFixed(bytes % MB === 0 ? 0 : 1)} MB` : `${Math.round(bytes / KB)} KB`;
+}
+
+function CompressOptions({ file, run }: { file: File; run: FileWorkflowRun }) {
+  const [preset, setPreset] = useState<PresetId>("1mb");
+  const [customValue, setCustomValue] = useState(1);
+  const [customUnit, setCustomUnit] = useState<"KB" | "MB">("MB");
   const [inspected, setInspected] = useState<{ file: File; analysis: PdfImageAnalysis | null } | null>(null);
 
   useEffect(() => {
@@ -41,63 +45,91 @@ function CompressOptions({ file, run }: { file: File; run: (h: (files: File[]) =
 
   const current = inspected && inspected.file === file ? inspected : null;
   const analysis = current?.analysis ?? null;
-  const analysisFailed = current !== null && current.analysis === null;
-
   const info = analysis ? describeAnalysis(analysis) : null;
-  // Scans and photo-heavy files only shrink meaningfully with a lossy level, so that is pre-selected for them
-  // (clearly labelled as reducing image quality); text/vector files start on the lossless option.
-  const level: CompressLevel = chosen ?? (info?.suggestLossy ? "balanced" : "lossless");
+
+  const targetBytes = preset === "custom" ? Math.max(1, Math.round(customValue * (customUnit === "MB" ? MB : KB))) : (PRESETS.find((p) => p.id === preset)!.bytes ?? MB);
+  const alreadyUnderTarget = file.size <= targetBytes;
 
   return (
     <div className="space-y-5 pt-2">
       <div className="rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--surface-muted)] p-4 text-sm" aria-live="polite">
-        {analysis && info ? (
-          <>
-            <p className="font-medium text-[var(--foreground)]">
-              {formatBytes(analysis.totalBytes)} · {info.headline}
-            </p>
-            <p className="mt-1 text-[var(--foreground-muted)]">{info.advice}</p>
-          </>
-        ) : analysisFailed ? (
-          <p className="text-[var(--foreground-muted)]">Couldn&rsquo;t inspect this PDF&rsquo;s contents ahead of time; you can still try compressing it.</p>
-        ) : (
-          <p className="text-[var(--foreground-muted)]">Inspecting the PDF&hellip;</p>
-        )}
+        <p className="font-medium text-[var(--foreground)]">Current size: {formatBytes(file.size)}</p>
+        {analysis && info && <p className="mt-1 text-[var(--foreground-muted)]">{info.headline}</p>}
       </div>
 
       <fieldset className="space-y-2">
-        <legend className="mb-1 text-sm font-medium text-[var(--foreground)]">How much to compress</legend>
-        {LEVELS.map((l) => (
-          <label
-            key={l.id}
-            className={`flex cursor-pointer items-start gap-3 rounded-[var(--radius-md)] border p-3 text-sm transition-colors ${
-              level === l.id ? "border-[var(--brand)] bg-[var(--brand-soft)]" : "border-[var(--border)] bg-[var(--surface)]"
-            }`}
-          >
-            <input type="radio" name="compress-level" value={l.id} checked={level === l.id} onChange={() => setChosen(l.id)} className="mt-1 accent-[var(--brand)]" />
-            <span>
-              <span className="block font-medium text-[var(--foreground)]">{l.label}</span>
-              <span className="block text-[var(--foreground-muted)]">{l.detail}</span>
-            </span>
-          </label>
-        ))}
+        <legend className="mb-1 text-sm font-medium text-[var(--foreground)]">Target file size</legend>
+        <div className="flex flex-wrap gap-2">
+          {PRESETS.map((p) => (
+            <button
+              key={p.id}
+              type="button"
+              onClick={() => setPreset(p.id)}
+              className={`rounded-full border px-4 py-2 text-sm font-medium transition-colors ${
+                preset === p.id ? "border-[var(--brand)] bg-[var(--brand-soft)] text-[var(--brand-strong)]" : "border-[var(--border)] bg-[var(--surface)] text-[var(--foreground)] hover:bg-[var(--surface-muted)]"
+              }`}
+            >
+              {p.label}
+            </button>
+          ))}
+        </div>
+        {preset === "custom" && (
+          <div className="flex items-center gap-2 pt-1">
+            <input
+              type="number"
+              min={1}
+              value={customValue}
+              onChange={(e) => setCustomValue(Math.max(0.01, Number(e.target.value)))}
+              className="w-28 rounded-[var(--radius-sm)] border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--foreground)] outline-none focus:border-[var(--brand)]"
+            />
+            <select
+              value={customUnit}
+              onChange={(e) => setCustomUnit(e.target.value as "KB" | "MB")}
+              className="rounded-[var(--radius-sm)] border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--foreground)] outline-none focus:border-[var(--brand)]"
+            >
+              <option value="KB">KB</option>
+              <option value="MB">MB</option>
+            </select>
+          </div>
+        )}
       </fieldset>
+
+      {alreadyUnderTarget && (
+        <p className="text-sm text-[var(--foreground-muted)]">
+          This file is already smaller than {targetLabel(targetBytes)} — compressing will only tidy its structure, not shrink it much further.
+        </p>
+      )}
 
       <Button
         onClick={() =>
-          run(async (f) => {
+          run(async (f, report) => {
+            report("Analyzing file…");
             const buf = new Uint8Array(await f[0].arrayBuffer());
             let result;
             try {
-              result = await compressPdfDocument(buf, level);
+              result = await compressPdfToTarget(buf, targetBytes, undefined, undefined, (label) =>
+                report(label.startsWith("lossless") ? "Checking if it already fits…" : `Trying ${label}…`)
+              );
             } catch {
               throw new Error("We couldn't read this PDF. It may be damaged, encrypted, or incomplete.");
             }
-            return [{ name: safeOutputName(f[0].name, "compressed", "pdf"), blob: result.blob, note: result.summary }];
+            report("Finalizing PDF…");
+            const savedPct = result.originalBytes > 0 ? Math.round(((result.originalBytes - result.newBytes) / result.originalBytes) * 100) : 0;
+            const note = result.targetAchieved
+              ? `Reached your target at ${result.rungLabel} (${formatBytes(result.originalBytes)} → ${formatBytes(result.newBytes)}, ${Math.max(0, savedPct)}% smaller).`
+              : `Couldn't reach ${targetLabel(targetBytes)} without making the document hard to read. This is the smallest safe result: ${formatBytes(result.newBytes)}.`;
+            return [
+              {
+                name: safeOutputName(f[0].name, "compressed", "pdf"),
+                blob: result.blob,
+                note,
+                badge: result.targetAchieved ? { text: `Target ✓ under ${targetLabel(targetBytes)}`, tone: "success" } : { text: "Closest safe result", tone: "warning" },
+              },
+            ];
           })
         }
       >
-        Compress {file.name}
+        Compress to under {targetLabel(targetBytes)}
       </Button>
     </div>
   );
@@ -108,7 +140,7 @@ export function CompressWorkflow() {
     <FileWorkflow
       tool={tool}
       multiple={false}
-      noSavingsHint="This PDF has little left to squeeze at this setting. If it is mostly scanned pages or photos, try Balanced or Smallest (they lower image quality); if it is mostly text, it is already about as small as it can get."
+      noSavingsHint="This PDF has little left to squeeze — it's mostly text/vector content, or already efficiently compressed."
     >
       {({ files, run }) => (files[0] ? <CompressOptions file={files[0]} run={run} /> : null)}
     </FileWorkflow>
