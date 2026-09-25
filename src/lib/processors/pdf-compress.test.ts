@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { PDFDocument } from "pdf-lib";
-import { analyzePdfImages, compressPdfDocument, describeAnalysis, type JpegReencoder } from "./pdf-compress";
+import { analyzePdfImages, compressPdfDocument, compressPdfToTarget, describeAnalysis, type JpegReencoder } from "./pdf-compress";
 
 const JPEG = new Uint8Array(fs.readFileSync(path.join(__dirname, "../../../e2e/fixtures/sample.jpg")));
 
@@ -101,6 +101,47 @@ describe("compressPdfDocument", () => {
     doc.addPage().drawText("text only");
     const r = await compressPdfDocument(await doc.save(), "lossless");
     expect(r.summary).toBe("Optimized the file structure.");
+  });
+});
+
+describe("compressPdfToTarget", () => {
+  // A deterministic fake: output size is exactly `quality` of the input, so which ladder rung
+  // "won" is verifiable from the returned quality.
+  const scaledReencoder: JpegReencoder = async (jpeg, { quality }) => ({ bytes: jpeg.slice(0, Math.max(1, Math.floor(jpeg.length * quality))), width: 1, height: 1 });
+
+  it("stops at the free lossless pass when that already meets the target", async () => {
+    const input = await pdfWithRepeatedImage(3);
+    const lossless = await compressPdfDocument(input, "lossless");
+    const r = await compressPdfToTarget(input, lossless.newBytes + 1, scaledReencoder);
+    expect(r.targetAchieved).toBe(true);
+    expect(r.rungLabel).toBe("lossless (no quality loss)");
+    expect(r.attempts).toHaveLength(1);
+  });
+
+  it("walks the quality ladder and stops at the first (highest-quality) rung that fits, not a later/worse one", async () => {
+    const input = await pdfWithRepeatedImage(1);
+    // A target only the middle of the ladder can reach (found by probing the smallest achievable size).
+    const smallest = await compressPdfToTarget(input, 1, scaledReencoder);
+    const target = Math.round((smallest.newBytes + smallest.attempts[0].bytes) / 2);
+    const r = await compressPdfToTarget(input, target, scaledReencoder);
+    expect(r.targetAchieved).toBe(true);
+    expect(r.newBytes).toBeLessThanOrEqual(target);
+    // Every rung tried before the winning one must genuinely have missed the target — otherwise the
+    // search didn't stop at the *first* (best-quality) success.
+    const wonAt = r.attempts.findIndex((a) => a.label === r.rungLabel);
+    expect(wonAt).toBeGreaterThan(0);
+    for (const earlier of r.attempts.slice(0, wonAt)) expect(earlier.bytes).toBeGreaterThan(target);
+  });
+
+  it("never claims success it can't back up: an unreachable target returns the smallest safe result instead", async () => {
+    const input = await pdfWithRepeatedImage(1);
+    const r = await compressPdfToTarget(input, 1, scaledReencoder); // impossible target
+    expect(r.targetAchieved).toBe(false);
+    expect(r.rungLabel).toBe("closest safe result");
+    expect(r.newBytes).toBeGreaterThan(1);
+    // it tried every rung, not just gave up after one
+    expect(r.attempts).toHaveLength(8); // lossless + 7 ladder rungs
+    expect(r.newBytes).toBe(Math.min(...r.attempts.map((a) => a.bytes)));
   });
 });
 

@@ -10,12 +10,12 @@ export function PopularTools() {
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <h2 className="text-2xl font-semibold tracking-tight text-[var(--foreground)] sm:text-3xl">
-            Popular tools
+            Most used
           </h2>
           <p className="mt-2 text-[var(--foreground-muted)]">The tools people reach for most.</p>
         </div>
         <Link href="/tools" className="text-sm font-medium text-[var(--brand)] hover:underline">
-          View all 40+ tools →
+          Browse everything →
         </Link>
       </div>
 

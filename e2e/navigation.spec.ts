@@ -1,12 +1,12 @@
 import { test, expect } from "@playwright/test";
 
 test.describe("Navigation", () => {
-  test("desktop nav links go to the right category pages", async ({ page, isMobile }) => {
+  test("desktop nav links go to the right tool pages", async ({ page, isMobile }) => {
     test.skip(isMobile, "desktop-only test");
     await page.goto("/");
-    await page.getByRole("link", { name: "PDF", exact: true }).first().click();
-    await expect(page).toHaveURL(/\/pdf$/);
-    await expect(page.getByRole("heading", { level: 1 })).toContainText("PDF");
+    await page.getByRole("link", { name: "PDF Tools", exact: true }).first().click();
+    await expect(page).toHaveURL(/\/pdf\/merge$/);
+    await expect(page.getByRole("heading", { level: 1 })).toContainText("Merge");
   });
 
   test("mobile menu opens and navigates", async ({ page, isMobile }) => {

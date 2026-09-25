@@ -19,8 +19,8 @@ test.describe("Homepage", () => {
 
   test("shows popular tools, categories, and FAQ sections", async ({ page }) => {
     await page.goto("/");
-    await expect(page.getByRole("heading", { name: "Popular tools" })).toBeVisible();
-    await expect(page.getByRole("heading", { name: "All your files. One place." })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Most used" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Start with a category" })).toBeVisible();
     await expect(page.getByRole("heading", { name: "How it works" })).toBeVisible();
     await expect(page.getByRole("heading", { name: "Your files are yours." })).toBeVisible();
     await expect(page.getByRole("heading", { name: "Frequently asked questions" })).toBeVisible();

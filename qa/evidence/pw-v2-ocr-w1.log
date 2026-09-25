@@ -1,0 +1,69 @@
+
+Running 26 tests using 1 worker
+
+[1/26] [chromium-ocr] › e2e\ocr.spec.ts:14:7 › OCR: page classification › flags scanned pages, leaves native pages alone, and pre-selects only what needs OCR
+[2/26] [chromium-ocr] › e2e\ocr.spec.ts:28:7 › OCR: page classification › a fully native PDF is left alone by default but can still be OCR'd on request
+[3/26] [chromium-ocr] › e2e\ocr.spec.ts:37:7 › OCR: recognition accuracy › recognizes a clean scan with high confidence and exact text
+[4/26] [chromium-ocr] › e2e\ocr.spec.ts:54:7 › OCR: recognition accuracy › recognizes currency, account numbers, and dates accurately
+[5/26] [chromium-ocr] › e2e\ocr.spec.ts:69:7 › OCR: recognition accuracy › recognizes names, emails, and phone numbers on a form-like scan
+[6/26] [chromium-ocr] › e2e\ocr.spec.ts:83:7 › OCR: recognition accuracy › recognizes a sideways-scanned page once rotation is corrected
+[7/26] [chromium-ocr] › e2e\ocr.spec.ts:98:7 › OCR: recognition accuracy › supports a second verified language (Spanish)
+[8/26] [chromium-ocr] › e2e\ocr.spec.ts:113:7 › OCR: recognition accuracy › processes every page of a multi-page scanned PDF
+[9/26] [chromium-ocr] › e2e\ocr.spec.ts:126:7 › OCR: searchable PDF export › exported PDF is reopenable, phrase-searchable, and keeps the original scan visible
+[chromium-ocr] › e2e\ocr.spec.ts:126:7 › OCR: searchable PDF export › exported PDF is reopenable, phrase-searchable, and keeps the original scan visible
+Warning: UnknownErrorException: Ensure that the `standardFontDataUrl` API parameter is provided.
+
+[10/26] [chromium-ocr] › e2e\ocr.spec.ts:160:7 › OCR: searchable PDF export › extracted text can be downloaded as a .txt file
+[11/26] [chromium-ocr] › e2e\ocr.spec.ts:181:7 › OCR: cancel and error handling › cancelling mid-batch keeps already-recognized pages instead of discarding everything
+[12/26] [chromium-ocr] › e2e\ocr.spec.ts:196:7 › OCR: cancel and error handling › a corrupted PDF fails safely with a friendly message
+[13/26] [chromium-ocr] › e2e\ocr.spec.ts:205:7 › OCR: cancel and error handling › a zero-byte file is rejected immediately
+[14/26] [chromium-ocr] › e2e\ocr.spec.ts:211:7 › OCR: cancel and error handling › an unsupported file type shows a friendly error
+[15/26] [chromium-ocr] › e2e\ocr.spec.ts:219:7 › OCR: network privacy › only same-origin static OCR assets are fetched — never document content
+[16/26] [chromium-ocr] › e2e\ocr.spec.ts:245:7 › OCR: network privacy › OCR is never loaded on the homepage or other tool pages
+[17/26] [chromium-ocr] › e2e\pdf-editor-ocr.spec.ts:140:7 › PDF Editor: OCR integration › recognizes a scanned page inside a mixed document and lets you correct the text
+[18/26] [chromium-ocr] › e2e\pdf-editor-ocr.spec.ts:161:7 › PDF Editor: OCR text edit round trip › corrects exactly one recognized word — original text carries only that word, not the whole line
+[chromium-ocr] › e2e\pdf-editor-ocr.spec.ts:161:7 › PDF Editor: OCR text edit round trip › corrects exactly one recognized word — original text carries only that word, not the whole line
+Warning: UnknownErrorException: Ensure that the `standardFontDataUrl` API parameter is provided.
+
+Warning: UnknownErrorException: Ensure that the `standardFontDataUrl` API parameter is provided.
+
+[19/26] [chromium-ocr] › e2e\pdf-editor-ocr.spec.ts:211:7 › PDF Editor: OCR text edit round trip › no-collateral-change: editing one word leaves the rest of the scanned page pixel-identical
+[chromium-ocr] › e2e\pdf-editor-ocr.spec.ts:211:7 › PDF Editor: OCR text edit round trip › no-collateral-change: editing one word leaves the rest of the scanned page pixel-identical
+Warning: UnknownErrorException: Ensure that the `standardFontDataUrl` API parameter is provided.
+
+[20/26] [chromium-ocr] › e2e\pdf-editor-ocr.spec.ts:275:7 › PDF Editor: OCR visual-fidelity fixtures › B. uniform gray scan background: patch matches the gray, doesn't punch a white hole
+[chromium-ocr] › e2e\pdf-editor-ocr.spec.ts:275:7 › PDF Editor: OCR visual-fidelity fixtures › B. uniform gray scan background: patch matches the gray, doesn't punch a white hole
+Warning: UnknownErrorException: Ensure that the `standardFontDataUrl` API parameter is provided.
+
+[21/26] [chromium-ocr] › e2e\pdf-editor-ocr.spec.ts:283:7 › PDF Editor: OCR visual-fidelity fixtures › C+D. colored form background with table border lines close to the value
+[chromium-ocr] › e2e\pdf-editor-ocr.spec.ts:283:7 › PDF Editor: OCR visual-fidelity fixtures › C+D. colored form background with table border lines close to the value
+Warning: UnknownErrorException: Ensure that the `standardFontDataUrl` API parameter is provided.
+
+[22/26] [chromium-ocr] › e2e\pdf-editor-ocr.spec.ts:287:7 › PDF Editor: OCR visual-fidelity fixtures › screenshot acceptance: degree -> graduate on a textured serif scan renders in a matching style, not a generic sans-serif box
+[chromium-ocr] › e2e\pdf-editor-ocr.spec.ts:287:7 › PDF Editor: OCR visual-fidelity fixtures › screenshot acceptance: degree -> graduate on a textured serif scan renders in a matching style, not a generic sans-serif box
+Warning: UnknownErrorException: Ensure that the `standardFontDataUrl` API parameter is provided.
+
+style stats — replacement: {
+  inkDensity: 0.1086577130283026,
+  avgStrokeWidthPx: 4.887372013651877,
+  edgeSoftness: 0.11000621504039776
+} neighbor: {
+  inkDensity: 0.11384669111227519,
+  avgStrokeWidthPx: 4.591549295774648,
+  edgeSoftness: 0.17153748411689962
+}
+
+[23/26] [chromium-ocr] › e2e\pdf-editor-ocr.spec.ts:388:7 › PDF Editor: OCR visual-fidelity fixtures › unsafe fallback: a word overlapping a ruling line refuses to auto-erase and requires an explicit manual overlay
+[chromium-ocr] › e2e\pdf-editor-ocr.spec.ts:388:7 › PDF Editor: OCR visual-fidelity fixtures › unsafe fallback: a word overlapping a ruling line refuses to auto-erase and requires an explicit manual overlay
+Warning: UnknownErrorException: Ensure that the `standardFontDataUrl` API parameter is provided.
+
+[24/26] [chromium-ocr] › e2e\pdf-editor-ocr.spec.ts:426:7 › PDF Editor: OCR visual-fidelity fixtures › micro-edit acceptance: only the changed date digit is patched, not the whole date field
+[chromium-ocr] › e2e\pdf-editor-ocr.spec.ts:426:7 › PDF Editor: OCR visual-fidelity fixtures › micro-edit acceptance: only the changed date digit is patched, not the whole date field
+Warning: UnknownErrorException: Ensure that the `standardFontDataUrl` API parameter is provided.
+
+Warning: UnknownErrorException: Ensure that the `standardFontDataUrl` API parameter is provided.
+
+[25/26] [chromium-ocr] › e2e\pdf-editor-ocr.spec.ts:519:7 › PDF Editor: OCR visual-fidelity fixtures › regression: selection handles on a freshly-saved micro-edit don't cover the edited glyph
+[26/26] [chromium-ocr] › e2e\pdf-editor-ocr.spec.ts:567:7 › PDF Editor: OCR privacy regression › recognizing and correcting a scanned page, then exporting, never sends document content or scan pixels off-device
+  26 passed (2.3m)
+EXIT 0
