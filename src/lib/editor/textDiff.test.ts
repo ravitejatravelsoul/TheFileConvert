@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { computeChangedSpan, computeChangedSubRect, type CharBox } from "./textDiff";
+import { computeChangedSpan, computeChangedSubRect, planOcrPatch, type CharBox } from "./textDiff";
 
 describe("computeChangedSpan", () => {
   it("finds only the final changed digit in a date", () => {
@@ -78,5 +78,49 @@ describe("computeChangedSubRect", () => {
     expect(rect).not.toBeNull();
     expect(rect!.x).toBe(0);
     expect(rect!.width).toBe(30); // covers chars 0..4 (5 chars, 6 wide each)
+  });
+});
+
+describe("planOcrPatch", () => {
+  const lineBox = { x: 40, y: 500, width: 520, height: 14 };
+  const charsFor = (text: string, x0 = 100, w = 7): CharBox[] => [...text].map((ch, i) => ({ text: ch, pdfBox: { x: x0 + i * w, y: 500, width: w, height: 12 } }));
+
+  it("a word-level digit swap with per-character boxes patches just the changed digit", () => {
+    const plan = planOcrPatch(charsFor("2026"), "2026", "2028", lineBox);
+    expect(plan.partial).toBe(true);
+    expect(plan.originalText).toBe("6");
+    expect(plan.newText).toBe("8");
+    expect(plan.box.width).toBe(7);
+  });
+
+  it("a line-level digit swap (no per-character boxes) redraws the WHOLE line, never just the changed digit", () => {
+    // Regression: production edit of "VALID FROM 02/08/2026 UNTIL 12/20/2026" -> "...12/20/2028"
+    // patched the whole line's box but drew only "8", erasing the rest of the line.
+    const original = "VALID FROM 02/08/2026 UNTIL 12/20/2026";
+    const edited = "VALID FROM 02/08/2026 UNTIL 12/20/2028";
+    const plan = planOcrPatch(undefined, original, edited, lineBox);
+    expect(plan.partial).toBe(false);
+    expect(plan.box).toEqual(lineBox);
+    expect(plan.originalText).toBe(original);
+    expect(plan.newText).toBe(edited);
+  });
+
+  it("per-character boxes that don't match the text fall back to the whole box and whole text together", () => {
+    const plan = planOcrPatch(charsFor("2O26"), "2026", "2028", lineBox); // OCR merged/misread a glyph
+    expect(plan).toEqual({ box: lineBox, originalText: "2026", newText: "2028", partial: false });
+  });
+
+  it("letter changes and length changes always redraw the whole word", () => {
+    expect(planOcrPatch(charsFor("degree"), "degree", "graduate", lineBox).partial).toBe(false);
+    expect(planOcrPatch(charsFor("Smith"), "Smith", "Smyth", lineBox).partial).toBe(false);
+    expect(planOcrPatch(charsFor("182.50"), "182.50", "182.500", lineBox).partial).toBe(false);
+  });
+
+  it("the drawn text and the patched box are never mixed granularities", () => {
+    for (const [chars, a, b] of [[charsFor("2026"), "2026", "2028"], [undefined, "12/20/2026", "12/20/2028"], [charsFor("abc"), "abc", "abd"]] as const) {
+      const plan = planOcrPatch(chars as CharBox[] | undefined, a, b, lineBox);
+      if (plan.partial) expect(plan.box).not.toEqual(lineBox);
+      else expect([plan.originalText, plan.newText]).toEqual([a, b]);
+    }
   });
 });

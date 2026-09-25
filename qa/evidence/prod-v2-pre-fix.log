@@ -1,0 +1,29 @@
+PASS    fingerprint :: PDF Compress shows target-size presets, not the old Lossless/Balanced/Smallest radios — Under 500 KB:true Under 1 MB:true Under 2 MB:true Under 5 MB:true Custom:true oldRadios=0
+PASS    fingerprint :: Image Compress shows target-size presets, no quality slider — presets=true,true,true,true,true sliders=0
+PASS    fingerprint :: Homepage: V2 nav (Compress / Convert / Edit PDF / PDF Tools) and V2 category section — nav="Compress Convert Edit PDF PDF Tools About" h2=Most used|Start with a category|How it works|Your files are yours.|Why TheFileConvert|Frequently asked questions|Got a file? Get it done.
+PASS    pdf-compress :: real scan 3982736 B → Under 1 MB → 471312 B (88.2% smaller) in 1.6s — badge="Target ✓ under 1 MB" ui="Exact: 3,982,736 bytes → 471,312 bytes (3,511,424 fewer)" pages=2 ink=4462 nonGET=[] foreign=[]
+PASS    image-compress :: IMAGE-01 8078741 B → Under 1 MB → 868412 B, 4200×3000 — badge="Target ✓ under 1 MB" nonGET=[] foreign=[]
+PASS    converters :: JPG → PNG — png 1000×1600
+PASS    converters :: PNG → WebP (alpha kept) — webp 2400×1800 cornerAlpha=0
+PASS    converters :: PDF → Images (6 pages, rotated page 2 comes out landscape) — 6 images, page-2 1584×1224
+PASS    converters :: Images → PDF (2 pages) — pages=2
+PASS    privacy :: converters: no non-GET, no foreign host — nonGET=[] foreign=[]
+PASS    pdf-editor :: native: edit text, highlight, draw, fast-typed added text, export → reopen — typed="Reviewed by production audit" types=native-text-replacement,annotation,drawing,added-text pages=14 p1="Page 1 of 14 exercitation ullamco veniam…1 PROD EDIT Reviewed by production audit" nonGET=[] foreign=[]
+PASS    pdf-editor :: scanned: OCR (35.6s) → 12/20/2026→12/20/2028 → fast-typed added text → export → reopen — typed="Verified in production" text="VALID FROM 02/08/2026 UNTIL 12/20/2028 Verified in production" changedPx=3565/1090584 nonGET=[] foreign=[]
+PASS    pdf-tools :: Merge 14 + 3 → 17 pages in order — 17 pages
+PASS    pdf-tools :: Split 14 pages, 5 per file → 5/5/4 — part-1.pdf,part-2.pdf,part-3.pdf 4,5,5
+PASS    pdf-tools :: Reorder: page 2 moved first — 2/14,1/14,3/14
+PASS    pdf-tools :: Rotate pages 2,4 by 180° — 0,180,0,180,0
+PASS    pdf-tools :: Delete 2,4-6 → 10 pages left — 1,3,7,8,9,10,11,12,13,14
+PASS    privacy :: PDF tools: no non-GET, no foreign host — nonGET=[] foreign=[]
+PASS    mobile :: PDF compress custom 700 KB — 471312 B
+PASS    mobile :: Image compress under 500 KB — 451590 B
+PASS    mobile :: PNG → JPG converter — 1000×700
+PASS    mobile :: Editor: OCR, edit word, add text, highlight, draw, crop, export — types=ocr-text-replacement,added-text,annotation,drawing crop=true text="Priya Mobile prod"
+PASS    privacy :: mobile session: no non-GET, no foreign host — nonGET=[] foreign=[]
+PASS    seo :: canonical + OpenGraph on 9 pages; sitemap 55 URLs all apex + 200; robots → sitemap —  
+PASS    seo :: unknown URL → 404 page — 404
+PASS    console :: no uncaught/console errors across all sessions
+PASS    console :: no 4xx/5xx responses (excluding the intentional 404 probe)
+PASS    privacy :: no non-GET requests and no third-party hosts anywhere in the run — nonGET=0 foreign=
+EXIT 0

@@ -423,6 +423,68 @@ test.describe("PDF Editor: OCR visual-fidelity fixtures", () => {
     expect(text).toContain("Total");
   });
 
+  test("a line-level edit that only swaps a digit keeps the rest of the line (not just the changed digit)", async ({ page, isMobile }) => {
+    // Regression (found on production): editing the whole recognized LINE
+    // "VALID FROM 02/08/2026 UNTIL 12/20/2026" -> "...12/20/2028" was treated as a digit micro-edit,
+    // but a line has no per-character boxes, so the patch covered the entire line while drawing only
+    // the changed "8" — the first date and "UNTIL" vanished from the export.
+    const fixturePath = path.join(OCR_FIXTURES, "date-field-scan.pdf");
+    const originalBytes = fs.readFileSync(fixturePath);
+
+    await openFile(page, fixturePath);
+    await openMobilePanel(page, isMobile, "Properties");
+    await page.locator("summary", { hasText: "OCR" }).click();
+    await withOcrLock(async () => {
+      await page.getByRole("button", { name: "Recognize current page" }).click();
+      await expect(page.getByRole("button", { name: "Recognize current page" })).toBeVisible({ timeout: 90_000 });
+    });
+    await page.keyboard.press("Escape");
+
+    const untilBox = await page.getByRole("button", { name: /Edit recognized word: UNTIL/i }).first().boundingBox();
+    const firstDateBox = await page.getByRole("button", { name: /Edit recognized word: 02\/08\/2026/i }).first().boundingBox();
+    const surfaceBox = await page.locator('[data-testid="page-surface"]').first().boundingBox();
+    if (!untilBox || !firstDateBox || !surfaceBox) throw new Error("missing word/surface bounding boxes");
+
+    // Word buttons sit on top of the line button, so — like a user — reach the line through the gap
+    // between two words.
+    const lineButton = page.getByRole("button", { name: /Edit recognized line: .*UNTIL.*12\/20\/2026/i }).first();
+    await expect(lineButton).toBeVisible({ timeout: 10_000 });
+    const gapX = (firstDateBox.x + firstDateBox.width + untilBox.x) / 2;
+    const lineY = untilBox.y + untilBox.height / 2;
+    await page.mouse.click(gapX, lineY);
+    const dialog = page.getByRole("dialog", { name: "Edit text" });
+    const input = dialog.locator("input[type=text]");
+    const original = await input.inputValue();
+    expect(original).toMatch(/UNTIL.*12\/20\/2026/);
+    await input.fill(original.replace("12/20/2026", "12/20/2028"));
+    await dialog.getByRole("button", { name: "Save correction" }).click();
+    await expect(dialog).not.toBeVisible();
+
+    const bytes = await exportAndSave(page, "line-edit.pdf");
+    const before = await renderPdfPage(originalBytes, 1, RENDER_SCALE);
+    const after = await renderPdfPage(bytes, 1, RENDER_SCALE);
+    const toPx = (b: { x: number; y: number; width: number; height: number }) => ({
+      x: (b.x - surfaceBox.x) * PIXEL_SCALE,
+      y: (b.y - surfaceBox.y) * PIXEL_SCALE,
+      width: b.width * PIXEL_SCALE,
+      height: b.height * PIXEL_SCALE,
+    });
+    const ink = (img: { getPixel(x: number, y: number): [number, number, number, number] }, r: { x: number; y: number; width: number; height: number }) => {
+      let n = 0;
+      for (let y = Math.round(r.y); y <= Math.round(r.y + r.height); y++) for (let x = Math.round(r.x); x <= Math.round(r.x + r.width); x++) if (img.getPixel(x, y)[0] < 110) n++;
+      return n;
+    };
+    for (const [label, box] of [["UNTIL", untilBox], ["02/08/2026", firstDateBox]] as const) {
+      const r = toPx(box);
+      const was = ink(before, r);
+      const now = ink(after, r);
+      expect(was, `${label} had ink originally`).toBeGreaterThan(20);
+      // Redrawn in a matched face its pixels may differ, but its text must still be there.
+      expect(now, `${label} still has its text after a line edit (was ${was} dark px, now ${now})`).toBeGreaterThan(was * 0.4);
+    }
+    expect(await extractText(bytes, 1)).toContain("12/20/2028");
+  });
+
   test("micro-edit acceptance: only the changed date digit is patched, not the whole date field", async ({ page, isMobile }) => {
     // The exact regression scenario from the defect report: "02/08/2026 UNTIL 12/20/2026",
     // editing only the final date's last digit (2026 -> 2028). A correct fix patches roughly

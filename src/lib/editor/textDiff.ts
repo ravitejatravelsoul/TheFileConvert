@@ -61,3 +61,34 @@ export function computeChangedSubRect(chars: CharBox[] | undefined, originalText
   const y1 = Math.max(...changedChars.map((c) => c.pdfBox.y + c.pdfBox.height));
   return { x: x0, y: y0, width: x1 - x0, height: y1 - y0 };
 }
+
+export interface OcrPatchPlan {
+  /** The PDF-space box to patch: just the changed characters, or the whole original box. */
+  box: Rect;
+  /** The text the patch replaces and the text it draws — always the same granularity as `box`. */
+  originalText: string;
+  newText: string;
+  /** True when only the changed characters are patched. */
+  partial: boolean;
+}
+
+/**
+ * Decides what an OCR correction patches and draws. Only a same-length swap of digits
+ * (2026 -> 2028, $182.50 -> $182.60) is patched as just the changed characters, and only when
+ * the real per-character boxes needed to locate them are available (word-level edits). Anything
+ * else — letters, a longer/shorter result, or a line-level edit that has no per-character boxes —
+ * redraws the whole original box with the whole new text.
+ *
+ * The box and the drawn text must always be chosen together: patching the whole box while drawing
+ * only the changed middle ("8") would erase everything else in that box.
+ */
+export function planOcrPatch(chars: CharBox[] | undefined, originalText: string, newText: string, wholeBox: Rect): OcrPatchPlan {
+  const span = computeChangedSpan(originalText, newText);
+  const digitSwap =
+    span.originalMiddle.length === span.replacementMiddle.length &&
+    /^[0-9]+$/.test(span.originalMiddle) &&
+    /^[0-9]+$/.test(span.replacementMiddle);
+  const subRect = digitSwap ? computeChangedSubRect(chars, originalText, span) : null;
+  if (subRect) return { box: subRect, originalText: span.originalMiddle, newText: span.replacementMiddle, partial: true };
+  return { box: wholeBox, originalText, newText, partial: false };
+}

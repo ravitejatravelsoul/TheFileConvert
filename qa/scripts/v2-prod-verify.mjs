@@ -18,7 +18,8 @@ async function session(opts = {}) {
   const page = await ctx.newPage();
   const log = { errors: [], bad: [], nonGet: [], foreign: [] };
   page.on("pageerror", (e) => log.errors.push(String(e).slice(0, 200)));
-  page.on("console", (m) => { if (m.type() === "error" && !/favicon/i.test(m.text())) log.errors.push(m.text().slice(0, 200)); });
+  // Chrome logs "Failed to load resource: 404" for the intentional unknown-URL probe document itself; that one is expected.
+  page.on("console", (m) => { if (m.type() === "error" && !/favicon/i.test(m.text()) && !/definitely-not-a-page/.test(m.location().url)) log.errors.push(`${m.text().slice(0, 200)} @ ${m.location().url}`); });
   ctx.on("request", (r) => {
     const u = new URL(r.url());
     if (/^(blob|data):/.test(u.protocol)) return;
@@ -169,7 +170,7 @@ await guard("pdf-editor", "native", async () => {
 
   // Fast typing immediately after placing a text box — no wait between the click and the keystrokes.
   await page.getByRole("button", { name: "Text", exact: true }).click();
-  await page.mouse.click(...at(300, 772));
+  await page.mouse.click(...at(300, 680)); // well inside the page, so a wrapped second line stays on it
   await page.keyboard.type("Reviewed by production audit");
   const typed = await page.getByTestId("canvas-text-editor").inputValue();
   await page.keyboard.press("Escape");
@@ -211,9 +212,13 @@ await guard("pdf-editor", "scanned", async () => {
   const t = await pdfTexts(out);
   const a = await pdfPixels(REAL, 1, 1.5), b = await pdfPixels(out, 1, 1.5);
   let changed = 0; for (let i = 0; i < a.d.length; i += 4) if (Math.abs(a.d[i] - b.d[i]) + Math.abs(a.d[i + 1] - b.d[i + 1]) > 50) changed++;
-  rec("pdf-editor", `scanned: OCR (${(ocrMs / 1000).toFixed(1)}s) → 12/20/2026→12/20/2028 → fast-typed added text → export → reopen`,
-    typed === "Verified in production" && /12\/20\/2028/.test(t[0].text) && /Verified in production/.test(t[0].text) && t.length === 2 && changed > 50 && changed < a.w * a.h * 0.05 && privacyOk(log) ? "PASS" : "FAIL",
-    `typed="${typed}" text="${t[0].text.slice(0, 120)}" changedPx=${changed}/${a.w * a.h} ${privacyDetail(log)}`);
+  // The text layer alone can't prove the edit looks right (it passed while the visible row was wiped
+  // out): the "VALID FROM … UNTIL …" row must still carry roughly its original ink after the edit.
+  const rowInk = (img) => { let n = 0; const y0 = Math.round(img.h * 0.255), y1 = Math.round(img.h * 0.29); for (let y = y0; y < y1; y++) for (let x = Math.round(img.w * 0.07); x < Math.round(img.w * 0.9); x++) if (img.d[(y * img.w + x) * 4] < 110) n++; return n; };
+  const inkBefore = rowInk(a), inkAfter = rowInk(b);
+  rec("pdf-editor", `scanned: OCR (${(ocrMs / 1000).toFixed(1)}s) → 12/20/2026→12/20/2028 → fast-typed added text → export → reopen; date row still visibly intact`,
+    typed === "Verified in production" && /12\/20\/2028/.test(t[0].text) && /Verified in production/.test(t[0].text) && t.length === 2 && changed > 50 && changed < a.w * a.h * 0.05 && inkAfter > inkBefore * 0.6 && privacyOk(log) ? "PASS" : "FAIL",
+    `typed="${typed}" text="${t[0].text.slice(0, 120)}" changedPx=${changed}/${a.w * a.h} rowInk ${inkBefore}→${inkAfter} ${privacyDetail(log)}`);
   await import("node:child_process").then(({ execFileSync }) => execFileSync("node", ["qa/scripts/render-page.mjs", out, "1", "2", "qa/screenshots/prod-v2-date-edit.png", "0", "0.28", "1", "0.14"]));
   await ctx.close();
 });

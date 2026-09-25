@@ -21,7 +21,7 @@ import type { OcrPageResult } from "@/lib/processors/ocr";
 import { confidenceTier } from "@/lib/processors/ocr";
 import { estimateRegionColors, computeEditPadding, type PixelSource } from "@/lib/editor/regionColor";
 import { composeOcrPatch, type ComposeOcrPatchResult } from "@/lib/editor/scanPatch";
-import { computeChangedSpan, computeChangedSubRect, type CharBox } from "@/lib/editor/textDiff";
+import { planOcrPatch, type CharBox } from "@/lib/editor/textDiff";
 import type { EditorWorkspaceApi, ToolId, SearchMatch } from "./useEditorWorkspace";
 import type { ToolOptions } from "./toolOptions";
 import { rgbToCss } from "./toolOptions";
@@ -323,17 +323,14 @@ export function PageSurface({
           // different diff against the original), so the patch geometry can't be fixed once
           // at click time — this is the core of the "patch only what changed" fix (spec
           // sections 2-5).
-          const span = computeChangedSpan(text, newText);
           // Only a same-length swap of digits (2026 -> 2028, $182.50 -> $182.60) is patched as
-          // just the changed characters. Anything else (letters, or a longer/shorter result such
-          // as degree -> graduate) redraws the whole word in one face: a partial patch there leaves
-          // half old glyphs beside half new ones, has no room to grow, and its per-character
-          // boxes are too imprecise to cut a letter cleanly.
-          const digitSwap =
-            span.originalMiddle.length === span.replacementMiddle.length &&
-            /^[0-9]+$/.test(span.originalMiddle) &&
-            /^[0-9]+$/.test(span.replacementMiddle);
-          const changedPdfBox = (digitSwap ? computeChangedSubRect(chars, text, span) : null) ?? pdfBox;
+          // just the changed characters, and only when per-character boxes exist to locate them
+          // (word-level edits). Anything else (letters, a longer/shorter result such as
+          // degree -> graduate, or a line-level edit) redraws the whole box with the whole new text.
+          // The box and the drawn text are decided together (planOcrPatch): patching a whole line's
+          // box while drawing only the changed digit used to erase the rest of that line.
+          const plan = planOcrPatch(chars, text, newText, pdfBox);
+          const changedPdfBox = plan.box;
           const targetPaddingPt = computeEditPadding(changedPdfBox.height, confidence);
           const targetRectPx = pdfRectToViewport(spec, changedPdfBox);
           const targetPaddingPx = targetPaddingPt * spec.scale;
@@ -361,8 +358,8 @@ export function PageSurface({
             wordRectPx: targetRectPx,
             patchRectPx: pdfRectToViewport(spec, paddedTargetPdfBox),
             baselinePx,
-            originalText: digitSwap ? span.originalMiddle : text,
-            newText: digitSwap ? span.replacementMiddle : newText,
+            originalText: plan.originalText,
+            newText: plan.newText,
             backgroundColor: targetEstimate.backgroundColor,
             textColor: targetEstimate.textColor,
             pixelScale: PATCH_PIXEL_SCALE,
