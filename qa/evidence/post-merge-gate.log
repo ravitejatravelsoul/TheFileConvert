@@ -1,0 +1,626 @@
+
+Running 392 tests using 1 worker
+
+[1/392] [chromium-ocr] › e2e\ocr.spec.ts:14:7 › OCR: page classification › flags scanned pages, leaves native pages alone, and pre-selects only what needs OCR
+[2/392] [chromium-ocr] › e2e\ocr.spec.ts:28:7 › OCR: page classification › a fully native PDF is left alone by default but can still be OCR'd on request
+[3/392] [chromium-ocr] › e2e\ocr.spec.ts:37:7 › OCR: recognition accuracy › recognizes a clean scan with high confidence and exact text
+[4/392] [chromium-ocr] › e2e\ocr.spec.ts:54:7 › OCR: recognition accuracy › recognizes currency, account numbers, and dates accurately
+[5/392] [chromium-ocr] › e2e\ocr.spec.ts:69:7 › OCR: recognition accuracy › recognizes names, emails, and phone numbers on a form-like scan
+[6/392] [chromium-ocr] › e2e\ocr.spec.ts:83:7 › OCR: recognition accuracy › recognizes a sideways-scanned page once rotation is corrected
+[7/392] [chromium-ocr] › e2e\ocr.spec.ts:98:7 › OCR: recognition accuracy › supports a second verified language (Spanish)
+[8/392] [chromium-ocr] › e2e\ocr.spec.ts:113:7 › OCR: recognition accuracy › processes every page of a multi-page scanned PDF
+[9/392] [chromium-ocr] › e2e\ocr.spec.ts:126:7 › OCR: searchable PDF export › exported PDF is reopenable, phrase-searchable, and keeps the original scan visible
+[chromium-ocr] › e2e\ocr.spec.ts:126:7 › OCR: searchable PDF export › exported PDF is reopenable, phrase-searchable, and keeps the original scan visible
+Warning: UnknownErrorException: Ensure that the `standardFontDataUrl` API parameter is provided.
+
+[10/392] [chromium-ocr] › e2e\ocr.spec.ts:160:7 › OCR: searchable PDF export › extracted text can be downloaded as a .txt file
+[11/392] [chromium-ocr] › e2e\ocr.spec.ts:181:7 › OCR: cancel and error handling › cancelling mid-batch keeps already-recognized pages instead of discarding everything
+[12/392] [chromium-ocr] › e2e\ocr.spec.ts:196:7 › OCR: cancel and error handling › a corrupted PDF fails safely with a friendly message
+[13/392] [chromium-ocr] › e2e\ocr.spec.ts:205:7 › OCR: cancel and error handling › a zero-byte file is rejected immediately
+[14/392] [chromium-ocr] › e2e\ocr.spec.ts:211:7 › OCR: cancel and error handling › an unsupported file type shows a friendly error
+[15/392] [chromium-ocr] › e2e\ocr.spec.ts:219:7 › OCR: network privacy › only same-origin static OCR assets are fetched — never document content
+[16/392] [chromium-ocr] › e2e\ocr.spec.ts:245:7 › OCR: network privacy › OCR is never loaded on the homepage or other tool pages
+[17/392] [chromium-ocr] › e2e\pdf-editor-ocr.spec.ts:140:7 › PDF Editor: OCR integration › recognizes a scanned page inside a mixed document and lets you correct the text
+[18/392] [chromium-ocr] › e2e\pdf-editor-ocr.spec.ts:161:7 › PDF Editor: OCR text edit round trip › corrects exactly one recognized word — original text carries only that word, not the whole line
+[chromium-ocr] › e2e\pdf-editor-ocr.spec.ts:161:7 › PDF Editor: OCR text edit round trip › corrects exactly one recognized word — original text carries only that word, not the whole line
+Warning: UnknownErrorException: Ensure that the `standardFontDataUrl` API parameter is provided.
+
+Warning: UnknownErrorException: Ensure that the `standardFontDataUrl` API parameter is provided.
+
+[19/392] [chromium-ocr] › e2e\pdf-editor-ocr.spec.ts:211:7 › PDF Editor: OCR text edit round trip › no-collateral-change: editing one word leaves the rest of the scanned page pixel-identical
+[chromium-ocr] › e2e\pdf-editor-ocr.spec.ts:211:7 › PDF Editor: OCR text edit round trip › no-collateral-change: editing one word leaves the rest of the scanned page pixel-identical
+Warning: UnknownErrorException: Ensure that the `standardFontDataUrl` API parameter is provided.
+
+[20/392] [chromium-ocr] › e2e\pdf-editor-ocr.spec.ts:275:7 › PDF Editor: OCR visual-fidelity fixtures › B. uniform gray scan background: patch matches the gray, doesn't punch a white hole
+[chromium-ocr] › e2e\pdf-editor-ocr.spec.ts:275:7 › PDF Editor: OCR visual-fidelity fixtures › B. uniform gray scan background: patch matches the gray, doesn't punch a white hole
+Warning: UnknownErrorException: Ensure that the `standardFontDataUrl` API parameter is provided.
+
+[21/392] [chromium-ocr] › e2e\pdf-editor-ocr.spec.ts:283:7 › PDF Editor: OCR visual-fidelity fixtures › C+D. colored form background with table border lines close to the value
+[chromium-ocr] › e2e\pdf-editor-ocr.spec.ts:283:7 › PDF Editor: OCR visual-fidelity fixtures › C+D. colored form background with table border lines close to the value
+Warning: UnknownErrorException: Ensure that the `standardFontDataUrl` API parameter is provided.
+
+[22/392] [chromium-ocr] › e2e\pdf-editor-ocr.spec.ts:287:7 › PDF Editor: OCR visual-fidelity fixtures › screenshot acceptance: degree -> graduate on a textured serif scan renders in a matching style, not a generic sans-serif box
+[chromium-ocr] › e2e\pdf-editor-ocr.spec.ts:287:7 › PDF Editor: OCR visual-fidelity fixtures › screenshot acceptance: degree -> graduate on a textured serif scan renders in a matching style, not a generic sans-serif box
+Warning: UnknownErrorException: Ensure that the `standardFontDataUrl` API parameter is provided.
+
+style stats — replacement: {
+  inkDensity: 0.1086577130283026,
+  avgStrokeWidthPx: 4.887372013651877,
+  edgeSoftness: 0.11000621504039776
+} neighbor: {
+  inkDensity: 0.11384669111227519,
+  avgStrokeWidthPx: 4.591549295774648,
+  edgeSoftness: 0.17153748411689962
+}
+
+[23/392] [chromium-ocr] › e2e\pdf-editor-ocr.spec.ts:388:7 › PDF Editor: OCR visual-fidelity fixtures › unsafe fallback: a word overlapping a ruling line refuses to auto-erase and requires an explicit manual overlay
+[chromium-ocr] › e2e\pdf-editor-ocr.spec.ts:388:7 › PDF Editor: OCR visual-fidelity fixtures › unsafe fallback: a word overlapping a ruling line refuses to auto-erase and requires an explicit manual overlay
+Warning: UnknownErrorException: Ensure that the `standardFontDataUrl` API parameter is provided.
+
+[24/392] [chromium-ocr] › e2e\pdf-editor-ocr.spec.ts:426:7 › PDF Editor: OCR visual-fidelity fixtures › micro-edit acceptance: only the changed date digit is patched, not the whole date field
+[chromium-ocr] › e2e\pdf-editor-ocr.spec.ts:426:7 › PDF Editor: OCR visual-fidelity fixtures › micro-edit acceptance: only the changed date digit is patched, not the whole date field
+Warning: UnknownErrorException: Ensure that the `standardFontDataUrl` API parameter is provided.
+
+Warning: UnknownErrorException: Ensure that the `standardFontDataUrl` API parameter is provided.
+
+[25/392] [chromium-ocr] › e2e\pdf-editor-ocr.spec.ts:519:7 › PDF Editor: OCR visual-fidelity fixtures › regression: selection handles on a freshly-saved micro-edit don't cover the edited glyph
+[26/392] [chromium-ocr] › e2e\pdf-editor-ocr.spec.ts:567:7 › PDF Editor: OCR privacy regression › recognizing and correcting a scanned page, then exporting, never sends document content or scan pixels off-device
+[27/392] [mobile-chromium-ocr] › e2e\ocr.spec.ts:14:7 › OCR: page classification › flags scanned pages, leaves native pages alone, and pre-selects only what needs OCR
+[28/392] [mobile-chromium-ocr] › e2e\ocr.spec.ts:28:7 › OCR: page classification › a fully native PDF is left alone by default but can still be OCR'd on request
+[29/392] [mobile-chromium-ocr] › e2e\ocr.spec.ts:37:7 › OCR: recognition accuracy › recognizes a clean scan with high confidence and exact text
+[30/392] [mobile-chromium-ocr] › e2e\ocr.spec.ts:54:7 › OCR: recognition accuracy › recognizes currency, account numbers, and dates accurately
+[31/392] [mobile-chromium-ocr] › e2e\ocr.spec.ts:69:7 › OCR: recognition accuracy › recognizes names, emails, and phone numbers on a form-like scan
+[32/392] [mobile-chromium-ocr] › e2e\ocr.spec.ts:83:7 › OCR: recognition accuracy › recognizes a sideways-scanned page once rotation is corrected
+[33/392] [mobile-chromium-ocr] › e2e\ocr.spec.ts:98:7 › OCR: recognition accuracy › supports a second verified language (Spanish)
+[34/392] [mobile-chromium-ocr] › e2e\ocr.spec.ts:113:7 › OCR: recognition accuracy › processes every page of a multi-page scanned PDF
+[35/392] [mobile-chromium-ocr] › e2e\ocr.spec.ts:126:7 › OCR: searchable PDF export › exported PDF is reopenable, phrase-searchable, and keeps the original scan visible
+[mobile-chromium-ocr] › e2e\ocr.spec.ts:126:7 › OCR: searchable PDF export › exported PDF is reopenable, phrase-searchable, and keeps the original scan visible
+Warning: UnknownErrorException: Ensure that the `standardFontDataUrl` API parameter is provided.
+
+[36/392] [mobile-chromium-ocr] › e2e\ocr.spec.ts:160:7 › OCR: searchable PDF export › extracted text can be downloaded as a .txt file
+[37/392] [mobile-chromium-ocr] › e2e\ocr.spec.ts:181:7 › OCR: cancel and error handling › cancelling mid-batch keeps already-recognized pages instead of discarding everything
+[38/392] [mobile-chromium-ocr] › e2e\ocr.spec.ts:196:7 › OCR: cancel and error handling › a corrupted PDF fails safely with a friendly message
+[39/392] [mobile-chromium-ocr] › e2e\ocr.spec.ts:205:7 › OCR: cancel and error handling › a zero-byte file is rejected immediately
+[40/392] [mobile-chromium-ocr] › e2e\ocr.spec.ts:211:7 › OCR: cancel and error handling › an unsupported file type shows a friendly error
+[41/392] [mobile-chromium-ocr] › e2e\ocr.spec.ts:219:7 › OCR: network privacy › only same-origin static OCR assets are fetched — never document content
+[42/392] [mobile-chromium-ocr] › e2e\ocr.spec.ts:245:7 › OCR: network privacy › OCR is never loaded on the homepage or other tool pages
+[43/392] [mobile-chromium-ocr] › e2e\pdf-editor-ocr.spec.ts:140:7 › PDF Editor: OCR integration › recognizes a scanned page inside a mixed document and lets you correct the text
+[44/392] [mobile-chromium-ocr] › e2e\pdf-editor-ocr.spec.ts:161:7 › PDF Editor: OCR text edit round trip › corrects exactly one recognized word — original text carries only that word, not the whole line
+[mobile-chromium-ocr] › e2e\pdf-editor-ocr.spec.ts:161:7 › PDF Editor: OCR text edit round trip › corrects exactly one recognized word — original text carries only that word, not the whole line
+Warning: UnknownErrorException: Ensure that the `standardFontDataUrl` API parameter is provided.
+
+Warning: UnknownErrorException: Ensure that the `standardFontDataUrl` API parameter is provided.
+
+[45/392] [mobile-chromium-ocr] › e2e\pdf-editor-ocr.spec.ts:211:7 › PDF Editor: OCR text edit round trip › no-collateral-change: editing one word leaves the rest of the scanned page pixel-identical
+[mobile-chromium-ocr] › e2e\pdf-editor-ocr.spec.ts:211:7 › PDF Editor: OCR text edit round trip › no-collateral-change: editing one word leaves the rest of the scanned page pixel-identical
+Warning: UnknownErrorException: Ensure that the `standardFontDataUrl` API parameter is provided.
+
+[46/392] [mobile-chromium-ocr] › e2e\pdf-editor-ocr.spec.ts:275:7 › PDF Editor: OCR visual-fidelity fixtures › B. uniform gray scan background: patch matches the gray, doesn't punch a white hole
+[mobile-chromium-ocr] › e2e\pdf-editor-ocr.spec.ts:275:7 › PDF Editor: OCR visual-fidelity fixtures › B. uniform gray scan background: patch matches the gray, doesn't punch a white hole
+Warning: UnknownErrorException: Ensure that the `standardFontDataUrl` API parameter is provided.
+
+[47/392] [mobile-chromium-ocr] › e2e\pdf-editor-ocr.spec.ts:283:7 › PDF Editor: OCR visual-fidelity fixtures › C+D. colored form background with table border lines close to the value
+[mobile-chromium-ocr] › e2e\pdf-editor-ocr.spec.ts:283:7 › PDF Editor: OCR visual-fidelity fixtures › C+D. colored form background with table border lines close to the value
+Warning: UnknownErrorException: Ensure that the `standardFontDataUrl` API parameter is provided.
+
+[48/392] [mobile-chromium-ocr] › e2e\pdf-editor-ocr.spec.ts:287:7 › PDF Editor: OCR visual-fidelity fixtures › screenshot acceptance: degree -> graduate on a textured serif scan renders in a matching style, not a generic sans-serif box
+[mobile-chromium-ocr] › e2e\pdf-editor-ocr.spec.ts:287:7 › PDF Editor: OCR visual-fidelity fixtures › screenshot acceptance: degree -> graduate on a textured serif scan renders in a matching style, not a generic sans-serif box
+Warning: UnknownErrorException: Ensure that the `standardFontDataUrl` API parameter is provided.
+
+style stats — replacement: {
+  inkDensity: 0.10759541695121026,
+  avgStrokeWidthPx: 4.8561643835616435,
+  edgeSoftness: 0.12630930375847196
+} neighbor: {
+  inkDensity: 0.11384669111227519,
+  avgStrokeWidthPx: 4.591549295774648,
+  edgeSoftness: 0.17153748411689962
+}
+
+[49/392] [mobile-chromium-ocr] › e2e\pdf-editor-ocr.spec.ts:388:7 › PDF Editor: OCR visual-fidelity fixtures › unsafe fallback: a word overlapping a ruling line refuses to auto-erase and requires an explicit manual overlay
+[mobile-chromium-ocr] › e2e\pdf-editor-ocr.spec.ts:388:7 › PDF Editor: OCR visual-fidelity fixtures › unsafe fallback: a word overlapping a ruling line refuses to auto-erase and requires an explicit manual overlay
+Warning: UnknownErrorException: Ensure that the `standardFontDataUrl` API parameter is provided.
+
+[50/392] [mobile-chromium-ocr] › e2e\pdf-editor-ocr.spec.ts:426:7 › PDF Editor: OCR visual-fidelity fixtures › micro-edit acceptance: only the changed date digit is patched, not the whole date field
+[mobile-chromium-ocr] › e2e\pdf-editor-ocr.spec.ts:426:7 › PDF Editor: OCR visual-fidelity fixtures › micro-edit acceptance: only the changed date digit is patched, not the whole date field
+Warning: UnknownErrorException: Ensure that the `standardFontDataUrl` API parameter is provided.
+
+Warning: UnknownErrorException: Ensure that the `standardFontDataUrl` API parameter is provided.
+
+[51/392] [mobile-chromium-ocr] › e2e\pdf-editor-ocr.spec.ts:519:7 › PDF Editor: OCR visual-fidelity fixtures › regression: selection handles on a freshly-saved micro-edit don't cover the edited glyph
+[52/392] [mobile-chromium-ocr] › e2e\pdf-editor-ocr.spec.ts:567:7 › PDF Editor: OCR privacy regression › recognizing and correcting a scanned page, then exporting, never sends document content or scan pixels off-device
+[53/392] [chromium] › e2e\archive-roundtrip.spec.ts:9:7 › Archive round-trip integrity › files zipped then extracted keep their names and exact byte content
+[54/392] [chromium] › e2e\data-tools.spec.ts:4:7 › Data conversion workflow › converts CSV input to JSON output
+[55/392] [chromium] › e2e\data-tools.spec.ts:16:7 › Data conversion workflow › JSON formatter pretty-prints and reports invalid JSON
+[56/392] [chromium] › e2e\data-tools.spec.ts:29:7 › Data conversion workflow › word counter updates live as you type
+[57/392] [chromium] › e2e\data-tools.spec.ts:35:7 › Data conversion workflow › UUID generator produces well-formed UUIDs
+[58/392] [chromium] › e2e\data-tools.spec.ts:42:7 › Data conversion workflow › CSV to JSON handles quoted commas, escaped quotes, and embedded newlines
+[59/392] [chromium] › e2e\data-tools.spec.ts:77:9 › Text and document converters: whitespace-only input counts as empty › /document/txt-to-pdf: spaces, tabs and blank lines show the empty-input message and produce nothing
+[60/392] [chromium] › e2e\data-tools.spec.ts:77:9 › Text and document converters: whitespace-only input counts as empty › /document/markdown-to-pdf: spaces, tabs and blank lines show the empty-input message and produce nothing
+[61/392] [chromium] › e2e\data-tools.spec.ts:77:9 › Text and document converters: whitespace-only input counts as empty › /document/txt-to-html: spaces, tabs and blank lines show the empty-input message and produce nothing
+[62/392] [chromium] › e2e\data-tools.spec.ts:77:9 › Text and document converters: whitespace-only input counts as empty › /document/markdown-to-html: spaces, tabs and blank lines show the empty-input message and produce nothing
+[63/392] [chromium] › e2e\data-tools.spec.ts:77:9 › Text and document converters: whitespace-only input counts as empty › /data/json-formatter: spaces, tabs and blank lines show the empty-input message and produce nothing
+[64/392] [chromium] › e2e\data-tools.spec.ts:77:9 › Text and document converters: whitespace-only input counts as empty › /data/csv-to-json: spaces, tabs and blank lines show the empty-input message and produce nothing
+[65/392] [chromium] › e2e\data-tools.spec.ts:77:9 › Text and document converters: whitespace-only input counts as empty › /data/json-to-csv: spaces, tabs and blank lines show the empty-input message and produce nothing
+[66/392] [chromium] › e2e\data-tools.spec.ts:77:9 › Text and document converters: whitespace-only input counts as empty › /data/xml-formatter: spaces, tabs and blank lines show the empty-input message and produce nothing
+[67/392] [chromium] › e2e\data-tools.spec.ts:77:9 › Text and document converters: whitespace-only input counts as empty › /data/base64: spaces, tabs and blank lines show the empty-input message and produce nothing
+[68/392] [chromium] › e2e\data-tools.spec.ts:77:9 › Text and document converters: whitespace-only input counts as empty › /data/url-encode-decode: spaces, tabs and blank lines show the empty-input message and produce nothing
+[69/392] [chromium] › e2e\data-tools.spec.ts:77:9 › Text and document converters: whitespace-only input counts as empty › /data/case-converter: spaces, tabs and blank lines show the empty-input message and produce nothing
+[70/392] [chromium] › e2e\data-tools.spec.ts:89:7 › Text and document converters: whitespace-only input counts as empty › real content still converts after an empty attempt
+[71/392] [chromium] › e2e\homepage.spec.ts:4:7 › Homepage › loads with hero, drop zone, and no console errors
+[72/392] [chromium] › e2e\homepage.spec.ts:20:7 › Homepage › shows popular tools, categories, and FAQ sections
+[73/392] [chromium] › e2e\homepage.spec.ts:29:7 › Homepage › has no pricing, login, or signup CTAs
+[74/392] [chromium] › e2e\homepage.spec.ts:36:7 › Homepage › footer includes privacy and terms links
+[75/392] [chromium] › e2e\image-convert.spec.ts:9:7 › Image conversion workflow › converts a JPG to a valid PNG
+[76/392] [chromium] › e2e\image-convert.spec.ts:28:7 › Image conversion workflow › rejects a file type the tool doesn't accept
+[77/392] [chromium] › e2e\navigation.spec.ts:4:7 › Navigation › desktop nav links go to the right tool pages
+[78/392] [chromium] › e2e\navigation.spec.ts:12:7 › Navigation › mobile menu opens and navigates
+[79/392] [chromium] › e2e\navigation.spec.ts:22:7 › Navigation › tool search finds a known tool
+[80/392] [chromium] › e2e\navigation.spec.ts:28:7 › Navigation › tool search shows an empty state for nonsense queries
+[81/392] [chromium] › e2e\navigation.spec.ts:34:7 › Navigation › tool status directory lists every tool with a status
+[82/392] [chromium] › e2e\pdf-compress-flate-scan.spec.ts:47:5 › a Flate-encoded scan really shrinks toward a real target, with exact byte counts shown
+[83/392] [chromium] › e2e\pdf-compress-flate-scan.spec.ts:75:5 › a target already met by the free lossless pass is honest: no inflated saving is claimed
+[84/392] [chromium] › e2e\pdf-compress-honesty.spec.ts:8:7 › Target-size PDF compression is honest about what it actually achieved › an already-small PDF: Target reached is shown, and any claimed reduction is real
+[85/392] [chromium] › e2e\pdf-compress-honesty.spec.ts:30:7 › Target-size PDF compression is honest about what it actually achieved › an image-dominated PDF: the search stops at a rung whose real output actually fits the target
+[86/392] [chromium] › e2e\pdf-compress-honesty.spec.ts:56:7 › Target-size PDF compression is honest about what it actually achieved › an impossible target never fakes success: it is labelled Closest safe result and the file still opens
+[87/392] [chromium] › e2e\pdf-editor-advanced.spec.ts:64:7 › PDF Editor: signature › draws a signature, places and resizes it, and it renders at the intended location after export
+[chromium] › e2e\pdf-editor-advanced.spec.ts:64:7 › PDF Editor: signature › draws a signature, places and resizes it, and it renders at the intended location after export
+Warning: UnknownErrorException: Ensure that the `standardFontDataUrl` API parameter is provided.
+
+Warning: UnknownErrorException: Ensure that the `standardFontDataUrl` API parameter is provided.
+
+[88/392] [chromium] › e2e\pdf-editor-advanced.spec.ts:145:7 › PDF Editor: image placement › inserts a real PNG image, preserves aspect ratio, and it renders at the placed location
+[chromium] › e2e\pdf-editor-advanced.spec.ts:145:7 › PDF Editor: image placement › inserts a real PNG image, preserves aspect ratio, and it renders at the placed location
+Warning: UnknownErrorException: Ensure that the `standardFontDataUrl` API parameter is provided.
+
+[89/392] [chromium] › e2e\pdf-editor-advanced.spec.ts:208:7 › PDF Editor: annotations › highlight fills the selected region with a translucent color
+[chromium] › e2e\pdf-editor-advanced.spec.ts:208:7 › PDF Editor: annotations › highlight fills the selected region with a translucent color
+Warning: UnknownErrorException: Ensure that the `standardFontDataUrl` API parameter is provided.
+
+[90/392] [chromium] › e2e\pdf-editor-advanced.spec.ts:227:7 › PDF Editor: annotations › underline draws a thin line at the bottom of the region, not a fill
+[chromium] › e2e\pdf-editor-advanced.spec.ts:227:7 › PDF Editor: annotations › underline draws a thin line at the bottom of the region, not a fill
+Warning: UnknownErrorException: Ensure that the `standardFontDataUrl` API parameter is provided.
+
+[91/392] [chromium] › e2e\pdf-editor-advanced.spec.ts:244:7 › PDF Editor: annotations › strikethrough draws a thin line through the middle of the region
+[chromium] › e2e\pdf-editor-advanced.spec.ts:244:7 › PDF Editor: annotations › strikethrough draws a thin line through the middle of the region
+Warning: UnknownErrorException: Ensure that the `standardFontDataUrl` API parameter is provided.
+
+[92/392] [chromium] › e2e\pdf-editor-advanced.spec.ts:265:7 › PDF Editor: form fill › detects AcroForm fields, edits them, and the values persist in the exported PDF
+[93/392] [chromium] › e2e\pdf-editor-advanced.spec.ts:293:7 › PDF Editor: crop › applies a crop box to the current page and it's reflected in the exported PDF's page box
+[94/392] [chromium] › e2e\pdf-editor-advanced.spec.ts:339:7 › PDF Editor: header/footer › stamps header/footer text with a page-number token onto every page
+[chromium] › e2e\pdf-editor-advanced.spec.ts:339:7 › PDF Editor: header/footer › stamps header/footer text with a page-number token onto every page
+Warning: UnknownErrorException: Ensure that the `standardFontDataUrl` API parameter is provided.
+
+Warning: UnknownErrorException: Ensure that the `standardFontDataUrl` API parameter is provided.
+
+Warning: UnknownErrorException: Ensure that the `standardFontDataUrl` API parameter is provided.
+
+Warning: UnknownErrorException: Ensure that the `standardFontDataUrl` API parameter is provided.
+
+[95/392] [chromium] › e2e\pdf-editor-interaction.spec.ts:64:7 › PDF Editor: drag previews follow the pointer › the live preview box sits exactly under the pointer while dragging (not at the page's top-left)
+[96/392] [chromium] › e2e\pdf-editor-interaction.spec.ts:86:7 › PDF Editor: drag previews follow the pointer › a drag started on top of the page's text still draws (the text hit-target doesn't swallow it)
+[97/392] [chromium] › e2e\pdf-editor-interaction.spec.ts:95:7 › PDF Editor: drag previews follow the pointer › placement is exact (0px) at different zooms, when scrolled, and on a rotated page
+[98/392] [chromium] › e2e\pdf-editor-interaction.spec.ts:123:7 › PDF Editor: tools stay armed for repeated use › highlight, underline and strikethrough each work several times in a row without reselecting
+[99/392] [chromium] › e2e\pdf-editor-interaction.spec.ts:134:7 › PDF Editor: tools stay armed for repeated use › Escape leaves the tool; a stray click without dragging doesn't create anything or drop the tool
+[100/392] [chromium] › e2e\pdf-editor-interaction.spec.ts:147:7 › PDF Editor: freehand drawing › the stroke is visible while the pointer is still down, and the tool stays armed
+[101/392] [chromium] › e2e\pdf-editor-interaction.spec.ts:166:7 › PDF Editor: text is edited directly on the page › place text, type a sentence continuously, edit inside it, and it exports where it shows
+[chromium] › e2e\pdf-editor-interaction.spec.ts:166:7 › PDF Editor: text is edited directly on the page › place text, type a sentence continuously, edit inside it, and it exports where it shows
+Warning: UnknownErrorException: Ensure that the `standardFontDataUrl` API parameter is provided.
+
+Warning: UnknownErrorException: Ensure that the `standardFontDataUrl` API parameter is provided.
+
+[102/392] [chromium] › e2e\pdf-editor-interaction.spec.ts:201:7 › PDF Editor: text is edited directly on the page › clicking an already-selected text box (or double-clicking) re-enters editing; typing is one undo step
+[103/392] [chromium] › e2e\pdf-editor-interaction.spec.ts:218:7 › PDF Editor: text is edited directly on the page › the selected text's color and size are edited from the panel, and Delete removes it
+[104/392] [chromium] › e2e\pdf-editor-interaction.spec.ts:240:7 › PDF Editor: text is edited directly on the page › typing into the properties-panel text box isn't cut off after one character
+[105/392] [chromium] › e2e\pdf-editor-interaction.spec.ts:259:7 › PDF Editor: shapes, images, crop, search, pages › a line dragged down-right exports down-right, and matches what's on screen
+[chromium] › e2e\pdf-editor-interaction.spec.ts:259:7 › PDF Editor: shapes, images, crop, search, pages › a line dragged down-right exports down-right, and matches what's on screen
+Warning: UnknownErrorException: Ensure that the `standardFontDataUrl` API parameter is provided.
+
+[106/392] [chromium] › e2e\pdf-editor-interaction.spec.ts:287:7 › PDF Editor: shapes, images, crop, search, pages › a resized picture keeps its proportions (screen and export agree)
+[107/392] [chromium] › e2e\pdf-editor-interaction.spec.ts:307:7 › PDF Editor: shapes, images, crop, search, pages › a crop area can be adjusted by its handles, is kept on the page, and applied from the action bar
+[108/392] [chromium] › e2e\pdf-editor-interaction.spec.ts:334:7 › PDF Editor: shapes, images, crop, search, pages › search covers every page from the start and Next/Prev jump to the match
+[109/392] [chromium] › e2e\pdf-editor-interaction.spec.ts:349:7 › PDF Editor: shapes, images, crop, search, pages › pages can be moved with the Move up/down buttons (works without dragging)
+[chromium] › e2e\pdf-editor-interaction.spec.ts:349:7 › PDF Editor: shapes, images, crop, search, pages › pages can be moved with the Move up/down buttons (works without dragging)
+Warning: UnknownErrorException: Ensure that the `standardFontDataUrl` API parameter is provided.
+
+[110/392] [chromium] › e2e\pdf-editor-interaction.spec.ts:360:7 › PDF Editor: shapes, images, crop, search, pages › Whiteout shows the not-secure-redaction warning while it's the active tool
+[111/392] [chromium] › e2e\pdf-editor-interaction.spec.ts:370:7 › PDF Editor: added text on a rotated page › keeps its layout (one line, real width) and turns with the page instead of wrapping into a sliver
+[112/392] [chromium] › e2e\pdf-editor-interaction.spec.ts:394:7 › PDF Editor: underline and strikethrough as a flat drag › dragging straight along a line (almost no height) still creates the underline / strikethrough
+[113/392] [chromium] › e2e\pdf-editor-interaction.spec.ts:414:7 › PDF Editor: typing right after placing text › the first character typed immediately after clicking is not lost
+[114/392] [chromium] › e2e\pdf-editor-interaction.spec.ts:423:7 › PDF Editor: typing right after placing text › typing across a pause (e.g. thinking mid-sentence) never loses what was already typed
+[115/392] [chromium] › e2e\pdf-editor-interaction.spec.ts:441:7 › PDF Editor: pages that carry a CropBox › the page is laid out on its visible (cropped) area, and the crop survives a round trip
+[116/392] [chromium] › e2e\pdf-editor-interaction.spec.ts:461:7 › PDF Editor on a phone › opens fit to the screen, has finger-sized controls, and both drawers can be closed and used
+[117/392] [chromium] › e2e\pdf-editor-interaction.spec.ts:490:7 › PDF Editor: a page wider than its viewport › the page keeps its size (and its drawing overlay matches its canvas) and scrolls instead of being squeezed
+[118/392] [chromium] › e2e\pdf-editor-interaction.spec.ts:537:7 › PDF Editor on a phone: touch input › tap places text and typing works; highlight/underline stay armed; strokes render live; crop applies
+[119/392] [chromium] › e2e\pdf-editor-qa.spec.ts:27:7 › PDF Editor: large document smoke test › handles a 25-page document: thumbnails, navigation, zoom, an annotation, and export
+[120/392] [chromium] › e2e\pdf-editor-qa.spec.ts:75:7 › PDF Editor: mobile editing checklist › every core editing action works on a mobile viewport
+[121/392] [chromium] › e2e\pdf-editor-qa.spec.ts:156:9 › PDF Editor: responsive QA matrix › no horizontal overflow and core controls are reachable at 390x844
+[122/392] [chromium] › e2e\pdf-editor-qa.spec.ts:156:9 › PDF Editor: responsive QA matrix › no horizontal overflow and core controls are reachable at 768x1024
+[123/392] [chromium] › e2e\pdf-editor-qa.spec.ts:156:9 › PDF Editor: responsive QA matrix › no horizontal overflow and core controls are reachable at 1366x768
+[124/392] [chromium] › e2e\pdf-editor-qa.spec.ts:156:9 › PDF Editor: responsive QA matrix › no horizontal overflow and core controls are reachable at 1440x900
+[125/392] [chromium] › e2e\pdf-editor-qa.spec.ts:156:9 › PDF Editor: responsive QA matrix › no horizontal overflow and core controls are reachable at 1920x1080
+[126/392] [chromium] › e2e\pdf-editor-qa.spec.ts:156:9 › PDF Editor: responsive QA matrix › no horizontal overflow and core controls are reachable at 2560x1440
+[127/392] [chromium] › e2e\pdf-editor-qa.spec.ts:156:9 › PDF Editor: responsive QA matrix › no horizontal overflow and core controls are reachable at 3440x1440
+[128/392] [chromium] › e2e\pdf-editor-qa.spec.ts:186:7 › PDF Editor: privacy regression (signature / image / form / crop / header-footer) › no document bytes, signature/image contents, or third-party requests leave the browser across these flows
+[129/392] [chromium] › e2e\pdf-editor.spec.ts:49:7 › PDF Editor: native text editing › corrects native text, exports, and the correction is verifiable in the reopened PDF
+[chromium] › e2e\pdf-editor.spec.ts:49:7 › PDF Editor: native text editing › corrects native text, exports, and the correction is verifiable in the reopened PDF
+Warning: UnknownErrorException: Ensure that the `standardFontDataUrl` API parameter is provided.
+
+Warning: UnknownErrorException: Ensure that the `standardFontDataUrl` API parameter is provided.
+
+[130/392] [chromium] › e2e\pdf-editor.spec.ts:71:7 › PDF Editor: add text / shapes / annotations › adds a text box and it appears at export in the reopened PDF
+[chromium] › e2e\pdf-editor.spec.ts:71:7 › PDF Editor: add text / shapes / annotations › adds a text box and it appears at export in the reopened PDF
+Warning: UnknownErrorException: Ensure that the `standardFontDataUrl` API parameter is provided.
+
+Warning: UnknownErrorException: Ensure that the `standardFontDataUrl` API parameter is provided.
+
+[131/392] [chromium] › e2e\pdf-editor.spec.ts:83:7 › PDF Editor: add text / shapes / annotations › draws a whiteout box and the exported page renders a white-filled region
+[chromium] › e2e\pdf-editor.spec.ts:83:7 › PDF Editor: add text / shapes / annotations › draws a whiteout box and the exported page renders a white-filled region
+Warning: UnknownErrorException: Ensure that the `standardFontDataUrl` API parameter is provided.
+
+[132/392] [chromium] › e2e\pdf-editor.spec.ts:107:7 › PDF Editor: add text / shapes / annotations › draws a rectangle shape that survives export
+[133/392] [chromium] › e2e\pdf-editor.spec.ts:132:7 › PDF Editor: page management › rotate, duplicate, and delete pages, then export and verify the result
+[134/392] [chromium] › e2e\pdf-editor.spec.ts:154:7 › PDF Editor: page management › inserts pages from another PDF after the current page
+[135/392] [chromium] › e2e\pdf-editor.spec.ts:173:7 › PDF Editor: undo/redo › Ctrl+Z undoes an added text object and Ctrl+Shift+Z redoes it
+[136/392] [chromium] › e2e\pdf-editor.spec.ts:199:7 › PDF Editor: OCR integration › OCR is never fetched until recognition is explicitly requested
+[137/392] [chromium] › e2e\pdf-editor.spec.ts:215:7 › PDF Editor: privacy / network › no document content is ever sent off-device while editing and exporting
+[138/392] [chromium] › e2e\pdf-editor.spec.ts:236:7 › PDF Editor: security / error handling › a corrupted PDF fails safely with a friendly message
+[139/392] [chromium] › e2e\pdf-editor.spec.ts:245:7 › PDF Editor: security / error handling › a zero-byte file is rejected immediately
+[140/392] [chromium] › e2e\pdf-editor.spec.ts:251:7 › PDF Editor: security / error handling › an unsupported file type shows a friendly error
+[141/392] [chromium] › e2e\pdf-editor.spec.ts:259:7 › PDF Editor: responsive / mobile › no horizontal overflow and page panels are reachable via toggle buttons at 390px width
+[142/392] [chromium] › e2e\pdf-merge.spec.ts:8:7 › PDF merge workflow › merges two PDFs and produces a valid combined PDF
+[143/392] [chromium] › e2e\pdf-merge.spec.ts:36:7 › PDF merge workflow › shows a friendly error state and allows retry when processing fails
+[144/392] [chromium] › e2e\quality-acceptance.spec.ts:61:7 › PDF merge / reorder › merge: files can be reordered in the list, and the output follows that order
+[chromium] › e2e\quality-acceptance.spec.ts:61:7 › PDF merge / reorder › merge: files can be reordered in the list, and the output follows that order
+Warning: UnknownErrorException: Ensure that the `standardFontDataUrl` API parameter is provided.
+
+Warning: UnknownErrorException: Ensure that the `standardFontDataUrl` API parameter is provided.
+
+Warning: UnknownErrorException: Ensure that the `standardFontDataUrl` API parameter is provided.
+
+Warning: UnknownErrorException: Ensure that the `standardFontDataUrl` API parameter is provided.
+
+[145/392] [chromium] › e2e\quality-acceptance.spec.ts:72:7 › PDF merge / reorder › reorder: pages show thumbnails, and drag-and-drop plus an arrow give the exported order
+[chromium] › e2e\quality-acceptance.spec.ts:72:7 › PDF merge / reorder › reorder: pages show thumbnails, and drag-and-drop plus an arrow give the exported order
+Warning: UnknownErrorException: Ensure that the `standardFontDataUrl` API parameter is provided.
+
+Warning: UnknownErrorException: Ensure that the `standardFontDataUrl` API parameter is provided.
+
+[146/392] [chromium] › e2e\quality-acceptance.spec.ts:83:7 › PDF merge / reorder › reorder: arrows are labelled per page and move that page
+[chromium] › e2e\quality-acceptance.spec.ts:83:7 › PDF merge / reorder › reorder: arrows are labelled per page and move that page
+Warning: UnknownErrorException: Ensure that the `standardFontDataUrl` API parameter is provided.
+
+Warning: UnknownErrorException: Ensure that the `standardFontDataUrl` API parameter is provided.
+
+[147/392] [chromium] › e2e\quality-acceptance.spec.ts:94:7 › PDF pages keep their displayed orientation › PDF to images: a page stored rotated 90 degrees comes out landscape
+[148/392] [chromium] › e2e\quality-acceptance.spec.ts:108:7 › PDF pages keep their displayed orientation › page numbers land at the displayed bottom of a rotated page, not its stored bottom
+[chromium] › e2e\quality-acceptance.spec.ts:108:7 › PDF pages keep their displayed orientation › page numbers land at the displayed bottom of a rotated page, not its stored bottom
+Warning: UnknownErrorException: Ensure that the `standardFontDataUrl` API parameter is provided.
+
+Warning: UnknownErrorException: Ensure that the `standardFontDataUrl` API parameter is provided.
+
+Warning: UnknownErrorException: Ensure that the `standardFontDataUrl` API parameter is provided.
+
+[149/392] [chromium] › e2e\quality-acceptance.spec.ts:125:7 › PDF pages keep their displayed orientation › watermark text the PDF fonts cannot draw gives a plain-language message, not an encoding error
+[150/392] [chromium] › e2e\quality-acceptance.spec.ts:135:7 › PDF compress (target-size) tells the truth › a target the free lossless pass already meets merges duplicate images and reports real sizes
+[151/392] [chromium] › e2e\quality-acceptance.spec.ts:148:7 › PDF compress (target-size) tells the truth › an image-only scan: a loose target needs no quality loss, a tight one walks the ladder and shrinks a lot
+[152/392] [chromium] › e2e\quality-acceptance.spec.ts:173:7 › Image tools protect transparency and say what they did › compress (target-size): a transparent PNG is automatically kept in a format that preserves transparency
+[153/392] [chromium] › e2e\quality-acceptance.spec.ts:182:7 › Image tools protect transparency and say what they did › compress (target-size): a very tight target on a transparent image still keeps transparency, and says it converted format
+[154/392] [chromium] › e2e\quality-acceptance.spec.ts:194:7 › Image tools protect transparency and say what they did › compress (target-size): an already-small JPG under the target comes back unchanged instead of possibly larger
+[155/392] [chromium] › e2e\quality-acceptance.spec.ts:203:7 › Image tools protect transparency and say what they did › resize, rotate and crop keep a PNG a PNG by default
+[156/392] [chromium] › e2e\quality-acceptance.spec.ts:210:7 › Image tools protect transparency and say what they did › crop: dragging on the preview draws the box under the pointer and crops exactly that region
+[157/392] [chromium] › e2e\quality-acceptance.spec.ts:232:7 › PDF metadata removal › clears every document-information entry and keeps the content
+[158/392] [chromium] › e2e\quality-acceptance.spec.ts:252:7 › Text tools › CSV with an unclosed quote is reported, not silently mangled
+[159/392] [chromium] › e2e\quality-acceptance.spec.ts:257:7 › Text tools › JSON to CSV writes nested values as JSON text, never [object Object]
+[160/392] [chromium] › e2e\quality-acceptance.spec.ts:264:7 › Text tools › XML pretty-print keeps the xml declaration
+[161/392] [chromium] › e2e\quality-acceptance.spec.ts:269:7 › Text tools › case converter keeps accented letters
+[162/392] [chromium] › e2e\quality-acceptance.spec.ts:277:7 › Text tools › text diff says when the two texts are identical
+[163/392] [chromium] › e2e\quality-acceptance.spec.ts:288:7 › Documents › TXT to PDF: characters the PDF fonts cannot draw are reported, not turned into an encoding error
+[164/392] [chromium] › e2e\quality-acceptance.spec.ts:298:7 › Documents › editing the text after converting drops the stale Download button
+[165/392] [chromium] › e2e\quality-acceptance.spec.ts:307:7 › Documents › Markdown to HTML: tables render, snake_case survives, and javascript: links are removed
+[166/392] [chromium] › e2e\quality-acceptance.spec.ts:320:7 › Home page › the file chosen on the home page is already loaded in the tool it leads to, and specific tools come first
+[167/392] [chromium] › e2e\quality-acceptance.spec.ts:333:7 › Editor search reflects edits › search finds corrected native text and typed text, and no longer finds the text that was replaced
+[168/392] [chromium] › e2e\security-edge-cases.spec.ts:7:7 › Security edge cases fail safely › a file with the right extension but wrong content fails with a friendly message
+[169/392] [chromium] › e2e\security-edge-cases.spec.ts:20:7 › Security edge cases fail safely › a truncated/corrupted PDF fails with a friendly message
+[170/392] [chromium] › e2e\security-edge-cases.spec.ts:30:7 › Security edge cases fail safely › a malformed ZIP fails with a friendly message
+[171/392] [chromium] › e2e\security-edge-cases.spec.ts:39:7 › Security edge cases fail safely › an SVG with a script and event handlers never executes
+[172/392] [chromium] › e2e\security-edge-cases.spec.ts:57:7 › Security edge cases fail safely › a zero-byte file is rejected immediately as empty
+[173/392] [chromium] › e2e\security-edge-cases.spec.ts:63:7 › Security edge cases fail safely › uploading an unsupported file type shows a friendly error, not a crash
+[174/392] [chromium] › e2e\seo-metadata.spec.ts:4:7 › Per-page SEO metadata › the homepage declares the production domain as its canonical URL
+[175/392] [chromium] › e2e\seo-metadata.spec.ts:9:7 › Per-page SEO metadata › a tool page has its own OpenGraph/Twitter title, not the homepage's
+[176/392] [chromium] › e2e\seo-metadata.spec.ts:23:7 › Per-page SEO metadata › two different tool pages have distinct titles and descriptions
+[177/392] [chromium] › e2e\seo-metadata.spec.ts:36:7 › Per-page SEO metadata › sitemap and robots reference the production domain
+[178/392] [chromium] › e2e\smoke.spec.ts:6:9 › Smoke: every live tool page renders without errors › /pdf/editor renders
+[179/392] [chromium] › e2e\smoke.spec.ts:6:9 › Smoke: every live tool page renders without errors › /pdf/merge renders
+[180/392] [chromium] › e2e\smoke.spec.ts:6:9 › Smoke: every live tool page renders without errors › /pdf/split renders
+[181/392] [chromium] › e2e\smoke.spec.ts:6:9 › Smoke: every live tool page renders without errors › /pdf/extract-pages renders
+[182/392] [chromium] › e2e\smoke.spec.ts:6:9 › Smoke: every live tool page renders without errors › /pdf/delete-pages renders
+[183/392] [chromium] › e2e\smoke.spec.ts:6:9 › Smoke: every live tool page renders without errors › /pdf/rotate renders
+[184/392] [chromium] › e2e\smoke.spec.ts:6:9 › Smoke: every live tool page renders without errors › /pdf/reorder renders
+[185/392] [chromium] › e2e\smoke.spec.ts:6:9 › Smoke: every live tool page renders without errors › /pdf/images-to-pdf renders
+[186/392] [chromium] › e2e\smoke.spec.ts:6:9 › Smoke: every live tool page renders without errors › /pdf/to-images renders
+[187/392] [chromium] › e2e\smoke.spec.ts:6:9 › Smoke: every live tool page renders without errors › /pdf/page-numbers renders
+[188/392] [chromium] › e2e\smoke.spec.ts:6:9 › Smoke: every live tool page renders without errors › /pdf/watermark renders
+[189/392] [chromium] › e2e\smoke.spec.ts:6:9 › Smoke: every live tool page renders without errors › /pdf/metadata renders
+[190/392] [chromium] › e2e\smoke.spec.ts:6:9 › Smoke: every live tool page renders without errors › /pdf/compress renders
+[191/392] [chromium] › e2e\smoke.spec.ts:6:9 › Smoke: every live tool page renders without errors › /pdf/ocr renders
+[192/392] [chromium] › e2e\smoke.spec.ts:6:9 › Smoke: every live tool page renders without errors › /image/compress renders
+[193/392] [chromium] › e2e\smoke.spec.ts:6:9 › Smoke: every live tool page renders without errors › /image/resize renders
+[194/392] [chromium] › e2e\smoke.spec.ts:6:9 › Smoke: every live tool page renders without errors › /image/crop renders
+[195/392] [chromium] › e2e\smoke.spec.ts:6:9 › Smoke: every live tool page renders without errors › /image/rotate renders
+[196/392] [chromium] › e2e\smoke.spec.ts:6:9 › Smoke: every live tool page renders without errors › /image/remove-metadata renders
+[197/392] [chromium] › e2e\smoke.spec.ts:6:9 › Smoke: every live tool page renders without errors › /image/svg-to-png renders
+[198/392] [chromium] › e2e\smoke.spec.ts:6:9 › Smoke: every live tool page renders without errors › /convert/jpg-to-png renders
+[199/392] [chromium] › e2e\smoke.spec.ts:6:9 › Smoke: every live tool page renders without errors › /convert/png-to-jpg renders
+[200/392] [chromium] › e2e\smoke.spec.ts:6:9 › Smoke: every live tool page renders without errors › /convert/jpg-to-webp renders
+[201/392] [chromium] › e2e\smoke.spec.ts:6:9 › Smoke: every live tool page renders without errors › /convert/webp-to-jpg renders
+[202/392] [chromium] › e2e\smoke.spec.ts:6:9 › Smoke: every live tool page renders without errors › /convert/png-to-webp renders
+[203/392] [chromium] › e2e\smoke.spec.ts:6:9 › Smoke: every live tool page renders without errors › /convert/webp-to-png renders
+[204/392] [chromium] › e2e\smoke.spec.ts:6:9 › Smoke: every live tool page renders without errors › /data/json-formatter renders
+[205/392] [chromium] › e2e\smoke.spec.ts:6:9 › Smoke: every live tool page renders without errors › /data/xml-formatter renders
+[206/392] [chromium] › e2e\smoke.spec.ts:6:9 › Smoke: every live tool page renders without errors › /data/csv-to-json renders
+[207/392] [chromium] › e2e\smoke.spec.ts:6:9 › Smoke: every live tool page renders without errors › /data/json-to-csv renders
+[208/392] [chromium] › e2e\smoke.spec.ts:6:9 › Smoke: every live tool page renders without errors › /data/base64 renders
+[209/392] [chromium] › e2e\smoke.spec.ts:6:9 › Smoke: every live tool page renders without errors › /data/url-encode-decode renders
+[210/392] [chromium] › e2e\smoke.spec.ts:6:9 › Smoke: every live tool page renders without errors › /data/case-converter renders
+[211/392] [chromium] › e2e\smoke.spec.ts:6:9 › Smoke: every live tool page renders without errors › /data/word-counter renders
+[212/392] [chromium] › e2e\smoke.spec.ts:6:9 › Smoke: every live tool page renders without errors › /data/uuid-generator renders
+[213/392] [chromium] › e2e\smoke.spec.ts:6:9 › Smoke: every live tool page renders without errors › /data/hash-generator renders
+[214/392] [chromium] › e2e\smoke.spec.ts:6:9 › Smoke: every live tool page renders without errors › /data/text-diff renders
+[215/392] [chromium] › e2e\smoke.spec.ts:6:9 › Smoke: every live tool page renders without errors › /document/markdown-to-html renders
+[216/392] [chromium] › e2e\smoke.spec.ts:6:9 › Smoke: every live tool page renders without errors › /document/markdown-to-pdf renders
+[217/392] [chromium] › e2e\smoke.spec.ts:6:9 › Smoke: every live tool page renders without errors › /document/txt-to-pdf renders
+[218/392] [chromium] › e2e\smoke.spec.ts:6:9 › Smoke: every live tool page renders without errors › /document/txt-to-html renders
+[219/392] [chromium] › e2e\smoke.spec.ts:6:9 › Smoke: every live tool page renders without errors › /archive/zip renders
+[220/392] [chromium] › e2e\smoke.spec.ts:6:9 › Smoke: every live tool page renders without errors › /archive/unzip renders
+[221/392] [chromium] › e2e\theme-and-responsive.spec.ts:4:7 › Dark mode › toggling theme updates the document attribute and persists on reload
+[222/392] [chromium] › e2e\theme-and-responsive.spec.ts:21:7 › Responsive layout › no horizontal overflow at common viewport widths
+[223/392] [mobile-chromium] › e2e\archive-roundtrip.spec.ts:9:7 › Archive round-trip integrity › files zipped then extracted keep their names and exact byte content
+[224/392] [mobile-chromium] › e2e\data-tools.spec.ts:4:7 › Data conversion workflow › converts CSV input to JSON output
+[225/392] [mobile-chromium] › e2e\data-tools.spec.ts:16:7 › Data conversion workflow › JSON formatter pretty-prints and reports invalid JSON
+[226/392] [mobile-chromium] › e2e\data-tools.spec.ts:29:7 › Data conversion workflow › word counter updates live as you type
+[227/392] [mobile-chromium] › e2e\data-tools.spec.ts:35:7 › Data conversion workflow › UUID generator produces well-formed UUIDs
+[228/392] [mobile-chromium] › e2e\data-tools.spec.ts:42:7 › Data conversion workflow › CSV to JSON handles quoted commas, escaped quotes, and embedded newlines
+[229/392] [mobile-chromium] › e2e\data-tools.spec.ts:77:9 › Text and document converters: whitespace-only input counts as empty › /document/txt-to-pdf: spaces, tabs and blank lines show the empty-input message and produce nothing
+[230/392] [mobile-chromium] › e2e\data-tools.spec.ts:77:9 › Text and document converters: whitespace-only input counts as empty › /document/markdown-to-pdf: spaces, tabs and blank lines show the empty-input message and produce nothing
+[231/392] [mobile-chromium] › e2e\data-tools.spec.ts:77:9 › Text and document converters: whitespace-only input counts as empty › /document/txt-to-html: spaces, tabs and blank lines show the empty-input message and produce nothing
+[232/392] [mobile-chromium] › e2e\data-tools.spec.ts:77:9 › Text and document converters: whitespace-only input counts as empty › /document/markdown-to-html: spaces, tabs and blank lines show the empty-input message and produce nothing
+[233/392] [mobile-chromium] › e2e\data-tools.spec.ts:77:9 › Text and document converters: whitespace-only input counts as empty › /data/json-formatter: spaces, tabs and blank lines show the empty-input message and produce nothing
+[234/392] [mobile-chromium] › e2e\data-tools.spec.ts:77:9 › Text and document converters: whitespace-only input counts as empty › /data/csv-to-json: spaces, tabs and blank lines show the empty-input message and produce nothing
+[235/392] [mobile-chromium] › e2e\data-tools.spec.ts:77:9 › Text and document converters: whitespace-only input counts as empty › /data/json-to-csv: spaces, tabs and blank lines show the empty-input message and produce nothing
+[236/392] [mobile-chromium] › e2e\data-tools.spec.ts:77:9 › Text and document converters: whitespace-only input counts as empty › /data/xml-formatter: spaces, tabs and blank lines show the empty-input message and produce nothing
+[237/392] [mobile-chromium] › e2e\data-tools.spec.ts:77:9 › Text and document converters: whitespace-only input counts as empty › /data/base64: spaces, tabs and blank lines show the empty-input message and produce nothing
+[238/392] [mobile-chromium] › e2e\data-tools.spec.ts:77:9 › Text and document converters: whitespace-only input counts as empty › /data/url-encode-decode: spaces, tabs and blank lines show the empty-input message and produce nothing
+[239/392] [mobile-chromium] › e2e\data-tools.spec.ts:77:9 › Text and document converters: whitespace-only input counts as empty › /data/case-converter: spaces, tabs and blank lines show the empty-input message and produce nothing
+[240/392] [mobile-chromium] › e2e\data-tools.spec.ts:89:7 › Text and document converters: whitespace-only input counts as empty › real content still converts after an empty attempt
+[241/392] [mobile-chromium] › e2e\homepage.spec.ts:4:7 › Homepage › loads with hero, drop zone, and no console errors
+[242/392] [mobile-chromium] › e2e\homepage.spec.ts:20:7 › Homepage › shows popular tools, categories, and FAQ sections
+[243/392] [mobile-chromium] › e2e\homepage.spec.ts:29:7 › Homepage › has no pricing, login, or signup CTAs
+[244/392] [mobile-chromium] › e2e\homepage.spec.ts:36:7 › Homepage › footer includes privacy and terms links
+[245/392] [mobile-chromium] › e2e\image-convert.spec.ts:9:7 › Image conversion workflow › converts a JPG to a valid PNG
+[246/392] [mobile-chromium] › e2e\image-convert.spec.ts:28:7 › Image conversion workflow › rejects a file type the tool doesn't accept
+[247/392] [mobile-chromium] › e2e\navigation.spec.ts:4:7 › Navigation › desktop nav links go to the right tool pages
+[248/392] [mobile-chromium] › e2e\navigation.spec.ts:12:7 › Navigation › mobile menu opens and navigates
+[249/392] [mobile-chromium] › e2e\navigation.spec.ts:22:7 › Navigation › tool search finds a known tool
+[250/392] [mobile-chromium] › e2e\navigation.spec.ts:28:7 › Navigation › tool search shows an empty state for nonsense queries
+[251/392] [mobile-chromium] › e2e\navigation.spec.ts:34:7 › Navigation › tool status directory lists every tool with a status
+[252/392] [mobile-chromium] › e2e\pdf-compress-flate-scan.spec.ts:47:5 › a Flate-encoded scan really shrinks toward a real target, with exact byte counts shown
+[253/392] [mobile-chromium] › e2e\pdf-compress-flate-scan.spec.ts:75:5 › a target already met by the free lossless pass is honest: no inflated saving is claimed
+[254/392] [mobile-chromium] › e2e\pdf-compress-honesty.spec.ts:8:7 › Target-size PDF compression is honest about what it actually achieved › an already-small PDF: Target reached is shown, and any claimed reduction is real
+[255/392] [mobile-chromium] › e2e\pdf-compress-honesty.spec.ts:30:7 › Target-size PDF compression is honest about what it actually achieved › an image-dominated PDF: the search stops at a rung whose real output actually fits the target
+[256/392] [mobile-chromium] › e2e\pdf-compress-honesty.spec.ts:56:7 › Target-size PDF compression is honest about what it actually achieved › an impossible target never fakes success: it is labelled Closest safe result and the file still opens
+[257/392] [mobile-chromium] › e2e\pdf-editor-advanced.spec.ts:64:7 › PDF Editor: signature › draws a signature, places and resizes it, and it renders at the intended location after export
+[mobile-chromium] › e2e\pdf-editor-advanced.spec.ts:64:7 › PDF Editor: signature › draws a signature, places and resizes it, and it renders at the intended location after export
+Warning: UnknownErrorException: Ensure that the `standardFontDataUrl` API parameter is provided.
+
+Warning: UnknownErrorException: Ensure that the `standardFontDataUrl` API parameter is provided.
+
+[258/392] [mobile-chromium] › e2e\pdf-editor-advanced.spec.ts:145:7 › PDF Editor: image placement › inserts a real PNG image, preserves aspect ratio, and it renders at the placed location
+[mobile-chromium] › e2e\pdf-editor-advanced.spec.ts:145:7 › PDF Editor: image placement › inserts a real PNG image, preserves aspect ratio, and it renders at the placed location
+Warning: UnknownErrorException: Ensure that the `standardFontDataUrl` API parameter is provided.
+
+[259/392] [mobile-chromium] › e2e\pdf-editor-advanced.spec.ts:208:7 › PDF Editor: annotations › highlight fills the selected region with a translucent color
+[mobile-chromium] › e2e\pdf-editor-advanced.spec.ts:208:7 › PDF Editor: annotations › highlight fills the selected region with a translucent color
+Warning: UnknownErrorException: Ensure that the `standardFontDataUrl` API parameter is provided.
+
+[260/392] [mobile-chromium] › e2e\pdf-editor-advanced.spec.ts:227:7 › PDF Editor: annotations › underline draws a thin line at the bottom of the region, not a fill
+[mobile-chromium] › e2e\pdf-editor-advanced.spec.ts:227:7 › PDF Editor: annotations › underline draws a thin line at the bottom of the region, not a fill
+Warning: UnknownErrorException: Ensure that the `standardFontDataUrl` API parameter is provided.
+
+[261/392] [mobile-chromium] › e2e\pdf-editor-advanced.spec.ts:244:7 › PDF Editor: annotations › strikethrough draws a thin line through the middle of the region
+[mobile-chromium] › e2e\pdf-editor-advanced.spec.ts:244:7 › PDF Editor: annotations › strikethrough draws a thin line through the middle of the region
+Warning: UnknownErrorException: Ensure that the `standardFontDataUrl` API parameter is provided.
+
+[262/392] [mobile-chromium] › e2e\pdf-editor-advanced.spec.ts:265:7 › PDF Editor: form fill › detects AcroForm fields, edits them, and the values persist in the exported PDF
+[263/392] [mobile-chromium] › e2e\pdf-editor-advanced.spec.ts:293:7 › PDF Editor: crop › applies a crop box to the current page and it's reflected in the exported PDF's page box
+[264/392] [mobile-chromium] › e2e\pdf-editor-advanced.spec.ts:339:7 › PDF Editor: header/footer › stamps header/footer text with a page-number token onto every page
+[mobile-chromium] › e2e\pdf-editor-advanced.spec.ts:339:7 › PDF Editor: header/footer › stamps header/footer text with a page-number token onto every page
+Warning: UnknownErrorException: Ensure that the `standardFontDataUrl` API parameter is provided.
+
+Warning: UnknownErrorException: Ensure that the `standardFontDataUrl` API parameter is provided.
+
+Warning: UnknownErrorException: Ensure that the `standardFontDataUrl` API parameter is provided.
+
+Warning: UnknownErrorException: Ensure that the `standardFontDataUrl` API parameter is provided.
+
+[265/392] [mobile-chromium] › e2e\pdf-editor-interaction.spec.ts:64:7 › PDF Editor: drag previews follow the pointer › the live preview box sits exactly under the pointer while dragging (not at the page's top-left)
+[266/392] [mobile-chromium] › e2e\pdf-editor-interaction.spec.ts:86:7 › PDF Editor: drag previews follow the pointer › a drag started on top of the page's text still draws (the text hit-target doesn't swallow it)
+[267/392] [mobile-chromium] › e2e\pdf-editor-interaction.spec.ts:95:7 › PDF Editor: drag previews follow the pointer › placement is exact (0px) at different zooms, when scrolled, and on a rotated page
+[268/392] [mobile-chromium] › e2e\pdf-editor-interaction.spec.ts:123:7 › PDF Editor: tools stay armed for repeated use › highlight, underline and strikethrough each work several times in a row without reselecting
+[269/392] [mobile-chromium] › e2e\pdf-editor-interaction.spec.ts:134:7 › PDF Editor: tools stay armed for repeated use › Escape leaves the tool; a stray click without dragging doesn't create anything or drop the tool
+[270/392] [mobile-chromium] › e2e\pdf-editor-interaction.spec.ts:147:7 › PDF Editor: freehand drawing › the stroke is visible while the pointer is still down, and the tool stays armed
+[271/392] [mobile-chromium] › e2e\pdf-editor-interaction.spec.ts:166:7 › PDF Editor: text is edited directly on the page › place text, type a sentence continuously, edit inside it, and it exports where it shows
+[mobile-chromium] › e2e\pdf-editor-interaction.spec.ts:166:7 › PDF Editor: text is edited directly on the page › place text, type a sentence continuously, edit inside it, and it exports where it shows
+Warning: UnknownErrorException: Ensure that the `standardFontDataUrl` API parameter is provided.
+
+Warning: UnknownErrorException: Ensure that the `standardFontDataUrl` API parameter is provided.
+
+[272/392] [mobile-chromium] › e2e\pdf-editor-interaction.spec.ts:201:7 › PDF Editor: text is edited directly on the page › clicking an already-selected text box (or double-clicking) re-enters editing; typing is one undo step
+[273/392] [mobile-chromium] › e2e\pdf-editor-interaction.spec.ts:218:7 › PDF Editor: text is edited directly on the page › the selected text's color and size are edited from the panel, and Delete removes it
+[274/392] [mobile-chromium] › e2e\pdf-editor-interaction.spec.ts:240:7 › PDF Editor: text is edited directly on the page › typing into the properties-panel text box isn't cut off after one character
+[275/392] [mobile-chromium] › e2e\pdf-editor-interaction.spec.ts:259:7 › PDF Editor: shapes, images, crop, search, pages › a line dragged down-right exports down-right, and matches what's on screen
+[mobile-chromium] › e2e\pdf-editor-interaction.spec.ts:259:7 › PDF Editor: shapes, images, crop, search, pages › a line dragged down-right exports down-right, and matches what's on screen
+Warning: UnknownErrorException: Ensure that the `standardFontDataUrl` API parameter is provided.
+
+[276/392] [mobile-chromium] › e2e\pdf-editor-interaction.spec.ts:287:7 › PDF Editor: shapes, images, crop, search, pages › a resized picture keeps its proportions (screen and export agree)
+[277/392] [mobile-chromium] › e2e\pdf-editor-interaction.spec.ts:307:7 › PDF Editor: shapes, images, crop, search, pages › a crop area can be adjusted by its handles, is kept on the page, and applied from the action bar
+[278/392] [mobile-chromium] › e2e\pdf-editor-interaction.spec.ts:334:7 › PDF Editor: shapes, images, crop, search, pages › search covers every page from the start and Next/Prev jump to the match
+[279/392] [mobile-chromium] › e2e\pdf-editor-interaction.spec.ts:349:7 › PDF Editor: shapes, images, crop, search, pages › pages can be moved with the Move up/down buttons (works without dragging)
+[mobile-chromium] › e2e\pdf-editor-interaction.spec.ts:349:7 › PDF Editor: shapes, images, crop, search, pages › pages can be moved with the Move up/down buttons (works without dragging)
+Warning: UnknownErrorException: Ensure that the `standardFontDataUrl` API parameter is provided.
+
+[280/392] [mobile-chromium] › e2e\pdf-editor-interaction.spec.ts:360:7 › PDF Editor: shapes, images, crop, search, pages › Whiteout shows the not-secure-redaction warning while it's the active tool
+[281/392] [mobile-chromium] › e2e\pdf-editor-interaction.spec.ts:370:7 › PDF Editor: added text on a rotated page › keeps its layout (one line, real width) and turns with the page instead of wrapping into a sliver
+[282/392] [mobile-chromium] › e2e\pdf-editor-interaction.spec.ts:394:7 › PDF Editor: underline and strikethrough as a flat drag › dragging straight along a line (almost no height) still creates the underline / strikethrough
+[283/392] [mobile-chromium] › e2e\pdf-editor-interaction.spec.ts:414:7 › PDF Editor: typing right after placing text › the first character typed immediately after clicking is not lost
+[284/392] [mobile-chromium] › e2e\pdf-editor-interaction.spec.ts:423:7 › PDF Editor: typing right after placing text › typing across a pause (e.g. thinking mid-sentence) never loses what was already typed
+[285/392] [mobile-chromium] › e2e\pdf-editor-interaction.spec.ts:441:7 › PDF Editor: pages that carry a CropBox › the page is laid out on its visible (cropped) area, and the crop survives a round trip
+[286/392] [mobile-chromium] › e2e\pdf-editor-interaction.spec.ts:461:7 › PDF Editor on a phone › opens fit to the screen, has finger-sized controls, and both drawers can be closed and used
+[287/392] [mobile-chromium] › e2e\pdf-editor-interaction.spec.ts:490:7 › PDF Editor: a page wider than its viewport › the page keeps its size (and its drawing overlay matches its canvas) and scrolls instead of being squeezed
+[288/392] [mobile-chromium] › e2e\pdf-editor-interaction.spec.ts:537:7 › PDF Editor on a phone: touch input › tap places text and typing works; highlight/underline stay armed; strokes render live; crop applies
+[mobile-chromium] › e2e\pdf-editor-interaction.spec.ts:537:7 › PDF Editor on a phone: touch input › tap places text and typing works; highlight/underline stay armed; strokes render live; crop applies
+Warning: UnknownErrorException: Ensure that the `standardFontDataUrl` API parameter is provided.
+
+Warning: UnknownErrorException: Ensure that the `standardFontDataUrl` API parameter is provided.
+
+[289/392] [mobile-chromium] › e2e\pdf-editor-qa.spec.ts:27:7 › PDF Editor: large document smoke test › handles a 25-page document: thumbnails, navigation, zoom, an annotation, and export
+[290/392] [mobile-chromium] › e2e\pdf-editor-qa.spec.ts:75:7 › PDF Editor: mobile editing checklist › every core editing action works on a mobile viewport
+[291/392] [mobile-chromium] › e2e\pdf-editor-qa.spec.ts:156:9 › PDF Editor: responsive QA matrix › no horizontal overflow and core controls are reachable at 390x844
+[292/392] [mobile-chromium] › e2e\pdf-editor-qa.spec.ts:156:9 › PDF Editor: responsive QA matrix › no horizontal overflow and core controls are reachable at 768x1024
+[293/392] [mobile-chromium] › e2e\pdf-editor-qa.spec.ts:156:9 › PDF Editor: responsive QA matrix › no horizontal overflow and core controls are reachable at 1366x768
+[294/392] [mobile-chromium] › e2e\pdf-editor-qa.spec.ts:156:9 › PDF Editor: responsive QA matrix › no horizontal overflow and core controls are reachable at 1440x900
+[295/392] [mobile-chromium] › e2e\pdf-editor-qa.spec.ts:156:9 › PDF Editor: responsive QA matrix › no horizontal overflow and core controls are reachable at 1920x1080
+[296/392] [mobile-chromium] › e2e\pdf-editor-qa.spec.ts:156:9 › PDF Editor: responsive QA matrix › no horizontal overflow and core controls are reachable at 2560x1440
+[297/392] [mobile-chromium] › e2e\pdf-editor-qa.spec.ts:156:9 › PDF Editor: responsive QA matrix › no horizontal overflow and core controls are reachable at 3440x1440
+[298/392] [mobile-chromium] › e2e\pdf-editor-qa.spec.ts:186:7 › PDF Editor: privacy regression (signature / image / form / crop / header-footer) › no document bytes, signature/image contents, or third-party requests leave the browser across these flows
+[299/392] [mobile-chromium] › e2e\pdf-editor.spec.ts:49:7 › PDF Editor: native text editing › corrects native text, exports, and the correction is verifiable in the reopened PDF
+[mobile-chromium] › e2e\pdf-editor.spec.ts:49:7 › PDF Editor: native text editing › corrects native text, exports, and the correction is verifiable in the reopened PDF
+Warning: UnknownErrorException: Ensure that the `standardFontDataUrl` API parameter is provided.
+
+Warning: UnknownErrorException: Ensure that the `standardFontDataUrl` API parameter is provided.
+
+[300/392] [mobile-chromium] › e2e\pdf-editor.spec.ts:71:7 › PDF Editor: add text / shapes / annotations › adds a text box and it appears at export in the reopened PDF
+[mobile-chromium] › e2e\pdf-editor.spec.ts:71:7 › PDF Editor: add text / shapes / annotations › adds a text box and it appears at export in the reopened PDF
+Warning: UnknownErrorException: Ensure that the `standardFontDataUrl` API parameter is provided.
+
+Warning: UnknownErrorException: Ensure that the `standardFontDataUrl` API parameter is provided.
+
+[301/392] [mobile-chromium] › e2e\pdf-editor.spec.ts:83:7 › PDF Editor: add text / shapes / annotations › draws a whiteout box and the exported page renders a white-filled region
+[mobile-chromium] › e2e\pdf-editor.spec.ts:83:7 › PDF Editor: add text / shapes / annotations › draws a whiteout box and the exported page renders a white-filled region
+Warning: UnknownErrorException: Ensure that the `standardFontDataUrl` API parameter is provided.
+
+[302/392] [mobile-chromium] › e2e\pdf-editor.spec.ts:107:7 › PDF Editor: add text / shapes / annotations › draws a rectangle shape that survives export
+[303/392] [mobile-chromium] › e2e\pdf-editor.spec.ts:132:7 › PDF Editor: page management › rotate, duplicate, and delete pages, then export and verify the result
+[304/392] [mobile-chromium] › e2e\pdf-editor.spec.ts:154:7 › PDF Editor: page management › inserts pages from another PDF after the current page
+[305/392] [mobile-chromium] › e2e\pdf-editor.spec.ts:173:7 › PDF Editor: undo/redo › Ctrl+Z undoes an added text object and Ctrl+Shift+Z redoes it
+[306/392] [mobile-chromium] › e2e\pdf-editor.spec.ts:199:7 › PDF Editor: OCR integration › OCR is never fetched until recognition is explicitly requested
+[307/392] [mobile-chromium] › e2e\pdf-editor.spec.ts:215:7 › PDF Editor: privacy / network › no document content is ever sent off-device while editing and exporting
+[308/392] [mobile-chromium] › e2e\pdf-editor.spec.ts:236:7 › PDF Editor: security / error handling › a corrupted PDF fails safely with a friendly message
+[309/392] [mobile-chromium] › e2e\pdf-editor.spec.ts:245:7 › PDF Editor: security / error handling › a zero-byte file is rejected immediately
+[310/392] [mobile-chromium] › e2e\pdf-editor.spec.ts:251:7 › PDF Editor: security / error handling › an unsupported file type shows a friendly error
+[311/392] [mobile-chromium] › e2e\pdf-editor.spec.ts:259:7 › PDF Editor: responsive / mobile › no horizontal overflow and page panels are reachable via toggle buttons at 390px width
+[312/392] [mobile-chromium] › e2e\pdf-merge.spec.ts:8:7 › PDF merge workflow › merges two PDFs and produces a valid combined PDF
+[313/392] [mobile-chromium] › e2e\pdf-merge.spec.ts:36:7 › PDF merge workflow › shows a friendly error state and allows retry when processing fails
+[314/392] [mobile-chromium] › e2e\quality-acceptance.spec.ts:61:7 › PDF merge / reorder › merge: files can be reordered in the list, and the output follows that order
+[mobile-chromium] › e2e\quality-acceptance.spec.ts:61:7 › PDF merge / reorder › merge: files can be reordered in the list, and the output follows that order
+Warning: UnknownErrorException: Ensure that the `standardFontDataUrl` API parameter is provided.
+
+Warning: UnknownErrorException: Ensure that the `standardFontDataUrl` API parameter is provided.
+
+Warning: UnknownErrorException: Ensure that the `standardFontDataUrl` API parameter is provided.
+
+Warning: UnknownErrorException: Ensure that the `standardFontDataUrl` API parameter is provided.
+
+[315/392] [mobile-chromium] › e2e\quality-acceptance.spec.ts:72:7 › PDF merge / reorder › reorder: pages show thumbnails, and drag-and-drop plus an arrow give the exported order
+[316/392] [mobile-chromium] › e2e\quality-acceptance.spec.ts:83:7 › PDF merge / reorder › reorder: arrows are labelled per page and move that page
+[mobile-chromium] › e2e\quality-acceptance.spec.ts:83:7 › PDF merge / reorder › reorder: arrows are labelled per page and move that page
+Warning: UnknownErrorException: Ensure that the `standardFontDataUrl` API parameter is provided.
+
+Warning: UnknownErrorException: Ensure that the `standardFontDataUrl` API parameter is provided.
+
+[317/392] [mobile-chromium] › e2e\quality-acceptance.spec.ts:94:7 › PDF pages keep their displayed orientation › PDF to images: a page stored rotated 90 degrees comes out landscape
+[318/392] [mobile-chromium] › e2e\quality-acceptance.spec.ts:108:7 › PDF pages keep their displayed orientation › page numbers land at the displayed bottom of a rotated page, not its stored bottom
+[mobile-chromium] › e2e\quality-acceptance.spec.ts:108:7 › PDF pages keep their displayed orientation › page numbers land at the displayed bottom of a rotated page, not its stored bottom
+Warning: UnknownErrorException: Ensure that the `standardFontDataUrl` API parameter is provided.
+
+Warning: UnknownErrorException: Ensure that the `standardFontDataUrl` API parameter is provided.
+
+Warning: UnknownErrorException: Ensure that the `standardFontDataUrl` API parameter is provided.
+
+[319/392] [mobile-chromium] › e2e\quality-acceptance.spec.ts:125:7 › PDF pages keep their displayed orientation › watermark text the PDF fonts cannot draw gives a plain-language message, not an encoding error
+[320/392] [mobile-chromium] › e2e\quality-acceptance.spec.ts:135:7 › PDF compress (target-size) tells the truth › a target the free lossless pass already meets merges duplicate images and reports real sizes
+[321/392] [mobile-chromium] › e2e\quality-acceptance.spec.ts:148:7 › PDF compress (target-size) tells the truth › an image-only scan: a loose target needs no quality loss, a tight one walks the ladder and shrinks a lot
+[322/392] [mobile-chromium] › e2e\quality-acceptance.spec.ts:173:7 › Image tools protect transparency and say what they did › compress (target-size): a transparent PNG is automatically kept in a format that preserves transparency
+[323/392] [mobile-chromium] › e2e\quality-acceptance.spec.ts:182:7 › Image tools protect transparency and say what they did › compress (target-size): a very tight target on a transparent image still keeps transparency, and says it converted format
+[324/392] [mobile-chromium] › e2e\quality-acceptance.spec.ts:194:7 › Image tools protect transparency and say what they did › compress (target-size): an already-small JPG under the target comes back unchanged instead of possibly larger
+[325/392] [mobile-chromium] › e2e\quality-acceptance.spec.ts:203:7 › Image tools protect transparency and say what they did › resize, rotate and crop keep a PNG a PNG by default
+[326/392] [mobile-chromium] › e2e\quality-acceptance.spec.ts:210:7 › Image tools protect transparency and say what they did › crop: dragging on the preview draws the box under the pointer and crops exactly that region
+[327/392] [mobile-chromium] › e2e\quality-acceptance.spec.ts:232:7 › PDF metadata removal › clears every document-information entry and keeps the content
+[328/392] [mobile-chromium] › e2e\quality-acceptance.spec.ts:252:7 › Text tools › CSV with an unclosed quote is reported, not silently mangled
+[329/392] [mobile-chromium] › e2e\quality-acceptance.spec.ts:257:7 › Text tools › JSON to CSV writes nested values as JSON text, never [object Object]
+[330/392] [mobile-chromium] › e2e\quality-acceptance.spec.ts:264:7 › Text tools › XML pretty-print keeps the xml declaration
+[331/392] [mobile-chromium] › e2e\quality-acceptance.spec.ts:269:7 › Text tools › case converter keeps accented letters
+[332/392] [mobile-chromium] › e2e\quality-acceptance.spec.ts:277:7 › Text tools › text diff says when the two texts are identical
+[333/392] [mobile-chromium] › e2e\quality-acceptance.spec.ts:288:7 › Documents › TXT to PDF: characters the PDF fonts cannot draw are reported, not turned into an encoding error
+[334/392] [mobile-chromium] › e2e\quality-acceptance.spec.ts:298:7 › Documents › editing the text after converting drops the stale Download button
+[335/392] [mobile-chromium] › e2e\quality-acceptance.spec.ts:307:7 › Documents › Markdown to HTML: tables render, snake_case survives, and javascript: links are removed
+[336/392] [mobile-chromium] › e2e\quality-acceptance.spec.ts:320:7 › Home page › the file chosen on the home page is already loaded in the tool it leads to, and specific tools come first
+[337/392] [mobile-chromium] › e2e\quality-acceptance.spec.ts:333:7 › Editor search reflects edits › search finds corrected native text and typed text, and no longer finds the text that was replaced
+[338/392] [mobile-chromium] › e2e\security-edge-cases.spec.ts:7:7 › Security edge cases fail safely › a file with the right extension but wrong content fails with a friendly message
+[339/392] [mobile-chromium] › e2e\security-edge-cases.spec.ts:20:7 › Security edge cases fail safely › a truncated/corrupted PDF fails with a friendly message
+[340/392] [mobile-chromium] › e2e\security-edge-cases.spec.ts:30:7 › Security edge cases fail safely › a malformed ZIP fails with a friendly message
+[341/392] [mobile-chromium] › e2e\security-edge-cases.spec.ts:39:7 › Security edge cases fail safely › an SVG with a script and event handlers never executes
+[342/392] [mobile-chromium] › e2e\security-edge-cases.spec.ts:57:7 › Security edge cases fail safely › a zero-byte file is rejected immediately as empty
+[343/392] [mobile-chromium] › e2e\security-edge-cases.spec.ts:63:7 › Security edge cases fail safely › uploading an unsupported file type shows a friendly error, not a crash
+[344/392] [mobile-chromium] › e2e\seo-metadata.spec.ts:4:7 › Per-page SEO metadata › the homepage declares the production domain as its canonical URL
+[345/392] [mobile-chromium] › e2e\seo-metadata.spec.ts:9:7 › Per-page SEO metadata › a tool page has its own OpenGraph/Twitter title, not the homepage's
+[346/392] [mobile-chromium] › e2e\seo-metadata.spec.ts:23:7 › Per-page SEO metadata › two different tool pages have distinct titles and descriptions
+[347/392] [mobile-chromium] › e2e\seo-metadata.spec.ts:36:7 › Per-page SEO metadata › sitemap and robots reference the production domain
+[348/392] [mobile-chromium] › e2e\smoke.spec.ts:6:9 › Smoke: every live tool page renders without errors › /pdf/editor renders
+[349/392] [mobile-chromium] › e2e\smoke.spec.ts:6:9 › Smoke: every live tool page renders without errors › /pdf/merge renders
+[350/392] [mobile-chromium] › e2e\smoke.spec.ts:6:9 › Smoke: every live tool page renders without errors › /pdf/split renders
+[351/392] [mobile-chromium] › e2e\smoke.spec.ts:6:9 › Smoke: every live tool page renders without errors › /pdf/extract-pages renders
+[352/392] [mobile-chromium] › e2e\smoke.spec.ts:6:9 › Smoke: every live tool page renders without errors › /pdf/delete-pages renders
+[353/392] [mobile-chromium] › e2e\smoke.spec.ts:6:9 › Smoke: every live tool page renders without errors › /pdf/rotate renders
+[354/392] [mobile-chromium] › e2e\smoke.spec.ts:6:9 › Smoke: every live tool page renders without errors › /pdf/reorder renders
+[355/392] [mobile-chromium] › e2e\smoke.spec.ts:6:9 › Smoke: every live tool page renders without errors › /pdf/images-to-pdf renders
+[356/392] [mobile-chromium] › e2e\smoke.spec.ts:6:9 › Smoke: every live tool page renders without errors › /pdf/to-images renders
+[357/392] [mobile-chromium] › e2e\smoke.spec.ts:6:9 › Smoke: every live tool page renders without errors › /pdf/page-numbers renders
+[358/392] [mobile-chromium] › e2e\smoke.spec.ts:6:9 › Smoke: every live tool page renders without errors › /pdf/watermark renders
+[359/392] [mobile-chromium] › e2e\smoke.spec.ts:6:9 › Smoke: every live tool page renders without errors › /pdf/metadata renders
+[360/392] [mobile-chromium] › e2e\smoke.spec.ts:6:9 › Smoke: every live tool page renders without errors › /pdf/compress renders
+[361/392] [mobile-chromium] › e2e\smoke.spec.ts:6:9 › Smoke: every live tool page renders without errors › /pdf/ocr renders
+[362/392] [mobile-chromium] › e2e\smoke.spec.ts:6:9 › Smoke: every live tool page renders without errors › /image/compress renders
+[363/392] [mobile-chromium] › e2e\smoke.spec.ts:6:9 › Smoke: every live tool page renders without errors › /image/resize renders
+[364/392] [mobile-chromium] › e2e\smoke.spec.ts:6:9 › Smoke: every live tool page renders without errors › /image/crop renders
+[365/392] [mobile-chromium] › e2e\smoke.spec.ts:6:9 › Smoke: every live tool page renders without errors › /image/rotate renders
+[366/392] [mobile-chromium] › e2e\smoke.spec.ts:6:9 › Smoke: every live tool page renders without errors › /image/remove-metadata renders
+[367/392] [mobile-chromium] › e2e\smoke.spec.ts:6:9 › Smoke: every live tool page renders without errors › /image/svg-to-png renders
+[368/392] [mobile-chromium] › e2e\smoke.spec.ts:6:9 › Smoke: every live tool page renders without errors › /convert/jpg-to-png renders
+[369/392] [mobile-chromium] › e2e\smoke.spec.ts:6:9 › Smoke: every live tool page renders without errors › /convert/png-to-jpg renders
+[370/392] [mobile-chromium] › e2e\smoke.spec.ts:6:9 › Smoke: every live tool page renders without errors › /convert/jpg-to-webp renders
+[371/392] [mobile-chromium] › e2e\smoke.spec.ts:6:9 › Smoke: every live tool page renders without errors › /convert/webp-to-jpg renders
+[372/392] [mobile-chromium] › e2e\smoke.spec.ts:6:9 › Smoke: every live tool page renders without errors › /convert/png-to-webp renders
+[373/392] [mobile-chromium] › e2e\smoke.spec.ts:6:9 › Smoke: every live tool page renders without errors › /convert/webp-to-png renders
+[374/392] [mobile-chromium] › e2e\smoke.spec.ts:6:9 › Smoke: every live tool page renders without errors › /data/json-formatter renders
+[375/392] [mobile-chromium] › e2e\smoke.spec.ts:6:9 › Smoke: every live tool page renders without errors › /data/xml-formatter renders
+[376/392] [mobile-chromium] › e2e\smoke.spec.ts:6:9 › Smoke: every live tool page renders without errors › /data/csv-to-json renders
+[377/392] [mobile-chromium] › e2e\smoke.spec.ts:6:9 › Smoke: every live tool page renders without errors › /data/json-to-csv renders
+[378/392] [mobile-chromium] › e2e\smoke.spec.ts:6:9 › Smoke: every live tool page renders without errors › /data/base64 renders
+[379/392] [mobile-chromium] › e2e\smoke.spec.ts:6:9 › Smoke: every live tool page renders without errors › /data/url-encode-decode renders
+[380/392] [mobile-chromium] › e2e\smoke.spec.ts:6:9 › Smoke: every live tool page renders without errors › /data/case-converter renders
+[381/392] [mobile-chromium] › e2e\smoke.spec.ts:6:9 › Smoke: every live tool page renders without errors › /data/word-counter renders
+[382/392] [mobile-chromium] › e2e\smoke.spec.ts:6:9 › Smoke: every live tool page renders without errors › /data/uuid-generator renders
+[383/392] [mobile-chromium] › e2e\smoke.spec.ts:6:9 › Smoke: every live tool page renders without errors › /data/hash-generator renders
+[384/392] [mobile-chromium] › e2e\smoke.spec.ts:6:9 › Smoke: every live tool page renders without errors › /data/text-diff renders
+[385/392] [mobile-chromium] › e2e\smoke.spec.ts:6:9 › Smoke: every live tool page renders without errors › /document/markdown-to-html renders
+[386/392] [mobile-chromium] › e2e\smoke.spec.ts:6:9 › Smoke: every live tool page renders without errors › /document/markdown-to-pdf renders
+[387/392] [mobile-chromium] › e2e\smoke.spec.ts:6:9 › Smoke: every live tool page renders without errors › /document/txt-to-pdf renders
+[388/392] [mobile-chromium] › e2e\smoke.spec.ts:6:9 › Smoke: every live tool page renders without errors › /document/txt-to-html renders
+[389/392] [mobile-chromium] › e2e\smoke.spec.ts:6:9 › Smoke: every live tool page renders without errors › /archive/zip renders
+[390/392] [mobile-chromium] › e2e\smoke.spec.ts:6:9 › Smoke: every live tool page renders without errors › /archive/unzip renders
+[391/392] [mobile-chromium] › e2e\theme-and-responsive.spec.ts:4:7 › Dark mode › toggling theme updates the document attribute and persists on reload
+[392/392] [mobile-chromium] › e2e\theme-and-responsive.spec.ts:21:7 › Responsive layout › no horizontal overflow at common viewport widths
+  8 skipped
+  384 passed (11.5m)
+EXIT 0
