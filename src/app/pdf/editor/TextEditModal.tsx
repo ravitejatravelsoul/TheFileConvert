@@ -182,8 +182,8 @@ export function TextEditModal({ request, api, onClose }: TextEditModalProps) {
 
         {isOcr && patch?.overflow && (
           <p className="mt-2 rounded-[var(--radius-sm)] bg-red-50 p-2 text-xs text-red-700 dark:bg-red-950/40 dark:text-red-300">
-            The replacement is wider than the available original space. It has been shrunk as much as can stay legible and
-            may still extend slightly beyond the original word rather than cover neighboring text.
+            The replacement is wider than the original text&rsquo;s space, so it has been shrunk to fit and may look smaller
+            than the surrounding text. For a closer match, click a single word on the page to edit just that word.
           </p>
         )}
 

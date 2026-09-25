@@ -213,11 +213,12 @@ await guard("pdf-editor", "scanned", async () => {
   const a = await pdfPixels(REAL, 1, 1.5), b = await pdfPixels(out, 1, 1.5);
   let changed = 0; for (let i = 0; i < a.d.length; i += 4) if (Math.abs(a.d[i] - b.d[i]) + Math.abs(a.d[i + 1] - b.d[i + 1]) > 50) changed++;
   // The text layer alone can't prove the edit looks right (it passed while the visible row was wiped
-  // out): the "VALID FROM … UNTIL …" row must still carry roughly its original ink after the edit.
+  // out): the "VALID FROM … UNTIL …" row must still carry its text after the edit. A whole-line redraw
+  // uses one matched face with thinner strokes (~50% of the original ink); the wiped row had ~1%.
   const rowInk = (img) => { let n = 0; const y0 = Math.round(img.h * 0.255), y1 = Math.round(img.h * 0.29); for (let y = y0; y < y1; y++) for (let x = Math.round(img.w * 0.07); x < Math.round(img.w * 0.9); x++) if (img.d[(y * img.w + x) * 4] < 110) n++; return n; };
   const inkBefore = rowInk(a), inkAfter = rowInk(b);
   rec("pdf-editor", `scanned: OCR (${(ocrMs / 1000).toFixed(1)}s) → 12/20/2026→12/20/2028 → fast-typed added text → export → reopen; date row still visibly intact`,
-    typed === "Verified in production" && /12\/20\/2028/.test(t[0].text) && /Verified in production/.test(t[0].text) && t.length === 2 && changed > 50 && changed < a.w * a.h * 0.05 && inkAfter > inkBefore * 0.6 && privacyOk(log) ? "PASS" : "FAIL",
+    typed === "Verified in production" && /12\/20\/2028/.test(t[0].text) && /Verified in production/.test(t[0].text) && t.length === 2 && changed > 50 && changed < a.w * a.h * 0.05 && inkAfter > inkBefore * 0.3 && privacyOk(log) ? "PASS" : "FAIL",
     `typed="${typed}" text="${t[0].text.slice(0, 120)}" changedPx=${changed}/${a.w * a.h} rowInk ${inkBefore}→${inkAfter} ${privacyDetail(log)}`);
   await import("node:child_process").then(({ execFileSync }) => execFileSync("node", ["qa/scripts/render-page.mjs", out, "1", "2", "qa/screenshots/prod-v2-date-edit.png", "0", "0.28", "1", "0.14"]));
   await ctx.close();
@@ -302,12 +303,14 @@ await guard("mobile", "Pixel 7 session", async () => {
   await page.getByRole("button", { name: /Edit recognized word: John/i }).first().tap();
   const dlg = page.getByRole("dialog", { name: "Edit text" }); await dlg.waitFor();
   await dlg.locator("input[type=text]").fill("Priya"); await dlg.getByRole("button", { name: "Save correction" }).tap(); await dlg.waitFor({ state: "hidden" });
-  const S = await surf.boundingBox();
-  await arm("Text"); await page.touchscreen.tap(S.x + S.width * 0.3, S.y + S.height * 0.55); await page.waitForTimeout(300);
+  // Re-read the page position right before every gesture: banners collapse after the OCR edit and
+  // the page moves (~40px) — a position captured once goes stale and a drag can start off the page.
+  let S = await surf.boundingBox();
+  await arm("Text"); S = await surf.boundingBox(); await page.touchscreen.tap(S.x + S.width * 0.3, S.y + S.height * 0.55); await page.waitForTimeout(300);
   await page.keyboard.type("Mobile prod"); await page.keyboard.press("Escape");
-  await arm("Highlight"); await page.waitForTimeout(250); await touchDrag(S.x + S.width * 0.1, S.y + S.height * 0.15, S.x + S.width * 0.6, S.y + S.height * 0.18); await page.waitForTimeout(200);
-  await arm("Draw"); await page.waitForTimeout(250); await pointerDrag(S.x + S.width * 0.15, S.y + S.height * 0.7, S.x + S.width * 0.5, S.y + S.height * 0.78); await page.waitForTimeout(200);
-  await arm("Crop"); await page.waitForTimeout(250); await pointerDrag(S.x + 10, S.y + 10, S.x + S.width * 0.85, S.y + S.height * 0.7); await page.waitForTimeout(200);
+  await arm("Highlight"); await page.waitForTimeout(250); S = await surf.boundingBox(); await touchDrag(S.x + S.width * 0.1, S.y + S.height * 0.15, S.x + S.width * 0.6, S.y + S.height * 0.18); await page.waitForTimeout(200);
+  await arm("Draw"); await page.waitForTimeout(250); S = await surf.boundingBox(); await pointerDrag(S.x + S.width * 0.15, S.y + S.height * 0.7, S.x + S.width * 0.5, S.y + S.height * 0.78); await page.waitForTimeout(200);
+  await arm("Crop"); await page.waitForTimeout(250); S = await surf.boundingBox(); await pointerDrag(S.x + 10, S.y + 10, S.x + S.width * 0.85, S.y + S.height * 0.7); await page.waitForTimeout(200);
   const keep = page.getByRole("button", { name: "Keep this area" }); const cropOk = (await keep.count()) > 0; if (cropOk) await keep.tap();
   await page.waitForTimeout(400);
   const types = await page.locator("[data-object-type]").evaluateAll((e) => e.map((x) => x.dataset.objectType));

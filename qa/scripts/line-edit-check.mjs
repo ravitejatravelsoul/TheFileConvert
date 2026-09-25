@@ -1,0 +1,27 @@
+// Real-scan line-level OCR edit (the flow that failed on production), then render the row.
+import { chromium } from "@playwright/test";
+import { pdfTexts, pdfPixels } from "./lib.mjs";
+import { execFileSync } from "node:child_process";
+const BASE = process.env.BASE ?? "http://localhost:3000";
+const REAL = "C:/Users/ravit/Downloads/TheFileConvert_Scanned_OCR_Test.pdf";
+const b = await chromium.launch(); const ctx = await b.newContext({ acceptDownloads: true, viewport: { width: 1440, height: 1000 } }); const p = await ctx.newPage();
+await p.goto(BASE + "/pdf/editor"); await p.locator('input[type="file"]').setInputFiles(REAL);
+const surf = p.locator('[data-testid="page-surface"]').first(); await surf.waitFor({ timeout: 30000 });
+await p.getByRole("button", { name: "Fit page" }).click(); await p.waitForTimeout(800);
+await p.getByRole("button", { name: "Recognize current page" }).click().catch(async () => p.getByRole("button", { name: "Recognize Text" }).first().click());
+const line = p.getByRole("button", { name: /Edit recognized line: .*12\/20\/2026/ }).first(); await line.waitFor({ timeout: 150000 });
+const wFrom = await p.getByRole("button", { name: /Edit recognized word: 02\/08\/2026/ }).first().boundingBox();
+const wUntil = await p.getByRole("button", { name: /Edit recognized word: UNTIL/ }).first().boundingBox();
+await p.mouse.click((wFrom.x + wFrom.width + wUntil.x) / 2, wUntil.y + wUntil.height / 2);
+const dlg = p.getByRole("dialog", { name: "Edit text" }); await dlg.waitFor();
+const cur = await dlg.locator("input[type=text]").inputValue();
+await dlg.locator("input[type=text]").fill(cur.replace("12/20/2026", "12/20/2028")); await p.waitForTimeout(600);
+const warning = (await dlg.innerText()).includes("shrunk to fit");
+await dlg.getByRole("button", { name: "Save correction" }).click(); await dlg.waitFor({ state: "hidden" });
+const [dl] = await Promise.all([p.waitForEvent("download"), p.getByRole("button", { name: /Export PDF/ }).click()]);
+const out = "qa/evidence/out/line-edit-check.pdf"; await dl.saveAs(out);
+const rowInk = (img) => { let n = 0; for (let y = Math.round(img.h * 0.255); y < Math.round(img.h * 0.29); y++) for (let x = Math.round(img.w * 0.07); x < Math.round(img.w * 0.9); x++) if (img.d[(y * img.w + x) * 4] < 110) n++; return n; };
+const a = await pdfPixels(REAL, 1, 1.5), bb = await pdfPixels(out, 1, 1.5);
+console.log(JSON.stringify({ dialogValue: cur, overflowWarningShown: warning, text: (await pdfTexts(out))[0].text.match(/VALID FROM.*?2028/)?.[0], rowInk: `${rowInk(a)} -> ${rowInk(bb)}` }));
+execFileSync("node", ["qa/scripts/render-page.mjs", out, "1", "2", process.env.SHOT ?? "qa/evidence/line-edit-check.png", "0", "0.2", "1", "0.12"]);
+await b.close();

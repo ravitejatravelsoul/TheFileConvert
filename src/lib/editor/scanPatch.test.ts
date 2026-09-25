@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { computeFeatherPx, peakInkColor } from "./scanPatch";
+import { computeFeatherPx, fitFontSizeToWidth, peakInkColor } from "./scanPatch";
 import type { PixelSource } from "./regionColor";
 
 describe("computeFeatherPx", () => {
@@ -53,5 +53,35 @@ describe("peakInkColor", () => {
   it("returns null when there is too little ink to judge", () => {
     const blank: PixelSource = { width: 40, height: 20, getPixel: () => [242, 242, 237, 255] };
     expect(peakInkColor(blank, { x: 0, y: 0, width: 40, height: 20 }, paper)).toBeNull();
+  });
+});
+
+describe("fitFontSizeToWidth", () => {
+  // Text width proportional to size, like a real font: `perPt` px of width per point of size.
+  const widthFor = (perPt: number) => (size: number) => size * perPt;
+
+  it("leaves text that already fits unchanged", () => {
+    expect(fitFontSizeToWidth(20, widthFor(5), 150)).toEqual({ size: 20, overflow: false });
+  });
+
+  it("shrinks to fit without flagging overflow when the legibility floor is enough", () => {
+    const r = fitFontSizeToWidth(20, widthFor(5), 90); // needs 18pt (0.9x), floor is 0.72x
+    expect(r.overflow).toBe(false);
+    expect(r.size * 5).toBeLessThanOrEqual(90);
+  });
+
+  it("regression: text too wide even at the legibility floor is shrunk the rest of the way, never left to be clipped", () => {
+    // A whole scanned line redrawn in a wider matched face needed well below the floor to fit; the
+    // old code stopped at the floor, drew anyway, and the patch edge cut the last characters off.
+    const widthAt = widthFor(10);
+    const r = fitFontSizeToWidth(20, widthAt, 100); // needs 10pt (0.5x) — below the 0.72x floor
+    expect(r.overflow).toBe(true);
+    expect(widthAt(r.size)).toBeLessThanOrEqual(100);
+  });
+
+  it("still fits when measurement isn't perfectly proportional (hinting/rounding)", () => {
+    const widthAt = (s: number) => Math.ceil(s * 10.3) + 1;
+    const r = fitFontSizeToWidth(20, widthAt, 97);
+    expect(widthAt(r.size)).toBeLessThanOrEqual(97);
   });
 });

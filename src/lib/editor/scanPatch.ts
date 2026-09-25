@@ -226,6 +226,29 @@ function rgbToCssColor(c: RgbColor): string {
   return `rgb(${Math.round(c.r * 255)}, ${Math.round(c.g * 255)}, ${Math.round(c.b * 255)})`;
 }
 
+/**
+ * Shrinks a font size until text of that size fits `availableWidth`. Prefers stopping at the
+ * legibility floor (MIN_SHRINK_FACTOR of the original size); if the text still doesn't fit there,
+ * keeps shrinking the rest of the way and reports `overflow` so the caller can warn. It never
+ * returns a size whose text is wider than the space: drawing that would be clipped by the patch's
+ * own edge and silently drop characters (a line edit once exported "12/20/2028" as "12/20/202").
+ * `widthAt(size)` measures the text at a given size.
+ */
+export function fitFontSizeToWidth(size: number, widthAt: (size: number) => number, availableWidth: number): { size: number; overflow: boolean } {
+  let width = widthAt(size);
+  if (width <= availableWidth) return { size, overflow: false };
+  let fitted = Math.max(size * MIN_SHRINK_FACTOR, size * (availableWidth / width));
+  width = widthAt(fitted);
+  if (width <= availableWidth) return { size: fitted, overflow: false };
+  // Text width is proportional to font size, so one proportional step lands it inside the space;
+  // a second guards against measurement rounding.
+  for (let i = 0; i < 2 && width > availableWidth; i++) {
+    fitted *= availableWidth / width;
+    width = widthAt(fitted);
+  }
+  return { size: fitted, overflow: true };
+}
+
 export function composeOcrPatch(input: ComposeOcrPatchInput): ComposeOcrPatchResult | null {
   if (typeof document === "undefined") return null;
   const {
@@ -433,12 +456,14 @@ export function composeOcrPatch(input: ComposeOcrPatchInput): ComposeOcrPatchRes
       }
     }
     if (naturalWidth > availableWidthPx) {
-      const floor = size * MIN_SHRINK_FACTOR;
-      const scaled = size * (availableWidthPx / naturalWidth);
-      size = Math.max(floor, scaled);
+      const fitted = fitFontSizeToWidth(size, (s) => {
+        ctx.font = fontString(fontCandidate, s);
+        return ctx.measureText(newText).width;
+      }, availableWidthPx);
+      size = fitted.size;
+      overflow = fitted.overflow;
       ctx.font = fontString(fontCandidate, size);
       naturalWidth = ctx.measureText(newText).width;
-      if (naturalWidth > availableWidthPx) overflow = true;
     }
 
     const baselineLocalPx = ((digitSwap && inkTop >= 0 ? wordRectPx.y + inkBottom + 0.7 : (seatedBaselinePx ?? input.baselinePx)) - patchRectPx.y) * pixelScale;

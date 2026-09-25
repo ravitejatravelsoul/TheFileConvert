@@ -442,8 +442,9 @@ test.describe("PDF Editor: OCR visual-fidelity fixtures", () => {
 
     const untilBox = await page.getByRole("button", { name: /Edit recognized word: UNTIL/i }).first().boundingBox();
     const firstDateBox = await page.getByRole("button", { name: /Edit recognized word: 02\/08\/2026/i }).first().boundingBox();
+    const secondDateBox = await page.getByRole("button", { name: /Edit recognized word: 12\/20\/2026/i }).first().boundingBox();
     const surfaceBox = await page.locator('[data-testid="page-surface"]').first().boundingBox();
-    if (!untilBox || !firstDateBox || !surfaceBox) throw new Error("missing word/surface bounding boxes");
+    if (!untilBox || !firstDateBox || !secondDateBox || !surfaceBox) throw new Error("missing word/surface bounding boxes");
 
     // Word buttons sit on top of the line button, so — like a user — reach the line through the gap
     // between two words.
@@ -482,6 +483,10 @@ test.describe("PDF Editor: OCR visual-fidelity fixtures", () => {
       // Redrawn in a matched face its pixels may differ, but its text must still be there.
       expect(now, `${label} still has its text after a line edit (was ${was} dark px, now ${now})`).toBeGreaterThan(was * 0.4);
     }
+    // The redrawn line must not be clipped at the patch's right edge: the final digit ("8") has to
+    // be there. A line redrawn in a wider face used to be cut off, exporting "12/20/202".
+    const lastDigit = toPx({ x: secondDateBox.x + secondDateBox.width * 0.85, y: secondDateBox.y, width: secondDateBox.width * 0.2, height: secondDateBox.height });
+    expect(ink(after, lastDigit), "the final digit of the edited date is present (not clipped)").toBeGreaterThan(10);
     expect(await extractText(bytes, 1)).toContain("12/20/2028");
   });
 
