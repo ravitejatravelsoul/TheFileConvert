@@ -1,0 +1,176 @@
+[
+ {
+  "tool": "smoke",
+  "test": "/ → 200",
+  "verdict": "PASS",
+  "detail": "h1: Every file.\nAny format."
+ },
+ {
+  "tool": "smoke",
+  "test": "/tools → 200",
+  "verdict": "PASS",
+  "detail": "h1: What do you want to do?"
+ },
+ {
+  "tool": "smoke",
+  "test": "/pdf/compress → 200",
+  "verdict": "PASS",
+  "detail": "h1: Compress PDF"
+ },
+ {
+  "tool": "smoke",
+  "test": "/image/compress → 200",
+  "verdict": "PASS",
+  "detail": "h1: Compress Image"
+ },
+ {
+  "tool": "smoke",
+  "test": "/pdf/merge → 200",
+  "verdict": "PASS",
+  "detail": "h1: Merge PDF"
+ },
+ {
+  "tool": "smoke",
+  "test": "/pdf/ocr → 200",
+  "verdict": "PASS",
+  "detail": "h1: OCR PDF"
+ },
+ {
+  "tool": "smoke",
+  "test": "/pdf/editor → 200",
+  "verdict": "PASS",
+  "detail": "h1: PDF Editor"
+ },
+ {
+  "tool": "smoke",
+  "test": "/archive/zip → 200",
+  "verdict": "PASS",
+  "detail": "h1: Create ZIP Archive"
+ },
+ {
+  "tool": "smoke",
+  "test": "/data/json-formatter → 200",
+  "verdict": "PASS",
+  "detail": "h1: JSON Formatter & Validator"
+ },
+ {
+  "tool": "smoke",
+  "test": "/about → 200",
+  "verdict": "PASS",
+  "detail": "h1: About TheFileConvert"
+ },
+ {
+  "tool": "smoke",
+  "test": "/privacy → 200",
+  "verdict": "PASS",
+  "detail": "h1: Privacy Policy"
+ },
+ {
+  "tool": "smoke",
+  "test": "/terms → 200",
+  "verdict": "PASS",
+  "detail": "h1: Terms of Use"
+ },
+ {
+  "tool": "smoke",
+  "test": "/definitely-not-a-page → 404 page",
+  "verdict": "PASS",
+  "detail": "404"
+ },
+ {
+  "tool": "pdf-compress",
+  "test": "balanced",
+  "verdict": "FAIL",
+  "detail": "TimeoutError: locator.getAttribute: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('input[name=compress-level]:checked')\u001b[22m\n"
+ },
+ {
+  "tool": "pdf-compress",
+  "test": "small",
+  "verdict": "FAIL",
+  "detail": "TimeoutError: locator.getAttribute: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('input[name=compress-level]:checked')\u001b[22m\n"
+ },
+ {
+  "tool": "ocr",
+  "test": "production: OCR finds 12/20/2026; edited to 12/20/2028; export text layer has 2028; change confined to that word",
+  "verdict": "FAIL",
+  "detail": "textLayer=\"VALID FROM 02/08/2026 UNTIL 12/20/2028\" changedPx=2753 bbox=65-644,333-349"
+ },
+ {
+  "tool": "privacy",
+  "test": "editor+OCR: no non-GET requests, no third-party hosts",
+  "verdict": "PASS",
+  "detail": "nonGET= external="
+ },
+ {
+  "tool": "image-compress",
+  "test": "large JPG",
+  "verdict": "FAIL",
+  "detail": "TimeoutError: locator.innerText: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByTestId('exact-bytes')\u001b[22m\n"
+ },
+ {
+  "tool": "privacy",
+  "test": "PDF compress POST check (see production compress rows)",
+  "verdict": "PASS",
+  "detail": "POSTs=0 recorded per run"
+ },
+ {
+  "tool": "json-formatter",
+  "test": "production JSON keeps 12345678901234567890 (new code)",
+  "verdict": "FAIL",
+  "detail": "{   \"a\": 12345678901234567000 }"
+ },
+ {
+  "tool": "zip",
+  "test": "production extract 7-file ZIP",
+  "verdict": "PASS",
+  "detail": ""
+ },
+ {
+  "tool": "merge",
+  "test": "production merge 14+3 pages",
+  "verdict": "PASS",
+  "detail": ""
+ },
+ {
+  "tool": "seo",
+  "test": "canonical + OpenGraph on 11 pages, no vercel.app",
+  "verdict": "PASS",
+  "detail": ""
+ },
+ {
+  "tool": "seo",
+  "test": "sitemap: 55 URLs all https://thefileconvert.com and all 200; robots allows and points to sitemap",
+  "verdict": "PASS",
+  "detail": ""
+ },
+ {
+  "tool": "(production)",
+  "test": "console/page errors on desktop run",
+  "verdict": "PASS",
+  "detail": ""
+ },
+ {
+  "tool": "(production)",
+  "test": "HTTP 4xx/5xx responses on desktop run (excluding intentional 404 page)",
+  "verdict": "PASS",
+  "detail": "404 https://thefileconvert.com/definitely-not-a-page"
+ },
+ {
+  "tool": "(production)",
+  "test": "non-GET requests on desktop run (all tools)",
+  "verdict": "PASS",
+  "detail": ""
+ },
+ {
+  "tool": "(production)",
+  "test": "third-party hosts contacted",
+  "verdict": "PASS",
+  "detail": ""
+ },
+ {
+  "tool": "mobile",
+  "test": "Pixel 7 emulation",
+  "verdict": "FAIL",
+  "detail": "TimeoutError: locator.click: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('button', { name: 'Keep this area' })\u001b[22m\n"
+ }
+]
