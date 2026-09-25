@@ -419,6 +419,22 @@ test.describe("PDF Editor: typing right after placing text", () => {
     await page.keyboard.type("Reviewed by QA"); // no waiting for the editor to appear
     await expect(page.getByTestId("canvas-text-editor")).toHaveValue("Reviewed by QA");
   });
+
+  test("typing across a pause (e.g. thinking mid-sentence) never loses what was already typed", async ({ page }) => {
+    await openFile(page, path.join(FIXTURES, "sample-a.pdf"));
+    const sb = await surfaceBox(page);
+    await page.getByRole("button", { name: "Text", exact: true }).click();
+    await page.mouse.click(sb.x + 60, sb.y + 320);
+    const editor = page.getByTestId("canvas-text-editor");
+    await expect(editor).toBeFocused();
+
+    await page.keyboard.type("Reviewed by"); // replaces the auto-selected placeholder ("New text")
+    await expect(editor).toHaveValue("Reviewed by");
+    await page.waitForTimeout(300);
+    await page.keyboard.type(" audit");
+
+    await expect(editor).toHaveValue("Reviewed by audit");
+  });
 });
 
 test.describe("PDF Editor: pages that carry a CropBox", () => {
@@ -475,9 +491,20 @@ test.describe("PDF Editor: a page wider than its viewport", () => {
     await page.setViewportSize({ width: 480, height: 800 });
     await openFile(page, path.join(FIXTURES, "multi-page.pdf")); // wider than the viewport at 100%
     await expect.poll(async () => (await surfaceBox(page)).width, { timeout: 20_000 }).toBeGreaterThan(480); // wider than the 480px viewport
+
+    // The page's own <canvas> is rendered asynchronously (pdf.js rasterization) and is swapped out
+    // for a fresh one on every scale change — including the auto-fit pass this wide page triggers on
+    // load — via a plain `host.innerHTML = ""; host.appendChild(canvas)`. So a canvas can briefly not
+    // exist in the DOM even after the *container* (sized synchronously from `spec.scale`) has already
+    // settled at its final width. Poll the canvas itself, not just its container, so the assertion
+    // below only ever reads a canvas that is actually present and already at its final size.
+    const canvas = page.locator('[data-testid="page-surface"] canvas').first();
+    await expect.poll(async () => (await canvas.boundingBox())?.width ?? 0, { timeout: 20_000 }).toBeGreaterThan(480);
+
     const surfaceWidth = (await surfaceBox(page)).width;
-    const canvasWidth = (await page.locator('[data-testid="page-surface"] canvas').first().boundingBox())!.width;
-    expect(Math.abs(surfaceWidth - canvasWidth)).toBeLessThan(1.5);
+    const canvasBox = await canvas.boundingBox();
+    if (!canvasBox) throw new Error("page canvas disappeared between the poll and the final read");
+    expect(Math.abs(surfaceWidth - canvasBox.width)).toBeLessThan(1.5);
   });
 });
 

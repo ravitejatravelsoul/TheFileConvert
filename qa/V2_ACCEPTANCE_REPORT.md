@@ -129,13 +129,29 @@ the effect is actually meant to guard against), never touching an in-progress ed
 **Re-verified**: re-ran the exact failing flow — the exported text now correctly reads "Reviewed by audit"
 in full (`qa/evidence/v2-editor-b.log`, `qa/screenshots/editor-b-export-p1.png` after fix).
 
-**Automated regression coverage**: attempted but not landed this session. A real-timing reproduction is
-inherently racy in Playwright, and a deterministic version built on `page.clock` (fast-forwarding the
-pending timer) did not reliably reproduce the failure in this harness even against the unfixed code — most
-likely because installing fake timers interferes with React's own effect-scheduling, a known class of
-incompatibility. Rather than ship a test that doesn't actually test anything, this is flagged as a residual
-follow-up instead of claimed as covered. The manual reproduce → fix → re-verify cycle above is real evidence
-of both the bug and the fix; it just isn't machine-enforced yet.
+**Automated regression coverage: NOT RELIABLY AUTOMATABLE in this harness.** Four separate attempts were
+made across two sessions, and each candidate test was checked against the pre-fix `ObjectView.tsx`
+(`git checkout 23cc4eb~1 -- src/app/pdf/editor/ObjectView.tsx`) to confirm it would actually catch the bug.
+None did — every one passed on the buggy code too, so none could be kept as a regression test:
+
+1. Fast real typing immediately after placing a box (with and without per-keystroke delay) — passes on buggy code.
+2. `page.clock` fake timers, fast-forwarding the pending `setTimeout(0)` between two typing bursts — passes
+   on buggy code; the selection never changed after the fast-forward, consistent with fake timers
+   interfering with React's own effect scheduling (a known incompatibility).
+3. Type a batch, wait a bounded interval so the `setTimeout(0)` has certainly fired, type more — passes on
+   buggy code.
+4. The exact real sequence that found the bug, inside the Playwright test runner (OCR recognize → correct a
+   word via the dialog → draw a highlight and a rectangle → place text → type fast) — passes on buggy code.
+
+The same sequence *does* reproduce reliably via the standalone `qa/scripts/editor-b.mjs` harness (a direct
+`chromium.launch()` rather than the Playwright test runner's managed browser/context), which is how the
+bug was found and how the fix was verified (before: "ed by audit" in the exported PDF; after: "Reviewed by
+audit"). The difference is most likely in browser launch/context configuration affecting timer and focus
+scheduling, which I did not pin down. Rather than ship a test that is green whether or not the bug is
+present — which would be false assurance — the evidence of record is that real-browser reproduce → fix →
+re-verify cycle (`qa/evidence/v2-editor-b.log`). One test from attempt 3 was kept, renamed and re-described
+honestly as a general "typing across a pause never loses earlier text" invariant, without claiming it
+guards this specific regression.
 
 ## 5. OCR — re-tested on `rebuild/v2`
 
@@ -207,23 +223,30 @@ non-localhost host recorded across a full context; all five came back empty:
 - **ESLint**: `npx eslint .` → 0 errors, 0 warnings.
 - **`npm run build`**: succeeds, all routes prerender.
 - **`npm audit`**: 0 vulnerabilities.
-- **Playwright, full suite, `--workers=1`** (`qa/evidence/v2-full-w1.log`): **381 passed, 1 failed, 8
-  skipped** (390 total). The one failure
-  (`pdf-editor-interaction.spec.ts` — "a page wider than its viewport… scrolls instead of being squeezed")
-  is a `canvas.boundingBox()` timing read that returned `null` once; re-run in isolation immediately after,
-  it **passed** (`1 passed (22.3s)`). It's in a spec file untouched by this branch and unrelated to the V2
-  changes — a pre-existing, isolated render-timing flake, not a regression. With that one confirmed-flaky
-  test excluded, this is a clean 0-failure run including `mobile-chromium-ocr`, which was not skipped or
-  assumed — it ran and passed as part of this same suite.
-  - An earlier default-concurrency (4-worker) run of the same suite showed ~90 failures; investigated and
-    found to be Windows trace-file/browser-context contention under heavy parallel load (not application
-    bugs) — see the prior session's evidence; this section's `--workers=1` run is the one that counts as
-    the authoritative "0 failures" result requested.
+- **Playwright, full suite, one single `--workers=1` invocation — FINAL RELEASE GATE**
+  (`qa/evidence/v2-final-gate.log`): **384 passed, 0 failed, 8 skipped** (392 total), exit code 0.
+  Every project ran in that one invocation, including `mobile-chromium-ocr`.
+  - The one failure from the previous full run (`pdf-editor-interaction.spec.ts` — "a page wider than its
+    viewport… scrolls instead of being squeezed", `TypeError: Cannot read properties of null (reading
+    'width')`) was root-caused and fixed rather than dismissed as flaky. **Cause (test synchronization, not
+    app behavior):** the page's `<canvas>` is created asynchronously by pdf.js inside a `useEffect` and
+    attached via `host.innerHTML = ""; host.appendChild(canvas)` — so on every scale change (including the
+    auto-fit pass this wide page triggers on load) the canvas is briefly *absent* from the DOM, even though
+    its container (sized synchronously from `spec.scale`) has already settled at its final width. The test
+    polled the container's width, then did a single un-polled `canvas.boundingBox()!` read, which could
+    land in that window and get `null`. **Fix:** poll the canvas itself (`expect.poll` on its bounding box
+    width) before reading it — a deterministic readiness condition, no sleeps, no retries, no loosened
+    assertion. Verified 5/5 on `chromium` and 3/3 on `mobile-chromium` in isolation, then clean in the full
+    gate run above.
+  - An earlier default-concurrency (4-worker) run showed ~90 failures, traced to Windows trace-file /
+    browser-context contention under heavy parallel load (not application bugs); `--workers=1` is the
+    authoritative configuration for this machine.
 
 ## 10. Remaining limitations
 
-- Automated regression coverage for the fixed "dropped keystrokes" defect was attempted (real-timing, then
-  `page.clock`-based) and not reliably landed this session — flagged above, not silently dropped.
+- Automated regression coverage for the fixed "dropped keystrokes" defect is not reliably achievable in the
+  Playwright test runner (four attempts, each verified against the pre-fix code, none discriminating — see
+  §4). The standalone real-browser reproduce → fix → re-verify evidence stands in its place.
 - Two OCR recognized-line overlay buttons are under the 32px touch-target guideline by design (see §7).
 - A text correction in the editor visually covers the original but doesn't remove it from the file — a
   disclosed, intentional limitation (§4), not new to this pass.
