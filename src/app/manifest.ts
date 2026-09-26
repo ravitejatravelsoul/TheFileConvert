@@ -2,24 +2,16 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "TheFileConvert — Every File. Any Format. Free.",
-    short_name: "TheFileConvert",
-    description: "Free file conversion and compression tools that run privately in your browser.",
+    name: "TheFileConvert",
+    short_name: "FileConvert",
+    description: "Compress, convert and edit files directly in your browser.",
     start_url: "/",
     display: "standalone",
-    background_color: "#fafaf9",
-    theme_color: "#ea580c",
+    background_color: "#f7f6f2",
+    theme_color: "#f7f6f2",
     icons: [
-      {
-        src: "/favicon.svg",
-        sizes: "any",
-        type: "image/svg+xml",
-      },
-      {
-        src: "/apple-icon",
-        sizes: "180x180",
-        type: "image/png",
-      },
+      { src: "/favicon.svg", sizes: "any", type: "image/svg+xml" },
+      { src: "/apple-icon", sizes: "180x180", type: "image/png" },
     ],
   };
 }

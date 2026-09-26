@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { PDFDocument } from "pdf-lib";
-import { analyzePdfImages, compressPdfDocument, compressPdfToTarget, describeAnalysis, type JpegReencoder } from "./pdf-compress";
+import { analyzePdfImages, compressPdfDocument, compressPdfToTarget, compressionOutlook, type JpegReencoder } from "./pdf-compress";
 
 const JPEG = new Uint8Array(fs.readFileSync(path.join(__dirname, "../../../e2e/fixtures/sample.jpg")));
 
@@ -32,22 +32,22 @@ describe("analyzePdfImages", () => {
     doc.addPage().drawText("just text");
     const a = await analyzePdfImages(await doc.save());
     expect(a.imageCount).toBe(0);
-    expect(describeAnalysis(a).suggestLossy).toBe(false);
+    expect(compressionOutlook(a).kind).toBe("text-only");
   });
 });
 
-describe("describeAnalysis", () => {
+describe("compressionOutlook", () => {
   const base = { totalBytes: 1000, imageCount: 2, jpegCount: 2, imageBytes: 900, jpegBytes: 900, duplicateCount: 0, duplicateBytes: 0 };
-  it("tells the user up front that an image-dominated PDF won't shrink losslessly", () => {
-    const d = describeAnalysis(base);
-    expect(d.suggestLossy).toBe(true);
-    expect(d.advice).toMatch(/barely change/i);
+  it("says an image-heavy PDF has room to shrink", () => {
+    const o = compressionOutlook(base);
+    expect(o.kind).toBe("good-room");
+    expect(o.text).toMatch(/90% of the file/);
   });
-  it("does not push lossy compression on a mostly-text PDF", () => {
-    expect(describeAnalysis({ ...base, imageBytes: 100, jpegBytes: 100 }).suggestLossy).toBe(false);
+  it("sets modest expectations for a mostly-text PDF", () => {
+    expect(compressionOutlook({ ...base, imageBytes: 100, jpegBytes: 100 }).kind).toBe("little-room");
   });
-  it("says when images are not JPEG and so cannot be recompressed", () => {
-    expect(describeAnalysis({ ...base, jpegCount: 0, jpegBytes: 0 }).advice).toMatch(/only recompress JPEG/i);
+  it("says when the images are in encodings that are kept as-is", () => {
+    expect(compressionOutlook({ ...base, jpegCount: 0, jpegBytes: 0 }).kind).toBe("unsupported-images");
   });
 });
 
@@ -145,10 +145,9 @@ describe("compressPdfToTarget", () => {
   });
 });
 
-describe("describeAnalysis with repeated images", () => {
-  it("says lossless will help when merging repeats alone saves a lot (not 'barely change')", () => {
-    const d = describeAnalysis({ totalBytes: 1000, imageCount: 6, jpegCount: 6, imageBytes: 990, jpegBytes: 990, duplicateCount: 5, duplicateBytes: 820 });
-    expect(d.advice).toMatch(/Lossless mode should still help/);
-    expect(d.advice).not.toMatch(/barely change/);
+describe("compressionOutlook with repeated images", () => {
+  it("mentions that repeats merge for free", () => {
+    const o = compressionOutlook({ totalBytes: 1000, imageCount: 6, jpegCount: 6, imageBytes: 990, jpegBytes: 990, duplicateCount: 5, duplicateBytes: 820 });
+    expect(o.text).toMatch(/5 repeated images can be merged for free/);
   });
 });

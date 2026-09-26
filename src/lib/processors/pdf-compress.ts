@@ -136,30 +136,23 @@ export async function analyzePdfImages(bytes: ArrayBuffer | Uint8Array): Promise
   };
 }
 
-/** What the analysis means for the user, before they press anything. */
-export function describeAnalysis(a: PdfImageAnalysis): { headline: string; advice: string; suggestLossy: boolean } {
+export type CompressionOutlook = "text-only" | "little-room" | "unsupported-images" | "good-room";
+
+/** What the analysis means for the user before they pick a target, in one sentence. */
+export function compressionOutlook(a: PdfImageAnalysis): { kind: CompressionOutlook; text: string } {
   const share = a.totalBytes > 0 ? a.imageBytes / a.totalBytes : 0;
-  const pct = Math.round(share * 100);
+  const recompressible = a.jpegCount + (a.flateCount ?? 0);
+  const repeats = a.duplicateCount > 0 ? ` ${a.duplicateCount} repeated image${a.duplicateCount === 1 ? "" : "s"} can be merged for free.` : "";
   if (a.imageCount === 0) {
-    return { headline: "This PDF has no embedded images — it is text and vector content.", advice: "Lossless optimization is all that applies here, and it usually saves only a few percent (often nothing if the file was already optimized).", suggestLossy: false };
+    return { kind: "text-only", text: "Text and vector content only, so there is little to shrink — expect a small saving at most." };
   }
-  const dup = a.duplicateCount > 0 ? ` ${a.duplicateCount} of them are exact repeats that can be merged with no quality loss.` : "";
   if (share < 0.25) {
-    return { headline: `${a.imageCount} embedded image${a.imageCount === 1 ? "" : "s"} (${pct}% of the file).${dup}`, advice: "Mostly text: expect little from lossless optimization.", suggestLossy: false };
+    return { kind: "little-room", text: `Mostly text: images are ${Math.round(share * 100)}% of the file, so savings will be modest.${repeats}` };
   }
-  const flate = a.flateCount ?? 0;
-  if (a.jpegCount + flate === 0) {
-    return { headline: `${a.imageCount} embedded image${a.imageCount === 1 ? "" : "s"} (${pct}% of the file), none in a format this tool can recompress.${dup}`, advice: "This tool can only recompress JPEG and lossless (Flate) RGB/grayscale images. Other image encodings (such as black-and-white JBIG2/CCITT, CMYK or indexed colour) are kept exactly as they are, so savings will be small.", suggestLossy: false };
+  if (recompressible === 0) {
+    return { kind: "unsupported-images", text: `Images make up ${Math.round(share * 100)}% of the file, but in encodings that are kept as they are (such as black-and-white fax or CMYK), so savings will be small.${repeats}` };
   }
-  if (a.jpegCount === 0 && flate > 0) {
-    return { headline: `${a.imageCount} embedded image${a.imageCount === 1 ? "" : "s"} ${a.imageCount === 1 ? "makes" : "make"} up ${pct}% of this file — stored losslessly (uncompressed-quality scan data).${dup}`, advice: "Lossless optimization cannot shrink this kind of scan without changing it. Balanced or Smallest re-encode the pages as JPEG, which usually cuts the size by a large factor (this lowers image quality).", suggestLossy: true };
-  }
-  const dupShare = a.totalBytes > 0 ? a.duplicateBytes / a.totalBytes : 0;
-  const headline = `${a.imageCount} embedded image${a.imageCount === 1 ? "" : "s"} ${a.imageCount === 1 ? "makes" : "make"} up ${pct}% of this file.${dup}`;
-  if (dupShare >= 0.1) {
-    return { headline, advice: `Lossless mode should still help: merging the repeated images alone saves roughly ${Math.round(dupShare * 100)}% with no quality loss. Balanced or Smallest go further by lowering image quality.`, suggestLossy: true };
-  }
-  return { headline, advice: "Lossless optimization will barely change a file like this. To actually shrink it, choose Balanced or Smallest below (this lowers image quality).", suggestLossy: true };
+  return { kind: "good-room", text: `Images make up ${Math.round(share * 100)}% of the file — there is real room to shrink it.${repeats}` };
 }
 
 export interface CompressResult {

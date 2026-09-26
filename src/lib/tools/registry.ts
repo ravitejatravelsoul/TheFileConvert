@@ -1,124 +1,354 @@
-import { pdfTools } from "./pdf-tools";
-import { imageTools, imageConvertTools } from "./image-tools";
-import { dataTools, archiveTools } from "./data-tools";
-import { roadmapTools } from "./roadmap-tools";
-import type { ToolCategory, ToolDefinition } from "./types";
+/**
+ * The first-launch tool set. Every route, nav entry, homepage card, sitemap row and smart-entry
+ * suggestion reads from this list, so a tool can't appear in one place and be missing from another.
+ */
 
-export const allTools: ToolDefinition[] = [
-  ...pdfTools,
-  ...imageTools,
-  ...imageConvertTools,
-  ...dataTools,
-  ...archiveTools,
-  ...roadmapTools,
+export type ToolCategory = "compress" | "convert" | "edit" | "organize";
+
+export type ToolId =
+  | "compress-pdf"
+  | "compress-image"
+  | "convert-image"
+  | "pdf-to-image"
+  | "image-to-pdf"
+  | "merge-pdf"
+  | "split-pdf"
+  | "organize-pdf"
+  | "pdf-editor";
+
+export interface ToolFaq {
+  q: string;
+  a: string;
+}
+
+export interface Tool {
+  id: ToolId;
+  href: `/${ToolId}`;
+  name: string;
+  /** One line for cards and menus. */
+  short: string;
+  /** Page <title> (the layout appends the brand). */
+  seoTitle: string;
+  seoDescription: string;
+  category: ToolCategory;
+  /** What the drop zone asks for. */
+  inputNoun: string;
+  accept: string;
+  acceptedExtensions: string[];
+  acceptedMimeTypes: string[];
+  multiple: boolean;
+  maxRecommendedSizeMb: number;
+  faq: ToolFaq[];
+}
+
+const PDF_EXT = ["pdf"];
+const PDF_MIME = ["application/pdf"];
+const RASTER_EXT = ["jpg", "jpeg", "png", "webp"];
+const RASTER_MIME = ["image/jpeg", "image/png", "image/webp"];
+
+export const TOOLS: Tool[] = [
+  {
+    id: "compress-pdf",
+    href: "/compress-pdf",
+    name: "Compress PDF",
+    short: "Pick a target size — 500 KB, 1 MB, 2 MB — and get a PDF under it.",
+    seoTitle: "Compress PDF to a target size",
+    seoDescription:
+      "Make a PDF smaller than 500 KB, 1 MB or any size you choose. Runs in your browser — the file never leaves your device.",
+    category: "compress",
+    inputNoun: "PDF",
+    accept: ".pdf,application/pdf",
+    acceptedExtensions: PDF_EXT,
+    acceptedMimeTypes: PDF_MIME,
+    multiple: false,
+    maxRecommendedSizeMb: 200,
+    faq: [
+      {
+        q: "How do I get a PDF under a specific size?",
+        a: "Choose a target such as 1 MB or type your own. TheFileConvert first tries a lossless clean-up, then steps down image quality only as far as needed, and stops at the first result that fits.",
+      },
+      {
+        q: "What if my PDF can't get that small?",
+        a: "You'll see the closest size we could reach without making the pages unreadable, with the exact number of bytes. We never label a result as reaching your target when it didn't.",
+      },
+      {
+        q: "Will text stay sharp?",
+        a: "Text and vector graphics are kept as they are. Only embedded images (scans and photos) are re-encoded, so a text-only PDF has little room to shrink.",
+      },
+      {
+        q: "Is my PDF uploaded?",
+        a: "No. Compression runs inside this browser tab. The file is never sent to a server.",
+      },
+    ],
+  },
+  {
+    id: "compress-image",
+    href: "/compress-image",
+    name: "Compress Image",
+    short: "Shrink a JPG, PNG or WebP to 100 KB, 500 KB or any size you need.",
+    seoTitle: "Compress an image to a target size",
+    seoDescription:
+      "Reduce a JPG, PNG or WebP to under 100 KB, 250 KB, 1 MB or your own limit — no quality slider, no upload.",
+    category: "compress",
+    inputNoun: "image",
+    accept: ".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp",
+    acceptedExtensions: RASTER_EXT,
+    acceptedMimeTypes: RASTER_MIME,
+    multiple: false,
+    maxRecommendedSizeMb: 60,
+    faq: [
+      {
+        q: "Why is there no quality slider?",
+        a: "Most people know the size they need, not the quality number that gets them there. You pick the size; TheFileConvert tries the highest quality first and only reduces dimensions if quality alone can't reach it.",
+      },
+      {
+        q: "Why did my PNG become a WebP?",
+        a: "PNG is lossless, so it can't be squeezed much. WebP keeps transparency and reaches far smaller sizes, so it's used when a PNG needs to shrink. You'll always see when the format changes.",
+      },
+      {
+        q: "Is my image uploaded?",
+        a: "No. The image is processed in this browser tab and never leaves your device.",
+      },
+    ],
+  },
+  {
+    id: "convert-image",
+    href: "/convert-image",
+    name: "Convert Images",
+    short: "JPG, PNG, WebP and SVG — choose the format you need, nothing else.",
+    seoTitle: "Convert images — JPG, PNG, WebP, SVG",
+    seoDescription:
+      "Convert JPG to PNG, PNG to JPG, WebP to JPG, SVG to PNG and more. One click, no settings, no upload.",
+    category: "convert",
+    inputNoun: "images",
+    accept: ".jpg,.jpeg,.png,.webp,.svg,image/jpeg,image/png,image/webp,image/svg+xml",
+    acceptedExtensions: [...RASTER_EXT, "svg"],
+    acceptedMimeTypes: [...RASTER_MIME, "image/svg+xml"],
+    multiple: true,
+    maxRecommendedSizeMb: 60,
+    faq: [
+      {
+        q: "Which conversions are supported?",
+        a: "JPG → PNG or WebP, PNG → JPG or WebP, WebP → JPG or PNG, and SVG → PNG.",
+      },
+      {
+        q: "What happens to transparency when converting to JPG?",
+        a: "JPG can't store transparency, so transparent areas are filled with white. PNG and WebP keep it.",
+      },
+      {
+        q: "Are my images uploaded?",
+        a: "No. Conversion happens in your browser; nothing is sent to a server.",
+      },
+    ],
+  },
+  {
+    id: "pdf-to-image",
+    href: "/pdf-to-image",
+    name: "PDF to Image",
+    short: "Turn every page — or just the ones you pick — into JPG or PNG.",
+    seoTitle: "PDF to JPG or PNG",
+    seoDescription: "Convert PDF pages to high-resolution JPG or PNG images. Pick pages, download one or all as a ZIP.",
+    category: "convert",
+    inputNoun: "PDF",
+    accept: ".pdf,application/pdf",
+    acceptedExtensions: PDF_EXT,
+    acceptedMimeTypes: PDF_MIME,
+    multiple: false,
+    maxRecommendedSizeMb: 200,
+    faq: [
+      {
+        q: "What resolution are the images?",
+        a: "Pages are rendered at 2× their PDF size (about 144 DPI), which is sharp on screens and fine for most printing.",
+      },
+      {
+        q: "Can I convert only some pages?",
+        a: "Yes. Every page shows as a thumbnail — select the ones you want, or convert them all.",
+      },
+    ],
+  },
+  {
+    id: "image-to-pdf",
+    href: "/image-to-pdf",
+    name: "Images to PDF",
+    short: "Combine photos and scans into one PDF, in the order you choose.",
+    seoTitle: "Images to PDF — JPG, PNG, WebP",
+    seoDescription: "Combine JPG, PNG and WebP images into a single PDF. Drag to reorder, choose page size, no upload.",
+    category: "convert",
+    inputNoun: "images",
+    accept: ".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp",
+    acceptedExtensions: RASTER_EXT,
+    acceptedMimeTypes: RASTER_MIME,
+    multiple: true,
+    maxRecommendedSizeMb: 60,
+    faq: [
+      {
+        q: "What page size is used?",
+        a: "By default each page matches its image, so nothing is cropped or padded. You can switch to A4 or Letter with a small margin.",
+      },
+      {
+        q: "Can I change the order?",
+        a: "Yes — drag the cards, or use the arrow buttons on each one.",
+      },
+    ],
+  },
+  {
+    id: "merge-pdf",
+    href: "/merge-pdf",
+    name: "Merge PDF",
+    short: "Put several PDFs together in the order you want.",
+    seoTitle: "Merge PDF files",
+    seoDescription: "Combine multiple PDFs into one. Drag to reorder, see page counts, merge in your browser.",
+    category: "organize",
+    inputNoun: "PDFs",
+    accept: ".pdf,application/pdf",
+    acceptedExtensions: PDF_EXT,
+    acceptedMimeTypes: PDF_MIME,
+    multiple: true,
+    maxRecommendedSizeMb: 200,
+    faq: [
+      {
+        q: "Is there a limit on the number of files?",
+        a: "No fixed limit — it depends on your device's memory. Dozens of ordinary PDFs merge without trouble.",
+      },
+      {
+        q: "Do bookmarks and links survive?",
+        a: "Page content, including text and images, is kept exactly. Document-level extras such as bookmarks may not carry over.",
+      },
+    ],
+  },
+  {
+    id: "split-pdf",
+    href: "/split-pdf",
+    name: "Split PDF",
+    short: "Pull out the pages you need, or split every page into its own file.",
+    seoTitle: "Split PDF — extract pages",
+    seoDescription: "Extract selected pages from a PDF or split every page into a separate file. Visual page picker, no upload.",
+    category: "organize",
+    inputNoun: "PDF",
+    accept: ".pdf,application/pdf",
+    acceptedExtensions: PDF_EXT,
+    acceptedMimeTypes: PDF_MIME,
+    multiple: false,
+    maxRecommendedSizeMb: 200,
+    faq: [
+      {
+        q: "How do I choose pages?",
+        a: "Click the page thumbnails you want. If you prefer, you can also type a range like 1-3, 7.",
+      },
+      {
+        q: "What does 'split every page' give me?",
+        a: "One PDF per page, downloaded together as a ZIP.",
+      },
+    ],
+  },
+  {
+    id: "organize-pdf",
+    href: "/organize-pdf",
+    name: "Organize PDF",
+    short: "Reorder, rotate, duplicate and delete pages with a visual grid.",
+    seoTitle: "Organize PDF pages — reorder, rotate, delete",
+    seoDescription: "Rearrange PDF pages by dragging, rotate them, duplicate or delete them, then save the new PDF.",
+    category: "organize",
+    inputNoun: "PDF",
+    accept: ".pdf,application/pdf",
+    acceptedExtensions: PDF_EXT,
+    acceptedMimeTypes: PDF_MIME,
+    multiple: false,
+    maxRecommendedSizeMb: 200,
+    faq: [
+      {
+        q: "Does rotating reduce quality?",
+        a: "No. Rotation only changes how the page is displayed; the content itself isn't re-rendered.",
+      },
+      {
+        q: "Can I undo a deletion?",
+        a: "Yes — deleted pages can be restored until you save. Your original file is never changed.",
+      },
+    ],
+  },
+  {
+    id: "pdf-editor",
+    href: "/pdf-editor",
+    name: "PDF Editor",
+    short: "Edit text, fix scans, highlight, draw, sign and add images.",
+    seoTitle: "Edit PDF in your browser",
+    seoDescription:
+      "Edit PDF text, correct scanned documents with on-device OCR, highlight, draw, add images and a visual signature. No upload.",
+    category: "edit",
+    inputNoun: "PDF",
+    accept: ".pdf,application/pdf",
+    acceptedExtensions: PDF_EXT,
+    acceptedMimeTypes: PDF_MIME,
+    multiple: false,
+    maxRecommendedSizeMb: 200,
+    faq: [
+      {
+        q: "Can I edit text in a scanned PDF?",
+        a: "Yes. Click Recognize text — the page is read with OCR on your device — then click any word to correct it. The change is painted to match the surrounding scan as closely as possible; always check the preview.",
+      },
+      {
+        q: "Is the signature legally binding?",
+        a: "It's a visual signature — an image of your signature placed on the page. It is not a cryptographic digital signature.",
+      },
+      {
+        q: "Does whiteout remove the text underneath?",
+        a: "No. Whiteout visually covers content; the original is still inside the file. It is not secure redaction.",
+      },
+      {
+        q: "Is my PDF uploaded?",
+        a: "No. The editor, OCR included, runs entirely in your browser.",
+      },
+    ],
+  },
 ];
 
-export const liveTools: ToolDefinition[] = allTools.filter((t) => t.status !== "coming-soon");
-
-export const availableTools: ToolDefinition[] = allTools.filter((t) => t.status === "available");
-
-export function getToolById(id: string): ToolDefinition | undefined {
-  return allTools.find((t) => t.id === id);
-}
-
-export function getToolByHref(href: string): ToolDefinition | undefined {
-  return allTools.find((t) => t.href === href);
-}
-
-export function getToolsByCategory(category: ToolCategory): ToolDefinition[] {
-  return allTools.filter((t) => t.category === category);
-}
-
-export function getToolsAcceptingExtension(extension: string): ToolDefinition[] {
-  const ext = extension.toLowerCase();
-  return liveTools.filter(
-    (t) => t.acceptedExtensions.includes(ext) || t.acceptedExtensions.includes("*")
-  );
-}
-
-export function getRelatedTools(tool: ToolDefinition, limit = 4): ToolDefinition[] {
-  const related = (tool.relatedToolIds ?? [])
-    .map((id) => getToolById(id))
-    .filter((t): t is ToolDefinition => Boolean(t) && t!.status !== "coming-soon");
-  if (related.length >= limit) return related.slice(0, limit);
-
-  const fallback = getToolsByCategory(tool.category).filter(
-    (t) => t.id !== tool.id && t.status !== "coming-soon" && !related.includes(t)
-  );
-  return [...related, ...fallback].slice(0, limit);
-}
-
-export const CATEGORY_LABELS: Record<ToolCategory, string> = {
-  pdf: "PDF",
-  image: "Image",
-  document: "Document",
-  data: "Data & Developer",
-  archive: "Archive",
-  media: "Audio & Video",
+export const CATEGORY_LABEL: Record<ToolCategory, string> = {
+  compress: "Compress",
+  convert: "Convert",
+  edit: "Edit",
+  organize: "Organize",
 };
 
-export const POPULAR_TOOL_IDS = [
-  "pdf-editor",
-  "pdf-merge",
-  "pdf-compress",
-  "image-compress",
-  "jpg-to-png",
-  "png-to-jpg",
-  "pdf-split",
-  "images-to-pdf",
-];
-
-export function getPopularTools(): ToolDefinition[] {
-  return POPULAR_TOOL_IDS.map((id) => getToolById(id)).filter(
-    (t): t is ToolDefinition => Boolean(t)
-  );
+export function getTool(id: ToolId): Tool {
+  const tool = TOOLS.find((t) => t.id === id);
+  if (!tool) throw new Error(`Unknown tool: ${id}`);
+  return tool;
 }
 
-function normalize(text: string): string {
-  return text.toLowerCase().trim();
+export function toolsInCategory(category: ToolCategory): Tool[] {
+  return TOOLS.filter((t) => t.category === category);
 }
 
-/** Lightweight, dependency-free fuzzy search: scores substring and keyword hits. */
-export function searchTools(query: string, options: { includeComingSoon?: boolean } = {}): ToolDefinition[] {
-  const q = normalize(query);
-  if (!q) return [];
+export type EntryKind = "pdf" | "image" | "svg" | "unsupported";
 
-  const pool = options.includeComingSoon ? allTools : liveTools;
-  const scored = pool
-    .map((tool) => ({ tool, score: scoreTool(tool, q) }))
-    .filter((entry) => entry.score > 0)
-    .sort((a, b) => b.score - a.score);
-
-  return scored.map((entry) => entry.tool);
+/** Classifies a dropped file for the homepage's "what do you want to do with it?" step. */
+export function entryKindFor(file: { name: string; type: string }): EntryKind {
+  const name = file.name.toLowerCase();
+  if (file.type === "application/pdf" || name.endsWith(".pdf")) return "pdf";
+  if (file.type === "image/svg+xml" || name.endsWith(".svg")) return "svg";
+  if (/^image\/(jpeg|png|webp)$/.test(file.type) || /\.(jpe?g|png|webp)$/.test(name)) return "image";
+  return "unsupported";
 }
 
-function scoreTool(tool: ToolDefinition, q: string): number {
-  const name = normalize(tool.name);
-  const description = normalize(tool.description);
-  const keywords = tool.keywords.map(normalize);
-
-  if (name === q) return 100;
-  if (name.startsWith(q)) return 90;
-  if (keywords.includes(q)) return 85;
-  if (name.includes(q)) return 70;
-  if (keywords.some((k) => k.includes(q))) return 60;
-  if (description.includes(q)) return 40;
-
-  if (isFuzzySubsequence(q, name)) return 20;
-  if (keywords.some((k) => isFuzzySubsequence(q, k))) return 15;
-
-  return 0;
-}
-
-/** True if every character of `needle` appears in order within `haystack` (typo-tolerant match). */
-function isFuzzySubsequence(needle: string, haystack: string): boolean {
-  if (needle.length < 3) return false;
-  let i = 0;
-  for (let j = 0; j < haystack.length && i < needle.length; j++) {
-    if (haystack[j] === needle[i]) i++;
+/** The tools offered for a dropped file (or files), most likely first. Several files only get
+ * tools that take several files. */
+export function suggestionsFor(kind: EntryKind, count: number): ToolId[] {
+  switch (kind) {
+    case "pdf":
+      return count > 1 ? ["merge-pdf"] : ["compress-pdf", "pdf-editor", "merge-pdf", "split-pdf", "pdf-to-image", "organize-pdf"];
+    case "image":
+      return count > 1 ? ["image-to-pdf", "convert-image"] : ["compress-image", "convert-image", "image-to-pdf"];
+    case "svg":
+      return ["convert-image"];
+    default:
+      return [];
   }
-  return i === needle.length;
 }
 
-export { pdfTools, imageTools, imageConvertTools, dataTools, archiveTools, roadmapTools };
-export * from "./types";
+/** One kind for a set of dropped files; "unsupported" when they can't go to the same tool. */
+export function entryKindForAll(files: { name: string; type: string }[]): EntryKind {
+  const kinds = new Set(files.map(entryKindFor));
+  if (kinds.size === 0 || kinds.has("unsupported")) return "unsupported";
+  if (kinds.has("pdf")) return kinds.size === 1 ? "pdf" : "unsupported";
+  return kinds.has("svg") ? "svg" : "image";
+}

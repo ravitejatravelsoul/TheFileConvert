@@ -1,29 +1,13 @@
 import { describe, expect, it } from "vitest";
-import {
-  sanitizeSvgMarkup,
-  sanitizeArchiveEntryName,
-  looksLikeZipBomb,
-  validateFileForTool,
-  isOverRecommendedSize,
-} from "./validators";
-import type { ToolDefinition } from "@/lib/tools/types";
+import { sanitizeSvgMarkup, validateFileForTool, isOverRecommendedSize, type ToolInputRules } from "./validators";
+import { TOOLS } from "@/lib/tools/registry";
 
-const pdfTool: ToolDefinition = {
-  id: "t",
-  slug: "t",
-  href: "/t",
+const pdfTool: ToolInputRules = {
   name: "Test tool",
-  description: "d",
-  category: "pdf",
+  inputNoun: "PDF",
   acceptedExtensions: ["pdf"],
   acceptedMimeTypes: ["application/pdf"],
-  outputExtensions: ["pdf"],
-  processingMode: "local",
-  status: "available",
-  supportsMultiple: false,
   maxRecommendedSizeMb: 1,
-  keywords: [],
-  workflow: "file",
 };
 
 describe("sanitizeSvgMarkup", () => {
@@ -52,39 +36,12 @@ describe("sanitizeSvgMarkup", () => {
   });
 });
 
-describe("sanitizeArchiveEntryName", () => {
-  it("removes path traversal segments", () => {
-    expect(sanitizeArchiveEntryName("../../etc/passwd")).toBe("etc/passwd");
-  });
-
-  it("normalizes backslashes", () => {
-    expect(sanitizeArchiveEntryName("folder\\file.txt")).toBe("folder/file.txt");
-  });
-
-  it("falls back to a default name when nothing safe remains", () => {
-    expect(sanitizeArchiveEntryName("../..")).toBe("file");
-  });
-});
-
-describe("looksLikeZipBomb", () => {
-  it("flags an extreme compression ratio", () => {
-    expect(looksLikeZipBomb(1000, 1000 * 300)).toBe(true);
-  });
-
-  it("allows normal compression ratios", () => {
-    expect(looksLikeZipBomb(1000, 3000)).toBe(false);
-  });
-
-  it("flags absurd absolute uncompressed size regardless of ratio", () => {
-    expect(looksLikeZipBomb(1_000_000_000, 3_000_000_000)).toBe(true);
-  });
-});
-
 describe("validateFileForTool", () => {
-  it("rejects empty files", async () => {
+  it("rejects empty files and names the file", async () => {
     const file = new File([], "empty.pdf", { type: "application/pdf" });
     const result = await validateFileForTool(file, pdfTool);
     expect(result.valid).toBe(false);
+    expect(result.error).toContain("empty.pdf");
   });
 
   it("accepts a matching file", async () => {
@@ -93,10 +50,17 @@ describe("validateFileForTool", () => {
     expect(result.valid).toBe(true);
   });
 
-  it("rejects a mismatched file type", async () => {
+  it("rejects a mismatched file type and says what is accepted", async () => {
     const file = new File([new Uint8Array([1, 2, 3])], "doc.txt", { type: "text/plain" });
     const result = await validateFileForTool(file, pdfTool);
     expect(result.valid).toBe(false);
+    expect(result.error).toMatch(/takes PDF files/);
+  });
+
+  it("lists every accepted image format once", async () => {
+    const tool = TOOLS.find((t) => t.id === "compress-image")!;
+    const result = await validateFileForTool(new File([new Uint8Array([1])], "x.gif", { type: "image/gif" }), tool);
+    expect(result.error).toMatch(/JPG, PNG or WEBP files/);
   });
 });
 

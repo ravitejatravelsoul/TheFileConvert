@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { deflateSync } from "node:zlib";
 import { PDFDocument, PDFName, PDFNumber, PDFRawStream } from "pdf-lib";
 import { ascii85Decode, decodeFlateImage, undoPngPredictor } from "./pdf-image-decode";
-import { analyzePdfImages, compressPdfDocument, describeAnalysis, type RawReencoder } from "./pdf-compress";
+import { analyzePdfImages, compressPdfDocument, compressionOutlook, type RawReencoder } from "./pdf-compress";
 
 function ascii85Encode(buf: Uint8Array): string {
   let out = "";
@@ -106,13 +106,11 @@ describe("Flate scans are recognised and recompressed", () => {
     });
   }
 
-  it("analysis counts them and the advice says a lossy level will help (no longer 'none are JPEG')", async () => {
+  it("analysis counts them as recompressible, so the outlook says there is room to shrink", async () => {
     const { bytes } = await pdfWithFlateImage("a85flate", 200, 200);
     const a = await analyzePdfImages(bytes);
     expect(a.flateCount).toBe(1);
-    const d = describeAnalysis(a);
-    expect(d.suggestLossy).toBe(true);
-    expect(d.advice).toMatch(/Balanced or Smallest/);
+    expect(compressionOutlook(a).kind).toBe("good-room");
   });
 
   it("Balanced replaces a Flate image with a JPEG stream when that is smaller, Lossless leaves it alone", async () => {

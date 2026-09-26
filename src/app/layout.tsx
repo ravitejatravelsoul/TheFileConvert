@@ -1,87 +1,59 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { Header } from "@/components/layout/Header";
-import { Footer } from "@/components/layout/Footer";
+import { SiteHeader } from "@/components/layout/SiteHeader";
+import { SiteFooter } from "@/components/layout/SiteFooter";
+import { SITE_NAME, SITE_URL } from "@/lib/seo";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
+const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
+const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
-const SITE_URL = "https://thefileconvert.com";
+const DESCRIPTION = "Compress, convert and edit PDFs and images directly in your browser. No uploads, no account, no clutter.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "TheFileConvert — Every File. Any Format. Free.",
-    template: "%s | TheFileConvert",
+    default: `${SITE_NAME} — Every file. One simple place.`,
+    template: `%s — ${SITE_NAME}`,
   },
-  description:
-    "Convert, compress, and work with your files without creating an account. Free file tools that run privately in your browser — no signup, no subscriptions.",
-  keywords: [
-    "file converter",
-    "pdf tools",
-    "image compressor",
-    "convert files online",
-    "free file converter",
-  ],
+  description: DESCRIPTION,
+  applicationName: SITE_NAME,
   openGraph: {
     type: "website",
     url: SITE_URL,
-    siteName: "TheFileConvert",
-    title: "TheFileConvert — Every File. Any Format. Free.",
-    description:
-      "Convert, compress, and work with your files without creating an account. Free, private, no signup.",
+    siteName: SITE_NAME,
+    title: `${SITE_NAME} — Every file. One simple place.`,
+    description: DESCRIPTION,
   },
   twitter: {
     card: "summary_large_image",
-    title: "TheFileConvert — Every File. Any Format. Free.",
-    description:
-      "Convert, compress, and work with your files without creating an account. Free, private, no signup.",
+    title: `${SITE_NAME} — Every file. One simple place.`,
+    description: DESCRIPTION,
   },
-  icons: {
-    icon: "/favicon.svg",
-  },
+  icons: { icon: "/favicon.svg" },
 };
 
-const THEME_INIT_SCRIPT = `
-(function () {
-  try {
-    var stored = localStorage.getItem('theme');
-    var theme = stored === 'light' || stored === 'dark'
-      ? stored
-      : (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-    document.documentElement.setAttribute('data-theme', theme);
-  } catch (e) {}
-})();
-`;
+export const viewport: Viewport = {
+  themeColor: "#f7f6f2",
+  width: "device-width",
+  initialScale: 1,
+};
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html
-      lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
-      // The inline script below intentionally sets data-theme on the raw DOM node before
-      // React hydrates, to pick the right theme with no flash of the wrong one on first
-      // paint — React's server-rendered markup never has this attribute, so hydration would
-      // otherwise always flag it as a mismatch even though the mismatch is expected and
-      // correct (this is the standard no-flash dark-mode pattern; see e.g. next-themes,
-      // which does the same thing for the same reason).
-      suppressHydrationWarning
-    >
-      <head>
-        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
-      </head>
-      <body className="min-h-full flex flex-col">
-        <Header />
-        <main className="flex-1">{children}</main>
-        <Footer />
+    <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
+      <body className="flex min-h-dvh flex-col">
+        <a
+          href="#main"
+          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-full focus:bg-[var(--ink)] focus:px-4 focus:py-2 focus:text-white"
+        >
+          Skip to content
+        </a>
+        <SiteHeader />
+        <main id="main" className="flex-1">
+          {children}
+        </main>
+        <SiteFooter />
       </body>
     </html>
   );

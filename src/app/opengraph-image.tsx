@@ -1,7 +1,9 @@
 import { ImageResponse } from "next/og";
+import { HIGHLIGHT, INK, MARK_PATHS } from "@/components/brand/Logo";
 
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
+export const alt = "TheFileConvert — Every file. One simple place.";
 
 export default async function OpengraphImage() {
   return new ImageResponse(
@@ -12,36 +14,32 @@ export default async function OpengraphImage() {
           height: "100%",
           display: "flex",
           flexDirection: "column",
-          justifyContent: "center",
-          padding: "80px",
-          background: "#16161a",
+          justifyContent: "space-between",
+          padding: "72px 80px",
+          background: "#f7f6f2",
           fontFamily: "sans-serif",
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
           <svg width={64} height={64} viewBox="0 0 32 32">
-            <rect width="32" height="32" rx="8" fill="#ea580c" />
-            <path d="M10 5.5H19.6L25.5 11.4V14.6H10Z" fill="#fff" stroke="#fff" strokeWidth="1.2" strokeLinejoin="round" />
-            <path d="M19.6 5.5V11.4H25.5Z" fill="#ea580c" opacity="0.4" />
-            <path d="M6.5 17.4H22V26.5H6.5Z" fill="#fff" stroke="#fff" strokeWidth="1.2" strokeLinejoin="round" />
+            <rect width="32" height="32" rx="9" fill={INK} />
+            <path d={MARK_PATHS.page} fill="#fff" />
+            <path d={MARK_PATHS.flap} fill={HIGHLIGHT} />
+            <path d={MARK_PATHS.lines} stroke={INK} strokeWidth="1.7" strokeLinecap="round" />
           </svg>
-          <span style={{ display: "flex", fontSize: 40, letterSpacing: -0.5 }}>
-            <span style={{ color: "#a6a6ab", fontWeight: 500 }}>The</span>
-            <span style={{ color: "#f5f5f4", fontWeight: 700 }}>File</span>
-            <span style={{ color: "#fb923c", fontWeight: 700 }}>Convert</span>
+          <span style={{ display: "flex", fontSize: 38, letterSpacing: -1.2 }}>
+            <span style={{ color: "#8a877f", fontWeight: 500 }}>The</span>
+            <span style={{ color: INK, fontWeight: 700 }}>FileConvert</span>
           </span>
         </div>
-        <div style={{ display: "flex", flexDirection: "column", marginTop: 56 }}>
-          <span style={{ fontSize: 78, color: "#ffffff", fontWeight: 700, lineHeight: 1.05 }}>
-            Every file.
-          </span>
-          <span style={{ fontSize: 78, color: "#ea580c", fontWeight: 700, lineHeight: 1.05 }}>
-            Any format.
+        <div style={{ display: "flex", flexDirection: "column" }}>
+          <span style={{ fontSize: 96, color: "#8a877f", fontWeight: 600, lineHeight: 1, letterSpacing: -4 }}>Every file.</span>
+          <span style={{ display: "flex", fontSize: 96, color: INK, fontWeight: 600, lineHeight: 1.05, letterSpacing: -4 }}>
+            <span>One simple&nbsp;</span>
+            <span style={{ background: HIGHLIGHT, padding: "0 12px", borderRadius: 12 }}>place.</span>
           </span>
         </div>
-        <span style={{ fontSize: 28, color: "#a6a6ab", marginTop: 32 }}>
-          Free file tools. No signup. No subscriptions.
-        </span>
+        <span style={{ fontSize: 30, color: "#57544e" }}>Compress, convert and edit files — right in your browser.</span>
       </div>
     ),
     { ...size }

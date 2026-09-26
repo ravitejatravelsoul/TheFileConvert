@@ -27,11 +27,39 @@ async function loadBitmap(file: File): Promise<ImageBitmap> {
 function canvasToBlob(canvas: HTMLCanvasElement, format: ImageOutputFormat, quality: number): Promise<Blob> {
   return new Promise((resolve, reject) => {
     canvas.toBlob(
-      (blob) => (blob ? resolve(blob) : reject(new ProcessorError("Encoding this image failed."))),
+      (blob) => {
+        if (!blob) return reject(new ProcessorError("Encoding this image failed."));
+        // Browsers silently fall back to PNG for formats they can't encode (Safari and WebP) —
+        // never hand that back labelled as the format that was asked for.
+        if (blob.type !== MIME_BY_FORMAT[format]) {
+          return reject(new ProcessorError(`This browser can't save ${format === "jpeg" ? "JPG" : format.toUpperCase()} images. Try another format, or a different browser.`));
+        }
+        resolve(blob);
+      },
       MIME_BY_FORMAT[format],
       format === "png" ? undefined : quality
     );
   });
+}
+
+let webpEncodeSupport: Promise<boolean> | null = null;
+
+/** Whether this browser's canvas can write WebP (Safari can read WebP but not write it). */
+export function canEncodeWebp(): Promise<boolean> {
+  webpEncodeSupport ??= new Promise((resolve) => {
+    const c = document.createElement("canvas");
+    c.width = c.height = 1;
+    c.toBlob((b) => resolve(b?.type === "image/webp"), "image/webp");
+  });
+  return webpEncodeSupport;
+}
+
+/** The format a file already is, from its MIME type or extension. */
+export function inputFormatOf(file: File): ImageOutputFormat | null {
+  if (file.type === "image/jpeg" || /\.jpe?g$/i.test(file.name)) return "jpeg";
+  if (file.type === "image/png" || /\.png$/i.test(file.name)) return "png";
+  if (file.type === "image/webp" || /\.webp$/i.test(file.name)) return "webp";
+  return null;
 }
 
 function drawToCanvas(
@@ -123,95 +151,6 @@ export async function resizeImage(file: File, options: ResizeOptions): Promise<B
   return canvasToBlob(canvas, options.format, options.quality);
 }
 
-export function computeAspectRatioSize(
-  original: ImageDimensions,
-  targetWidth?: number,
-  targetHeight?: number
-): ImageDimensions {
-  if (targetWidth && !targetHeight) {
-    return { width: targetWidth, height: Math.round((targetWidth / original.width) * original.height) };
-  }
-  if (targetHeight && !targetWidth) {
-    return { width: Math.round((targetHeight / original.height) * original.width), height: targetHeight };
-  }
-  return { width: targetWidth ?? original.width, height: targetHeight ?? original.height };
-}
-
-export interface CropOptions extends ConvertOptions {
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-}
-
-export async function cropImage(file: File, options: CropOptions): Promise<Blob> {
-  const bitmap = await loadBitmap(file);
-  if (
-    options.width < 1 ||
-    options.height < 1 ||
-    options.x < 0 ||
-    options.y < 0 ||
-    options.x + options.width > bitmap.width ||
-    options.y + options.height > bitmap.height
-  ) {
-    bitmap.close();
-    throw new ProcessorError("The crop area must be fully inside the image.");
-  }
-  const canvas = document.createElement("canvas");
-  canvas.width = options.width;
-  canvas.height = options.height;
-  const ctx = canvas.getContext("2d");
-  if (!ctx) throw new ProcessorError("Your browser can't render canvas content.");
-  if (options.format === "jpeg") {
-    ctx.fillStyle = "#ffffff";
-    ctx.fillRect(0, 0, options.width, options.height);
-  }
-  ctx.drawImage(
-    bitmap,
-    options.x,
-    options.y,
-    options.width,
-    options.height,
-    0,
-    0,
-    options.width,
-    options.height
-  );
-  bitmap.close();
-  return canvasToBlob(canvas, options.format, options.quality);
-}
-
-export interface RotateFlipOptions extends ConvertOptions {
-  rotateDegrees: 0 | 90 | 180 | 270;
-  flipHorizontal: boolean;
-  flipVertical: boolean;
-}
-
-export async function rotateFlipImage(file: File, options: RotateFlipOptions): Promise<Blob> {
-  const bitmap = await loadBitmap(file);
-  const swapDimensions = options.rotateDegrees === 90 || options.rotateDegrees === 270;
-  const width = swapDimensions ? bitmap.height : bitmap.width;
-  const height = swapDimensions ? bitmap.width : bitmap.height;
-
-  const canvas = document.createElement("canvas");
-  canvas.width = width;
-  canvas.height = height;
-  const ctx = canvas.getContext("2d");
-  if (!ctx) throw new ProcessorError("Your browser can't render canvas content.");
-  if (options.format === "jpeg") {
-    ctx.fillStyle = "#ffffff";
-    ctx.fillRect(0, 0, width, height);
-  }
-
-  ctx.translate(width / 2, height / 2);
-  ctx.rotate((options.rotateDegrees * Math.PI) / 180);
-  ctx.scale(options.flipHorizontal ? -1 : 1, options.flipVertical ? -1 : 1);
-  ctx.drawImage(bitmap, -bitmap.width / 2, -bitmap.height / 2);
-  bitmap.close();
-
-  return canvasToBlob(canvas, options.format, options.quality);
-}
-
 // ---------------------------------------------------------------------------------------------
 // Target-size compression (V2): "how small do I need this image?" instead of a quality slider.
 // ---------------------------------------------------------------------------------------------
@@ -239,27 +178,37 @@ export interface ImageTargetResult {
   scale: number;
   /** Set when the output format differs from the input's, so the caller can tell the user why. */
   formatChanged: boolean;
+  /** The input has (partly) transparent pixels — the reason a PNG goes to WebP rather than JPEG. */
+  transparent: boolean;
   attempts: ImageTargetAttempt[];
 }
 
+/** Output format for target-size compression: JPEG input stays JPEG; anything with transparency goes
+ * to WebP (the only one of the three that keeps it compactly); other images go to WebP. Where the
+ * browser can't write WebP, transparent images stay PNG and opaque ones become JPEG. */
+export function targetFormatFor(input: ImageOutputFormat | null, transparent: boolean, webp: boolean): ImageOutputFormat {
+  if (transparent) return webp ? "webp" : "png";
+  if (input === "jpeg") return "jpeg";
+  return webp ? "webp" : "jpeg";
+}
+
 /**
- * Compresses toward a target file size. Picks WebP for images with transparency (the only one of the
- * three output formats that keeps it efficiently) and otherwise keeps JPEG input as JPEG or uses WebP —
- * then walks quality from high to low at full size, and only shrinks dimensions (in fixed steps) if the
- * lowest quality alone still doesn't reach the target. Stops at the first setting that fits.
+ * Compresses toward a target file size: walks quality from high to low at full size, and only shrinks
+ * dimensions (in fixed steps) if the lowest quality alone still doesn't reach the target. Stops at the
+ * first setting that fits.
  */
 export async function compressImageToTarget(file: File, targetBytes: number, onProgress?: (label: string) => void): Promise<ImageTargetResult> {
   const transparent = await hasTransparency(file);
-  const isJpegInput = file.type === "image/jpeg" || /\.jpe?g$/i.test(file.name);
-  const format: ImageOutputFormat = transparent ? "webp" : isJpegInput ? "jpeg" : "webp";
-  const formatChanged = (transparent && !/\.webp$/i.test(file.name) && file.type !== "image/webp") || (!transparent && !isJpegInput && file.type !== "image/webp");
+  const input = inputFormatOf(file);
+  const format = targetFormatFor(input, transparent, await canEncodeWebp());
+  const formatChanged = input !== format;
   const dims = await getImageDimensions(file);
 
   // Nothing to do: the format wouldn't change and the file already fits. Re-encoding an already
   // well-compressed image can make it bigger (recompression artifacts) — never hand that back as if it
   // were a result. This mirrors the PDF engine's free lossless-first step.
   if (!formatChanged && file.size <= targetBytes) {
-    return { blob: file, format, width: dims.width, height: dims.height, originalBytes: file.size, newBytes: file.size, targetBytes, targetAchieved: true, quality: 1, scale: 1, formatChanged: false, attempts: [{ scale: 1, quality: 1, bytes: file.size }] };
+    return { blob: file, format, width: dims.width, height: dims.height, originalBytes: file.size, newBytes: file.size, targetBytes, targetAchieved: true, quality: 1, scale: 1, formatChanged: false, transparent, attempts: [{ scale: 1, quality: 1, bytes: file.size }] };
   }
 
   const attempts: ImageTargetAttempt[] = [];
@@ -268,13 +217,14 @@ export async function compressImageToTarget(file: File, targetBytes: number, onP
   for (const scale of SCALE_LADDER) {
     const width = Math.max(1, Math.round(dims.width * scale));
     const height = Math.max(1, Math.round(dims.height * scale));
-    for (const quality of QUALITY_LADDER) {
-      onProgress?.(`${Math.round(quality * 100)}% quality${scale < 1 ? `, ${Math.round(scale * 100)}% size` : ""}`);
+    // PNG has no quality setting: only its dimensions can change.
+    for (const quality of format === "png" ? [1] : QUALITY_LADDER) {
+      onProgress?.(format === "png" ? `${Math.round(scale * 100)}% size` : `${Math.round(quality * 100)}% quality${scale < 1 ? `, ${Math.round(scale * 100)}% size` : ""}`);
       const blob = await resizeImage(file, { width, height, format, quality });
       attempts.push({ scale, quality, bytes: blob.size });
       if (!best || blob.size < best.blob.size) best = { blob, width, height, quality, scale };
       if (blob.size <= targetBytes) {
-        return { blob, format, width, height, originalBytes: file.size, newBytes: blob.size, targetBytes, targetAchieved: true, quality, scale, formatChanged, attempts };
+        return { blob, format, width, height, originalBytes: file.size, newBytes: blob.size, targetBytes, targetAchieved: true, quality, scale, formatChanged, transparent, attempts };
       }
     }
   }
@@ -291,21 +241,19 @@ export async function compressImageToTarget(file: File, targetBytes: number, onP
     quality: best!.quality,
     scale: best!.scale,
     formatChanged,
+    transparent,
     attempts,
   };
 }
 
-export interface SvgToPngOptions {
-  width: number;
-  height: number;
-}
+/** Long side an SVG is rendered at when its own size is smaller — SVGs are often drawn tiny
+ * (24 or 100 px) and a PNG that small is rarely what anyone wants. */
+const SVG_MIN_LONG_SIDE = 1024;
+const SVG_MAX_LONG_SIDE = 4096;
 
-export async function svgToPng(file: File, options: SvgToPngOptions): Promise<Blob> {
-  const rawText = await file.text();
-  const safeSvg = sanitizeSvgMarkup(rawText);
-  const svgBlob = new Blob([safeSvg], { type: "image/svg+xml" });
-  const url = URL.createObjectURL(svgBlob);
-
+export async function svgToPng(file: File): Promise<{ blob: Blob; width: number; height: number }> {
+  const safeSvg = sanitizeSvgMarkup(await file.text());
+  const url = URL.createObjectURL(new Blob([safeSvg], { type: "image/svg+xml" }));
   try {
     const image = new Image();
     await new Promise<void>((resolve, reject) => {
@@ -313,15 +261,40 @@ export async function svgToPng(file: File, options: SvgToPngOptions): Promise<Bl
       image.onerror = () => reject(new ProcessorError("This SVG couldn't be rendered. It may use unsupported features."));
       image.src = url;
     });
-
+    const naturalW = image.naturalWidth || 300;
+    const naturalH = image.naturalHeight || 150;
+    const long = Math.max(naturalW, naturalH);
+    const scale = Math.min(SVG_MAX_LONG_SIDE, Math.max(SVG_MIN_LONG_SIDE, long)) / long;
+    const width = Math.max(1, Math.round(naturalW * scale));
+    const height = Math.max(1, Math.round(naturalH * scale));
     const canvas = document.createElement("canvas");
-    canvas.width = options.width;
-    canvas.height = options.height;
+    canvas.width = width;
+    canvas.height = height;
     const ctx = canvas.getContext("2d");
     if (!ctx) throw new ProcessorError("Your browser can't render canvas content.");
-    ctx.drawImage(image, 0, 0, options.width, options.height);
-    return await canvasToBlob(canvas, "png", 1);
+    ctx.drawImage(image, 0, 0, width, height);
+    return { blob: await canvasToBlob(canvas, "png", 1), width, height };
   } finally {
     URL.revokeObjectURL(url);
   }
+}
+
+/**
+ * Gets an image ready to embed in a PDF, which can only hold JPEG and PNG data as-is. JPEG and PNG
+ * pass through untouched (no quality loss) unless a JPEG is stored sideways with an EXIF rotation
+ * flag — then it is redrawn upright. WebP becomes JPEG, or PNG if it has transparency.
+ */
+export async function prepareImageForPdf(file: File): Promise<File> {
+  const format = inputFormatOf(file);
+  if (format === "png") return file;
+  if (format === "jpeg") {
+    const { jpegOrientation } = await import("./exif");
+    const head = new Uint8Array(await file.slice(0, 256 * 1024).arrayBuffer());
+    if (jpegOrientation(head) === 1) return file;
+  }
+  const transparent = await hasTransparency(file);
+  const out: ImageOutputFormat = transparent ? "png" : "jpeg";
+  const blob = await convertImage(file, { format: out, quality: 0.92 });
+  const name = file.name.replace(/\.[^.]+$/, "") + (out === "png" ? ".png" : ".jpg");
+  return new File([blob], name, { type: blob.type });
 }

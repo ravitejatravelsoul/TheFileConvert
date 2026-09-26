@@ -1,5 +1,5 @@
 import { PDFDocument, PDFTextField, PDFCheckBox, PDFRadioGroup, PDFDropdown } from "pdf-lib";
-import { generateUuidV4 } from "@/lib/processors/data";
+import { generateUuidV4 } from "@/lib/id";
 import type { EditorDocument, EditorPage, FormFieldValue } from "./types";
 import type { Rotation } from "./coordinates";
 

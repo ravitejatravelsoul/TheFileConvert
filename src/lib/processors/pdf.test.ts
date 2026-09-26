@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { PDFDocument, degrees } from "pdf-lib";
-import { addHeaderFooter, addPageNumbers, addWatermark, displayedPage, parsePageRanges, ProcessorError, removePdfMetadata, watermarkOrigin } from "./pdf";
+import { addHeaderFooter, addPageNumbers, addWatermark, buildPdfFromPages, displayedPage, imagesToPdf, parsePageRanges, ProcessorError, watermarkOrigin } from "./pdf";
 
 describe("parsePageRanges", () => {
   it("parses a single page", () => {
@@ -109,20 +109,63 @@ describe("stamps follow the displayed page (rotation-aware)", () => {
   });
 });
 
-describe("removePdfMetadata removes every info entry and the XMP stream", () => {
-  it("leaves no title/author/producer/dates behind", async () => {
+
+async function pdfWithPages(n: number): Promise<File> {
+  const doc = await PDFDocument.create();
+  for (let i = 0; i < n; i++) doc.addPage([200 + i * 10, 300]);
+  return new File([(await doc.save()) as BlobPart], "src.pdf", { type: "application/pdf" });
+}
+
+async function load(blob: Blob) {
+  return PDFDocument.load(new Uint8Array(await blob.arrayBuffer()));
+}
+
+describe("buildPdfFromPages", () => {
+  it("reorders, duplicates, drops and rotates pages in one pass", async () => {
+    const src = await pdfWithPages(3);
+    const out = await load(
+      await buildPdfFromPages(src, [
+        { index: 2, rotate: 0 },
+        { index: 0, rotate: 90 },
+        { index: 0, rotate: 0 },
+      ])
+    );
+    expect(out.getPageCount()).toBe(3);
+    expect(out.getPages().map((p) => p.getWidth())).toEqual([220, 200, 200]);
+    expect(out.getPages().map((p) => p.getRotation().angle)).toEqual([0, 90, 0]);
+  });
+
+  it("adds to a page's existing rotation", async () => {
     const doc = await PDFDocument.create();
-    doc.addPage();
-    doc.setTitle("T");
-    doc.setAuthor("A");
-    doc.setProducer("P");
-    doc.setCreationDate(new Date());
-    const out = await removePdfMetadata(new File([(await doc.save()) as BlobPart], "m.pdf", { type: "application/pdf" }));
-    const back = await PDFDocument.load(await out.arrayBuffer(), { updateMetadata: false });
-    expect(back.getTitle()).toBeUndefined();
-    expect(back.getAuthor()).toBeUndefined();
-    expect(back.getProducer()).toBeUndefined();
-    expect(back.getCreationDate()).toBeUndefined();
-    expect(back.getPageCount()).toBe(1);
+    doc.addPage([200, 300]).setRotation(degrees(270));
+    const src = new File([(await doc.save()) as BlobPart], "r.pdf");
+    const out = await load(await buildPdfFromPages(src, [{ index: 0, rotate: 180 }]));
+    expect(out.getPage(0).getRotation().angle).toBe(90);
+  });
+
+  it("refuses an empty plan and pages that don't exist", async () => {
+    const src = await pdfWithPages(2);
+    await expect(buildPdfFromPages(src, [])).rejects.toThrow(ProcessorError);
+    await expect(buildPdfFromPages(src, [{ index: 5, rotate: 0 }])).rejects.toThrow(ProcessorError);
+  });
+});
+
+// 1x1 PNG (red) and a 2x1 PNG saved with a .jpg name.
+const PNG_1x1 = Uint8Array.from(atob("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8DwHwAFBQIAX8jx0gAAAABJRU5ErkJggg=="), (c) => c.charCodeAt(0));
+
+describe("imagesToPdf", () => {
+  it("sizes each page to its image with 'fit'", async () => {
+    const out = await load(await imagesToPdf([new File([PNG_1x1], "a.png", { type: "image/png" })], { pageSize: "fit", margin: 0 }));
+    expect(out.getPageCount()).toBe(1);
+    expect(out.getPage(0).getWidth()).toBeCloseTo(0.75);
+  });
+
+  it("detects the real format instead of trusting the file name", async () => {
+    const out = await load(await imagesToPdf([new File([PNG_1x1], "misnamed.jpg", { type: "image/jpeg" })], { pageSize: "a4", margin: 24 }));
+    expect(out.getPageCount()).toBe(1);
+  });
+
+  it("rejects data that isn't JPG or PNG with the file's name", async () => {
+    await expect(imagesToPdf([new File([new Uint8Array([1, 2, 3, 4])], "x.webp")], { pageSize: "fit", margin: 0 })).rejects.toThrow(/x\.webp/);
   });
 });

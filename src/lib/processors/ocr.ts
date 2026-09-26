@@ -199,6 +199,9 @@ export async function createOcrSession(langCode: string): Promise<OcrSession> {
       corePath: TESSERACT_CORE_PATH,
       langPath: TESSERACT_LANG_PATH,
       gzip: true,
+      // Don't copy the language model into IndexedDB: the site keeps nothing in browser storage.
+      // The browser's ordinary HTTP cache still avoids re-downloading it on every visit.
+      cacheMethod: "none",
       logger: (m) => {
         if (m.status === "recognizing text" && activeProgressHandler) {
           activeProgressHandler(m.progress);
