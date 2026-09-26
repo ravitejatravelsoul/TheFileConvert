@@ -19,7 +19,7 @@
  },
  {
   "tool": "pdf-compress",
-  "test": "real scan 3982736 B → Under 1 MB → 471312 B (88.2% smaller) in 1.5s",
+  "test": "real scan 3982736 B → Under 1 MB → 471312 B (88.2% smaller) in 1.3s",
   "verdict": "PASS",
   "detail": "badge=\"Target ✓ under 1 MB\" ui=\"Exact: 3,982,736 bytes → 471,312 bytes (3,511,424 fewer)\" pages=2 ink=4462 nonGET=[] foreign=[]"
  },
@@ -67,9 +67,9 @@
  },
  {
   "tool": "pdf-editor",
-  "test": "scanned: OCR (35.5s) → 12/20/2026→12/20/2028 → fast-typed added text → export → reopen; date row still visibly intact",
-  "verdict": "FAIL",
-  "detail": "typed=\"Verified in production\" text=\"VALID FROM 02/08/2026 UNTIL 12/20/2028 Verified in production\" changedPx=5561/1090584 rowInk 819→485 nonGET=[] foreign=[]"
+  "test": "scanned: OCR (32.9s) → 12/20/2026→12/20/2028 → fast-typed added text → export → reopen; date row still visibly intact",
+  "verdict": "PASS",
+  "detail": "typed=\"Verified in production\" text=\"VALID FROM 02/08/2026 UNTIL 12/20/2028 Verified in production\" changedPx=5505/1090584 rowInk 819→398 nonGET=[] foreign=[]"
  },
  {
   "tool": "pdf-tools",
@@ -128,8 +128,8 @@
  {
   "tool": "mobile",
   "test": "Editor: OCR, edit word, add text, highlight, draw, crop, export",
-  "verdict": "FAIL",
-  "detail": "types=ocr-text-replacement,added-text,annotation,drawing crop=false text=\"Priya Mobile prod\""
+  "verdict": "PASS",
+  "detail": "types=ocr-text-replacement,added-text,annotation,drawing crop=true text=\"Priya Mobile prod\""
  },
  {
   "tool": "privacy",
