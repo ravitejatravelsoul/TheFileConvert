@@ -42,9 +42,11 @@ interface PdfThumbProps {
   width?: number;
   alt: string;
   className?: string;
+  /** Fixed box shape (width / height). Without it the box follows the page's own shape. */
+  boxAspect?: number;
 }
 
-export function PdfThumb({ file, pageIndex, rotation = 0, width = 180, alt, className = "" }: PdfThumbProps) {
+export function PdfThumb({ file, pageIndex, rotation = 0, width = 180, alt, className = "", boxAspect }: PdfThumbProps) {
   const hostRef = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
   const [src, setSrc] = useState<string | null>(null);
@@ -98,13 +100,10 @@ export function PdfThumb({ file, pageIndex, rotation = 0, width = 180, alt, clas
   const turned = ((rotation % 360) + 360) % 360;
   const sideways = turned === 90 || turned === 270;
   const shownAspect = sideways ? 1 / aspect : aspect;
+  const box = boxAspect ?? Math.max(0.5, Math.min(2, shownAspect));
 
   return (
-    <div
-      ref={hostRef}
-      className={`relative flex items-center justify-center overflow-hidden ${className}`}
-      style={{ aspectRatio: String(Math.max(0.5, Math.min(2, shownAspect))) }}
-    >
+    <div ref={hostRef} className={`relative flex items-center justify-center overflow-hidden ${className}`} style={{ aspectRatio: String(box) }}>
       {src ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img
@@ -114,9 +113,9 @@ export function PdfThumb({ file, pageIndex, rotation = 0, width = 180, alt, clas
           className="max-h-full max-w-full bg-white shadow-[0_0_0_1px_var(--line),var(--shadow-1)] transition-transform duration-300"
           style={{
             transform: `rotate(${turned}deg)`,
-            // A sideways page must fit the box by its height.
-            // Before rotating, its width becomes the shown height and vice versa.
-            ...(sideways ? { maxWidth: `${100 / shownAspect}%`, maxHeight: `${100 * shownAspect}%` } : null),
+            // Before rotating, its width becomes the shown height and vice versa, so it is limited by the
+            // box's other side.
+            ...(sideways ? { maxWidth: `${100 / box}%`, maxHeight: `${100 * box}%` } : null),
           }}
         />
       ) : (

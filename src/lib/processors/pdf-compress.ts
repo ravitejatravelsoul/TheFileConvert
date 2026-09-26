@@ -348,6 +348,9 @@ const TARGET_LADDER: { label: string; quality: number; maxLongSide: number }[] =
   { label: "lowest quality", quality: 0.22, maxLongSide: 800 },
 ];
 
+/** Bisection steps between the last rung that missed the target and the first that met it. */
+const REFINE_STEPS = 2;
+
 export interface TargetCompressAttempt {
   label: string;
   bytes: number;
@@ -405,15 +408,37 @@ export async function compressPdfToTarget(
     attempts.push({ label: rung.label, bytes: result.newBytes });
     if (result.newBytes < best.newBytes) best = result;
     if (result.newBytes <= targetBytes) {
+      // The fixed rungs are coarse: the one above this may have missed the target by a little. Search
+      // the gap between them so the result uses as much of the target as possible — higher quality —
+      // while still fitting. Only kept if it fits; the passing rung is the fallback.
+      let winner = { result, label: rung.label };
+      const index = TARGET_LADDER.indexOf(rung);
+      if (index > 0) {
+        let lo = { quality: rung.quality, maxLongSide: rung.maxLongSide };
+        let hi = TARGET_LADDER[index - 1];
+        for (let step = 0; step < REFINE_STEPS; step++) {
+          const mid = { quality: (lo.quality + hi.quality) / 2, maxLongSide: Math.round((lo.maxLongSide + hi.maxLongSide) / 2) };
+          const label = `${Math.round(mid.quality * 100)}% quality`;
+          onProgress?.(label);
+          const tried = await compressCore(input, mid, reencode, reencodeRaw);
+          attempts.push({ label, bytes: tried.newBytes });
+          if (tried.newBytes <= targetBytes) {
+            if (tried.newBytes > winner.result.newBytes) winner = { result: tried, label };
+            lo = mid;
+          } else {
+            hi = { ...hi, ...mid };
+          }
+        }
+      }
       return {
-        blob: result.blob,
+        blob: winner.result.blob,
         originalBytes: input.length,
-        newBytes: result.newBytes,
+        newBytes: winner.result.newBytes,
         targetBytes,
         targetAchieved: true,
-        rungLabel: rung.label,
-        imagesRecompressed: result.imagesRecompressed,
-        duplicatesMerged: result.duplicatesMerged,
+        rungLabel: winner.label,
+        imagesRecompressed: winner.result.imagesRecompressed,
+        duplicatesMerged: winner.result.duplicatesMerged,
         attempts,
       };
     }

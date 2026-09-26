@@ -331,6 +331,17 @@ export default function EditorWorkspace({ file, onExit }: { file: File; onExit: 
         )}
 
         <div className="relative flex min-w-0 flex-1 flex-col">
+          {/* Floats over the page rather than pushing it down, so the page doesn't move under the pointer. */}
+          {pendingPlacement && (
+            <div className="pointer-events-none absolute inset-x-0 top-3 z-10 flex justify-center px-3">
+              <div role="status" className="animate-sheet pointer-events-auto flex items-center gap-3 rounded-full bg-[var(--ink)] py-1.5 pl-4 pr-1.5 text-sm text-white shadow-[var(--shadow-3)]">
+                <span>Tap the page where the {pendingPlacement.kind} should go.</span>
+                <button type="button" onClick={() => setPendingPlacement(null)} className="btn btn-sm bg-white/15 text-white hover:bg-white/25">
+                  Cancel
+                </button>
+              </div>
+            </div>
+          )}
           <div ref={scrollContainerRef} className="hatch flex min-h-0 flex-1 items-start overflow-auto bg-[var(--surface-2)] p-4 pb-24 sm:p-6 sm:pb-24">
             {/* mx-auto (not justify-center) centers a narrow page but lets a wide one scroll from its left edge. */}
             {activePage && (

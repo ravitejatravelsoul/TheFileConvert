@@ -210,6 +210,9 @@ export function PageSurface({
     };
   }
 
+  /** A word space, as a share of the word box's height (about a quarter to a third of an em). */
+  const WORD_SPACE_SHARE = 0.3;
+
   /** Checks rightward from the word's own edge, in a few steps, for genuinely blank
    * (background-colored) space to grow a longer replacement into — the "expand into
    * available whitespace only if verified" rule: a longer replacement is allowed extra
@@ -235,7 +238,11 @@ export function PageSurface({
           break;
         }
       }
-      if (!allBackground) break;
+      if (!allBackground) {
+        // A neighboring word starts here: keep a word space before it, or a wider replacement
+        // runs straight into it ("Jordan Smith" -> "MorganSmith").
+        return Math.max(0, safe - wordRectPx.height * WORD_SPACE_SHARE);
+      }
       safe = i * stepSize;
     }
     return safe;

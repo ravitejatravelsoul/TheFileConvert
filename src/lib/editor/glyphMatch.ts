@@ -24,8 +24,8 @@ export interface FontCandidate {
   italic: boolean;
 }
 
-/** A small curated set covering the common document-text styles: serif, sans-serif, and
- * monospace, each with a bold and an italic variant. Kept intentionally short (10
+/** A small curated set covering the common document-text styles: serif, sans-serif, narrow sans
+ * and monospace, with bold (and for serif/sans, italic) variants. Kept intentionally short (12
  * candidates) — this runs synchronously on every keystroke of a live preview, so it must
  * stay cheap (see scanPatch.ts's perf note). */
 // Times-like faces come first in the serif stack on purpose: scanned documents are overwhelmingly
@@ -42,6 +42,10 @@ export const FONT_CANDIDATES: FontCandidate[] = [
   { id: "sans-bold-italic", family: "Arial, Helvetica, 'Segoe UI', sans-serif", bold: true, italic: true },
   { id: "mono-regular", family: "'Courier New', Courier, monospace", bold: false, italic: false },
   { id: "mono-bold", family: "'Courier New', Courier, monospace", bold: true, italic: false },
+  // Narrow sans faces, common on receipts and forms. Where none is installed the stack ends in the
+  // same generic sans as above, so these simply tie with it and change nothing.
+  { id: "sans-condensed", family: "'Arial Narrow', 'Liberation Sans Narrow', 'Roboto Condensed', 'Bahnschrift SemiCondensed', 'Helvetica Neue', sans-serif", bold: false, italic: false },
+  { id: "sans-condensed-bold", family: "'Arial Narrow', 'Liberation Sans Narrow', 'Roboto Condensed', 'Bahnschrift SemiCondensed', 'Helvetica Neue', sans-serif", bold: true, italic: false },
 ];
 
 export const DEFAULT_FONT_CANDIDATE = FONT_CANDIDATES[4]; // sans-regular — safest generic fallback

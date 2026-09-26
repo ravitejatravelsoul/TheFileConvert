@@ -166,7 +166,7 @@ export function OrganizePdfTool() {
                   }`}
                 >
                   <div className="relative">
-                    <PdfThumb file={file} pageIndex={p.index} rotation={p.rotate} width={160} alt={label} className="w-full rounded-[6px] bg-[var(--surface-2)] p-1.5" />
+                    <PdfThumb file={file} pageIndex={p.index} rotation={p.rotate} width={160} boxAspect={0.8} alt={label} className="w-full rounded-[6px] bg-[var(--surface-2)] p-1.5" />
                     {p.deleted && (
                       <span className="absolute inset-0 flex items-center justify-center">
                         <span className="rounded-full bg-[var(--ink)] px-3 py-1 text-xs font-semibold text-white">Deleted</span>

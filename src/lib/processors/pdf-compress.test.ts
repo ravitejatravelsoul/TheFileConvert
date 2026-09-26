@@ -126,11 +126,24 @@ describe("compressPdfToTarget", () => {
     const r = await compressPdfToTarget(input, target, scaledReencoder);
     expect(r.targetAchieved).toBe(true);
     expect(r.newBytes).toBeLessThanOrEqual(target);
-    // Every rung tried before the winning one must genuinely have missed the target — otherwise the
-    // search didn't stop at the *first* (best-quality) success.
-    const wonAt = r.attempts.findIndex((a) => a.label === r.rungLabel);
-    expect(wonAt).toBeGreaterThan(0);
-    for (const earlier of r.attempts.slice(0, wonAt)) expect(earlier.bytes).toBeGreaterThan(target);
+    // Every rung tried before the first one that fits must genuinely have missed the target — otherwise
+    // the search didn't stop at the *first* (best-quality) success.
+    const firstFit = r.attempts.findIndex((a) => a.bytes <= target);
+    expect(firstFit).toBeGreaterThan(0);
+    for (const earlier of r.attempts.slice(0, firstFit)) expect(earlier.bytes).toBeGreaterThan(target);
+  });
+
+  it("refines between the rung that missed and the rung that fit, keeping the largest result that still fits", async () => {
+    const input = await pdfWithRepeatedImage(1);
+    const smallest = await compressPdfToTarget(input, 1, scaledReencoder);
+    const target = Math.round((smallest.newBytes + smallest.attempts[0].bytes) / 2);
+    const r = await compressPdfToTarget(input, target, scaledReencoder);
+    const fitting = r.attempts.filter((a) => a.bytes <= target);
+    // The refinement tried settings after the first fitting rung…
+    expect(r.attempts.some((a) => /^\d+% quality$/.test(a.label))).toBe(true);
+    // …and the returned file is the largest (highest-quality) one that fits — never one over the target.
+    expect(r.newBytes).toBe(Math.max(...fitting.map((a) => a.bytes)));
+    expect(r.newBytes).toBeLessThanOrEqual(target);
   });
 
   it("never claims success it can't back up: an unreachable target returns the smallest safe result instead", async () => {

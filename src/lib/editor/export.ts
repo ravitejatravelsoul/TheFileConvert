@@ -3,6 +3,7 @@ import type { EditorDocument, EditorObject, RgbColor } from "./types";
 import { effectiveRotation } from "./types";
 import { wrapText, lineBaselineY, sanitizeForFont } from "./textLayout";
 import { arrowHead, drawingPdfPoints, lineEndpoints, annotationLineThickness } from "./shapeGeometry";
+import { DESCENT_SHARE } from "./nativeText";
 
 export class EditorExportError extends Error {}
 
@@ -154,7 +155,8 @@ async function drawObject(
       try {
         // Real (visible) text, so the correction is already searchable and copyable — a second
         // invisible copy would make every search/copy of this text appear twice.
-        page.drawText(obj.newText, { x: obj.x, y: obj.y, size, font, color: rgb(0, 0, 0) });
+        // Same baseline as the text it replaces (the region box extends below it for descenders).
+        page.drawText(obj.newText, { x: obj.x + 0.5, y: obj.y + obj.height * DESCENT_SHARE, size, font, color: rgb(0, 0, 0) });
       } catch {
         // A character outside Helvetica's supported encoding shouldn't fail the whole
         // export — the region is still whited out, just without replacement text drawn.

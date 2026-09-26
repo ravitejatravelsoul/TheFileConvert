@@ -1,4 +1,5 @@
 import { sanitizeSvgMarkup } from "@/lib/security/validators";
+import type { SearchAttempt } from "./image-search";
 
 export class ProcessorError extends Error {}
 
@@ -155,15 +156,6 @@ export async function resizeImage(file: File, options: ResizeOptions): Promise<B
 // Target-size compression (V2): "how small do I need this image?" instead of a quality slider.
 // ---------------------------------------------------------------------------------------------
 
-const QUALITY_LADDER = [0.92, 0.82, 0.72, 0.6, 0.48, 0.36, 0.25];
-/** Dimensions are only reduced once quality alone can't reach the target. */
-const SCALE_LADDER = [1, 0.85, 0.7, 0.55, 0.4];
-
-export interface ImageTargetAttempt {
-  scale: number;
-  quality: number;
-  bytes: number;
-}
 
 export interface ImageTargetResult {
   blob: Blob;
@@ -180,7 +172,7 @@ export interface ImageTargetResult {
   formatChanged: boolean;
   /** The input has (partly) transparent pixels — the reason a PNG goes to WebP rather than JPEG. */
   transparent: boolean;
-  attempts: ImageTargetAttempt[];
+  attempts: SearchAttempt[];
 }
 
 /** Output format for target-size compression: JPEG input stays JPEG; anything with transparency goes
@@ -193,9 +185,8 @@ export function targetFormatFor(input: ImageOutputFormat | null, transparent: bo
 }
 
 /**
- * Compresses toward a target file size: walks quality from high to low at full size, and only shrinks
- * dimensions (in fixed steps) if the lowest quality alone still doesn't reach the target. Stops at the
- * first setting that fits.
+ * Compresses toward a target file size with the least visible change: see {@link searchImageSettings}
+ * for the order in which quality and dimensions are traded away.
  */
 export async function compressImageToTarget(file: File, targetBytes: number, onProgress?: (label: string) => void): Promise<ImageTargetResult> {
   const transparent = await hasTransparency(file);
@@ -211,38 +202,27 @@ export async function compressImageToTarget(file: File, targetBytes: number, onP
     return { blob: file, format, width: dims.width, height: dims.height, originalBytes: file.size, newBytes: file.size, targetBytes, targetAchieved: true, quality: 1, scale: 1, formatChanged: false, transparent, attempts: [{ scale: 1, quality: 1, bytes: file.size }] };
   }
 
-  const attempts: ImageTargetAttempt[] = [];
-  let best: { blob: Blob; width: number; height: number; quality: number; scale: number } | null = null;
-
-  for (const scale of SCALE_LADDER) {
-    const width = Math.max(1, Math.round(dims.width * scale));
-    const height = Math.max(1, Math.round(dims.height * scale));
-    // PNG has no quality setting: only its dimensions can change.
-    for (const quality of format === "png" ? [1] : QUALITY_LADDER) {
-      onProgress?.(format === "png" ? `${Math.round(scale * 100)}% size` : `${Math.round(quality * 100)}% quality${scale < 1 ? `, ${Math.round(scale * 100)}% size` : ""}`);
-      const blob = await resizeImage(file, { width, height, format, quality });
-      attempts.push({ scale, quality, bytes: blob.size });
-      if (!best || blob.size < best.blob.size) best = { blob, width, height, quality, scale };
-      if (blob.size <= targetBytes) {
-        return { blob, format, width, height, originalBytes: file.size, newBytes: blob.size, targetBytes, targetAchieved: true, quality, scale, formatChanged, transparent, attempts };
-      }
-    }
-  }
-
+  const { searchImageSettings } = await import("./image-search");
+  const sizeAt = (scale: number) => ({ width: Math.max(1, Math.round(dims.width * scale)), height: Math.max(1, Math.round(dims.height * scale)) });
+  const found = await searchImageSettings(targetBytes, (scale, quality) => resizeImage(file, { ...sizeAt(scale), format, quality }), {
+    lossy: format !== "png",
+    onProgress,
+  });
+  const { width, height } = sizeAt(found.scale);
   return {
-    blob: best!.blob,
+    blob: found.out,
     format,
-    width: best!.width,
-    height: best!.height,
+    width,
+    height,
     originalBytes: file.size,
-    newBytes: best!.blob.size,
+    newBytes: found.out.size,
     targetBytes,
-    targetAchieved: false,
-    quality: best!.quality,
-    scale: best!.scale,
+    targetAchieved: found.fits,
+    quality: found.quality,
+    scale: found.scale,
     formatChanged,
     transparent,
-    attempts,
+    attempts: found.attempts,
   };
 }
 

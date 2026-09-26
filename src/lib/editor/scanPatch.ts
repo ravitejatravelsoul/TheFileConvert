@@ -443,7 +443,11 @@ export function composeOcrPatch(input: ComposeOcrPatchInput): ComposeOcrPatchRes
       }
     }
     ctx.font = fontString(fontCandidate, size);
-    const availableWidthPx = patchRectPx.width * pixelScale;
+    // The new word starts where the old one's ink started and may use the old word's width plus the
+    // verified blank space beyond it — not the padding ring on the right, which is the gap before the
+    // next word (using it ran replacements into their neighbors: "Jordan Smith" -> "MorganSmith").
+    const startPx = (wordRectPx.x - patchRectPx.x) * pixelScale;
+    const availableWidthPx = Math.max(1, patchRectPx.width * pixelScale - startPx * 2);
     let naturalWidth = ctx.measureText(newText).width;
     let letterSpacing = 0;
 
@@ -484,7 +488,9 @@ export function composeOcrPatch(input: ComposeOcrPatchInput): ComposeOcrPatchRes
     ctx.fillStyle = rgbToCssColor(fill);
     ctx.textBaseline = "alphabetic";
     ctx.filter = `blur(${BLUR_PX}px)`;
-    ctx.fillText(newText, 0, baselineLocalPx);
+    // Place the first glyph's ink (not its advance origin) on the original word's left edge.
+    const inkLeft = ctx.measureText(newText).actualBoundingBoxLeft || 0;
+    ctx.fillText(newText, Math.max(0, startPx + inkLeft), baselineLocalPx);
     ctx.filter = "none";
     if ("letterSpacing" in ctx) (ctx as CanvasRenderingContext2D & { letterSpacing: string }).letterSpacing = "0px";
   }

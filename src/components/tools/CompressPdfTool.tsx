@@ -17,8 +17,8 @@ import { decideOutcome, type Outcome } from "@/lib/processors/outcome";
 
 const tool = getTool("compress-pdf");
 const PRESETS = [500 * KB, 1 * MB, 2 * MB, 5 * MB];
-/** Lossless pass + the engine's seven quality rungs. */
-const SEARCH_STEPS = 8;
+/** Lossless pass + seven quality rungs + up to two refinement steps. */
+const SEARCH_STEPS = 10;
 
 type Phase =
   | { name: "empty" }
@@ -119,7 +119,7 @@ export function CompressPdfTool() {
   if (phase.name === "working") {
     return (
       <div className="mx-auto max-w-3xl">
-        <Working label={phase.label} detail="Starting with the highest quality and stopping at the first result that fits." fraction={phase.step / SEARCH_STEPS} />
+        <Working label={phase.label} detail="Starting with the highest quality and stopping at the first result that fits." fraction={Math.min(1, phase.step / SEARCH_STEPS)} />
       </div>
     );
   }
