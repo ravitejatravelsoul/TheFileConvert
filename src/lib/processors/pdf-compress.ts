@@ -1,5 +1,5 @@
-import { PDFArray, PDFDict, PDFDocument, PDFName, PDFNumber, PDFRawStream, PDFRef, type PDFObject } from "pdf-lib";
-import { decodeFlateImage, filterChain, isFlateChain, type RawImage } from "./pdf-image-decode";
+import { PDFArray, PDFDict, PDFDocument, PDFName, PDFNumber, PDFRawStream, PDFRef, type PDFContext, type PDFObject } from "pdf-lib";
+import { colorChannels, decodeFlateImage, filterChain, isFlateChain, type RawImage } from "./pdf-image-decode";
 
 /**
  * Browser-local PDF size reduction, in three honest levels:
@@ -76,7 +76,7 @@ function collectImages(doc: PDFDocument): ImageEntry[] {
     if (!(obj instanceof PDFRawStream)) continue;
     if (nameOf(obj.dict.get(PDFName.of("Subtype"))) !== "Image") continue;
     const isJpeg = filterOf(obj.dict) === "DCTDecode";
-    out.push({ ref, stream: obj, isJpeg, isFlate: !isJpeg && isFlateChain(filterChain(obj.dict)) && isRecompressible(obj.dict), bytes: obj.contents });
+    out.push({ ref, stream: obj, isJpeg, isFlate: !isJpeg && isFlateChain(filterChain(obj.dict)) && isRecompressible(obj.dict, doc.context), bytes: obj.contents });
   }
   return out;
 }
@@ -126,7 +126,8 @@ export async function analyzePdfImages(bytes: ArrayBuffer | Uint8Array): Promise
   return {
     totalBytes: data.length,
     imageCount: images.length,
-    jpegCount: images.filter((i) => i.isJpeg).length,
+    // Only JPEGs this tool can actually re-encode (CMYK and other colour spaces are kept as they are).
+    jpegCount: images.filter((i) => i.isJpeg && isRecompressible(i.stream.dict, doc.context)).length,
     imageBytes: images.reduce((s, i) => s + i.bytes.length, 0),
     jpegBytes: images.filter((i) => i.isJpeg).reduce((s, i) => s + i.bytes.length, 0),
     flateCount: images.filter((i) => i.isFlate).length,
@@ -227,9 +228,8 @@ export const canvasRawReencoder: RawReencoder = async (img, { quality, maxLongSi
   return { bytes: new Uint8Array(await out.arrayBuffer()), width: w, height: h };
 };
 
-function isRecompressible(dict: PDFDict): boolean {
-  const cs = nameOf(dict.get(PDFName.of("ColorSpace")));
-  if (cs !== "DeviceRGB" && cs !== "DeviceGray") return false;
+function isRecompressible(dict: PDFDict, context: PDFContext): boolean {
+  if (!colorChannels(dict.get(PDFName.of("ColorSpace")), context)) return false;
   const bpc = (dict.get(PDFName.of("BitsPerComponent")) as PDFNumber | undefined)?.asNumber();
   if (bpc !== 8) return false;
   if (dict.get(PDFName.of("Decode")) || dict.get(PDFName.of("ImageMask")) || dict.get(PDFName.of("Mask"))) return false;
@@ -273,7 +273,7 @@ async function compressCore(
     const { quality, maxLongSide } = settings;
     for (const img of images) {
       if (dups.has(img.ref)) continue;
-      if ((!img.isJpeg && !img.isFlate) || !isRecompressible(img.stream.dict)) {
+      if ((!img.isJpeg && !img.isFlate) || !isRecompressible(img.stream.dict, doc.context)) {
         imagesSkipped++;
         continue;
       }
@@ -282,7 +282,7 @@ async function compressCore(
         if (img.isJpeg) {
           result = await reencode(img.bytes, { quality, maxLongSide });
         } else {
-          const raw = await decodeFlateImage(img.stream.dict, img.bytes);
+          const raw = await decodeFlateImage(img.stream.dict, img.bytes, doc.context);
           result = raw ? await reencodeRaw(raw, { quality, maxLongSide }) : null;
         }
       } catch {
@@ -296,6 +296,9 @@ async function compressCore(
       dict.set(PDFName.of("Width"), PDFNumber.of(result.width));
       dict.set(PDFName.of("Height"), PDFNumber.of(result.height));
       dict.set(PDFName.of("ColorSpace"), PDFName.of("DeviceRGB")); // canvas output is always RGB
+      // A browser-encoded JPEG is ordinary YCbCr; an inherited /ColorTransform 0 (Chrome writes it) would
+      // tell viewers to skip the colour conversion and show the photo in the wrong colours.
+      dict.delete(PDFName.of("ColorTransform"));
       dict.set(PDFName.of("Filter"), PDFName.of("DCTDecode"));
       dict.delete(PDFName.of("DecodeParms"));
       dict.delete(PDFName.of("DP"));
@@ -384,6 +387,22 @@ export async function compressPdfToTarget(
   reencodeRaw: RawReencoder = canvasRawReencoder,
   onProgress?: (label: string) => void
 ): Promise<TargetCompressResult> {
+  // Already at or under the target: nothing to do, and a re-save could only change bytes the user
+  // didn't ask to change. The original comes back untouched.
+  if (input.length <= targetBytes) {
+    return {
+      blob: new Blob([input as BlobPart], { type: "application/pdf" }),
+      originalBytes: input.length,
+      newBytes: input.length,
+      targetBytes,
+      targetAchieved: true,
+      rungLabel: "original (already under the target)",
+      imagesRecompressed: 0,
+      duplicatesMerged: 0,
+      attempts: [],
+    };
+  }
+
   onProgress?.("lossless (no quality loss)");
   const lossless = await compressCore(input, null, reencode, reencodeRaw);
   const attempts: TargetCompressAttempt[] = [{ label: "lossless (no quality loss)", bytes: lossless.newBytes }];

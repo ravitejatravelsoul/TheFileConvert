@@ -175,6 +175,10 @@ export interface ImageTargetResult {
   attempts: SearchAttempt[];
 }
 
+/** A target-size result is never shrunk below this long side (or the original's, if smaller): past it a
+ * photo stops being usable, so the target is reported as not reached instead. */
+const MIN_LONG_SIDE = 480;
+
 /** Output format for target-size compression: JPEG input stays JPEG; anything with transparency goes
  * to WebP (the only one of the three that keeps it compactly); other images go to WebP. Where the
  * browser can't write WebP, transparent images stay PNG and opaque ones become JPEG. */
@@ -207,6 +211,7 @@ export async function compressImageToTarget(file: File, targetBytes: number, onP
   const found = await searchImageSettings(targetBytes, (scale, quality) => resizeImage(file, { ...sizeAt(scale), format, quality }), {
     lossy: format !== "png",
     onProgress,
+    minScale: Math.min(1, MIN_LONG_SIDE / Math.max(dims.width, dims.height)),
   });
   const { width, height } = sizeAt(found.scale);
   return {

@@ -70,7 +70,9 @@ test("an unreachable target is reported honestly, with the closest result offere
   await customTarget(page, 1);
   await page.getByRole("button", { name: "Compress to under 1 KB" }).click();
   const result = page.getByTestId("result");
-  await expect(result.getByRole("status")).toContainText(/Couldn't safely reach 1 KB|can't be made smaller/, { timeout: 60_000 });
+  await expect(result.getByRole("status")).toHaveText("Target not reached", { timeout: 60_000 });
+  await expect(result.getByText("Couldn’t reach 1 KB without unacceptable quality loss.")).toBeVisible();
+  await expect(result.getByText(/^Closest safe result:/)).toBeVisible();
   await expect(result.getByText("1 KB ✗")).toBeVisible();
   await expect(result.getByText(/^Done/)).toHaveCount(0);
   const { bytes } = await downloadFrom(page, page.getByRole("button", { name: /^Download/ }));
@@ -94,4 +96,37 @@ test("Continue with hands the result to the next tool without picking it again",
   await page.getByRole("button", { name: "Split PDF" }).click();
   await expect(page).toHaveURL(/\/split-pdf$/);
   await expect(page.getByText("sample-a.pdf")).toBeVisible();
+});
+
+// Regression: a real-world ~320 KB PDF (Chrome's own print-to-PDF: a photo stored as a JPEG with an ICC
+// profile colour space) asked to go under 200 KB used to come back at its original size, because images
+// with ICC colour spaces were never re-encoded.
+test("a ~320 KB Chrome-printed PDF really goes under a 200 KB target", async ({ page, browser }) => {
+  const maker = await browser.newPage();
+  const photo = fs.readFileSync(fx("qa", "img-landscape.jpg")).toString("base64");
+  await maker.setContent(`<html><body style="font-family:Arial;margin:40px"><h1>Site report</h1><p>${"Inspection notes for the north building. ".repeat(20)}</p><img src="data:image/jpeg;base64,${photo}" style="width:100%"></body></html>`);
+  const pdf = await maker.pdf({ format: "A4", printBackground: true });
+  await maker.close();
+  expect(pdf.length).toBeGreaterThan(200_000); // the input really is over the target
+
+  await page.goto("/compress-pdf");
+  await addFiles(page, { name: "report.pdf", mimeType: "application/pdf", buffer: pdf });
+  await customTarget(page, 200);
+  await page.getByRole("button", { name: "Compress to under 200 KB" }).click();
+  const result = page.getByTestId("result");
+  await expect(result.getByRole("status")).toContainText("Done", { timeout: 60_000 });
+  const { bytes } = await downloadFrom(page, page.getByRole("button", { name: /^Download/ }));
+  expect(bytes.length).toBeLessThanOrEqual(200_000);
+  expect(bytes.equals(pdf)).toBe(false);
+  expect((await PDFDocument.load(bytes)).getPageCount()).toBe((await PDFDocument.load(pdf)).getPageCount());
+});
+
+test("a file already under the target is returned unchanged by the image compressor too", async ({ page }) => {
+  await page.goto("/compress-image");
+  await addFiles(page, [fx("qa", "img-photo-small-optimized.jpg")]);
+  await customTarget(page, 200);
+  await page.getByRole("button", { name: "Compress to under 200 KB" }).click();
+  await expect(page.getByTestId("result").getByRole("status")).toHaveText("Already under your target");
+  const { bytes } = await downloadFrom(page, page.getByRole("button", { name: /^Download/ }));
+  expect(bytes.equals(fs.readFileSync(fx("qa", "img-photo-small-optimized.jpg")))).toBe(true);
 });

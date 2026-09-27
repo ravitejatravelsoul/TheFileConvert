@@ -1,4 +1,4 @@
-import { PDFArray, PDFDict, PDFName, PDFNumber, type PDFObject } from "pdf-lib";
+import { PDFArray, PDFDict, PDFName, PDFNumber, PDFRawStream, PDFRef, type PDFContext, type PDFObject } from "pdf-lib";
 
 /**
  * Decoding of the lossless image encodings that scanners and PDF generators (ReportLab, PIL, Word "save as
@@ -17,6 +17,29 @@ export interface RawImage {
 
 function nameOf(obj: PDFObject | undefined): string | undefined {
   return obj instanceof PDFName ? obj.decodeText() : undefined;
+}
+
+/**
+ * Number of colour components (1 = gray, 3 = RGB) of an image's colour space, or 0 when it isn't one this
+ * tool re-encodes. Besides DeviceGray/DeviceRGB this accepts ICC-based and calibrated gray/RGB spaces —
+ * what Chrome's print-to-PDF, Word, Preview and most scanner apps write — since their pixel data is plain
+ * gray or RGB. CMYK, Lab, palette (Indexed) and separation images are left exactly as they are.
+ */
+export function colorChannels(colorSpace: PDFObject | undefined, context?: PDFContext): 0 | 1 | 3 {
+  const cs = colorSpace instanceof PDFRef && context ? context.lookup(colorSpace) : colorSpace;
+  const name = nameOf(cs);
+  if (name === "DeviceRGB" || name === "CalRGB") return 3;
+  if (name === "DeviceGray" || name === "CalGray") return 1;
+  if (!(cs instanceof PDFArray) || cs.size() < 1) return 0;
+  const family = nameOf(cs.get(0));
+  if (family === "CalRGB") return 3;
+  if (family === "CalGray") return 1;
+  if (family !== "ICCBased" || !context) return 0;
+  const profile = context.lookup(cs.get(1));
+  const dict = profile instanceof PDFRawStream ? profile.dict : profile instanceof PDFDict ? profile : null;
+  const n = dict?.get(PDFName.of("N"));
+  const components = n instanceof PDFNumber ? n.asNumber() : 0;
+  return components === 3 ? 3 : components === 1 ? 1 : 0;
 }
 
 /** The filter names of a stream dictionary, in decode order. */
@@ -128,14 +151,13 @@ export function undoPngPredictor(data: Uint8Array, rowBytes: number, bytesPerPix
 }
 
 /**
- * Decodes an 8-bit DeviceRGB / DeviceGray Flate image (with optional ASCII85 wrapper and PNG predictor)
+ * Decodes an 8-bit gray or RGB (see colorChannels) Flate image (with optional ASCII85 wrapper and PNG predictor)
  * to raw pixels. Returns null for anything else (other colour spaces, TIFF predictor, size mismatch).
  */
-export async function decodeFlateImage(dict: PDFDict, contents: Uint8Array): Promise<RawImage | null> {
+export async function decodeFlateImage(dict: PDFDict, contents: Uint8Array, context?: PDFContext): Promise<RawImage | null> {
   const chain = filterChain(dict);
   if (!isFlateChain(chain)) return null;
-  const cs = nameOf(dict.get(PDFName.of("ColorSpace")));
-  const channels = cs === "DeviceRGB" ? 3 : cs === "DeviceGray" ? 1 : 0;
+  const channels = colorChannels(dict.get(PDFName.of("ColorSpace")), context);
   if (!channels) return null;
   const width = num(dict, "Width", 0);
   const height = num(dict, "Height", 0);

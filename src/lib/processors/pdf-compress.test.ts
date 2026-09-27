@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
-import { PDFDocument } from "pdf-lib";
+import { PDFDocument, PDFName, PDFNumber, PDFRawStream } from "pdf-lib";
 import { analyzePdfImages, compressPdfDocument, compressPdfToTarget, compressionOutlook, type JpegReencoder } from "./pdf-compress";
 
 const JPEG = new Uint8Array(fs.readFileSync(path.join(__dirname, "../../../e2e/fixtures/sample.jpg")));
@@ -162,5 +162,75 @@ describe("compressionOutlook with repeated images", () => {
   it("mentions that repeats merge for free", () => {
     const o = compressionOutlook({ totalBytes: 1000, imageCount: 6, jpegCount: 6, imageBytes: 990, jpegBytes: 990, duplicateCount: 5, duplicateBytes: 820 });
     expect(o.text).toMatch(/5 repeated images can be merged for free/);
+  });
+});
+
+/** Like pdfWithRepeatedImage(1), but the photo carries an ICC profile colour space and /ColorTransform 0,
+ * exactly as Chrome's print-to-PDF (and Word, Preview, most scanner apps) write it. */
+const PHOTO = new Uint8Array(fs.readFileSync(path.join(__dirname, "../../../e2e/fixtures/qa/img-landscape.jpg"))); // ~390 KB
+
+async function pdfWithIccJpeg(): Promise<Uint8Array> {
+  const doc = await PDFDocument.create();
+  const img = await doc.embedJpg(PHOTO);
+  const page = doc.addPage([300, 300]);
+  page.drawImage(img, { x: 10, y: 10, width: 200, height: 200 });
+  page.drawText("report", { x: 10, y: 250 });
+  const icc = doc.context.register(doc.context.stream(new Uint8Array(600), { N: 3 }));
+  await doc.flush();
+  const stream = doc.context.lookup(img.ref) as PDFRawStream;
+  stream.dict.set(PDFName.of("ColorSpace"), doc.context.obj([PDFName.of("ICCBased"), icc]));
+  stream.dict.set(PDFName.of("ColorTransform"), PDFNumber.of(0));
+  return doc.save();
+}
+
+describe("target contract: small files and ICC-profile images (regression)", () => {
+  const halfSize: JpegReencoder = async (jpeg, { quality }) => ({ bytes: jpeg.slice(0, Math.max(1, Math.floor(jpeg.length * quality * 0.5))), width: 1, height: 1 });
+
+  it("re-encodes an ICC-profile JPEG instead of skipping it, so an input over the target really shrinks", async () => {
+    const input = await pdfWithIccJpeg();
+    const target = Math.round(input.length * 0.7);
+    const r = await compressPdfToTarget(input, target, halfSize);
+    expect(input.length).toBeGreaterThan(target);
+    expect(r.imagesRecompressed).toBe(1);
+    expect(r.targetAchieved).toBe(true);
+    expect(r.newBytes).toBeLessThanOrEqual(target);
+    expect(r.newBytes).toBeLessThan(input.length);
+  });
+
+  it("drops an inherited /ColorTransform 0 from the re-encoded image", async () => {
+    const input = await pdfWithIccJpeg();
+    const r = await compressPdfToTarget(input, Math.round(input.length * 0.7), halfSize);
+    const out = await PDFDocument.load(new Uint8Array(await r.blob.arrayBuffer()));
+    for (const [, obj] of out.context.enumerateIndirectObjects()) {
+      if (obj instanceof PDFRawStream && obj.dict.get(PDFName.of("Subtype"))?.toString() === "/Image") {
+        expect(obj.dict.get(PDFName.of("ColorTransform"))).toBeUndefined();
+        expect(obj.dict.get(PDFName.of("ColorSpace"))?.toString()).toBe("/DeviceRGB");
+      }
+    }
+  });
+
+  it("never reports success for an input over the target unless the output is at or under it", async () => {
+    const input = await pdfWithIccJpeg();
+    for (const share of [0.9, 0.6, 0.3, 0.01]) {
+      const target = Math.round(input.length * share);
+      const r = await compressPdfToTarget(input, target, halfSize);
+      expect(r.targetAchieved).toBe(r.newBytes <= target);
+    }
+  });
+
+  it("returns the original byte-for-byte when it is already at or under the target", async () => {
+    const input = await pdfWithIccJpeg();
+    for (const target of [input.length, input.length + 1, input.length * 2]) {
+      const r = await compressPdfToTarget(input, target, halfSize);
+      expect(r.targetAchieved).toBe(true);
+      expect(r.attempts).toHaveLength(0);
+      expect(new Uint8Array(await r.blob.arrayBuffer())).toEqual(input);
+    }
+  });
+
+  it("the up-front outlook counts an ICC-profile JPEG as recompressible", async () => {
+    const a = await analyzePdfImages(await pdfWithIccJpeg());
+    expect(a.jpegCount).toBe(1);
+    expect(compressionOutlook(a).kind).not.toBe("unsupported-images");
   });
 });

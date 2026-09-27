@@ -47,3 +47,12 @@ describe("searchImageSettings", () => {
     expect(r.attempts.length).toBeLessThanOrEqual(12);
   });
 });
+
+describe("searchImageSettings — safe floor", () => {
+  it("never shrinks below minScale; an unreachable target is reported as not reached", async () => {
+    const r = await searchImageSettings(5_000, fake(1_000_000), { lossy: true, minScale: 0.4 });
+    expect(r.fits).toBe(false);
+    expect(Math.min(...r.attempts.map((a) => a.scale))).toBeGreaterThanOrEqual(0.4);
+    expect(r.attempts.every((a) => a.quality >= 0.35)).toBe(true);
+  });
+});

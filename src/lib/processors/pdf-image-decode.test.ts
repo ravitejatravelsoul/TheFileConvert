@@ -135,3 +135,22 @@ describe("Flate scans are recognised and recompressed", () => {
     expect(r.imagesSkipped).toBe(1);
   });
 });
+
+describe("colorChannels", () => {
+  it("accepts device, calibrated and 1-/3-component ICC spaces; rejects CMYK, palette and unknown ones", async () => {
+    const { PDFDocument: Doc, PDFName: N } = await import("pdf-lib");
+    const { colorChannels } = await import("./pdf-image-decode");
+    const doc = await Doc.create();
+    const icc = (n: number) => doc.context.register(doc.context.stream(new Uint8Array(4), { N: n }));
+    expect(colorChannels(N.of("DeviceRGB"), doc.context)).toBe(3);
+    expect(colorChannels(N.of("DeviceGray"), doc.context)).toBe(1);
+    expect(colorChannels(doc.context.obj([N.of("ICCBased"), icc(3)]), doc.context)).toBe(3);
+    expect(colorChannels(doc.context.obj([N.of("ICCBased"), icc(1)]), doc.context)).toBe(1);
+    expect(colorChannels(doc.context.obj([N.of("ICCBased"), icc(4)]), doc.context)).toBe(0); // CMYK profile
+    expect(colorChannels(doc.context.obj([N.of("CalRGB"), doc.context.obj({})]), doc.context)).toBe(3);
+    expect(colorChannels(N.of("DeviceCMYK"), doc.context)).toBe(0);
+    expect(colorChannels(doc.context.obj([N.of("Indexed"), N.of("DeviceRGB"), 1, doc.context.obj([])]), doc.context)).toBe(0);
+    // A colour space stored as an indirect object is resolved first.
+    expect(colorChannels(doc.context.register(doc.context.obj([N.of("ICCBased"), icc(3)])), doc.context)).toBe(3);
+  });
+});

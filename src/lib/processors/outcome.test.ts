@@ -36,3 +36,18 @@ describe("decideOutcome", () => {
     expect(o.kind).toBe("closest");
   });
 });
+
+describe("decideOutcome — small-file target contract (regression)", () => {
+  it("an unchanged original over the target is never a success, even if the engine claims one", () => {
+    const original = blob(324_000);
+    const o = decideOutcome(original, 200_000, { blob: original, newBytes: 324_000, targetAchieved: true });
+    expect(o.kind).not.toBe("reached");
+    expect(o.kind).not.toBe("already-small");
+  });
+
+  it("an original at or under the target is returned unchanged", () => {
+    const original = blob(180_000);
+    const o = decideOutcome(original, 200_000, { blob: original, newBytes: 180_000, targetAchieved: true });
+    expect(o).toEqual({ kind: "already-small", blob: original, bytes: 180_000 });
+  });
+});

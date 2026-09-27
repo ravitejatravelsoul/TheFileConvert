@@ -6,6 +6,7 @@ import { Alert, StatGrid, Working } from "@/components/tool/Feedback";
 import { SelectedFile } from "@/components/tool/SelectedFile";
 import { TargetPicker, resolveTarget, type TargetChoice } from "@/components/tool/TargetPicker";
 import { ContinueWith } from "@/components/tool/ContinueWith";
+import { TargetOutcome } from "@/components/tool/TargetOutcome";
 import { useFileIntake } from "@/components/tool/useFileIntake";
 import { IconDownload } from "@/components/icons";
 import { getTool } from "@/lib/tools/registry";
@@ -170,33 +171,10 @@ function CompressPdfResult({
   const saved = percentSaved(file.size, outcome.bytes);
   const reached = outcome.kind === "reached" || outcome.kind === "already-small";
 
-  const headline =
-    outcome.kind === "reached"
-      ? `Done — ${formatSize(outcome.bytes)}`
-      : outcome.kind === "already-small"
-        ? "Already under your target"
-        : outcome.kind === "closest"
-          ? `Couldn't safely reach ${formatTarget(target)}`
-          : "This PDF can't be made smaller";
-
-  const sub =
-    outcome.kind === "reached"
-      ? "Best quality we could preserve for your target."
-      : outcome.kind === "already-small"
-        ? "Nothing we tried came out smaller, so your original is returned unchanged."
-        : outcome.kind === "closest"
-          ? `Closest recommended result: ${formatSize(outcome.bytes)}. Going smaller would make pages hard to read.`
-          : "Its content is already efficiently stored. Your original is unchanged.";
-
   return (
     <div className="mx-auto max-w-3xl space-y-6" data-testid="result">
       <div className="card overflow-hidden">
-        <div className={`px-5 py-6 sm:px-7 ${reached ? "bg-[var(--success-soft)]" : "bg-[var(--warning-soft)]"}`}>
-          <p role="status" className="text-2xl font-semibold tracking-[-0.03em] sm:text-[1.75rem]">
-            {headline}
-          </p>
-          <p className="mt-1 text-[var(--ink-2)]">{sub}</p>
-        </div>
+        <TargetOutcome outcome={outcome} target={target} noun="PDF" />
         <div className="space-y-5 p-5 sm:p-7">
           <StatGrid
             stats={[
@@ -217,7 +195,7 @@ function CompressPdfResult({
           <div className="flex flex-col gap-3 sm:flex-row">
             <button type="button" className="btn btn-primary btn-lg" onClick={() => triggerDownload(output.name, output)}>
               <IconDownload className="h-5 w-5" />
-              {outcome.kind === "closest" ? `Download ${formatSize(outcome.bytes)} version` : "Download PDF"}
+              {outcome.kind === "closest" ? `Download closest result (${formatSize(outcome.bytes)})` : "Download PDF"}
             </button>
             <button type="button" className="btn btn-secondary btn-lg" onClick={onRetarget}>
               Try another size

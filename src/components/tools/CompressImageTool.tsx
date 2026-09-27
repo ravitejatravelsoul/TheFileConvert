@@ -6,6 +6,7 @@ import { Alert, StatGrid, Working } from "@/components/tool/Feedback";
 import { SelectedFile } from "@/components/tool/SelectedFile";
 import { TargetPicker, resolveTarget, type TargetChoice } from "@/components/tool/TargetPicker";
 import { ContinueWith } from "@/components/tool/ContinueWith";
+import { TargetOutcome } from "@/components/tool/TargetOutcome";
 import { BlobImage } from "@/components/tool/FileThumb";
 import { useFileIntake } from "@/components/tool/useFileIntake";
 import { IconDownload } from "@/components/icons";
@@ -131,26 +132,7 @@ function Result({ file, phase, onRetarget, onReset }: { file: File; phase: Extra
   return (
     <div className="mx-auto max-w-4xl space-y-6" data-testid="result">
       <div className="card overflow-hidden">
-        <div className={`px-5 py-6 sm:px-7 ${reached ? "bg-[var(--success-soft)]" : "bg-[var(--warning-soft)]"}`}>
-          <p role="status" className="text-2xl font-semibold tracking-[-0.03em] sm:text-[1.75rem]">
-            {outcome.kind === "reached"
-              ? `Done — ${formatSize(outcome.bytes)}`
-              : outcome.kind === "already-small"
-                ? "Already under your target"
-                : outcome.kind === "closest"
-                  ? `Couldn't safely reach ${formatTarget(target)}`
-                  : "This image can't be made smaller"}
-          </p>
-          <p className="mt-1 text-[var(--ink-2)]">
-            {outcome.kind === "reached"
-              ? "Best quality we could preserve for your target."
-              : outcome.kind === "already-small"
-                ? "Nothing we tried came out smaller, so your original is returned unchanged."
-                : outcome.kind === "closest"
-                  ? `Closest recommended result: ${formatSize(outcome.bytes)}.`
-                  : "Your original is unchanged."}
-          </p>
-        </div>
+        <TargetOutcome outcome={outcome} target={target} noun="image" />
         <div className="grid gap-6 p-5 sm:p-7 md:grid-cols-[220px_1fr]">
           <div className="hatch flex aspect-square items-center justify-center overflow-hidden rounded-[var(--radius-md)] border border-[var(--line)] bg-[var(--surface-2)] p-3">
             <BlobImage blob={output} alt="Compressed result preview" className="max-h-full max-w-full object-contain" />
@@ -174,7 +156,7 @@ function Result({ file, phase, onRetarget, onReset }: { file: File; phase: Extra
             <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
               <button type="button" className="btn btn-primary btn-lg" onClick={() => triggerDownload(output.name, output)}>
                 <IconDownload className="h-5 w-5" />
-                Download {untouched ? "image" : FORMAT_NAME[result.format]}
+                {outcome.kind === "closest" ? `Download closest result (${formatSize(outcome.bytes)})` : `Download ${untouched ? "image" : FORMAT_NAME[result.format]}`}
               </button>
               <button type="button" className="btn btn-secondary btn-lg" onClick={onRetarget}>
                 Try another size

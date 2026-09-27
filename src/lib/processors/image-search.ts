@@ -8,7 +8,8 @@
  *     roughly with pixel count), at a good quality (75%). Then nudge the scale back up between the size
  *     that fit and the one that didn't, to keep as many pixels as possible.
  *  3. Only if even small dimensions don't fit: lower quality (50%, then 35%) as a last resort.
- * If nothing fits, the smallest result is returned as the closest one — never labelled as success.
+ * Dimensions never go below `minScale`, and quality never below the last-resort floor: if nothing fits
+ * within those limits, the smallest result is returned as the closest one — never labelled as success.
  */
 
 export interface SearchAttempt {
@@ -28,7 +29,6 @@ export interface SearchOutcome<T> {
 const FULL_SIZE_QUALITIES = [0.92, 0.85, 0.78, 0.7];
 const SHRINK_QUALITY = 0.75;
 const LAST_RESORT_QUALITIES = [0.5, 0.35];
-const MIN_SCALE = 0.08;
 const SHRINK_ROUNDS = 5;
 /** Aim a little under the target when estimating a scale, since the estimate isn't exact. */
 const AIM = 0.96;
@@ -36,7 +36,17 @@ const AIM = 0.96;
 export async function searchImageSettings<T extends { size: number }>(
   target: number,
   encode: (scale: number, quality: number) => Promise<T>,
-  { lossy, onProgress }: { lossy: boolean; onProgress?: (label: string) => void }
+  {
+    lossy,
+    onProgress,
+    minScale = 0.08,
+  }: {
+    lossy: boolean;
+    onProgress?: (label: string) => void;
+    /** Smallest scale that still counts as a usable result. Below it the target is reported as not reached
+     * rather than met with an image too small to use. */
+    minScale?: number;
+  }
 ): Promise<SearchOutcome<T>> {
   const attempts: SearchAttempt[] = [];
   let best: { out: T; scale: number; quality: number } | null = null; // smallest seen (fallback)
@@ -71,9 +81,9 @@ export async function searchImageSettings<T extends { size: number }>(
   const shrinkQuality = lossy ? SHRINK_QUALITY : 1;
   let failScale = 1;
   let scale = 1;
-  for (let round = 0; round < SHRINK_ROUNDS && scale > MIN_SCALE; round++) {
+  for (let round = 0; round < SHRINK_ROUNDS && scale > minScale; round++) {
     const estimate = scale * Math.sqrt(target / lastSize) * AIM;
-    scale = Math.max(MIN_SCALE, Math.min(scale * 0.95, estimate));
+    scale = Math.max(minScale, Math.min(scale * 0.95, estimate));
     lastSize = (await tryAt(scale, shrinkQuality)).size;
     if (lastSize <= target) {
       // Keep as many pixels as possible: bisect back toward the size that didn't fit.
