@@ -54,20 +54,28 @@ export function Dropzone({ accept, multiple, onFiles, title, buttonLabel, hint, 
         if (!disabled) take(e.dataTransfer.files);
       }}
       data-dragging={dragging || undefined}
-      className={`hatch group relative flex cursor-pointer flex-col items-center justify-center rounded-[var(--radius-xl)] border-[1.5px] border-dashed text-center transition-[background-color,border-color] duration-200 ${
-        compact ? "gap-3 px-5 py-8" : "gap-4 px-6 py-10 sm:gap-5 sm:py-20"
-      } ${dragging ? "border-[var(--ink)] bg-[var(--accent-soft)]" : "border-[var(--line-strong)] bg-[var(--surface)] hover:border-[var(--ink-3)]"}`}
+      className={`group relative isolate flex cursor-pointer flex-col items-center justify-center overflow-hidden rounded-[var(--radius-xl)] border-[1.5px] border-dashed text-center transition-[background-color,border-color,box-shadow,transform] duration-300 ${
+        compact ? "gap-3 px-5 py-8" : "gap-4 px-6 py-10 sm:gap-5 sm:py-16"
+      } ${
+        dragging
+          ? "scale-[1.01] border-[var(--ink)] bg-[var(--accent-soft)] shadow-[0_0_0_6px_rgb(255_212_59/0.35)]"
+          : "border-[var(--line-strong)] bg-[linear-gradient(180deg,#fff,var(--band))] shadow-[var(--ring-highlight),var(--shadow-2)] hover:border-[var(--ink-3)] hover:shadow-[0_0_0_5px_rgb(255_212_59/0.18),var(--shadow-2)]"
+      }`}
     >
+      {/* soft highlighter glow behind the upload tile */}
       {!compact && (
-        <span className="flex h-14 w-14 items-center justify-center rounded-[18px] bg-[var(--ink)] text-white shadow-[var(--shadow-button)] transition-transform duration-300 group-hover:-translate-y-0.5">
-          <IconUpload className="h-6 w-6" />
+        <span aria-hidden="true" className="pointer-events-none absolute left-1/2 top-6 -z-10 h-40 w-64 -translate-x-1/2 rounded-full bg-[radial-gradient(closest-side,rgb(255_212_59/0.35),transparent)] opacity-70 transition-opacity duration-300 group-hover:opacity-100 sm:top-10" />
+      )}
+      {!compact && (
+        <span className="relative flex h-16 w-16 items-center justify-center rounded-[20px] bg-[linear-gradient(180deg,#34332f,var(--ink))] text-white shadow-[var(--shadow-button)] ring-4 ring-white transition-transform duration-300 group-hover:-translate-y-1">
+          <IconUpload className="h-7 w-7" />
         </span>
       )}
       <div>
         <p className={`${compact ? "text-lg" : "text-[1.35rem] sm:text-2xl"} font-semibold tracking-[-0.025em] text-[var(--ink)]`}>
           {dragging ? "Drop to add" : title}
         </p>
-        {!compact && <p className="mt-1.5 text-[0.9375rem] text-[var(--ink-2)]">or</p>}
+        {!compact && <p className="mt-1.5 text-[0.9375rem] text-[var(--ink-2)]">{dragging ? "Let go anywhere in this box" : "or"}</p>}
       </div>
       <button
         type="button"
@@ -79,7 +87,7 @@ export function Dropzone({ accept, multiple, onFiles, title, buttonLabel, hint, 
         {buttonLabel}
       </button>
       {hint && (
-        <p id={hintId} className="flex items-center gap-1.5 text-[0.8125rem] text-[var(--ink-2)]">
+        <p id={hintId} className="flex items-center gap-1.5 rounded-full bg-[var(--success-soft)] px-3 py-1 text-[0.8125rem] font-medium text-[var(--success)]">
           <IconLock className="h-3.5 w-3.5" />
           {hint}
         </p>

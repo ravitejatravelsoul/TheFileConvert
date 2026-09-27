@@ -8,7 +8,7 @@ export function SelectedFile({ file, meta, onChange, disabled, rules }: { file: 
   const isPdf = file.type === "application/pdf" || /\.pdf$/i.test(file.name);
   return (
     <div className="card flex items-center gap-4 p-4 sm:p-5">
-      <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[14px] bg-[var(--surface-2)] text-[var(--ink)]">
+      <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[14px] bg-[linear-gradient(180deg,#34332f,var(--ink))] text-white shadow-[var(--shadow-button)]">
         {isPdf ? <IconPdf className="h-6 w-6" /> : <IconImage className="h-6 w-6" />}
       </span>
       <div className="min-w-0 flex-1">
@@ -22,7 +22,7 @@ export function SelectedFile({ file, meta, onChange, disabled, rules }: { file: 
         {large && <p className="mt-1 text-sm text-[var(--warning)]">Large file — this may take a minute on this device.</p>}
       </div>
       {onChange && (
-        <button type="button" onClick={onChange} disabled={disabled} className="btn btn-ghost btn-sm shrink-0">
+        <button type="button" onClick={onChange} disabled={disabled} className="btn btn-secondary btn-sm shrink-0">
           Change file
         </button>
       )}

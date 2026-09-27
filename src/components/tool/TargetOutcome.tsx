@@ -1,5 +1,6 @@
 import type { Outcome } from "@/lib/processors/outcome";
 import { formatSize, formatTarget } from "@/lib/size";
+import { IconCheck, IconWarning } from "@/components/icons";
 
 /**
  * The headline of a target-size result. Success wording appears only when the file really is at or
@@ -9,7 +10,13 @@ import { formatSize, formatTarget } from "@/lib/size";
 export function TargetOutcome({ outcome, target, noun }: { outcome: Outcome; target: number; noun: "PDF" | "image" }) {
   const reached = outcome.kind === "reached" || outcome.kind === "already-small";
   return (
-    <div className={`px-5 py-6 sm:px-7 ${reached ? "bg-[var(--success-soft)]" : "bg-[var(--warning-soft)]"}`}>
+    <div className={`relative overflow-hidden px-5 py-6 sm:px-7 ${reached ? "bg-[linear-gradient(135deg,var(--success-soft),#f1faf5)]" : "bg-[linear-gradient(135deg,var(--warning-soft),#fdf7ea)]"}`}>
+      <span
+        aria-hidden="true"
+        className={`mb-3 flex h-10 w-10 items-center justify-center rounded-full text-white shadow-[var(--shadow-2)] ${reached ? "bg-[var(--success)]" : "bg-[var(--warning)]"}`}
+      >
+        {reached ? <IconCheck className="h-5 w-5" strokeWidth={2.6} /> : <IconWarning className="h-5 w-5" />}
+      </span>
       <p role="status" className="text-2xl font-semibold tracking-[-0.03em] sm:text-[1.75rem]">
         {outcome.kind === "reached" ? `Done — ${formatSize(outcome.bytes)}` : outcome.kind === "already-small" ? "Already under your target" : "Target not reached"}
       </p>

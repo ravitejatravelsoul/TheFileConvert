@@ -247,7 +247,7 @@ export default function EditorWorkspace({ file, onExit }: { file: File; onExit: 
 
       {/* Desktop dock sits under the top bar. */}
       {isDesktop && (
-        <div className="flex shrink-0 justify-center border-b border-[var(--line)] bg-[var(--surface)] py-1.5">
+        <div className="flex shrink-0 justify-center border-b border-[var(--line)] bg-[var(--band)] py-1">
           <ToolDock {...dockProps} pagesOpen={railOpen} onTogglePages={() => setRailOpen((o) => !o)} />
         </div>
       )}
@@ -300,7 +300,7 @@ export default function EditorWorkspace({ file, onExit }: { file: File; onExit: 
       <div className="flex min-h-0 flex-1">
         {/* Pages: a column on desktop, a bottom sheet on phones. */}
         {isDesktop && railOpen && (
-          <aside aria-label="Pages" className="w-44 shrink-0 border-r border-[var(--line)] bg-[var(--surface)]">
+          <aside aria-label="Pages" className="w-44 shrink-0 border-r border-[var(--line)] bg-[var(--band)]">
             <ThumbnailRail
               api={api}
               doc={state.doc}
@@ -354,7 +354,7 @@ export default function EditorWorkspace({ file, onExit }: { file: File; onExit: 
               </div>
             </div>
           )}
-          <div ref={scrollContainerRef} className="hatch flex min-h-0 flex-1 items-start overflow-auto bg-[var(--surface-2)] p-4 pb-24 sm:p-6 sm:pb-24">
+          <div ref={scrollContainerRef} className="canvas-bg flex min-h-0 flex-1 items-start overflow-auto p-4 pb-24 sm:p-6 sm:pb-24">
             {/* mx-auto (not justify-center) centers a narrow page but lets a wide one scroll from its left edge. */}
             {activePage && (
               <PageSurface
@@ -381,7 +381,7 @@ export default function EditorWorkspace({ file, onExit }: { file: File; onExit: 
         </div>
 
         {isDesktop && (
-        <aside aria-label="Properties" className="w-80 shrink-0 border-l border-[var(--line)] bg-[var(--surface)]">
+        <aside aria-label="Properties" className="w-80 shrink-0 border-l border-[var(--line)] bg-[var(--band)]">
           <PropertiesPanel
             api={api}
             doc={state.doc}

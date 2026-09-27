@@ -357,10 +357,10 @@ function CropTools({ api }: { api: EditorWorkspaceApi }) {
 
 function Section({ title, children, defaultOpen }: { title: string; children: React.ReactNode; defaultOpen?: boolean }) {
   return (
-    <details open={defaultOpen} className="group rounded-[var(--radius-md)] border border-[var(--line)] bg-[var(--surface)]">
-      <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between px-3 text-sm font-semibold text-[var(--ink)] [&::-webkit-details-marker]:hidden">
+    <details open={defaultOpen} className="group rounded-[var(--radius-md)] border border-[var(--line)] bg-[var(--surface)] shadow-[var(--ring-highlight),var(--shadow-1)] transition-shadow open:shadow-[var(--ring-highlight),var(--shadow-2)]">
+      <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-2 rounded-[var(--radius-md)] px-3.5 text-sm font-semibold text-[var(--ink)] hover:bg-[var(--band)] [&::-webkit-details-marker]:hidden">
         {title}
-        <span aria-hidden="true" className="text-[var(--ink-3)] transition-transform group-open:rotate-180">
+        <span aria-hidden="true" className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[var(--band)] text-[10px] text-[var(--ink-2)] ring-1 ring-[var(--line)] transition-transform duration-300 group-open:rotate-180">
           &#9662;
         </span>
       </summary>

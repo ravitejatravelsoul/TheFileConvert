@@ -46,19 +46,25 @@ export function SiteHeader() {
 
   return (
     <header
-      className={`sticky top-0 z-50 bg-[var(--paper)]/95 transition-[box-shadow,border-color] duration-200 ${
-        scrolled ? "border-b border-[var(--line)] shadow-[0_1px_0_rgb(20_20_19/0.02)]" : "border-b border-transparent"
+      className={`sticky top-0 z-50 transition-[box-shadow,border-color] duration-300 ${
+        scrolled ? "border-b border-[var(--line)] shadow-[0_8px_24px_-18px_rgb(45_38_20/0.35)]" : "border-b border-transparent"
       }`}
     >
+      {/* The frosted background is its own layer: a backdrop-filter on the header itself would make it the
+          containing block for the full-screen mobile menu inside it and squash that menu into the bar. */}
+      <div
+        aria-hidden="true"
+        className={`absolute inset-0 -z-10 transition-colors duration-300 ${scrolled ? "bg-[var(--paper)]/80 backdrop-blur-xl backdrop-saturate-150" : "bg-[var(--paper)]/60 backdrop-blur-md"}`}
+      />
       <div className="container-x flex h-16 items-center gap-6">
         <Link href="/" className="-m-1 rounded-lg p-1" aria-label="TheFileConvert home">
           <Wordmark />
         </Link>
 
-        <nav aria-label="Main" className="hidden flex-1 items-center gap-1 lg:flex">
+        <nav aria-label="Main" className="hidden flex-1 items-center gap-0.5 rounded-full lg:ml-2 lg:flex">
           <NavMenu group={NAV_GROUPS[0]} open={openMenu} setOpen={setOpenMenu} pathname={pathname} />
           <NavMenu group={NAV_GROUPS[1]} open={openMenu} setOpen={setOpenMenu} pathname={pathname} />
-          <NavLink href="/pdf-editor" active={false}>
+          <NavLink href="/pdf-editor" active={pathname === "/pdf-editor"}>
             PDF Editor
           </NavLink>
           <NavMenu group={NAV_GROUPS[2]} open={openMenu} setOpen={setOpenMenu} pathname={pathname} />
@@ -68,8 +74,9 @@ export function SiteHeader() {
         </nav>
 
         <div className="ml-auto hidden items-center gap-3 lg:flex">
-          <Link href="/privacy" className="pill hover:border-[var(--line-strong)]">
-            <IconLock className="h-3.5 w-3.5" />
+          <Link href="/privacy" className="pill hover:border-[var(--ink)]">
+            <span className="status-dot" aria-hidden="true" />
+            <IconLock className="h-3.5 w-3.5 text-[var(--ink-2)]" />
             Files stay on your device
           </Link>
         </div>
@@ -96,7 +103,7 @@ function NavLink({ href, active, children }: { href: string; active: boolean; ch
     <Link
       href={href}
       aria-current={active ? "page" : undefined}
-      className="inline-flex h-10 items-center rounded-full px-3.5 text-[0.9375rem] font-medium text-[var(--ink-2)] transition-colors hover:bg-[var(--surface-2)] hover:text-[var(--ink)] aria-[current=page]:text-[var(--ink)]"
+      className="relative inline-flex h-10 items-center rounded-full px-3.5 text-[0.9375rem] font-medium text-[var(--ink-2)] transition-colors hover:bg-[var(--surface)] hover:text-[var(--ink)] hover:shadow-[var(--shadow-1)] aria-[current=page]:text-[var(--ink)] aria-[current=page]:after:absolute aria-[current=page]:after:bottom-1 aria-[current=page]:after:left-1/2 aria-[current=page]:after:h-1 aria-[current=page]:after:w-1 aria-[current=page]:after:-translate-x-1/2 aria-[current=page]:after:rounded-full aria-[current=page]:after:bg-[var(--ink)] aria-[current=page]:after:content-['']"
     >
       {children}
     </Link>
@@ -124,31 +131,36 @@ function NavMenu({
         aria-expanded={isOpen}
         aria-controls={id}
         onClick={() => setOpen(isOpen ? null : group.label)}
-        className={`inline-flex h-10 items-center gap-1 rounded-full px-3.5 text-[0.9375rem] font-medium transition-colors hover:bg-[var(--surface-2)] hover:text-[var(--ink)] ${
+        className={`relative inline-flex h-10 items-center gap-1 rounded-full px-3.5 text-[0.9375rem] font-medium transition-colors hover:bg-[var(--surface)] hover:text-[var(--ink)] hover:shadow-[var(--shadow-1)] ${
           isOpen || active ? "text-[var(--ink)]" : "text-[var(--ink-2)]"
-        } ${isOpen ? "bg-[var(--surface-2)]" : ""}`}
+        } ${isOpen ? "bg-[var(--surface)] shadow-[var(--shadow-1)]" : ""}`}
       >
         {group.label}
-        <IconChevronDown className={`h-4 w-4 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} />
+        <IconChevronDown className={`h-4 w-4 text-[var(--ink-3)] transition-transform duration-300 ${isOpen ? "rotate-180 text-[var(--ink)]" : ""}`} />
+        {active && <span aria-hidden="true" className="absolute bottom-1 left-1/2 h-1 w-1 -translate-x-1/2 rounded-full bg-[var(--ink)]" />}
       </button>
       {isOpen && (
         <div
           id={id}
-          className="animate-sheet absolute left-0 top-[calc(100%+8px)] w-[340px] rounded-[var(--radius-lg)] border border-[var(--line)] bg-[var(--surface)] p-2 shadow-[var(--shadow-3)]"
+          className="animate-sheet absolute left-0 top-[calc(100%+10px)] w-[360px] overflow-hidden rounded-[var(--radius-lg)] border border-[var(--line)] bg-[var(--surface)] shadow-[var(--shadow-float)]"
         >
-          <ul>
+          <p className="kicker px-5 pb-1 pt-4">{group.label}</p>
+          <ul className="p-2">
             {group.tools.map((toolId) => {
               const tool = getTool(toolId);
               return (
                 <li key={toolId}>
                   <Link
                     href={tool.href}
-                    className="flex items-start gap-3 rounded-[var(--radius-md)] p-3 transition-colors hover:bg-[var(--surface-2)]"
+                    className="group/item flex items-start gap-3 rounded-[var(--radius-md)] p-3 transition-colors hover:bg-[var(--band)]"
                     onClick={() => setOpen(null)}
                   >
                     <ToolIcon id={tool.id} category={tool.category} size="sm" />
-                    <span className="min-w-0">
-                      <span className="block text-[0.9375rem] font-semibold tracking-[-0.01em] text-[var(--ink)]">{tool.name}</span>
+                    <span className="min-w-0 flex-1">
+                      <span className="flex items-center gap-1 text-[0.9375rem] font-semibold tracking-[-0.01em] text-[var(--ink)]">
+                        {tool.name}
+                        <IconArrowRight className="h-3.5 w-3.5 -translate-x-1 opacity-0 transition-all duration-200 group-hover/item:translate-x-0 group-hover/item:opacity-100" />
+                      </span>
                       <span className="mt-0.5 block text-[0.8125rem] leading-snug text-[var(--ink-2)]">{tool.short}</span>
                     </span>
                   </Link>
@@ -156,6 +168,14 @@ function NavMenu({
               );
             })}
           </ul>
+          <Link
+            href="/tools"
+            onClick={() => setOpen(null)}
+            className="flex items-center justify-between border-t border-[var(--line)] bg-[var(--band)] px-5 py-3 text-sm font-semibold text-[var(--ink)] hover:bg-[var(--surface-2)]"
+          >
+            See all nine tools
+            <IconArrowRight className="h-4 w-4" />
+          </Link>
         </div>
       )}
     </div>

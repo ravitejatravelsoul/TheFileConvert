@@ -71,7 +71,9 @@ test("a picture placed on a page shown rotated keeps its shape and exports uprig
   const [chooser] = await Promise.all([page.waitForEvent("filechooser"), page.getByRole("button", { name: "Image", exact: true }).click()]);
   await chooser.setFiles(fx("qa", "img-landscape.jpg")); // a landscape (wider than tall) photo
   await page.getByText(/Tap the page where the image should go/).waitFor();
-  await page.mouse.click(box.x + box.width * 0.5, box.y + box.height * 0.5);
+  // Anywhere visible on the page will do; the page's centre can sit below a short viewport at 100 %.
+  const viewH = page.viewportSize()!.height;
+  await page.mouse.click(box.x + box.width * 0.5, Math.min(box.y + box.height * 0.5, viewH - 140));
   const obj = (await page.locator('[data-object-type="image"]').first().boundingBox())!;
   expect(obj.width).toBeGreaterThan(obj.height); // landscape on screen
 

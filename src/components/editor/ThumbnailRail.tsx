@@ -69,7 +69,7 @@ export function ThumbnailRail({ api, doc, onInsertFile, layout = "rail" }: Thumb
               e.preventDefault();
               handleDrop(page.id);
             }}
-            className={`group relative rounded-[var(--radius-sm)] border-2 p-1.5 transition-colors ${active ? "border-[var(--ink)] bg-[var(--surface)]" : "border-transparent hover:bg-[var(--surface-2)]"} ${
+            className={`group relative rounded-[var(--radius-md)] border-2 p-1.5 transition-[background-color,border-color,box-shadow] duration-200 ${active ? "border-[var(--ink)] bg-[var(--surface)] shadow-[var(--shadow-2)]" : "border-transparent hover:bg-[var(--surface)] hover:shadow-[var(--shadow-1)]"} ${
               dragOverId === page.id ? "bg-[var(--accent-soft)]" : ""
             }`}
           >

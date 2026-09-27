@@ -49,7 +49,7 @@ const MORE: { id: ToolId; label: string; icon: IconC }[] = [
 export function EditorTopBar({ api, fileName, onExport }: { api: EditorWorkspaceApi; fileName: string; onExport: () => void }) {
   const pages = api.state.doc.pages.length;
   return (
-    <header className="flex h-14 shrink-0 items-center gap-2 border-b border-[var(--line)] bg-[var(--surface)] px-2 sm:gap-3 sm:px-3">
+    <header className="relative z-10 flex h-14 shrink-0 items-center gap-2 border-b border-[var(--line)] bg-[var(--surface)] px-2 shadow-[0_6px_18px_-16px_rgb(45_38_20/0.5)] sm:gap-3 sm:px-3">
       <Link
         href="/"
         aria-label="Back to TheFileConvert"
@@ -60,6 +60,10 @@ export function EditorTopBar({ api, fileName, onExport }: { api: EditorWorkspace
       >
         <LogoMark size={28} />
       </Link>
+      <span aria-hidden="true" className="hidden h-6 w-px bg-[var(--line)] sm:block" />
+      <span aria-hidden="true" className="hidden h-9 w-9 shrink-0 items-center justify-center rounded-[10px] bg-[var(--cat-edit-soft)] text-[var(--cat-edit)] sm:flex">
+        <IconFileBadge className="h-[18px] w-[18px]" />
+      </span>
       <div className="min-w-0 flex-1">
         <p className="truncate text-sm font-semibold tracking-[-0.01em]" title={fileName}>
           {fileName}
@@ -68,7 +72,11 @@ export function EditorTopBar({ api, fileName, onExport }: { api: EditorWorkspace
           {pages} {pages === 1 ? "page" : "pages"}
         </p>
       </div>
-      <div className="flex items-center">
+      <span className="pill mr-1 hidden py-1 text-xs text-[var(--ink-2)] xl:inline-flex">
+        <span className="status-dot" aria-hidden="true" />
+        Editing on this device
+      </span>
+      <div className="flex items-center rounded-full border border-[var(--line)] bg-[var(--band)] p-0.5">
         <IconButton label="Undo" onClick={api.undo} disabled={!api.canUndo}>
           <IconUndo className="h-[18px] w-[18px]" />
         </IconButton>
@@ -110,7 +118,11 @@ export function ToolDock({ api, onRequestImage, onRequestSign, pagesOpen, onTogg
   const more = MORE.find((m) => m.id === active);
 
   return (
-    <div role="toolbar" aria-label="Editing tools" className="flex items-stretch gap-0.5 overflow-x-auto px-1 [scrollbar-width:none] lg:overflow-visible">
+    <div
+      role="toolbar"
+      aria-label="Editing tools"
+      className="flex items-stretch gap-0.5 overflow-x-auto px-1 [scrollbar-width:none] lg:overflow-visible lg:rounded-[18px] lg:border lg:border-[var(--line)] lg:bg-[var(--surface)] lg:p-1 lg:shadow-[var(--ring-highlight),var(--shadow-2)]"
+    >
       <DockButton label="Select" icon={IconSelect} pressed={active === "select"} onClick={() => pick("select")} />
       <DockButton label="Text" icon={IconEditText} pressed={active === "add-text"} onClick={() => pick("add-text")} />
       <Divider />
@@ -141,8 +153,8 @@ function DockButton({ label, icon: Icon, pressed, onClick, className = "" }: { l
       onClick={onClick}
       aria-label={label}
       aria-pressed={pressed}
-      className={`flex min-h-12 min-w-[3.5rem] shrink-0 flex-col items-center justify-center gap-0.5 rounded-[12px] px-1.5 py-1 text-[11px] font-medium transition-colors ${
-        pressed ? "bg-[var(--ink)] text-white" : "text-[var(--ink-2)] hover:bg-[var(--surface-2)] hover:text-[var(--ink)]"
+      className={`flex min-h-12 min-w-[3.5rem] shrink-0 flex-col items-center justify-center gap-0.5 rounded-[12px] px-1.5 py-1 text-[11px] font-medium transition-[background-color,color,box-shadow] duration-200 ${
+        pressed ? "bg-[linear-gradient(180deg,#34332f,var(--ink))] text-white shadow-[var(--shadow-button)]" : "text-[var(--ink-2)] hover:bg-[var(--band)] hover:text-[var(--ink)]"
       } ${className}`}
     >
       <Icon className="h-5 w-5" />
@@ -207,8 +219,8 @@ function DockMenu({
         aria-haspopup="menu"
         aria-expanded={open}
         aria-pressed={pressed}
-        className={`flex min-h-12 min-w-[3.5rem] flex-col items-center justify-center gap-0.5 rounded-[12px] px-1.5 py-1 text-[11px] font-medium transition-colors ${
-          pressed ? "bg-[var(--ink)] text-white" : "text-[var(--ink-2)] hover:bg-[var(--surface-2)] hover:text-[var(--ink)]"
+        className={`flex min-h-12 min-w-[3.5rem] flex-col items-center justify-center gap-0.5 rounded-[12px] px-1.5 py-1 text-[11px] font-medium transition-[background-color,color,box-shadow] duration-200 ${
+          pressed ? "bg-[linear-gradient(180deg,#34332f,var(--ink))] text-white shadow-[var(--shadow-button)]" : "text-[var(--ink-2)] hover:bg-[var(--band)] hover:text-[var(--ink)]"
         }`}
       >
         <Icon className="h-5 w-5" />
@@ -221,7 +233,7 @@ function DockMenu({
         <div
           role="menu"
           aria-label={label}
-          className={`fixed z-[90] w-48 rounded-[var(--radius-md)] border border-[var(--line)] bg-[var(--surface)] p-1.5 shadow-[var(--shadow-3)] ${pos.above ? "-translate-y-full" : ""}`}
+          className={`animate-sheet fixed z-[90] w-48 rounded-[var(--radius-md)] border border-[var(--line)] bg-[var(--surface)] p-1.5 shadow-[var(--shadow-float)] ${pos.above ? "-translate-y-full" : ""}`}
           style={{ left: pos.left, top: pos.top }}
         >
           {items.map((item) => (
@@ -253,7 +265,7 @@ function DockMenu({
 export function ZoomControl({ api }: { api: EditorWorkspaceApi }) {
   const { zoom } = api.state;
   return (
-    <div className="flex items-center rounded-full border border-[var(--line)] bg-[var(--surface)] p-1 shadow-[var(--shadow-2)]">
+    <div className="flex items-center rounded-full border border-[var(--line)] bg-[var(--surface)]/95 p-1 shadow-[var(--ring-highlight),var(--shadow-float)] backdrop-blur">
       <IconButton label="Zoom out" onClick={() => api.setZoom(Math.max(0.4, zoom - 0.15))}>
         <IconZoomOut className="h-[18px] w-[18px]" />
       </IconButton>
@@ -301,6 +313,15 @@ function IconSliders({ className }: { className?: string }) {
       <path d="M4 7h9M17 7h3M4 17h3M11 17h9" />
       <circle cx="15" cy="7" r="2" />
       <circle cx="9" cy="17" r="2" />
+    </svg>
+  );
+}
+
+function IconFileBadge({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
+      <path d="M14 3.5H7A1.5 1.5 0 0 0 5.5 5v14A1.5 1.5 0 0 0 7 20.5h10a1.5 1.5 0 0 0 1.5-1.5V8Z" />
+      <path d="M14 3.5V8h4.5M8.5 13h7M8.5 16.5h4.5" />
     </svg>
   );
 }

@@ -112,3 +112,8 @@ export function ToolIcon({ id, category, size = "md" }: { id: ToolId; category: 
     </span>
   );
 }
+
+/** CSS custom properties that tint a surface with a category's colour (used by `.art` and `.tool-hero`). */
+export function toneStyle(category: ToolCategory): React.CSSProperties {
+  return { ["--tone" as string]: TILE[category].fg, ["--tone-soft" as string]: TILE[category].bg };
+}

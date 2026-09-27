@@ -54,9 +54,9 @@ export function SmartDrop() {
     const first = files[0];
     const isPdf = kind === "pdf";
     return (
-      <div ref={panelRef} tabIndex={-1} className="animate-sheet rounded-[var(--radius-xl)] border border-[var(--line)] bg-[var(--surface)] p-4 shadow-[var(--shadow-3)] outline-none sm:p-6" aria-live="polite">
-        <div className="flex items-center gap-3">
-          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[12px] bg-[var(--surface-2)]">
+      <div ref={panelRef} tabIndex={-1} className="animate-sheet rounded-[var(--radius-xl)] border border-[var(--line)] bg-[var(--surface)] p-4 outline-none sm:p-6" aria-live="polite">
+        <div className="flex items-center gap-3 rounded-[var(--radius-md)] border border-[var(--line)] bg-[var(--band)] p-2.5">
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[12px] bg-[var(--ink)] text-white shadow-[var(--shadow-button)]">
             {isPdf ? <IconPdf className="h-5 w-5" /> : <IconImage className="h-5 w-5" />}
           </span>
           <div className="min-w-0 flex-1 text-left">
@@ -76,8 +76,8 @@ export function SmartDrop() {
                 <button
                   type="button"
                   onClick={() => open(tool.href)}
-                  className={`group flex w-full items-center gap-3 rounded-[var(--radius-md)] border p-3 text-left transition-colors ${
-                    i === 0 ? "border-[var(--ink)] bg-[var(--ink)] text-white" : "border-[var(--line)] hover:border-[var(--ink)]"
+                  className={`group flex w-full items-center gap-3 rounded-[var(--radius-md)] border p-3 text-left transition-[border-color,box-shadow,transform] duration-200 hover:-translate-y-px ${
+                    i === 0 ? "border-[var(--ink)] bg-[linear-gradient(180deg,#2e2d2a,var(--ink))] text-white shadow-[var(--shadow-button)]" : "border-[var(--line)] bg-[var(--surface)] hover:border-[var(--ink)] hover:shadow-[var(--shadow-2)]"
                   }`}
                 >
                   <ToolIcon id={tool.id} category={tool.category} size="sm" />
@@ -100,7 +100,7 @@ export function SmartDrop() {
           {problem}
         </p>
       )}
-      <p className="text-center text-sm text-[var(--ink-2)]">
+      <p className="pb-2 text-center text-sm text-[var(--ink-2)]">
         or{" "}
         <Link href="/tools" className="font-medium text-[var(--ink)] underline decoration-[var(--line-strong)] underline-offset-4 hover:decoration-[var(--ink)]">
           browse all tools

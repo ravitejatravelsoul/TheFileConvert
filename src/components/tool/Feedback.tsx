@@ -3,7 +3,7 @@ import { IconCheck, IconInfo, IconWarning } from "@/components/icons";
 type Tone = "info" | "success" | "warning" | "danger";
 
 const TONES: Record<Tone, { box: string; icon: React.ReactNode }> = {
-  info: { box: "bg-[var(--surface-2)] text-[var(--ink)]", icon: <IconInfo className="h-[18px] w-[18px]" /> },
+  info: { box: "border border-[var(--line)] bg-[var(--band)] text-[var(--ink)]", icon: <IconInfo className="h-[18px] w-[18px]" /> },
   success: { box: "bg-[var(--success-soft)] text-[var(--success)]", icon: <IconCheck className="h-[18px] w-[18px]" /> },
   warning: { box: "bg-[var(--warning-soft)] text-[var(--warning)]", icon: <IconWarning className="h-[18px] w-[18px]" /> },
   danger: { box: "bg-[var(--danger-soft)] text-[var(--danger)]", icon: <IconWarning className="h-[18px] w-[18px]" /> },
@@ -25,9 +25,12 @@ export function Alert({ tone = "info", title, children, role }: { tone?: Tone; t
 /** Busy state for a running job. `fraction` null = indeterminate. */
 export function Working({ label, detail, fraction = null }: { label: string; detail?: string; fraction?: number | null }) {
   return (
-    <div role="status" aria-live="polite" className="card flex flex-col gap-4 p-6 sm:p-8">
+    <div role="status" aria-live="polite" className="card relative flex flex-col gap-4 overflow-hidden p-6 sm:p-8">
+      <span aria-hidden="true" className="pointer-events-none absolute -right-16 -top-20 h-48 w-48 rounded-full bg-[radial-gradient(closest-side,rgb(255_212_59/0.3),transparent)]" />
       <div className="flex items-center gap-3">
-        <span className="spinner" aria-hidden="true" />
+        <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--band)] ring-1 ring-[var(--line)]" aria-hidden="true">
+          <span className="spinner" />
+        </span>
         <p className="text-lg font-semibold tracking-[-0.02em]">{label}</p>
       </div>
       <div className="progress-track" aria-hidden="true">
