@@ -154,7 +154,7 @@ export function PdfToImageTool() {
                 </button>
               </p>
               <button type="button" onClick={run} disabled={selected.size === 0} className="btn btn-primary btn-lg">
-                {selected.size === count ? `Convert all ${count} pages` : `Convert ${selected.size} ${selected.size === 1 ? "page" : "pages"}`}
+                {selected.size === count ? (count === 1 ? "Convert page" : `Convert all ${count} pages`) : `Convert ${selected.size} ${selected.size === 1 ? "page" : "pages"}`}
               </button>
             </div>
           </div>

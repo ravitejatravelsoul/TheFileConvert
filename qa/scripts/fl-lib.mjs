@@ -7,6 +7,7 @@ import { PDFDocument } from "pdf-lib";
 import JSZip from "jszip";
 import { createCanvas, loadImage } from "@napi-rs/canvas";
 import * as pdfjs from "pdfjs-dist/legacy/build/pdf.mjs";
+import { validateFile } from "./validate-output.mjs";
 
 export const BASE = process.env.BASE ?? "http://localhost:3000";
 export const FIX = path.resolve("qa-fixtures/fresh");
@@ -19,8 +20,20 @@ export const fx = (n) => path.join(FIX, n);
 const STD_FONTS = path.resolve("node_modules/pdfjs-dist/standard_fonts").split(path.sep).join("/") + "/";
 
 export const records = [];
-/** verdict: PASS | LIMITED | FAIL */
+/** Integrity results of every download since the last rec() — the gate below consumes them. */
+let pendingOutputs = [];
+/** verdict: PASS | LIMITED | FAIL. Every file downloaded for this scenario has already been through the
+ * shared output validator; if any failed, the scenario is FAIL whatever the caller decided. */
 export function rec(tool, test, verdict, detail = {}) {
+  const outputs = pendingOutputs;
+  pendingOutputs = [];
+  if (outputs.length) {
+    detail = { ...detail, integrity: outputs.map((o) => ({ file: o.file, bytes: o.bytes, ok: o.ok, kind: o.kind, pages: o.pages, w: o.w, h: o.h, alpha: o.alpha, entries: o.entries?.length, problems: o.problems.length ? o.problems.slice(0, 4) : undefined })) };
+    if (outputs.some((o) => !o.ok) && verdict !== "FAIL") {
+      detail.gate = `output failed integrity validation (was ${verdict})`;
+      verdict = "FAIL";
+    }
+  }
   records.push({ tool, test, verdict, ...detail });
   const d = Object.entries(detail)
     .map(([k, v]) => `${k}=${typeof v === "object" ? JSON.stringify(v) : v}`)
@@ -60,7 +73,15 @@ export async function download(page, locator, tag) {
   const [dl] = await Promise.all([page.waitForEvent("download", { timeout: 180_000 }), locator.click()]);
   const file = path.join(OUT, `${tag}-${dl.suggestedFilename()}`);
   await dl.saveAs(file);
+  pendingOutputs.push(await validateFile(file));
   return file;
+}
+
+/** For outputs produced some other way (e.g. a file extracted from a ZIP the script already checked). */
+export async function validateOutput(file) {
+  const r = await validateFile(file);
+  pendingOutputs.push(r);
+  return r;
 }
 
 export const size = (f) => fs.statSync(f).size;
@@ -111,3 +132,83 @@ export async function shot(page, name, { full = false } = {}) {
 }
 
 export { fs, path, PDFDocument, createCanvas, loadImage };
+
+// ------------------------------------------------------------------ fresh scenario library helpers
+export const SFIX = path.resolve("qa/fresh-scenario-fixtures");
+export const sx = (n) => path.join(SFIX, n);
+export const REAL_SCAN = "C:/Users/ravit/Downloads/TheFileConvert_Scanned_OCR_Test.pdf"; // the only permitted Downloads file
+
+/** Adds files by absolute path through the tool's own file input. */
+export async function addPaths(page, paths) {
+  await page.getByTestId("file-input").first().setInputFiles(paths);
+}
+
+/** Composites RGBA over white and returns grey + RGB planes. */
+function planes(d, n) {
+  const rgbA = new Float64Array(n * 3);
+  const grey = new Float64Array(n);
+  for (let i = 0, p = 0; p < n; i += 4, p++) {
+    const a = d[i + 3] / 255;
+    const r = d[i] * a + 255 * (1 - a), g = d[i + 1] * a + 255 * (1 - a), b = d[i + 2] * a + 255 * (1 - a);
+    rgbA[p * 3] = r;
+    rgbA[p * 3 + 1] = g;
+    rgbA[p * 3 + 2] = b;
+    grey[p] = 0.299 * r + 0.587 * g + 0.114 * b;
+  }
+  return { rgbA, grey };
+}
+
+/** PSNR (dB, RGB) and mean SSIM (8×8 windows, grey) between two same-size RGBA buffers. */
+export function similarity(a, b, w, h) {
+  const n = w * h;
+  const A = planes(a, n), B = planes(b, n);
+  let se = 0;
+  for (let i = 0; i < n * 3; i++) se += (A.rgbA[i] - B.rgbA[i]) ** 2;
+  const mse = se / (n * 3);
+  const psnr = mse === 0 ? 99 : 10 * Math.log10((255 * 255) / mse);
+  const C1 = (0.01 * 255) ** 2, C2 = (0.03 * 255) ** 2;
+  let total = 0, windows = 0;
+  for (let y = 0; y + 8 <= h; y += 8)
+    for (let x = 0; x + 8 <= w; x += 8) {
+      let ma = 0, mb = 0;
+      for (let j = 0; j < 8; j++) for (let i = 0; i < 8; i++) {
+        ma += A.grey[(y + j) * w + x + i];
+        mb += B.grey[(y + j) * w + x + i];
+      }
+      ma /= 64;
+      mb /= 64;
+      let va = 0, vb = 0, cov = 0;
+      for (let j = 0; j < 8; j++) for (let i = 0; i < 8; i++) {
+        const da = A.grey[(y + j) * w + x + i] - ma, db = B.grey[(y + j) * w + x + i] - mb;
+        va += da * da;
+        vb += db * db;
+        cov += da * db;
+      }
+      va /= 63;
+      vb /= 63;
+      cov /= 63;
+      total += ((2 * ma * mb + C1) * (2 * cov + C2)) / ((ma * ma + mb * mb + C1) * (va + vb + C2));
+      windows++;
+    }
+  return { psnr: +psnr.toFixed(2), ssim: +(total / Math.max(1, windows)).toFixed(4) };
+}
+
+/** Compares an output image with its source (resized to the output's size first). */
+export async function imageSimilarity(srcFile, outFile) {
+  const [s, o] = [await loadImage(fs.readFileSync(srcFile)), await loadImage(fs.readFileSync(outFile))];
+  const w = Math.min(o.width, 1600), h = Math.round((o.height * w) / o.width);
+  const draw = (img) => {
+    const c = createCanvas(w, h);
+    c.getContext("2d").drawImage(img, 0, 0, w, h);
+    return c.getContext("2d").getImageData(0, 0, w, h).data;
+  };
+  return similarity(draw(s), draw(o), w, h);
+}
+
+/** Compares page `pageNo` of two PDFs rendered at the same scale. */
+export async function pdfPageSimilarity(srcFile, outFile, pageNo = 1, scale = 0.75) {
+  const a = await renderPage((await pdfInfo(srcFile)).doc, pageNo, scale);
+  const b = await renderPage((await pdfInfo(outFile)).doc, pageNo, scale);
+  if (a.w !== b.w || a.h !== b.h) return { psnr: null, ssim: null, note: `size ${a.w}x${a.h} vs ${b.w}x${b.h}` };
+  return similarity(a.d, b.d, a.w, a.h);
+}

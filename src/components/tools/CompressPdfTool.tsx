@@ -19,7 +19,7 @@ import { decideOutcome, type Outcome } from "@/lib/processors/outcome";
 const tool = getTool("compress-pdf");
 const PRESETS = [500 * KB, 1 * MB, 2 * MB, 5 * MB];
 /** Lossless pass + seven quality rungs + up to two refinement steps. */
-const SEARCH_STEPS = 10;
+const SEARCH_STEPS = 11;
 
 type Phase =
   | { name: "empty" }
@@ -52,8 +52,12 @@ export function CompressPdfTool() {
         const { analyzePdfImages, compressionOutlook } = await import("@/lib/processors/pdf-compress");
         const analysis = await analyzePdfImages(await file.arrayBuffer());
         if (!cancelled) setOutlook({ file, text: compressionOutlook(analysis).text });
-      } catch {
-        if (!cancelled) setOutlook(null);
+      } catch (e) {
+        if (cancelled) return;
+        setOutlook(null);
+        // Say so now, before the user picks a target, rather than after pressing Compress.
+        const encrypted = e instanceof Error && e.name === "EncryptedPdfError";
+        setPhase({ name: "error", message: encrypted ? (e as Error).message : "This PDF couldn't be read. It may be damaged, password-protected or incomplete." });
       }
     })();
     return () => {
@@ -88,8 +92,9 @@ export function CompressPdfTool() {
         ms: elapsed(),
         output,
       });
-    } catch {
-      setPhase({ name: "error", message: "This PDF couldn't be read. It may be damaged, password-protected or incomplete." });
+    } catch (e) {
+      const known = e instanceof Error && (e.name === "OutputIntegrityError" || e.name === "EncryptedPdfError");
+      setPhase({ name: "error", message: known ? (e as Error).message : "This PDF couldn't be read. It may be damaged, password-protected or incomplete." });
     }
   }
 

@@ -1,5 +1,7 @@
+import { savePdfChecked } from "@/lib/pdf/save";
 import { loadPdfJsDocument, getPageTextContent, PdfRenderError } from "./pdfjs-utils";
 import type { PageViewport } from "pdfjs-dist";
+import { EncryptedPdfError, loadPdfForEditing } from "@/lib/pdf/load";
 
 export class OcrError extends Error {}
 
@@ -296,13 +298,14 @@ export async function createOcrSession(langCode: string): Promise<OcrSession> {
 /** Adds an invisible, positioned text layer over OCR'd pages so the exported PDF becomes
  * searchable/selectable while looking pixel-identical to the original scan. */
 export async function buildSearchablePdf(file: File, results: OcrPageResult[]): Promise<Blob> {
-  const { PDFDocument, StandardFonts } = await import("pdf-lib");
+  const { StandardFonts } = await import("pdf-lib");
   const bytes = await file.arrayBuffer();
 
   let doc;
   try {
-    doc = await PDFDocument.load(bytes, { ignoreEncryption: true });
-  } catch {
+    doc = await loadPdfForEditing(bytes);
+  } catch (e) {
+    if (e instanceof EncryptedPdfError) throw new OcrError(e.message);
     throw new OcrError("We couldn't read this PDF to add the searchable text layer.");
   }
 
@@ -340,7 +343,7 @@ export async function buildSearchablePdf(file: File, results: OcrPageResult[]): 
     }
   }
 
-  const outBytes = await doc.save();
+  const outBytes = await savePdfChecked(doc);
   return new Blob([outBytes as BlobPart], { type: "application/pdf" });
 }
 

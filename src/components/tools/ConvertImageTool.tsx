@@ -14,6 +14,9 @@ import { formatSize } from "@/lib/size";
 import type { ImageOutputFormat } from "@/lib/processors/image";
 
 const tool = getTool("convert-image");
+/** WebP at 0.85 looks like JPEG at 0.92 but is much smaller — the reason people choose WebP. At 0.92 a
+ * converted photo often came out larger than the JPEG it came from. */
+const WEBP_QUALITY = 0.85;
 
 type Target = ImageOutputFormat;
 const TARGETS: { id: Target; label: string; note: string }[] = [
@@ -85,7 +88,7 @@ export function ConvertImageTool() {
             size = { width: png.width, height: png.height };
             input = new File([png.blob], withExtension(file.name, "png"), { type: "image/png" });
           }
-          const blob = target === "png" && src === "svg" ? input : await img.convertImage(input, { format: target, quality: 0.92 });
+          const blob = target === "png" && src === "svg" ? input : await img.convertImage(input, { format: target, quality: target === "webp" ? WEBP_QUALITY : 0.92 });
           size ??= await img.getImageDimensions(input);
           const name = withExtension(file.name, img.extensionForFormat(target));
           out.push({ key, source: file, output: new File([blob], name, { type: blob.type }), ...size });
@@ -116,12 +119,21 @@ export function ConvertImageTool() {
 
   if (phase === "done") {
     const outputs = results.filter((r) => r.output).map((r) => r.output!);
+    const failed = results.filter((r) => r.error).length;
+    const headline =
+      outputs.length === 0
+        ? failed
+          ? failed === 1
+            ? "This image couldn't be converted"
+            : "These images couldn't be converted"
+          : "Nothing to convert"
+        : `${outputs.length} ${outputs.length === 1 ? "image" : "images"} converted to ${LABEL[target!]}${failed ? ` · ${failed} couldn't be read` : ""}`;
     return (
       <div className="mx-auto max-w-4xl space-y-6" data-testid="result">
         <div className="card overflow-hidden">
-          <div className="bg-[var(--success-soft)] px-5 py-6 sm:px-7">
+          <div className={`${outputs.length === 0 && failed ? "bg-[var(--danger-soft)]" : "bg-[var(--success-soft)]"} px-5 py-6 sm:px-7`}>
             <p role="status" className="text-2xl font-semibold tracking-[-0.03em] sm:text-[1.75rem]">
-              {outputs.length === 0 ? "Nothing to convert" : `${outputs.length} ${outputs.length === 1 ? "image" : "images"} converted to ${LABEL[target!]}`}
+              {headline}
             </p>
           </div>
           <ul className="divide-y divide-[var(--line)]">

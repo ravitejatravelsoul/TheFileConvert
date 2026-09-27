@@ -1,7 +1,7 @@
 [
  {
   "tool": "PDF Editor",
-  "test": "native session: edit, add text, 3× highlight, 3× underline, draw, shape, image, signature, whiteout, undo/redo, blank page, reorder, rotate, crop, export, reopen",
+  "test": "native long session: edit, add text, 3× highlight, 3× underline, 3× strikethrough, draw, rectangle/ellipse/line/arrow, image, signature, whiteout, undo/redo, search, blank page add+delete, reorder, rotate, crop, export, reopen",
   "verdict": "PASS",
   "steps": [
    "region:\"Jordan Smith\"",
@@ -9,15 +9,17 @@
    "add-text:\"Approved for payment\"",
    "markup-armed:true",
    "live-stroke:true",
-   "undo:13->12->13",
+   "undo:19->18->19",
+   "search:1 of 1",
+   "blank+delete:1",
    "pages:blank+move+rotate+crop"
   ],
   "types": {
    "native-text-replacement": 1,
    "added-text": 1,
-   "annotation": 6,
+   "annotation": 9,
    "drawing": 1,
-   "shape": 1,
+   "shape": 4,
    "image": 1,
    "signature": 1,
    "whiteout": 1
@@ -31,17 +33,32 @@
    "underlines": true,
    "drawing": true,
    "rectangle": true,
+   "ellipse": true,
+   "line": true,
+   "arrow": true,
+   "strikethroughs": true,
+   "search": true,
+   "deletePage": true,
    "image": true,
    "signature": true,
    "whiteout": true,
    "originalLine11Intact": true,
    "crop": true
   },
-  "output": 657284
+  "output": 657581,
+  "integrity": [
+   {
+    "file": "editor-native-FL-PDF-07-native-text-edited.pdf",
+    "bytes": 657581,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 2
+   }
+  ]
  },
  {
   "tool": "PDF Editor",
-  "test": "scanned session (condensed): OCR 6.6s, 12/20/2026→12/20/2028, Jordan→Morgan, Consultation→Consultations, add text, highlight, draw, signature, export, reopen",
+  "test": "scanned session (condensed): OCR 3.4s, 12/20/2026→12/20/2028, Jordan→Morgan, Consultation→Consultations, add text, highlight, draw, signature, export, reopen",
   "verdict": "PASS",
   "edits": [
    {
@@ -68,11 +85,20 @@
   ],
   "textLayer": "12/20/2028  Morgan  Consultations  Checked on device",
   "changedPct": 1.2,
-  "pages": "1/1"
+  "pages": "1/1",
+  "integrity": [
+   {
+    "file": "editor-scan-condensed-FL-PDF-08b-scanned-condensed-edited.pdf",
+    "bytes": 728674,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 1
+   }
+  ]
  },
  {
   "tool": "PDF Editor",
-  "test": "scanned session (fixture): OCR 8.7s, 12/20/2026→12/20/2028, Jordan→Morgan, Consultation→Consultations, add text, highlight, draw, signature, export, reopen",
+  "test": "scanned session (fixture): OCR 3.4s, 12/20/2026→12/20/2028, Jordan→Morgan, Consultation→Consultations, add text, highlight, draw, signature, export, reopen",
   "verdict": "PASS",
   "edits": [
    {
@@ -99,11 +125,20 @@
   ],
   "textLayer": "12/20/2028  Morgan  Consultations  Checked on device",
   "changedPct": 1.24,
-  "pages": "1/1"
+  "pages": "1/1",
+  "integrity": [
+   {
+    "file": "editor-scan-fixture-FL-PDF-08-scanned-text-edited.pdf",
+    "bytes": 765222,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 1
+   }
+  ]
  },
  {
   "tool": "PDF Editor",
-  "test": "scanned session (user-supplied): OCR 6.6s, 12/20/2026→12/20/2028, add text, highlight, draw, signature, export, reopen",
+  "test": "scanned session (user-supplied): OCR 3.0s, 12/20/2026→12/20/2028, add text, highlight, draw, signature, export, reopen",
   "verdict": "PASS",
   "edits": [
    {
@@ -115,7 +150,16 @@
    }
   ],
   "textLayer": "12/20/2028  Checked on device",
-  "changedPct": 1.02,
-  "pages": "2/2"
+  "changedPct": 0.99,
+  "pages": "2/2",
+  "integrity": [
+   {
+    "file": "editor-scan-user-supplied-TheFileConvert_Scanned_OCR_Test-edited.pdf",
+    "bytes": 3959850,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 2
+   }
+  ]
  }
 ]

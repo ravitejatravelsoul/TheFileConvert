@@ -27,6 +27,7 @@ import type { ToolOptions } from "./toolOptions";
 import { rgbToCss } from "./toolOptions";
 import { ObjectView } from "./ObjectView";
 import { startCornerForDrag } from "@/lib/editor/shapeGeometry";
+import { withContentHeight } from "@/lib/editor/contentFrame";
 
 export interface OcrColorEstimate {
   backgroundColor: RgbColor;
@@ -270,6 +271,13 @@ export function PageSurface({
     chars?: CharBox[],
     voterWords?: { text: string; pdfBox: Rect; confidence: number }[]
   ) {
+    if (spec.rotation !== 0) {
+      // The scanned-word correction pipeline (patch padding, baseline, neighbour sampling) works
+      // along the page's unrotated text direction; on a page shown rotated it would place the patch
+      // wrongly. Say so rather than produce a misplaced correction.
+      api.showMessage("Editing recognized words on a rotated page isn't supported yet. You can still add text, a signature or a whiteout here — or rotate the page back to its original orientation to correct words.");
+      return;
+    }
     const paddingPt = computeEditPadding(pdfBox.height, confidence);
     const wordRectPx = pdfRectToViewport(spec, pdfBox);
     const paddingPx = paddingPt * spec.scale;
@@ -430,14 +438,15 @@ export function PageSurface({
       const factor = pendingPlacement.kind === "signature" ? 0.5 : 0.75;
       const width = Math.min(240, Math.max(pendingPlacement.kind === "signature" ? 60 : 48, (pendingPlacement.naturalWidth || 200) * factor));
       const height = width * (pendingPlacement.naturalHeight / pendingPlacement.naturalWidth || 1);
+      // Upright as the page is shown (see contentFrame.ts): width × height on screen, centred on the tap.
+      const at = pdfToViewportPoint(spec, pdfPoint);
+      const box = viewportRectToPdf(spec, { x: at.x - (width * spec.scale) / 2, y: at.y - (height * spec.scale) / 2, width: width * spec.scale, height: height * spec.scale });
       api.addObject({
         id: api.newObjectId(),
         type: pendingPlacement.kind,
         pageId: page.id,
-        x: pdfPoint.x - width / 2,
-        y: pdfPoint.y - height / 2,
-        width,
-        height,
+        ...box,
+        rotation: spec.rotation,
         dataUrl: pendingPlacement.dataUrl,
       });
       onPlacementComplete();
@@ -447,14 +456,15 @@ export function PageSurface({
     if (activeTool === "add-text") {
       const width = 160;
       const height = toolOptions.fontSize * 1.4;
+      // Starts at the tap and runs to the right as the page is shown — upright on a rotated page too.
+      const at = pdfToViewportPoint(spec, pdfPoint);
+      const box = viewportRectToPdf(spec, { x: at.x, y: at.y - (height * spec.scale) / 2, width: width * spec.scale, height: height * spec.scale });
       api.addObjectAndSelect({
         id: api.newObjectId(),
         type: "added-text",
         pageId: page.id,
-        x: pdfPoint.x,
-        y: pdfPoint.y - height / 2,
-        width,
-        height,
+        ...box,
+        rotation: spec.rotation,
         text: "New text",
         fontSize: toolOptions.fontSize,
         color: toolOptions.color,
@@ -897,8 +907,8 @@ export function PageSurface({
             onTextChange={(text) => api.updateObject(obj.id, { text }, { coalesceKey: `text:${obj.id}` })}
             onAutoHeight={(heightPx) => {
               const h = heightPx / spec.scale;
-              // Grow/shrink downward from the top edge (PDF y is up, so the bottom edge moves).
-              api.previewObject(obj.id, { height: h, y: obj.y + obj.height - h });
+              // Grow/shrink downward from the text's own top edge, whichever way it is turned.
+              api.previewObject(obj.id, withContentHeight(obj, "rotation" in obj ? obj.rotation : 0, h));
             }}
           />
         ))}

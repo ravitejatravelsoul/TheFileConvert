@@ -1,0 +1,168 @@
+[
+ {
+  "tool": "Merge PDF",
+  "test": "2 PDFs",
+  "verdict": "PASS",
+  "files": 2,
+  "pages": "5/5",
+  "sizesOk": true,
+  "rotOk": true,
+  "output": 4552,
+  "ms": 165,
+  "integrity": [
+   {
+    "file": "fs-merge-2-2PDFs-merged.pdf",
+    "bytes": 4552,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 5
+   }
+  ]
+ },
+ {
+  "tool": "Merge PDF",
+  "test": "3 PDFs",
+  "verdict": "PASS",
+  "files": 3,
+  "pages": "11/11",
+  "sizesOk": true,
+  "rotOk": true,
+  "output": 6345,
+  "ms": 151,
+  "integrity": [
+   {
+    "file": "fs-merge-3-3PDFs-merged.pdf",
+    "bytes": 6345,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 11
+   }
+  ]
+ },
+ {
+  "tool": "Merge PDF",
+  "test": "10 PDFs (scan, photo, forms, rotated, sizes, text)",
+  "verdict": "PASS",
+  "files": 10,
+  "pages": "39/39",
+  "sizesOk": true,
+  "rotOk": true,
+  "formNote": "form fields flattened/dropped (visual appearance kept)",
+  "output": 14932245,
+  "ms": 362,
+  "integrity": [
+   {
+    "file": "fs-merge-10-10PDF-merged.pdf",
+    "bytes": 14932245,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 39
+   }
+  ]
+ },
+ {
+  "tool": "Merge PDF",
+  "test": "mixed: incremental scan + native text + form",
+  "verdict": "PASS",
+  "files": 3,
+  "pages": "5/5",
+  "sizesOk": true,
+  "rotOk": true,
+  "formNote": "form fields flattened/dropped (visual appearance kept)",
+  "output": 3628584,
+  "ms": 236,
+  "integrity": [
+   {
+    "file": "fs-merge-3-mixed-merged.pdf",
+    "bytes": 3628584,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 5
+   }
+  ]
+ },
+ {
+  "tool": "Merge PDF",
+  "test": "rotated pages keep their rotation",
+  "verdict": "PASS",
+  "files": 2,
+  "pages": "6/6",
+  "sizesOk": true,
+  "rotOk": true,
+  "output": 647541,
+  "ms": 195,
+  "integrity": [
+   {
+    "file": "fs-merge-2-rotate-merged.pdf",
+    "bytes": 647541,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 6
+   }
+  ]
+ },
+ {
+  "tool": "Merge PDF",
+  "test": "mixed page sizes keep their sizes",
+  "verdict": "PASS",
+  "files": 2,
+  "pages": "8/8",
+  "sizesOk": true,
+  "rotOk": true,
+  "output": 4092,
+  "ms": 155,
+  "integrity": [
+   {
+    "file": "fs-merge-2-mixed-merged.pdf",
+    "bytes": 4092,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 8
+   }
+  ]
+ },
+ {
+  "tool": "Merge PDF",
+  "test": "reordered (third file moved first)",
+  "verdict": "PASS",
+  "firstPage": "SIZE 1: Letter  612 x 792 pt",
+  "integrity": [
+   {
+    "file": "fs-merge-reorder-merged.pdf",
+    "bytes": 6353,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 11
+   }
+  ]
+ },
+ {
+  "tool": "Merge PDF",
+  "test": "corrupt file in the mix",
+  "verdict": "PASS",
+  "message": "One file can't be read\n\nRemove “PDF-O-corrupted.pdf” to continue — it may be damaged or password-protected.",
+  "mergeBlocked": true,
+  "pagesAfterRemoval": 5,
+  "integrity": [
+   {
+    "file": "fs-merge-after-corrupt-merged.pdf",
+    "bytes": 4553,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 5
+   }
+  ]
+ },
+ {
+  "tool": "Merge PDF",
+  "test": "owner-password-only encrypted file in the mix",
+  "verdict": "PASS",
+  "message": "This PDF is protected with a password or encryption, so it can't be changed here. Remove the protection first (for example, print it to a new PDF from your PDF viewer), then try again.",
+  "producedOutput": false
+ },
+ {
+  "tool": "All tools",
+  "test": "console errors / unexpected dialogs",
+  "verdict": "PASS"
+ }
+]

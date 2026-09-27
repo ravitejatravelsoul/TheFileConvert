@@ -1,5 +1,8 @@
+import { savePdfChecked } from "@/lib/pdf/save";
 import { PDFArray, PDFDict, PDFDocument, PDFName, PDFNumber, PDFRawStream, PDFRef, type PDFContext, type PDFObject } from "pdf-lib";
 import { colorChannels, decodeFlateImage, filterChain, isFlateChain, type RawImage } from "./pdf-image-decode";
+import { loadPdfForEditing, replaceReferences } from "@/lib/pdf/load";
+import { deflate } from "@/lib/pdf/zlib";
 
 /**
  * Browser-local PDF size reduction, in three honest levels:
@@ -48,6 +51,8 @@ export interface PdfImageAnalysis {
   /** Images whose bytes are identical to an earlier one (mergeable without any quality change). */
   duplicateCount: number;
   duplicateBytes: number;
+  /** Bytes in streams stored with no compression at all (typically page text) — shrinkable losslessly. */
+  unfilteredBytes?: number;
 }
 
 interface ImageEntry {
@@ -79,6 +84,41 @@ function collectImages(doc: PDFDocument): ImageEntry[] {
     out.push({ ref, stream: obj, isJpeg, isFlate: !isJpeg && isFlateChain(filterChain(obj.dict)) && isRecompressible(obj.dict, doc.context), bytes: obj.contents });
   }
   return out;
+}
+
+/** Streams stored with no /Filter that are worth compressing: page content, fonts, forms, raw images.
+ * XMP metadata stays readable as-is (archival profiles expect that); cross-reference and object streams
+ * are rebuilt by the writer. */
+function unfilteredStreams(doc: PDFDocument): [PDFRef, PDFRawStream][] {
+  const out: [PDFRef, PDFRawStream][] = [];
+  for (const [ref, obj] of doc.context.enumerateIndirectObjects()) {
+    if (!(obj instanceof PDFRawStream) || obj.dict.has(PDFName.of("Filter"))) continue;
+    const type = nameOf(obj.dict.get(PDFName.of("Type")));
+    if (type === "Metadata" || type === "XRef" || type === "ObjStm") continue;
+    if (obj.contents.length >= 256) out.push([ref, obj]);
+  }
+  return out;
+}
+
+/** Lossless: Flate-compresses every uncompressed stream where that actually saves space. */
+async function deflateUnfilteredStreams(doc: PDFDocument): Promise<number> {
+  let count = 0;
+  for (const [ref, stream] of unfilteredStreams(doc)) {
+    let packed: Uint8Array;
+    try {
+      packed = await deflate(stream.contents);
+    } catch {
+      continue;
+    }
+    if (packed.length > stream.contents.length * 0.9) continue;
+    const dict = stream.dict.clone(doc.context);
+    dict.set(PDFName.of("Filter"), PDFName.of("FlateDecode"));
+    dict.delete(PDFName.of("DecodeParms"));
+    dict.set(PDFName.of("Length"), PDFNumber.of(packed.length));
+    doc.context.assign(ref, PDFRawStream.of(dict, packed));
+    count++;
+  }
+  return count;
 }
 
 function fingerprint(e: ImageEntry): string {
@@ -117,7 +157,7 @@ function findDuplicates(images: ImageEntry[]): Map<PDFRef, PDFRef> {
 
 export async function analyzePdfImages(bytes: ArrayBuffer | Uint8Array): Promise<PdfImageAnalysis> {
   const data = bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes);
-  const doc = await PDFDocument.load(data, { ignoreEncryption: true, updateMetadata: false });
+  const doc = await loadPdfForEditing(data, { updateMetadata: false });
   const images = collectImages(doc);
   const dups = findDuplicates(images);
   const byRef = new Map(images.map((i) => [i.ref, i]));
@@ -134,6 +174,7 @@ export async function analyzePdfImages(bytes: ArrayBuffer | Uint8Array): Promise
     flateBytes: images.filter((i) => i.isFlate).reduce((s, i) => s + i.bytes.length, 0),
     duplicateCount: dups.size,
     duplicateBytes,
+    unfilteredBytes: unfilteredStreams(doc).reduce((sum, [, st]) => sum + st.contents.length, 0),
   };
 }
 
@@ -144,8 +185,14 @@ export function compressionOutlook(a: PdfImageAnalysis): { kind: CompressionOutl
   const share = a.totalBytes > 0 ? a.imageBytes / a.totalBytes : 0;
   const recompressible = a.jpegCount + (a.flateCount ?? 0);
   const repeats = a.duplicateCount > 0 ? ` ${a.duplicateCount} repeated image${a.duplicateCount === 1 ? "" : "s"} can be merged for free.` : "";
+  const unfilteredShare = a.totalBytes > 0 ? (a.unfilteredBytes ?? 0) / a.totalBytes : 0;
   if (a.imageCount === 0) {
+    if (unfilteredShare >= 0.25)
+      return { kind: "good-room", text: `Text only, but ${Math.round(unfilteredShare * 100)}% of the file is stored uncompressed — it can shrink a lot with no change to how it looks.` };
     return { kind: "text-only", text: "Text and vector content only, so there is little to shrink — expect a small saving at most." };
+  }
+  if (share < 0.25 && unfilteredShare >= 0.25) {
+    return { kind: "good-room", text: `Mostly text, and ${Math.round(unfilteredShare * 100)}% of the file is stored uncompressed — it can shrink with no change to how it looks.${repeats}` };
   }
   if (share < 0.25) {
     return { kind: "little-room", text: `Mostly text: images are ${Math.round(share * 100)}% of the file, so savings will be modest.${repeats}` };
@@ -244,7 +291,7 @@ async function compressCore(
   reencode: JpegReencoder,
   reencodeRaw: RawReencoder
 ): Promise<CompressResult> {
-  const doc = await PDFDocument.load(input, { ignoreEncryption: true, updateMetadata: false });
+  const doc = await loadPdfForEditing(input, { updateMetadata: false });
   const images = collectImages(doc);
   let duplicatesMerged = 0;
   let imagesRecompressed = 0;
@@ -253,22 +300,20 @@ async function compressCore(
   // 1. Merge exact duplicate images (lossless): point every reference at the first copy, drop the rest.
   const dups = findDuplicates(images);
   if (dups.size > 0) {
-    for (const page of doc.getPages()) {
-      const res = page.node.Resources();
-      const xobjects = res?.lookupMaybe(PDFName.of("XObject"), PDFDict);
-      if (!xobjects) continue;
-      for (const key of xobjects.keys()) {
-        const v = xobjects.get(key);
-        if (v instanceof PDFRef && dups.has(v)) xobjects.set(key, dups.get(v)!);
-      }
-    }
+    // Repoint every reference in the document — pages, form XObjects, annotation appearances, shared
+    // resource dictionaries — not just each page's own image list, so nothing is left pointing at a
+    // deleted duplicate.
+    replaceReferences(doc.context, dups);
     for (const dupRef of dups.keys()) {
       doc.context.delete(dupRef);
       duplicatesMerged++;
     }
   }
 
-  // 2. Optional lossy recompression.
+  // 2. Lossless: compress streams that were stored with no compression at all.
+  const streamsCompressed = await deflateUnfilteredStreams(doc);
+
+  // 3. Optional lossy recompression.
   if (settings) {
     const { quality, maxLongSide } = settings;
     for (const img of images) {
@@ -308,10 +353,11 @@ async function compressCore(
     }
   }
 
-  const bytes = await doc.save({ useObjectStreams: true });
+  const bytes = await savePdfChecked(doc, { useObjectStreams: true });
   const parts: string[] = [];
   if (imagesRecompressed > 0) parts.push(`re-encoded ${imagesRecompressed} image${imagesRecompressed === 1 ? "" : "s"} at reduced quality`);
   if (duplicatesMerged > 0) parts.push(`merged ${duplicatesMerged} duplicate image${duplicatesMerged === 1 ? "" : "s"}`);
+  if (streamsCompressed > 0) parts.push(`compressed ${streamsCompressed} uncompressed stream${streamsCompressed === 1 ? "" : "s"} (no quality change)`);
   parts.push("optimized the file structure");
   return {
     blob: new Blob([bytes as BlobPart], { type: "application/pdf" }),
@@ -342,6 +388,8 @@ export async function compressPdfDocument(
  * steps (rather than a continuous search) keep this fast and predictable: most files hit their target
  * within the first one or two rungs, and the search always stops at the first success. */
 const TARGET_LADDER: { label: string; quality: number; maxLongSide: number }[] = [
+  // Full resolution for 300 dpi Letter/A4 pages (3300–3508 px): a generous target shouldn't cost pixels.
+  { label: "maximum quality", quality: 0.92, maxLongSide: 3600 },
   { label: "very high quality", quality: 0.9, maxLongSide: 2600 },
   { label: "high quality", quality: 0.8, maxLongSide: 2200 },
   { label: "good quality", quality: 0.7, maxLongSide: 1800 },
@@ -390,6 +438,10 @@ export async function compressPdfToTarget(
   // Already at or under the target: nothing to do, and a re-save could only change bytes the user
   // didn't ask to change. The original comes back untouched.
   if (input.length <= targetBytes) {
+    // Only a real, readable PDF can be "already under your target" — a damaged file or a non-PDF with a
+    // .pdf name must be reported, not handed back as a success.
+    const doc = await loadPdfForEditing(input, { updateMetadata: false });
+    if (doc.getPageCount() < 1) throw new Error("This PDF has no pages.");
     return {
       blob: new Blob([input as BlobPart], { type: "application/pdf" }),
       originalBytes: input.length,

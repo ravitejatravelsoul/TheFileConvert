@@ -1,9 +1,12 @@
+import { savePdfChecked } from "@/lib/pdf/save";
 import { PDFDocument, PDFDict, PDFName, PDFRef, StandardFonts, rgb, degrees, type PDFFont, type PDFPage } from "pdf-lib";
 import type { EditorDocument, EditorObject, RgbColor } from "./types";
 import { effectiveRotation } from "./types";
 import { wrapText, lineBaselineY, sanitizeForFont } from "./textLayout";
 import { arrowHead, drawingPdfPoints, lineEndpoints, annotationLineThickness } from "./shapeGeometry";
 import { DESCENT_SHARE } from "./nativeText";
+import { contentFrame } from "./contentFrame";
+import { loadPdfForEditing } from "@/lib/pdf/load";
 
 export class EditorExportError extends Error {}
 
@@ -171,12 +174,17 @@ async function drawObject(
       // the visible result matches the scan's own look rather than a generic PDF font. This
       // covers exactly (obj.x, obj.y, obj.width, obj.height); no separate rectangle/text
       // drawing needed for this path.
+      // The patch and text are laid out in the word's own frame: on a scan shown rotated (e.g. stored
+      // sideways with /Rotate 90) that frame is turned so the correction reads like the scan does.
+      const frame = contentFrame(obj, obj.rotation);
+      const rot = degrees(frame.rotation);
       let patchEmbedded = false;
       if (obj.patchDataUrl) {
         try {
           const bytes = await dataUrlToBytes(obj.patchDataUrl);
           const embedded = await doc.embedPng(bytes);
-          page.drawImage(embedded, { x: obj.x, y: obj.y, width: obj.width, height: obj.height });
+          const at = frame.toPdf(0, 0);
+          page.drawImage(embedded, { x: at.x, y: at.y, width: frame.width, height: frame.height, rotate: rot });
           patchEmbedded = true;
         } catch {
           // Fall through to the legacy vector path below — e.g. a corrupt/oversized data
@@ -191,7 +199,7 @@ async function drawObject(
       // the override actually has a visible effect — see PropertiesPanel.tsx).
       if (!patchEmbedded) {
         const font = fonts.regular;
-        const size = fitOcrReplacementFontSize(font, obj.newText, obj, obj.fontSize);
+        const size = fitOcrReplacementFontSize(font, obj.newText, frame, obj.fontSize);
         if (!obj.overlayOnly) {
           // The original word's OCR box is tight to *its own* glyphs — if it had no
           // descenders (e.g. "Smith") but the replacement does (e.g. "Rodriguez" -> the
@@ -200,17 +208,12 @@ async function drawObject(
           // OCR box measured one) is cheap and safe: the patch already matches the local
           // background color, so a slightly taller patch doesn't introduce a visible seam.
           const descenderAllowance = size * 0.28;
-          page.drawRectangle({
-            x: obj.x,
-            y: obj.y - descenderAllowance,
-            width: obj.width,
-            height: obj.height + descenderAllowance,
-            color: toPdfLibColor(obj.backgroundColor),
-          });
+          page.drawRectangle({ ...frame.rectToPdf(0, -descenderAllowance, frame.width, frame.height + descenderAllowance), color: toPdfLibColor(obj.backgroundColor) });
         }
         if (obj.newText.trim()) {
           try {
-            page.drawText(obj.newText, { x: obj.x, y: obj.y, size, font, color: toPdfLibColor(obj.textColor) });
+            const at = frame.toPdf(0, 0);
+            page.drawText(obj.newText, { x: at.x, y: at.y, size, font, color: toPdfLibColor(obj.textColor), rotate: rot });
           } catch {
             // A character outside Helvetica's supported encoding shouldn't fail the whole
             // export — the region still shows the patch/original scan, just without
@@ -226,10 +229,11 @@ async function drawObject(
       // characters, sizing the invisible run to that same tiny box would squeeze the whole
       // word's search text into it instead of the word's actual full span.
       if (obj.newText.trim()) {
-        const anchor = obj.searchAnchor ?? obj;
+        const anchorFrame = contentFrame(obj.searchAnchor ?? obj, obj.rotation);
         try {
-          const size = fitOcrReplacementFontSize(fonts.regular, obj.newText, anchor, obj.fontSize);
-          page.drawText(obj.newText, { x: anchor.x, y: anchor.y, size, font: fonts.regular, opacity: 0 });
+          const size = fitOcrReplacementFontSize(fonts.regular, obj.newText, anchorFrame, obj.fontSize);
+          const at = anchorFrame.toPdf(0, 0);
+          page.drawText(obj.newText, { x: at.x, y: at.y, size, font: fonts.regular, opacity: 0, rotate: degrees(anchorFrame.rotation) });
         } catch {
           // Same non-fatal handling as above — searchability is a bonus, not required for
           // the visible correction to be correct.
@@ -251,17 +255,19 @@ async function drawObject(
       };
       const text = sanitizeForFont(obj.text, canEncode);
       const measure = (t: string) => font.widthOfTextAtSize(t, size);
-      const lines = wrapText(text, obj.width, measure);
-      const topY = obj.y + obj.height;
+      // Laid out in the text's own frame (upright for text placed on a page shown rotated).
+      const frame = contentFrame(obj, obj.rotation);
+      const lines = wrapText(text, frame.width, measure);
       lines.forEach((line, i) => {
         if (!line) return;
-        let x = obj.x;
+        let u = 0;
         if (obj.align !== "left") {
           const lineWidth = measure(line);
-          x = obj.align === "center" ? obj.x + (obj.width - lineWidth) / 2 : obj.x + obj.width - lineWidth;
+          u = obj.align === "center" ? (frame.width - lineWidth) / 2 : frame.width - lineWidth;
         }
+        const at = frame.toPdf(u, lineBaselineY(frame.height, size, i));
         try {
-          page.drawText(line, { x, y: lineBaselineY(topY, size, i), size, font, color: toPdfLibColor(obj.color) });
+          page.drawText(line, { x: at.x, y: at.y, size, font, color: toPdfLibColor(obj.color), rotate: degrees(frame.rotation) });
         } catch {
           // Shouldn't happen after sanitizing, but one bad line shouldn't fail the export.
         }
@@ -274,7 +280,9 @@ async function drawObject(
       const bytes = await dataUrlToBytes(obj.dataUrl);
       const isPng = obj.dataUrl.startsWith("data:image/png");
       const embedded = isPng ? await doc.embedPng(bytes) : await doc.embedJpg(bytes);
-      page.drawImage(embedded, { x: obj.x, y: obj.y, width: obj.width, height: obj.height });
+      const frame = contentFrame(obj, obj.rotation);
+      const at = frame.toPdf(0, 0);
+      page.drawImage(embedded, { x: at.x, y: at.y, width: frame.width, height: frame.height, rotate: degrees(frame.rotation) });
       break;
     }
 
@@ -366,7 +374,7 @@ export async function exportEditorDocument(doc: EditorDocument): Promise<Blob> {
     const bytes = await file.arrayBuffer();
     let parsed: PDFDocument;
     try {
-      parsed = await PDFDocument.load(bytes, { ignoreEncryption: true });
+      parsed = await loadPdfForEditing(bytes);
     } catch {
       throw new EditorExportError("One of the source PDFs couldn't be read. It may be damaged.");
     }
@@ -422,6 +430,6 @@ export async function exportEditorDocument(doc: EditorDocument): Promise<Blob> {
     }
   }
 
-  const bytes = await out.save();
+  const bytes = await savePdfChecked(out);
   return new Blob([bytes as BlobPart], { type: "application/pdf" });
 }

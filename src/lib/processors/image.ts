@@ -1,5 +1,6 @@
 import { sanitizeSvgMarkup } from "@/lib/security/validators";
 import type { SearchAttempt } from "./image-search";
+import { isCompleteImage } from "./image-integrity";
 
 export class ProcessorError extends Error {}
 
@@ -16,6 +17,10 @@ export function extensionForFormat(format: ImageOutputFormat): string {
 }
 
 async function loadBitmap(file: File): Promise<ImageBitmap> {
+  // A cut-off file still "decodes" (the missing part comes out grey): refuse it instead.
+  if (!isCompleteImage(new Uint8Array(await file.arrayBuffer()))) {
+    throw new ProcessorError("We couldn't read this image. It may be corrupted or in an unsupported format.");
+  }
   try {
     return await createImageBitmap(file, { imageOrientation: "from-image" });
   } catch {
@@ -270,6 +275,8 @@ export async function svgToPng(file: File): Promise<{ blob: Blob; width: number;
  * flag — then it is redrawn upright. WebP becomes JPEG, or PNG if it has transparency.
  */
 export async function prepareImageForPdf(file: File): Promise<File> {
+  // JPEG and PNG are embedded without decoding, so make sure they really decode first.
+  (await loadBitmap(file)).close();
   const format = inputFormatOf(file);
   if (format === "png") return file;
   if (format === "jpeg") {

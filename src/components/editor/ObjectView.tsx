@@ -5,6 +5,7 @@ import { pdfRectToViewport, pdfRectToCssStyle, pdfToViewportPoint, type Viewport
 import { annotationLineThickness, arrowHead, drawingPdfPoints, lineEndpoints } from "@/lib/editor/shapeGeometry";
 import { TEXT_LINE_HEIGHT } from "@/lib/editor/textLayout";
 import { DESCENT_SHARE } from "@/lib/editor/nativeText";
+import { contentFrame } from "@/lib/editor/contentFrame";
 import type { AddedTextObject, DrawingObjectData, EditorObject, ShapeObjectData } from "@/lib/editor/types";
 import { rgbToCss } from "./toolOptions";
 
@@ -155,8 +156,10 @@ function ObjectContent({ object, spec, width, height, editing, onStopEdit, onTex
       // (saved before this patch pipeline existed) or when patch generation failed.
       if (object.patchDataUrl) {
         return (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={object.patchDataUrl} alt="" title={`Corrected: ${object.newText}`} className="h-full w-full object-fill" draggable={false} />
+          <ContentLayer object={object} spec={spec}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={object.patchDataUrl} alt="" title={`Corrected: ${object.newText}`} className="h-full w-full object-fill" draggable={false} />
+          </ContentLayer>
         );
       }
       return (
@@ -175,7 +178,7 @@ function ObjectContent({ object, spec, width, height, editing, onStopEdit, onTex
         <AddedTextContent
           object={object}
           spec={spec}
-          boxHeightPx={object.height * spec.scale}
+          boxHeightPx={contentFrame(object, object.rotation).height * spec.scale}
           editing={editing}
           onStopEdit={onStopEdit}
           onTextChange={onTextChange}
@@ -185,8 +188,12 @@ function ObjectContent({ object, spec, width, height, editing, onStopEdit, onTex
       );
     case "image":
     case "signature":
-      // eslint-disable-next-line @next/next/no-img-element
-      return <img src={object.dataUrl} alt="" className="h-full w-full object-fill" draggable={false} />;
+      return (
+        <ContentLayer object={object} spec={spec}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={object.dataUrl} alt="" className="h-full w-full object-fill" draggable={false} />
+        </ContentLayer>
+      );
     case "drawing":
       return <DrawingContent object={object} spec={spec} width={width} height={height} />;
     case "shape":
@@ -335,7 +342,7 @@ function AddedTextContent({ object, spec, boxHeightPx, editing, onStopEdit, onTe
     const target = Math.max(fontPx * TEXT_LINE_HEIGHT, natural);
     if (Math.abs(target - boxHeightPx) > 0.75) onAutoHeight?.(target);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [object.text, object.width, object.bold, object.fontSize, spec.scale, editing]);
+  }, [object.text, object.width, object.height, object.rotation, object.bold, object.fontSize, spec.scale, spec.rotation, editing]);
 
   // Focus the moment the editor appears, so the very first keystroke after clicking lands in it
   // (waiting a tick, as below, left a window where a fast typist's first letter was dropped).
@@ -372,26 +379,11 @@ function AddedTextContent({ object, spec, boxHeightPx, editing, onStopEdit, onTe
     return () => clearTimeout(t);
   }, [editing, selectAllOnEdit]);
 
-  // Text lives in the page's own (unrotated) frame and turns with the page — that's how the export
-  // draws it. On a page shown rotated by 90/270 the on-screen box is the swapped shape, so lay the
-  // text out at its real width and rotate that layer into place, or it would wrap to a sliver.
-  const frame = (content: React.ReactNode) =>
-    spec.rotation === 0 ? (
-      content
-    ) : (
-      <div
-        style={{
-          position: "absolute",
-          left: "50%",
-          top: "50%",
-          width: object.width * spec.scale,
-          height: object.height * spec.scale,
-          transform: `translate(-50%, -50%) rotate(${spec.rotation}deg)`,
-        }}
-      >
-        {content}
-      </div>
-    );
+  const frame = (content: React.ReactNode) => (
+    <ContentLayer object={object} spec={spec}>
+      {content}
+    </ContentLayer>
+  );
 
   if (editing) {
     return frame(
@@ -425,6 +417,30 @@ function AddedTextContent({ object, spec, boxHeightPx, editing, onStopEdit, onTe
   return frame(
     <div ref={divRef} style={{ ...common, cursor: "inherit" }}>
       {object.text || "​"}
+    </div>
+  );
+}
+
+/** Content with an "up" (text, pictures, signatures, scan corrections) is laid out in its own frame —
+ * the same frame export draws it in (see contentFrame.ts) — and turned into place on screen by however
+ * far the page is shown rotated relative to that frame. Content created on the page as it is shown is
+ * upright (no turn); content from before a later page rotation turns with the page, as in the PDF. */
+function ContentLayer({ object, spec, children }: { object: EditorObject & { rotation?: number }; spec: ViewportSpec; children: React.ReactNode }) {
+  const frame = contentFrame(object, object.rotation);
+  const turn = (((spec.rotation - frame.rotation) % 360) + 360) % 360;
+  if (turn === 0) return <>{children}</>;
+  return (
+    <div
+      style={{
+        position: "absolute",
+        left: "50%",
+        top: "50%",
+        width: frame.width * spec.scale,
+        height: frame.height * spec.scale,
+        transform: `translate(-50%, -50%) rotate(${turn}deg)`,
+      }}
+    >
+      {children}
     </div>
   );
 }

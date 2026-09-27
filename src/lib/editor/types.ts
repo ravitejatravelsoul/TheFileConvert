@@ -1,3 +1,4 @@
+import type { ContentRotation } from "./contentFrame";
 import type { Rotation, ViewportSpec } from "./coordinates";
 
 export interface RgbColor {
@@ -108,6 +109,9 @@ export interface OcrTextReplacementObject extends BaseObject {
    * box sized for just the characters that changed (see export.ts). Falls back to this
    * object's own rect when absent (objects saved before this field existed). */
   searchAnchor?: { x: number; y: number; width: number; height: number };
+  /** Content turned counter-clockwise by this much inside the box, so it reads upright on a page
+   * shown rotated (see contentFrame.ts). Absent = 0, the behaviour of objects saved before this existed. */
+  rotation?: ContentRotation;
 }
 
 export interface AddedTextObject extends BaseObject {
@@ -117,16 +121,25 @@ export interface AddedTextObject extends BaseObject {
   color: RgbColor;
   align: "left" | "center" | "right";
   bold: boolean;
+  /** Content turned counter-clockwise by this much inside the box, so it reads upright on a page
+   * shown rotated (see contentFrame.ts). Absent = 0, the behaviour of objects saved before this existed. */
+  rotation?: ContentRotation;
 }
 
 export interface ImageObjectData extends BaseObject {
   type: "image";
   dataUrl: string;
+  /** Content turned counter-clockwise by this much inside the box, so it reads upright on a page
+   * shown rotated (see contentFrame.ts). Absent = 0, the behaviour of objects saved before this existed. */
+  rotation?: ContentRotation;
 }
 
 export interface SignatureObjectData extends BaseObject {
   type: "signature";
   dataUrl: string;
+  /** Content turned counter-clockwise by this much inside the box, so it reads upright on a page
+   * shown rotated (see contentFrame.ts). Absent = 0, the behaviour of objects saved before this existed. */
+  rotation?: ContentRotation;
 }
 
 export interface DrawingObjectData extends BaseObject {

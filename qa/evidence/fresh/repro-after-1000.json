@@ -1,0 +1,31 @@
+[
+ {
+  "tool": "Compress PDF",
+  "test": "user scan → 1000 KB (after)",
+  "verdict": "PASS",
+  "input": 3982736,
+  "target": 1000000,
+  "output": 928322,
+  "headline": "Done — 928 KB",
+  "check": {
+   "file": "C:\\Users\\ravit\\Desktop\\my projects\\thefileconvert\\qa\\evidence\\fresh\\out\\after-real-1000-TheFileConvert_Scanned_OCR_Test-compressed.pdf",
+   "ok": true,
+   "problems": [],
+   "qpdf_pages": 2,
+   "encrypted": false,
+   "streams": 7,
+   "mupdf_pages": 2,
+   "blank_pages": [],
+   "text_chars": 0
+  },
+  "integrity": [
+   {
+    "file": "after-real-1000-TheFileConvert_Scanned_OCR_Test-compressed.pdf",
+    "bytes": 928322,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 2
+   }
+  ]
+ }
+]

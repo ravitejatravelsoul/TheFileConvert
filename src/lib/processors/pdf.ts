@@ -1,4 +1,7 @@
+import { savePdfChecked } from "@/lib/pdf/save";
 import { PDFDocument, StandardFonts, degrees, rgb, type PDFFont, type PDFPage } from "pdf-lib";
+import { EncryptedPdfError, loadPdfForEditing } from "@/lib/pdf/load";
+import { isCompleteImage } from "./image-integrity";
 
 export interface NamedBlob {
   name: string;
@@ -10,8 +13,9 @@ export class ProcessorError extends Error {}
 async function loadPdf(file: File): Promise<PDFDocument> {
   const bytes = await file.arrayBuffer();
   try {
-    return await PDFDocument.load(bytes, { ignoreEncryption: true });
-  } catch {
+    return await loadPdfForEditing(bytes);
+  } catch (e) {
+    if (e instanceof EncryptedPdfError) throw new ProcessorError(e.message);
     throw new ProcessorError(
       "We couldn't read this PDF. It may be damaged, encrypted, or incomplete."
     );
@@ -28,7 +32,7 @@ export async function mergePdfs(files: File[]): Promise<Blob> {
     const pages = await merged.copyPages(doc, doc.getPageIndices());
     pages.forEach((page) => merged.addPage(page));
   }
-  const bytes = await merged.save();
+  const bytes = await savePdfChecked(merged);
   return new Blob([bytes as BlobPart], { type: "application/pdf" });
 }
 
@@ -70,7 +74,7 @@ export async function extractPages(file: File, pageRanges: string): Promise<Blob
   const out = await PDFDocument.create();
   const pages = await out.copyPages(source, indices);
   pages.forEach((p) => out.addPage(p));
-  const bytes = await out.save();
+  const bytes = await savePdfChecked(out);
   return new Blob([bytes as BlobPart], { type: "application/pdf" });
 }
 
@@ -86,7 +90,7 @@ export async function splitPdfEveryNPages(file: File, n: number): Promise<NamedB
     const indices = Array.from({ length: end - start }, (_, i) => start + i);
     const pages = await out.copyPages(source, indices);
     pages.forEach((p) => out.addPage(p));
-    const bytes = await out.save();
+    const bytes = await savePdfChecked(out);
     results.push({
       name: `part-${partNumber}.pdf`,
       blob: new Blob([bytes as BlobPart], { type: "application/pdf" }),
@@ -117,7 +121,7 @@ export async function buildPdfFromPages(file: File, plan: PagePlan[]): Promise<B
     if (turn) page.setRotation(degrees((((page.getRotation().angle + turn) % 360) + 360) % 360));
     out.addPage(page);
   });
-  const bytes = await out.save();
+  const bytes = await savePdfChecked(out);
   return new Blob([bytes as BlobPart], { type: "application/pdf" });
 }
 
@@ -141,6 +145,7 @@ export async function imagesToPdf(files: File[], options: ImagesToPdfOptions): P
     const isPng = bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4e && bytes[3] === 0x47;
     const isJpeg = bytes[0] === 0xff && bytes[1] === 0xd8;
     if (!isPng && !isJpeg) throw new ProcessorError(`"${file.name}" isn't a JPG or PNG image.`);
+    if (!isCompleteImage(bytes)) throw new ProcessorError(`"${file.name}" couldn't be read. It may be damaged.`);
     let image;
     try {
       image = isPng ? await doc.embedPng(bytes) : await doc.embedJpg(bytes);
@@ -175,7 +180,7 @@ export async function imagesToPdf(files: File[], options: ImagesToPdfOptions): P
     });
   }
 
-  const bytes = await doc.save();
+  const bytes = await savePdfChecked(doc);
   return new Blob([bytes as BlobPart], { type: "application/pdf" });
 }
 
@@ -240,7 +245,7 @@ export async function addWatermark(file: File, options: WatermarkOptions): Promi
       rotate: degrees(options.rotationDegrees + shown.angle),
     });
   }
-  const bytes = await doc.save();
+  const bytes = await savePdfChecked(doc);
   return new Blob([bytes as BlobPart], { type: "application/pdf" });
 }
 
@@ -303,7 +308,7 @@ export async function addPageNumbers(file: File, options: PageNumberOptions): Pr
     const { x, y } = shown.toPage(at.x, at.y);
     page.drawText(label, { x, y, size: options.fontSize, font, color: rgb(0.2, 0.2, 0.2), rotate: degrees(shown.angle) });
   });
-  const bytes = await doc.save();
+  const bytes = await savePdfChecked(doc);
   return new Blob([bytes as BlobPart], { type: "application/pdf" });
 }
 
@@ -338,7 +343,7 @@ export async function addHeaderFooter(file: File, options: HeaderFooterOptions):
     const { x, y } = shown.toPage(dx, dy);
     page.drawText(label, { x, y, size: options.fontSize, font, color: rgb(0.2, 0.2, 0.2), rotate: degrees(shown.angle) });
   });
-  const bytes = await doc.save();
+  const bytes = await savePdfChecked(doc);
   return new Blob([bytes as BlobPart], { type: "application/pdf" });
 }
 

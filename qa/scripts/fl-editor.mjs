@@ -93,6 +93,10 @@ async function nativeSession() {
     await pickTool(page, "Underline");
     for (let i = 4; i < 7; i++) await drag(page, at(60, 303 + i * 18), at(300, 315 + i * 18));
     const ulArmed = (await page.getByRole("button", { name: "Underline", exact: true }).getAttribute("aria-pressed")) === "true";
+    // 4b. Strikethrough ×3 (from the More menu)
+    await page.getByRole("button", { name: "More", exact: true }).click();
+    await page.getByRole("menuitemradio", { name: "Strikethrough" }).click();
+    for (let i = 7; i < 10; i++) await drag(page, at(60, 303 + i * 18), at(300, 315 + i * 18));
     steps.push(`markup-armed:${hlArmed && ulArmed}`);
 
     // 5. Draw (live stroke must render while drawing)
@@ -109,6 +113,11 @@ async function nativeSession() {
     await page.getByRole("button", { name: "Shapes", exact: true }).click();
     await page.getByRole("menuitemradio", { name: "Rectangle" }).click();
     await drag(page, at(60, 640), at(200, 700));
+    for (const [shape, a, b] of [["Ellipse", [230, 640], [330, 700]], ["Line", [60, 720], [200, 770]], ["Arrow", [230, 720], [330, 770]]]) {
+      await page.getByRole("button", { name: "Shapes", exact: true }).click();
+      await page.getByRole("menuitemradio", { name: shape }).click();
+      await drag(page, at(...a), at(...b));
+    }
 
     // 7. Image
     await pickTool(page, "Select");
@@ -136,7 +145,18 @@ async function nativeSession() {
     steps.push(`undo:${before}->${afterUndo}->${afterRedo}`);
     const types = await objectTypes(page);
 
-    // 11. Pages: add a blank page, move it first, rotate it, crop it
+    // 10b. Search the document text
+    if (!(await page.getByLabel("Search document text").isVisible())) await page.locator("summary", { hasText: /^Search/ }).click();
+    await page.getByLabel("Search document text").fill("Consultation");
+    const searchResult = (await page.getByText(/^\d+ of \d+$|^No matches$/).first().innerText().catch(() => "")).trim();
+    await page.getByLabel("Search document text").fill("");
+    steps.push(`search:${searchResult}`);
+
+    // 11. Pages: add a blank page and delete it again, then add one, move it first, rotate it, crop it
+    await page.getByRole("button", { name: "+ Blank page" }).click();
+    await page.getByRole("button", { name: "Delete page 2" }).click();
+    const afterDelete = await page.getByRole("button", { name: /^Go to page \d+$/ }).count();
+    steps.push(`blank+delete:${afterDelete}`);
     await page.getByRole("button", { name: "+ Blank page" }).click();
     await page.getByRole("button", { name: "Move page 2 up" }).click();
     await page.getByRole("button", { name: "Rotate page 1 clockwise" }).click();
@@ -152,6 +172,7 @@ async function nativeSession() {
     const out = await download(page, page.getByRole("button", { name: "Export PDF" }), "editor-native");
     const info = await pdfInfo(out);
     const img = await renderPage(info.doc, 2, 2);
+    const base = await renderPage((await pdfInfo(fx("FL-PDF-07-native-text.pdf"))).doc, 1, 2);
     const s = 2;
     const checks = {
       pages: info.pages === 2,
@@ -162,6 +183,12 @@ async function nativeSession() {
       underlines: countIn(img, s, [65, 372, 295, 423], isDark) > countIn(img, s, [65, 372, 295, 423], () => false) + 400,
       drawing: countIn(img, s, [360, 595, 520, 645], isDark) > 60,
       rectangle: countIn(img, s, [58, 638, 202, 702], isDark) > 150,
+      ellipse: countIn(img, s, [228, 638, 332, 702], isDark) > 150,
+      line: countIn(img, s, [58, 718, 202, 772], isDark) > 80,
+      arrow: countIn(img, s, [228, 718, 332, 772], isDark) > 80,
+      strikethroughs: countIn(img, s, [65, 429, 295, 477], isDark) > countIn(base, s, [65, 429, 295, 477], isDark) + 300,
+      search: /^1 of 1$/.test(searchResult),
+      deletePage: afterDelete === 1,
       image: countIn(img, s, [440, 100, 520, 200], isColourful) > 3000,
       signature: countIn(img, s, [360, 690, 480, 770], isDark) > 50,
       whiteout: countIn(img, s, [60, 502, 460, 513], isDark) < 20,
@@ -175,7 +202,7 @@ async function nativeSession() {
     };
     const ok = Object.values(checks).every(Boolean) && typed === "Approved for payment" && hlArmed && ulArmed && liveStroke && afterUndo === before - 1 && afterRedo === before && whiteoutWarning > 0;
     await renderToPng(out, 2, "editor-native-export-p2.png");
-    rec(tool, "native session: edit, add text, 3× highlight, 3× underline, draw, shape, image, signature, whiteout, undo/redo, blank page, reorder, rotate, crop, export, reopen", ok ? "PASS" : "FAIL", {
+    rec(tool, "native long session: edit, add text, 3× highlight, 3× underline, 3× strikethrough, draw, rectangle/ellipse/line/arrow, image, signature, whiteout, undo/redo, search, blank page add+delete, reorder, rotate, crop, export, reopen", ok ? "PASS" : "FAIL", {
       steps,
       types: countTypes(types),
       checks,

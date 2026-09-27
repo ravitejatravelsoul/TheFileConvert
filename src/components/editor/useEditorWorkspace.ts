@@ -21,6 +21,7 @@ import { exportEditorDocument, EditorExportError } from "@/lib/editor/export";
 import { generateUuidV4 } from "@/lib/id";
 import { classifyPdfPages, createOcrSession, type OcrPageResult, type OcrSession, type PageClassification } from "@/lib/processors/ocr";
 import type { EditorDocument, EditorObject, EditorPage } from "@/lib/editor/types";
+import { effectiveRotation } from "@/lib/editor/types";
 import { validateFileForTool } from "@/lib/security/validators";
 import { getTool } from "@/lib/tools/registry";
 
@@ -290,6 +291,10 @@ export function useEditorWorkspace() {
         try {
           const result = await session.recognizePage(file, page.sourcePageIndex + 1, {
             scale: 2,
+            // Read the page the way it is shown: a scan stored sideways with /Rotate 90 is upright
+            // on screen but sideways in the file (the old fixed 0 read it sideways — ~9% accuracy).
+            // Word boxes are mapped back to PDF space whichever way it was rendered.
+            rotate: effectiveRotation(page),
             onProgress: (fraction) =>
               setState((s) => ({ ...s, ocrProgress: { label: "Recognizing text…", fraction } })),
           });
@@ -491,7 +496,7 @@ export function useEditorWorkspace() {
       const blob = await exportEditorDocument(state.doc);
       return blob;
     } catch (e) {
-      setExportError(e instanceof EditorExportError ? e.message : "We couldn't export this PDF.");
+      setExportError(e instanceof EditorExportError || (e instanceof Error && e.name === "OutputIntegrityError") ? e.message : "We couldn't export this PDF.");
       return null;
     } finally {
       setExporting(false);
@@ -557,8 +562,11 @@ export function useEditorWorkspace() {
     }));
   }, [searchIndex.length]);
 
+  const showMessage = useCallback((message: string | null) => setState((s) => ({ ...s, error: message })), []);
+
   return {
     state,
+    showMessage,
     canUndo: historyRef.current.canUndo,
     canRedo: historyRef.current.canRedo,
     openFile,

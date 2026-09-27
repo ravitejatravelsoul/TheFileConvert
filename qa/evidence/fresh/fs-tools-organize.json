@@ -1,0 +1,106 @@
+[
+ {
+  "tool": "Organize PDF",
+  "test": "drag page 4 to the front",
+  "verdict": "PASS",
+  "labels": "4,1,2,3,5,6,7,8,9,10",
+  "rotations": "0,0,0,0,0,0,0,0,0,0",
+  "output": 5315239,
+  "integrity": [
+   {
+    "file": "fs-org-dragpag-PDF-H-multipage-text-image-organized.pdf",
+    "bytes": 5315239,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 10
+   }
+  ]
+ },
+ {
+  "tool": "Organize PDF",
+  "test": "rotate page 2 right",
+  "verdict": "PASS",
+  "labels": "1,2,3,4,5,6,7,8,9,10",
+  "rotations": "0,90,0,0,0,0,0,0,0,0",
+  "output": 5315243,
+  "integrity": [
+   {
+    "file": "fs-org-rotatep-PDF-H-multipage-text-image-organized.pdf",
+    "bytes": 5315243,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 10
+   }
+  ]
+ },
+ {
+  "tool": "Organize PDF",
+  "test": "delete page 10",
+  "verdict": "PASS",
+  "labels": "1,2,3,4,5,6,7,8,9",
+  "rotations": "0,0,0,0,0,0,0,0,0",
+  "output": 4805655,
+  "integrity": [
+   {
+    "file": "fs-org-deletep-PDF-H-multipage-text-image-organized.pdf",
+    "bytes": 4805655,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 9
+   }
+  ]
+ },
+ {
+  "tool": "Organize PDF",
+  "test": "combined: drag, rotate left, delete, duplicate",
+  "verdict": "PASS",
+  "labels": "4,1,1,2,3,5,6,7,8,10",
+  "rotations": "0,0,0,270,0,0,0,0,0,0",
+  "output": 4773314,
+  "integrity": [
+   {
+    "file": "fs-org-combined-PDF-H-multipage-text-image-organized.pdf",
+    "bytes": 4773314,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 10
+   }
+  ]
+ },
+ {
+  "tool": "Organize PDF",
+  "test": "incremental-update scan: rotate + save",
+  "verdict": "PASS",
+  "rotations": "90,0",
+  "output": 3623902,
+  "integrity": [
+   {
+    "file": "fs-org-genone-PDF-C-scan-38mb-incremental-organized.pdf",
+    "bytes": 3623902,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 2
+   }
+  ]
+ },
+ {
+  "tool": "Organize PDF",
+  "test": "already-rotated source: rotations add up",
+  "verdict": "PASS",
+  "rotations": "0,180,180,0",
+  "integrity": [
+   {
+    "file": "fs-org-rotsrc-PDF-I-rotated-organized.pdf",
+    "bytes": 645994,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 4
+   }
+  ]
+ },
+ {
+  "tool": "All tools",
+  "test": "console errors / unexpected dialogs",
+  "verdict": "PASS"
+ }
+]

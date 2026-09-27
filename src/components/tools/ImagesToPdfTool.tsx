@@ -46,7 +46,11 @@ export function ImagesToPdfTool() {
       const prepared: File[] = [];
       for (const [i, it] of items.entries()) {
         setPhase({ name: "working", label: `Preparing image ${i + 1} of ${items.length}…` });
-        prepared.push(await prepareImageForPdf(it.file));
+        try {
+          prepared.push(await prepareImageForPdf(it.file));
+        } catch {
+          throw new Error(`“${it.file.name}” couldn't be read. It may be damaged — remove it and try again.`);
+        }
       }
       setPhase({ name: "working", label: "Building your PDF…" });
       const blob = await imagesToPdf(prepared, { pageSize: size, margin: size === "fit" ? 0 : 24 });

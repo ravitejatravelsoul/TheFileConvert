@@ -1,0 +1,126 @@
+[
+ {
+  "tool": "Split PDF",
+  "test": "selected pages 2, 5, 9",
+  "verdict": "PASS",
+  "pages": "2,5,9",
+  "output": 1601564,
+  "integrity": [
+   {
+    "file": "fs-split-2_5_9-PDF-H-multipage-text-image-pages-2_5_9.pdf",
+    "bytes": 1601564,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 3
+   }
+  ]
+ },
+ {
+  "tool": "Split PDF",
+  "test": "first page only",
+  "verdict": "PASS",
+  "pages": "1",
+  "output": 542474,
+  "integrity": [
+   {
+    "file": "fs-split-1-PDF-H-multipage-text-image-pages-1.pdf",
+    "bytes": 542474,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 1
+   }
+  ]
+ },
+ {
+  "tool": "Split PDF",
+  "test": "middle page only (5)",
+  "verdict": "PASS",
+  "pages": "5",
+  "output": 541764,
+  "integrity": [
+   {
+    "file": "fs-split-5-PDF-H-multipage-text-image-pages-5.pdf",
+    "bytes": 541764,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 1
+   }
+  ]
+ },
+ {
+  "tool": "Split PDF",
+  "test": "last page only (10)",
+  "verdict": "PASS",
+  "pages": "10",
+  "output": 510280,
+  "integrity": [
+   {
+    "file": "fs-split-10-PDF-H-multipage-text-image-pages-10.pdf",
+    "bytes": 510280,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 1
+   }
+  ]
+ },
+ {
+  "tool": "Split PDF",
+  "test": "multiple typed ranges 1-2,5,9-10",
+  "verdict": "PASS",
+  "pages": "1,2,5,9,10",
+  "output": 2652919,
+  "integrity": [
+   {
+    "file": "fs-split-1_2_5_9_10-PDF-H-multipage-text-image-pages-1-2_5_9-10.pdf",
+    "bytes": 2652919,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 5
+   }
+  ]
+ },
+ {
+  "tool": "Split PDF",
+  "test": "split every page (PDF-H) → ZIP",
+  "verdict": "PASS",
+  "files": 10,
+  "names": [
+   "PDF-H-multipage-text-image-page-1.pdf",
+   "PDF-H-multipage-text-image-page-2.pdf",
+   "PDF-H-multipage-text-image-page-3.pdf"
+  ],
+  "integrity": [
+   {
+    "file": "fs-split-every-PDF-H-PDF-H-multipage-text-image-pages.zip",
+    "bytes": 5323035,
+    "ok": true,
+    "kind": "zip",
+    "entries": 10
+   }
+  ]
+ },
+ {
+  "tool": "Split PDF",
+  "test": "split every page (PDF-C) → ZIP",
+  "verdict": "PASS",
+  "files": 2,
+  "names": [
+   "PDF-C-scan-38mb-incremental-page-1.pdf",
+   "PDF-C-scan-38mb-incremental-page-2.pdf"
+  ],
+  "integrity": [
+   {
+    "file": "fs-split-every-PDF-C-PDF-C-scan-38mb-incremental-pages.zip",
+    "bytes": 3624830,
+    "ok": true,
+    "kind": "zip",
+    "entries": 2
+   }
+  ]
+ },
+ {
+  "tool": "All tools",
+  "test": "console errors / unexpected dialogs",
+  "verdict": "PASS"
+ }
+]

@@ -1,0 +1,154 @@
+[
+ {
+  "tool": "OCR",
+  "test": "OCR-A clean-300dpi (eng)",
+  "verdict": "PASS",
+  "ms": 2456,
+  "wordsRecognized": 45,
+  "truthWords": 45,
+  "accuracy": "100%",
+  "missed": [],
+  "exportedSearchable": "0%",
+  "pages": 1,
+  "integrity": [
+   {
+    "file": "fs-ocr-OCR-A-OCR-A-clean-300dpi-edited.pdf",
+    "bytes": 859444,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 1
+   }
+  ]
+ },
+ {
+  "tool": "OCR",
+  "test": "OCR-B low-res-100dpi (eng)",
+  "verdict": "PASS",
+  "ms": 2408,
+  "wordsRecognized": 45,
+  "truthWords": 45,
+  "accuracy": "100%",
+  "missed": [],
+  "exportedSearchable": "0%",
+  "pages": 1,
+  "integrity": [
+   {
+    "file": "fs-ocr-OCR-B-OCR-B-low-res-100dpi-edited.pdf",
+    "bytes": 111124,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 1
+   }
+  ]
+ },
+ {
+  "tool": "OCR",
+  "test": "OCR-C low-contrast (eng)",
+  "verdict": "PASS",
+  "ms": 2450,
+  "wordsRecognized": 45,
+  "truthWords": 45,
+  "accuracy": "100%",
+  "missed": [],
+  "exportedSearchable": "0%",
+  "pages": 1,
+  "integrity": [
+   {
+    "file": "fs-ocr-OCR-C-OCR-C-low-contrast-edited.pdf",
+    "bytes": 635238,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 1
+   }
+  ]
+ },
+ {
+  "tool": "OCR",
+  "test": "OCR-D rotated (eng)",
+  "verdict": "PASS",
+  "ms": 1935,
+  "wordsRecognized": 45,
+  "truthWords": 45,
+  "accuracy": "100%",
+  "missed": [],
+  "exportedSearchable": "0%",
+  "pages": 1,
+  "integrity": [
+   {
+    "file": "fs-ocr-OCR-D-OCR-D-rotated-edited.pdf",
+    "bytes": 864475,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 1
+   }
+  ]
+ },
+ {
+  "tool": "OCR",
+  "test": "OCR-E spanish (spa)",
+  "verdict": "PASS",
+  "ms": 1927,
+  "wordsRecognized": 36,
+  "truthWords": 36,
+  "accuracy": "100%",
+  "missed": [],
+  "exportedSearchable": "0%",
+  "pages": 1,
+  "integrity": [
+   {
+    "file": "fs-ocr-OCR-E-OCR-E-spanish-edited.pdf",
+    "bytes": 834561,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 1
+   }
+  ]
+ },
+ {
+  "tool": "OCR",
+  "test": "OCR-F mixed-native-scan (eng)",
+  "verdict": "PASS",
+  "ms": 1917,
+  "wordsRecognized": 48,
+  "truthWords": 45,
+  "accuracy": "100%",
+  "missed": [],
+  "exportedSearchable": "0%",
+  "pages": 1,
+  "integrity": [
+   {
+    "file": "fs-ocr-OCR-F-OCR-F-mixed-native-scan-edited.pdf",
+    "bytes": 860354,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 1
+   }
+  ]
+ },
+ {
+  "tool": "OCR",
+  "test": "OCR-G multipage (eng)",
+  "verdict": "PASS",
+  "ms": 3856,
+  "wordsRecognized": 64,
+  "truthWords": 64,
+  "accuracy": "100%",
+  "missed": [],
+  "exportedSearchable": "0%",
+  "pages": 3,
+  "integrity": [
+   {
+    "file": "fs-ocr-OCR-G-OCR-G-multipage-edited.pdf",
+    "bytes": 2432202,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 3
+   }
+  ]
+ },
+ {
+  "tool": "OCR",
+  "test": "console errors",
+  "verdict": "PASS"
+ }
+]

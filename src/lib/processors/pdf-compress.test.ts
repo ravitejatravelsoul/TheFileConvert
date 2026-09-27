@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
-import { PDFDocument, PDFName, PDFNumber, PDFRawStream } from "pdf-lib";
+import { PDFDict, PDFDocument, PDFName, PDFNumber, PDFRawStream } from "pdf-lib";
 import { analyzePdfImages, compressPdfDocument, compressPdfToTarget, compressionOutlook, type JpegReencoder } from "./pdf-compress";
 
 const JPEG = new Uint8Array(fs.readFileSync(path.join(__dirname, "../../../e2e/fixtures/sample.jpg")));
@@ -153,7 +153,7 @@ describe("compressPdfToTarget", () => {
     expect(r.rungLabel).toBe("closest safe result");
     expect(r.newBytes).toBeGreaterThan(1);
     // it tried every rung, not just gave up after one
-    expect(r.attempts).toHaveLength(8); // lossless + 7 ladder rungs
+    expect(r.attempts).toHaveLength(9); // lossless + 8 ladder rungs
     expect(r.newBytes).toBe(Math.min(...r.attempts.map((a) => a.bytes)));
   });
 });
@@ -232,5 +232,85 @@ describe("target contract: small files and ICC-profile images (regression)", () 
     const a = await analyzePdfImages(await pdfWithIccJpeg());
     expect(a.jpegCount).toBe(1);
     expect(compressionOutlook(a).kind).not.toBe("unsupported-images");
+  });
+});
+
+describe("lossless compression of uncompressed streams", () => {
+  async function pdfWithRawText(pages: number): Promise<Uint8Array> {
+    const doc = await PDFDocument.create();
+    const font = await doc.embedFont("Helvetica");
+    for (let p = 0; p < pages; p++) {
+      const page = doc.addPage([612, 792]);
+      page.drawText("x", { x: 10, y: 10, size: 1, font }); // registers the font as /F… on the page
+      const fontKey = page.node.Resources()!.lookup(PDFName.of("Font"), PDFDict).keys()[0].asString();
+      const ops = Array.from({ length: 60 }, (_, i) => `BT ${fontKey} 10 Tf 56 ${740 - i * 11} Td (Line ${i + 1} of page ${p + 1}: quarterly report text that repeats a lot) Tj ET`).join("\n");
+      page.node.set(PDFName.of("Contents"), doc.context.register(doc.context.stream(ops))); // stored with no /Filter
+    }
+    return doc.save({ useObjectStreams: false });
+  }
+
+  it("Flate-compresses unfiltered content streams, keeps every page and the text, and reports it", async () => {
+    const input = await pdfWithRawText(6);
+    const analysis = await analyzePdfImages(input);
+    expect(analysis.unfilteredBytes).toBeGreaterThan(input.length * 0.5);
+    expect(compressionOutlook(analysis).kind).toBe("good-room");
+    const result = await compressPdfToTarget(input, Math.floor(input.length * 0.5));
+    expect(result.targetAchieved).toBe(true);
+    expect(result.rungLabel).toMatch(/^lossless/);
+    const out = new Uint8Array(await result.blob.arrayBuffer());
+    const reopened = await PDFDocument.load(out);
+    expect(reopened.getPageCount()).toBe(6);
+    const contents = reopened.getPage(3).node.lookup(PDFName.of("Contents"));
+    expect(contents).toBeInstanceOf(PDFRawStream);
+    expect((contents as PDFRawStream).dict.get(PDFName.of("Filter"))?.toString()).toBe("/FlateDecode");
+    const { inflate } = await import("@/lib/pdf/zlib");
+    expect(new TextDecoder().decode(await inflate((contents as PDFRawStream).contents))).toContain("Line 60 of page 4");
+  });
+});
+
+describe("compressPdfToTarget refuses unreadable input even when it is under the target", () => {
+  it("does not return a damaged PDF or a non-PDF as 'already under your target'", async () => {
+    const notPdf = new TextEncoder().encode("This is not a PDF, it only has the extension.\n");
+    await expect(compressPdfToTarget(new Uint8Array(notPdf), 1_000_000)).rejects.toThrow();
+    const good = await pdfWithRepeatedImage(2);
+    const truncated = good.slice(0, Math.floor(good.length * 0.4));
+    await expect(compressPdfToTarget(truncated, 1_000_000)).rejects.toThrow();
+    const ok = await compressPdfToTarget(good, 1_000_000);
+    expect(ok.rungLabel).toMatch(/already under/);
+    expect(new Uint8Array(await ok.blob.arrayBuffer())).toEqual(good);
+  });
+});
+
+describe("duplicate-image merge repoints every reference (regression: dangling refs from form XObjects)", () => {
+  it("a duplicate used inside a form XObject still resolves after the merge", async () => {
+    const doc = await PDFDocument.create();
+    const a = await doc.embedJpg(JPEG);
+    const b = await doc.embedJpg(JPEG); // byte-identical duplicate
+    const page = doc.addPage([300, 300]);
+    page.drawImage(a, { x: 10, y: 10, width: 100, height: 100 });
+    // A form XObject (like a stamp or a letterhead) whose own resources use the duplicate.
+    const ctx = doc.context;
+    await a.embed();
+    await b.embed();
+    const form = ctx.stream("q 100 0 0 100 0 0 cm /ImDup Do Q", {
+      Type: "XObject",
+      Subtype: "Form",
+      BBox: [0, 0, 100, 100],
+      Resources: { XObject: { ImDup: b.ref } },
+    });
+    const formRef = ctx.register(form);
+    const stampKey = page.node.newXObject("Stamp", formRef);
+    page.node.addContentStream(ctx.register(ctx.stream(`q 1 0 0 1 150 150 cm ${stampKey.asString()} Do Q`)));
+    const input = await doc.save({ useObjectStreams: false });
+
+    const result = await compressPdfDocument(input, "lossless");
+    expect(result.duplicatesMerged).toBe(1);
+    const out = new Uint8Array(await result.blob.arrayBuffer());
+    const { verifyPdfBytes } = await import("@/lib/pdf/save");
+    expect(await verifyPdfBytes(out, { pages: 1 })).toEqual([]);
+    const reopened = await PDFDocument.load(out);
+    const stamp = reopened.getPage(0).node.Resources()!.lookup(PDFName.of("XObject"), PDFDict).lookup(stampKey) as PDFRawStream;
+    const inner = stamp.dict.lookup(PDFName.of("Resources"), PDFDict).lookup(PDFName.of("XObject"), PDFDict).get(PDFName.of("ImDup"));
+    expect(reopened.context.lookup(inner as never)).toBeInstanceOf(PDFRawStream);
   });
 });

@@ -1,0 +1,823 @@
+[
+ {
+  "tool": "Compress Image",
+  "test": "IMAGE-A 249.8 KB → 200 KB",
+  "verdict": "PASS",
+  "fixture": "IMAGE-A",
+  "input": 249814,
+  "target": 200000,
+  "output": 188415,
+  "achieved": true,
+  "dims": "1920x1280→1263x842",
+  "format": "jpeg→jpeg",
+  "alpha": "false→false",
+  "psnr": 32.8,
+  "ssim": 0.8663,
+  "details": "JPG · 1263 × 842px (resized to 66%) · quality 75% · 0.4 s",
+  "headline": "Done — 188 KB",
+  "ms": 897,
+  "integrity": [
+   {
+    "file": "fs-cimg-IMAGE-A-200000-IMAGE-A-optimized-250k-compressed.jpg",
+    "bytes": 188415,
+    "ok": true,
+    "kind": "jpeg",
+    "w": 1263,
+    "h": 842,
+    "alpha": false
+   }
+  ]
+ },
+ {
+  "tool": "Compress Image",
+  "test": "IMAGE-A 249.8 KB → 150 KB",
+  "verdict": "PASS",
+  "fixture": "IMAGE-A",
+  "input": 249814,
+  "target": 150000,
+  "output": 142236,
+  "achieved": true,
+  "dims": "1920x1280→1084x723",
+  "format": "jpeg→jpeg",
+  "alpha": "false→false",
+  "psnr": 31.97,
+  "ssim": 0.844,
+  "details": "JPG · 1084 × 723px (resized to 56%) · quality 75% · 0.8 s",
+  "headline": "Done — 142 KB",
+  "ms": 949,
+  "integrity": [
+   {
+    "file": "fs-cimg-IMAGE-A-150000-IMAGE-A-optimized-250k-compressed.jpg",
+    "bytes": 142236,
+    "ok": true,
+    "kind": "jpeg",
+    "w": 1084,
+    "h": 723,
+    "alpha": false
+   }
+  ]
+ },
+ {
+  "tool": "Compress Image",
+  "test": "IMAGE-A 249.8 KB → 100 KB",
+  "verdict": "PASS",
+  "fixture": "IMAGE-A",
+  "input": 249814,
+  "target": 100000,
+  "output": 95893,
+  "achieved": true,
+  "dims": "1920x1280→873x582",
+  "format": "jpeg→jpeg",
+  "alpha": "false→false",
+  "psnr": 31.11,
+  "ssim": 0.8286,
+  "details": "JPG · 873 × 582px (resized to 45%) · quality 75% · 0.7 s",
+  "headline": "Done — 96 KB",
+  "ms": 949,
+  "integrity": [
+   {
+    "file": "fs-cimg-IMAGE-A-100000-IMAGE-A-optimized-250k-compressed.jpg",
+    "bytes": 95893,
+    "ok": true,
+    "kind": "jpeg",
+    "w": 873,
+    "h": 582,
+    "alpha": false
+   }
+  ]
+ },
+ {
+  "tool": "Compress Image",
+  "test": "IMAGE-B 498.6 KB → 400 KB",
+  "verdict": "PASS",
+  "fixture": "IMAGE-B",
+  "input": 498577,
+  "target": 400000,
+  "output": 387771,
+  "achieved": true,
+  "dims": "2400x1600→1811x1208",
+  "format": "jpeg→jpeg",
+  "alpha": "false→false",
+  "psnr": 32.46,
+  "ssim": 0.8395,
+  "details": "JPG · 1811 × 1208px (resized to 75%) · quality 75% · 1.2 s",
+  "headline": "Done — 388 KB",
+  "ms": 1431,
+  "integrity": [
+   {
+    "file": "fs-cimg-IMAGE-B-400000-IMAGE-B-photo-500k-compressed.jpg",
+    "bytes": 387771,
+    "ok": true,
+    "kind": "jpeg",
+    "w": 1811,
+    "h": 1208,
+    "alpha": false
+   }
+  ]
+ },
+ {
+  "tool": "Compress Image",
+  "test": "IMAGE-B 498.6 KB → 250 KB",
+  "verdict": "PASS",
+  "fixture": "IMAGE-B",
+  "input": 498577,
+  "target": 250000,
+  "output": 244707,
+  "achieved": true,
+  "dims": "2400x1600→1426x950",
+  "format": "jpeg→jpeg",
+  "alpha": "false→false",
+  "psnr": 31.63,
+  "ssim": 0.8244,
+  "details": "JPG · 1426 × 950px (resized to 59%) · quality 75% · 1.1 s",
+  "headline": "Done — 245 KB",
+  "ms": 1433,
+  "integrity": [
+   {
+    "file": "fs-cimg-IMAGE-B-250000-IMAGE-B-photo-500k-compressed.jpg",
+    "bytes": 244707,
+    "ok": true,
+    "kind": "jpeg",
+    "w": 1426,
+    "h": 950,
+    "alpha": false
+   }
+  ]
+ },
+ {
+  "tool": "Compress Image",
+  "test": "IMAGE-B 498.6 KB → 150 KB",
+  "verdict": "PASS",
+  "fixture": "IMAGE-B",
+  "input": 498577,
+  "target": 150000,
+  "output": 148747,
+  "achieved": true,
+  "dims": "2400x1600→1092x728",
+  "format": "jpeg→jpeg",
+  "alpha": "false→false",
+  "psnr": 30.76,
+  "ssim": 0.8058,
+  "details": "JPG · 1092 × 728px (resized to 46%) · quality 75% · 1.0 s",
+  "headline": "Done — 149 KB",
+  "ms": 1435,
+  "integrity": [
+   {
+    "file": "fs-cimg-IMAGE-B-150000-IMAGE-B-photo-500k-compressed.jpg",
+    "bytes": 148747,
+    "ok": true,
+    "kind": "jpeg",
+    "w": 1092,
+    "h": 728,
+    "alpha": false
+   }
+  ]
+ },
+ {
+  "tool": "Compress Image",
+  "test": "IMAGE-C 2.98 MB → 2 MB",
+  "verdict": "PASS",
+  "fixture": "IMAGE-C",
+  "input": 2975516,
+  "target": 2000000,
+  "output": 1954746,
+  "achieved": true,
+  "dims": "4000x3000→3586x2690",
+  "format": "jpeg→jpeg",
+  "alpha": "false→false",
+  "psnr": 31.48,
+  "ssim": 0.8308,
+  "details": "JPG · 3586 × 2690px (resized to 90%) · quality 75% · 3.8 s",
+  "headline": "Done — 1.95 MB",
+  "ms": 4012,
+  "integrity": [
+   {
+    "file": "fs-cimg-IMAGE-C-2000000-IMAGE-C-photo-3mb-compressed.jpg",
+    "bytes": 1954746,
+    "ok": true,
+    "kind": "jpeg",
+    "w": 3586,
+    "h": 2690,
+    "alpha": false
+   }
+  ]
+ },
+ {
+  "tool": "Compress Image",
+  "test": "IMAGE-C 2.98 MB → 1 MB",
+  "verdict": "PASS",
+  "fixture": "IMAGE-C",
+  "input": 2975516,
+  "target": 1000000,
+  "output": 792315,
+  "achieved": true,
+  "dims": "4000x3000→2244x1683",
+  "format": "jpeg→jpeg",
+  "alpha": "false→false",
+  "psnr": 28.34,
+  "ssim": 0.6478,
+  "details": "JPG · 2244 × 1683px (resized to 56%) · quality 75% · 3.4 s",
+  "headline": "Done — 792 KB",
+  "ms": 3510,
+  "integrity": [
+   {
+    "file": "fs-cimg-IMAGE-C-1000000-IMAGE-C-photo-3mb-compressed.jpg",
+    "bytes": 792315,
+    "ok": true,
+    "kind": "jpeg",
+    "w": 2244,
+    "h": 1683,
+    "alpha": false
+   }
+  ]
+ },
+ {
+  "tool": "Compress Image",
+  "test": "IMAGE-C 2.98 MB → 500 KB",
+  "verdict": "PASS",
+  "fixture": "IMAGE-C",
+  "input": 2975516,
+  "target": 500000,
+  "output": 414757,
+  "achieved": true,
+  "dims": "4000x3000→1586x1190",
+  "format": "jpeg→jpeg",
+  "alpha": "false→false",
+  "psnr": 29.51,
+  "ssim": 0.8075,
+  "details": "JPG · 1586 × 1190px (resized to 40%) · quality 75% · 3.1 s",
+  "headline": "Done — 415 KB",
+  "ms": 3627,
+  "integrity": [
+   {
+    "file": "fs-cimg-IMAGE-C-500000-IMAGE-C-photo-3mb-compressed.jpg",
+    "bytes": 414757,
+    "ok": true,
+    "kind": "jpeg",
+    "w": 1586,
+    "h": 1190,
+    "alpha": false
+   }
+  ]
+ },
+ {
+  "tool": "Compress Image",
+  "test": "IMAGE-C 2.98 MB → 250 KB",
+  "verdict": "PASS",
+  "fixture": "IMAGE-C",
+  "input": 2975516,
+  "target": 250000,
+  "output": 220779,
+  "achieved": true,
+  "dims": "4000x3000→1122x841",
+  "format": "jpeg→jpeg",
+  "alpha": "false→false",
+  "psnr": 29.11,
+  "ssim": 0.8181,
+  "details": "JPG · 1122 × 841px (resized to 28%) · quality 75% · 2.7 s",
+  "headline": "Done — 221 KB",
+  "ms": 3037,
+  "integrity": [
+   {
+    "file": "fs-cimg-IMAGE-C-250000-IMAGE-C-photo-3mb-compressed.jpg",
+    "bytes": 220779,
+    "ok": true,
+    "kind": "jpeg",
+    "w": 1122,
+    "h": 841,
+    "alpha": false
+   }
+  ]
+ },
+ {
+  "tool": "Compress Image",
+  "test": "IMAGE-D 8 MB → 5 MB",
+  "verdict": "PASS",
+  "fixture": "IMAGE-D",
+  "input": 7995077,
+  "target": 5000000,
+  "output": 4763120,
+  "achieved": true,
+  "dims": "6000x4000→5728x3819",
+  "format": "jpeg→jpeg",
+  "alpha": "false→false",
+  "psnr": 30.15,
+  "ssim": 0.8237,
+  "details": "JPG · 5728 × 3819px (resized to 95%) · quality 75% · 6.9 s",
+  "headline": "Done — 4.76 MB",
+  "ms": 7242,
+  "integrity": [
+   {
+    "file": "fs-cimg-IMAGE-D-5000000-IMAGE-D-photo-8mb-compressed.jpg",
+    "bytes": 4763120,
+    "ok": true,
+    "kind": "jpeg",
+    "w": 5728,
+    "h": 3819,
+    "alpha": false
+   }
+  ]
+ },
+ {
+  "tool": "Compress Image",
+  "test": "IMAGE-D 8 MB → 2 MB",
+  "verdict": "PASS",
+  "fixture": "IMAGE-D",
+  "input": 7995077,
+  "target": 2000000,
+  "output": 1485596,
+  "achieved": true,
+  "dims": "6000x4000→3107x2071",
+  "format": "jpeg→jpeg",
+  "alpha": "false→false",
+  "psnr": 26.48,
+  "ssim": 0.58,
+  "details": "JPG · 3107 × 2071px (resized to 52%) · quality 75% · 6.3 s",
+  "headline": "Done — 1.49 MB",
+  "ms": 6655,
+  "integrity": [
+   {
+    "file": "fs-cimg-IMAGE-D-2000000-IMAGE-D-photo-8mb-compressed.jpg",
+    "bytes": 1485596,
+    "ok": true,
+    "kind": "jpeg",
+    "w": 3107,
+    "h": 2071,
+    "alpha": false
+   }
+  ]
+ },
+ {
+  "tool": "Compress Image",
+  "test": "IMAGE-D 8 MB → 1 MB",
+  "verdict": "PASS",
+  "fixture": "IMAGE-D",
+  "input": 7995077,
+  "target": 1000000,
+  "output": 778426,
+  "achieved": true,
+  "dims": "6000x4000→2197x1465",
+  "format": "jpeg→jpeg",
+  "alpha": "false→false",
+  "psnr": 25.3,
+  "ssim": 0.4761,
+  "details": "JPG · 2197 × 1465px (resized to 37%) · quality 75% · 5.9 s",
+  "headline": "Done — 778 KB",
+  "ms": 6068,
+  "integrity": [
+   {
+    "file": "fs-cimg-IMAGE-D-1000000-IMAGE-D-photo-8mb-compressed.jpg",
+    "bytes": 778426,
+    "ok": true,
+    "kind": "jpeg",
+    "w": 2197,
+    "h": 1465,
+    "alpha": false
+   }
+  ]
+ },
+ {
+  "tool": "Compress Image",
+  "test": "IMAGE-D 8 MB → 500 KB",
+  "verdict": "PASS",
+  "fixture": "IMAGE-D",
+  "input": 7995077,
+  "target": 500000,
+  "output": 406560,
+  "achieved": true,
+  "dims": "6000x4000→1554x1036",
+  "format": "jpeg→jpeg",
+  "alpha": "false→false",
+  "psnr": 28.58,
+  "ssim": 0.8337,
+  "details": "JPG · 1554 × 1036px (resized to 26%) · quality 75% · 6.0 s",
+  "headline": "Done — 407 KB",
+  "ms": 6166,
+  "integrity": [
+   {
+    "file": "fs-cimg-IMAGE-D-500000-IMAGE-D-photo-8mb-compressed.jpg",
+    "bytes": 406560,
+    "ok": true,
+    "kind": "jpeg",
+    "w": 1554,
+    "h": 1036,
+    "alpha": false
+   }
+  ]
+ },
+ {
+  "tool": "Compress Image",
+  "test": "IMAGE-E 14.69 MB → 5 MB",
+  "verdict": "PASS",
+  "fixture": "IMAGE-E",
+  "input": 14688976,
+  "target": 5000000,
+  "output": 3824916,
+  "achieved": true,
+  "dims": "8000x6000→4545x3409",
+  "format": "jpeg→jpeg",
+  "alpha": "false→false",
+  "psnr": 22.1,
+  "ssim": 0.4266,
+  "details": "JPG · 4545 × 3409px (resized to 57%) · quality 75% · 11.6 s",
+  "headline": "Done — 3.82 MB",
+  "ms": 11799,
+  "integrity": [
+   {
+    "file": "fs-cimg-IMAGE-E-5000000-IMAGE-E-photo-15mb-compressed.jpg",
+    "bytes": 3824916,
+    "ok": true,
+    "kind": "jpeg",
+    "w": 4545,
+    "h": 3409,
+    "alpha": false
+   }
+  ]
+ },
+ {
+  "tool": "Compress Image",
+  "test": "IMAGE-E 14.69 MB → 2 MB",
+  "verdict": "PASS",
+  "fixture": "IMAGE-E",
+  "input": 14688976,
+  "target": 2000000,
+  "output": 1583971,
+  "achieved": true,
+  "dims": "8000x6000→2874x2156",
+  "format": "jpeg→jpeg",
+  "alpha": "false→false",
+  "psnr": 21.21,
+  "ssim": 0.3033,
+  "details": "JPG · 2874 × 2156px (resized to 36%) · quality 75% · 10.8 s",
+  "headline": "Done — 1.58 MB",
+  "ms": 11098,
+  "integrity": [
+   {
+    "file": "fs-cimg-IMAGE-E-2000000-IMAGE-E-photo-15mb-compressed.jpg",
+    "bytes": 1583971,
+    "ok": true,
+    "kind": "jpeg",
+    "w": 2874,
+    "h": 2156,
+    "alpha": false
+   }
+  ]
+ },
+ {
+  "tool": "Compress Image",
+  "test": "IMAGE-E 14.69 MB → 1 MB",
+  "verdict": "PASS",
+  "fixture": "IMAGE-E",
+  "input": 14688976,
+  "target": 1000000,
+  "output": 813954,
+  "achieved": true,
+  "dims": "8000x6000→2033x1524",
+  "format": "jpeg→jpeg",
+  "alpha": "false→false",
+  "psnr": 22.35,
+  "ssim": 0.3139,
+  "details": "JPG · 2033 × 1524px (resized to 25%) · quality 75% · 10.7 s",
+  "headline": "Done — 814 KB",
+  "ms": 11076,
+  "integrity": [
+   {
+    "file": "fs-cimg-IMAGE-E-1000000-IMAGE-E-photo-15mb-compressed.jpg",
+    "bytes": 813954,
+    "ok": true,
+    "kind": "jpeg",
+    "w": 2033,
+    "h": 1524,
+    "alpha": false
+   }
+  ]
+ },
+ {
+  "tool": "Compress Image",
+  "test": "IMAGE-F 3.28 MB → 1 MB",
+  "verdict": "PASS",
+  "fixture": "IMAGE-F",
+  "input": 3280825,
+  "target": 1000000,
+  "output": 607762,
+  "achieved": true,
+  "dims": "1800x1400→1800x1400",
+  "format": "png→webp",
+  "alpha": "true→true",
+  "psnr": 47.2,
+  "ssim": 0.9966,
+  "details": "WebP · 1800 × 1400px · quality 92% · 0.8 s",
+  "headline": "Done — 608 KB",
+  "ms": 916,
+  "integrity": [
+   {
+    "file": "fs-cimg-IMAGE-F-1000000-IMAGE-F-transparent-compressed.webp",
+    "bytes": 607762,
+    "ok": true,
+    "kind": "webp",
+    "w": 1800,
+    "h": 1400,
+    "alpha": true
+   }
+  ]
+ },
+ {
+  "tool": "Compress Image",
+  "test": "IMAGE-F 3.28 MB → 500 KB",
+  "verdict": "PASS",
+  "fixture": "IMAGE-F",
+  "input": 3280825,
+  "target": 500000,
+  "output": 429154,
+  "achieved": true,
+  "dims": "1800x1400→1800x1400",
+  "format": "png→webp",
+  "alpha": "true→true",
+  "psnr": 45.2,
+  "ssim": 0.9914,
+  "details": "WebP · 1800 × 1400px · quality 85% · 1.8 s",
+  "headline": "Done — 429 KB",
+  "ms": 1930,
+  "integrity": [
+   {
+    "file": "fs-cimg-IMAGE-F-500000-IMAGE-F-transparent-compressed.webp",
+    "bytes": 429154,
+    "ok": true,
+    "kind": "webp",
+    "w": 1800,
+    "h": 1400,
+    "alpha": true
+   }
+  ]
+ },
+ {
+  "tool": "Compress Image",
+  "test": "IMAGE-F 3.28 MB → 250 KB",
+  "verdict": "PASS",
+  "fixture": "IMAGE-F",
+  "input": 3280825,
+  "target": 250000,
+  "output": 178364,
+  "achieved": true,
+  "dims": "1800x1400→1778x1383",
+  "format": "png→webp",
+  "alpha": "true→true",
+  "psnr": 40.33,
+  "ssim": 0.9615,
+  "details": "WebP · 1778 × 1383px (resized to 99%) · quality 75% · 3.4 s",
+  "headline": "Done — 178 KB",
+  "ms": 3477,
+  "integrity": [
+   {
+    "file": "fs-cimg-IMAGE-F-250000-IMAGE-F-transparent-compressed.webp",
+    "bytes": 178364,
+    "ok": true,
+    "kind": "webp",
+    "w": 1778,
+    "h": 1383,
+    "alpha": true
+   }
+  ]
+ },
+ {
+  "tool": "Compress Image",
+  "test": "IMAGE-G 8.31 MB → 2 MB",
+  "verdict": "PASS",
+  "fixture": "IMAGE-G",
+  "input": 8311892,
+  "target": 2000000,
+  "output": 1915738,
+  "achieved": true,
+  "dims": "3000x2000→3000x2000",
+  "format": "png→webp",
+  "alpha": "false→false",
+  "psnr": 39.78,
+  "ssim": 0.9805,
+  "details": "WebP · 3000 × 2000px · quality 85% · 4.8 s",
+  "headline": "Done — 1.92 MB",
+  "ms": 5033,
+  "integrity": [
+   {
+    "file": "fs-cimg-IMAGE-G-2000000-IMAGE-G-large-photo-compressed.webp",
+    "bytes": 1915738,
+    "ok": true,
+    "kind": "webp",
+    "w": 3000,
+    "h": 2000,
+    "alpha": false
+   }
+  ]
+ },
+ {
+  "tool": "Compress Image",
+  "test": "IMAGE-G 8.31 MB → 1 MB",
+  "verdict": "PASS",
+  "fixture": "IMAGE-G",
+  "input": 8311892,
+  "target": 1000000,
+  "output": 775130,
+  "achieved": true,
+  "dims": "3000x2000→2894x1929",
+  "format": "png→webp",
+  "alpha": "false→false",
+  "psnr": 33.36,
+  "ssim": 0.8526,
+  "details": "WebP · 2894 × 1929px (resized to 96%) · quality 75% · 8.7 s",
+  "headline": "Done — 775 KB",
+  "ms": 9106,
+  "integrity": [
+   {
+    "file": "fs-cimg-IMAGE-G-1000000-IMAGE-G-large-photo-compressed.webp",
+    "bytes": 775130,
+    "ok": true,
+    "kind": "webp",
+    "w": 2894,
+    "h": 1929,
+    "alpha": false
+   }
+  ]
+ },
+ {
+  "tool": "Compress Image",
+  "test": "IMAGE-G 8.31 MB → 500 KB",
+  "verdict": "PASS",
+  "fixture": "IMAGE-G",
+  "input": 8311892,
+  "target": 500000,
+  "output": 459430,
+  "achieved": true,
+  "dims": "3000x2000→2115x1410",
+  "format": "png→webp",
+  "alpha": "false→false",
+  "psnr": 31.72,
+  "ssim": 0.7845,
+  "details": "WebP · 2115 × 1410px (resized to 71%) · quality 75% · 7.8 s",
+  "headline": "Done — 459 KB",
+  "ms": 8121,
+  "integrity": [
+   {
+    "file": "fs-cimg-IMAGE-G-500000-IMAGE-G-large-photo-compressed.webp",
+    "bytes": 459430,
+    "ok": true,
+    "kind": "webp",
+    "w": 2115,
+    "h": 1410,
+    "alpha": false
+   }
+  ]
+ },
+ {
+  "tool": "Compress Image",
+  "test": "IMAGE-L 23.4 KB → 50 KB",
+  "verdict": "PASS",
+  "fixture": "IMAGE-L",
+  "input": 23430,
+  "target": 50000,
+  "output": 23430,
+  "achieved": true,
+  "dims": "480x320→480x320",
+  "format": "jpeg→jpeg",
+  "alpha": "false→false",
+  "psnr": 99,
+  "ssim": 1,
+  "details": "",
+  "headline": "Already under your target",
+  "ms": 86,
+  "integrity": [
+   {
+    "file": "fs-cimg-IMAGE-L-50000-IMAGE-L-tiny-optimized.jpg",
+    "bytes": 23430,
+    "ok": true,
+    "kind": "jpeg",
+    "w": 480,
+    "h": 320,
+    "alpha": false
+   }
+  ]
+ },
+ {
+  "tool": "Compress Image",
+  "test": "IMAGE-L 23.4 KB → 20 KB",
+  "verdict": "LIMITED",
+  "fixture": "IMAGE-L",
+  "input": 23430,
+  "target": 20000,
+  "output": 20007,
+  "achieved": false,
+  "dims": "480x320→480x320",
+  "format": "jpeg→jpeg",
+  "alpha": "false→false",
+  "psnr": 29.83,
+  "ssim": 0.9461,
+  "details": "JPG · 480 × 320px · quality 35% · 0.1 s",
+  "headline": "Target not reached",
+  "ms": 292,
+  "integrity": [
+   {
+    "file": "fs-cimg-IMAGE-L-20000-IMAGE-L-tiny-optimized-compressed.jpg",
+    "bytes": 20007,
+    "ok": true,
+    "kind": "jpeg",
+    "w": 480,
+    "h": 320,
+    "alpha": false
+   }
+  ]
+ },
+ {
+  "tool": "Compress Image",
+  "test": "IMAGE-L 23.4 KB → 2 KB",
+  "verdict": "LIMITED",
+  "fixture": "IMAGE-L",
+  "input": 23430,
+  "target": 2000,
+  "output": 20007,
+  "achieved": false,
+  "dims": "480x320→480x320",
+  "format": "jpeg→jpeg",
+  "alpha": "false→false",
+  "psnr": 29.83,
+  "ssim": 0.9461,
+  "details": "JPG · 480 × 320px · quality 35% · 0.1 s",
+  "headline": "Target not reached",
+  "ms": 285,
+  "integrity": [
+   {
+    "file": "fs-cimg-IMAGE-L-2000-IMAGE-L-tiny-optimized-compressed.jpg",
+    "bytes": 20007,
+    "ok": true,
+    "kind": "jpeg",
+    "w": 480,
+    "h": 320,
+    "alpha": false
+   }
+  ]
+ },
+ {
+  "tool": "Compress Image",
+  "test": "IMAGE-H 1.17 MB → 500 KB",
+  "verdict": "PASS",
+  "fixture": "IMAGE-H",
+  "input": 1167856,
+  "target": 500000,
+  "output": 421092,
+  "achieved": true,
+  "dims": "2400x1600→2260x1507",
+  "format": "webp→webp",
+  "alpha": "false→false",
+  "psnr": 33.72,
+  "ssim": 0.8581,
+  "details": "WebP · 2260 × 1507px (resized to 94%) · quality 75% · 5.9 s",
+  "headline": "Done — 421 KB",
+  "ms": 6026,
+  "integrity": [
+   {
+    "file": "fs-cimg-IMAGE-H-500000-IMAGE-H-photo-compressed.webp",
+    "bytes": 421092,
+    "ok": true,
+    "kind": "webp",
+    "w": 2260,
+    "h": 1507,
+    "alpha": false
+   }
+  ]
+ },
+ {
+  "tool": "Compress Image",
+  "test": "IMAGE-K 679.9 KB → 300 KB",
+  "verdict": "PASS",
+  "fixture": "IMAGE-K",
+  "input": 679943,
+  "target": 300000,
+  "output": 295043,
+  "achieved": true,
+  "dims": "1200x1600→1169x1558",
+  "format": "jpeg→jpeg",
+  "alpha": "false→false",
+  "psnr": 33.32,
+  "ssim": 0.8588,
+  "exif": {
+   "gpsStripped": true,
+   "upright": true
+  },
+  "details": "JPG · 1169 × 1558px (resized to 97%) · quality 75% · 0.9 s",
+  "headline": "Done — 295 KB",
+  "ms": 1434,
+  "integrity": [
+   {
+    "file": "fs-cimg-IMAGE-K-300000-IMAGE-K-exif-rich-compressed.jpg",
+    "bytes": 295043,
+    "ok": true,
+    "kind": "jpeg",
+    "w": 1169,
+    "h": 1558,
+    "alpha": false
+   }
+  ]
+ },
+ {
+  "tool": "Compress Image",
+  "test": "console errors during matrix",
+  "verdict": "PASS"
+ }
+]

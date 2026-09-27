@@ -4,32 +4,81 @@
   "test": "mobile: homepage hand-off + custom 700 KB",
   "verdict": "PASS",
   "output": 638222,
-  "pages": 3
+  "pages": 3,
+  "integrity": [
+   {
+    "file": "m-cpdf-FL-PDF-02-scan-4mb-compressed.pdf",
+    "bytes": 638222,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 3
+   }
+  ]
  },
  {
   "tool": "Compress Image",
   "test": "mobile: custom 300 KB",
   "verdict": "PASS",
-  "output": 245259
+  "output": 245259,
+  "integrity": [
+   {
+    "file": "m-cimg-FL-IMG-01-large-compressed.jpg",
+    "bytes": 245259,
+    "ok": true,
+    "kind": "jpeg",
+    "w": 1252,
+    "h": 894,
+    "alpha": false
+   }
+  ]
  },
  {
   "tool": "Image Converter",
   "test": "mobile: WebP → JPG",
   "verdict": "PASS",
-  "output": 1305456
+  "output": 1305456,
+  "integrity": [
+   {
+    "file": "m-conv-FL-IMG-05-photo.jpg",
+    "bytes": 1305456,
+    "ok": true,
+    "kind": "jpeg",
+    "w": 2000,
+    "h": 1500,
+    "alpha": false
+   }
+  ]
  },
  {
   "tool": "Merge PDF",
   "test": "mobile: touch-drag reorder then merge",
   "verdict": "PASS",
-  "firstDocument": "CHARLIE"
+  "firstDocument": "CHARLIE",
+  "integrity": [
+   {
+    "file": "m-merge-merged.pdf",
+    "bytes": 3691,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 9
+   }
+  ]
  },
  {
   "tool": "Organize PDF",
   "test": "mobile: touch-drag, rotate, delete, save",
   "verdict": "PASS",
   "labels": "3,1,2,4,5,6,7,8,9,10,11",
-  "rotations": "0,0,90,0,0,0,0,0,0,0,0"
+  "rotations": "0,0,90,0,0,0,0,0,0,0,0",
+  "integrity": [
+   {
+    "file": "m-organize-FL-PDF-05-multipage-organized.pdf",
+    "bytes": 4379,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 11
+   }
+  ]
  },
  {
   "tool": "PDF Editor",
@@ -38,7 +87,16 @@
   "typed": "Mobile check",
   "drawings": "0→1",
   "crop": "575x689",
-  "text": "12/20/2028  Mobile check"
+  "text": "12/20/2028  Mobile check",
+  "integrity": [
+   {
+    "file": "m-editor-FL-PDF-08-scanned-text-edited.pdf",
+    "bytes": 753708,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 1
+   }
+  ]
  },
  {
   "tool": "Mobile",

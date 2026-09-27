@@ -1,0 +1,444 @@
+[
+ {
+  "tool": "Image Converter",
+  "test": "landscape JPG → PNG",
+  "verdict": "PASS",
+  "fixture": "IMAGE-B-photo-500k.jpg",
+  "input": 498577,
+  "output": 7725439,
+  "format": "png",
+  "dims": "2400x1600→2400x1600",
+  "alpha": "false→false",
+  "corner": null,
+  "exifGone": true,
+  "leakedRequests": [],
+  "psnr": 99,
+  "ssim": 1,
+  "ms": 442,
+  "integrity": [
+   {
+    "file": "fs-conv-IMAGE-B-p-png-IMAGE-B-photo-500k.png",
+    "bytes": 7725439,
+    "ok": true,
+    "kind": "png",
+    "w": 2400,
+    "h": 1600,
+    "alpha": false
+   }
+  ]
+ },
+ {
+  "tool": "Image Converter",
+  "test": "portrait JPG → WebP",
+  "verdict": "PASS",
+  "fixture": "X-portrait-1200x1800.jpg",
+  "input": 705945,
+  "output": 643258,
+  "format": "webp",
+  "dims": "1200x1800→1200x1800",
+  "alpha": "false→false",
+  "corner": null,
+  "exifGone": true,
+  "leakedRequests": [],
+  "psnr": 37.59,
+  "ssim": 0.9681,
+  "ms": 913,
+  "integrity": [
+   {
+    "file": "fs-conv-X-portrai-webp-X-portrait-1200x1800.webp",
+    "bytes": 643258,
+    "ok": true,
+    "kind": "webp",
+    "w": 1200,
+    "h": 1800,
+    "alpha": false
+   }
+  ]
+ },
+ {
+  "tool": "Image Converter",
+  "test": "transparent PNG → JPG (transparency becomes white)",
+  "verdict": "PASS",
+  "fixture": "IMAGE-F-transparent.png",
+  "input": 3280825,
+  "output": 442969,
+  "format": "jpeg",
+  "dims": "1800x1400→1800x1400",
+  "alpha": "true→false",
+  "corner": [
+   255,
+   255,
+   255
+  ],
+  "exifGone": true,
+  "leakedRequests": [],
+  "psnr": 43.17,
+  "ssim": 0.9838,
+  "ms": 427,
+  "integrity": [
+   {
+    "file": "fs-conv-IMAGE-F-t-jpeg-IMAGE-F-transparent.jpg",
+    "bytes": 442969,
+    "ok": true,
+    "kind": "jpeg",
+    "w": 1800,
+    "h": 1400,
+    "alpha": false
+   }
+  ]
+ },
+ {
+  "tool": "Image Converter",
+  "test": "transparent PNG → WebP (alpha kept)",
+  "verdict": "PASS",
+  "fixture": "IMAGE-F-transparent.png",
+  "input": 3280825,
+  "output": 429154,
+  "format": "webp",
+  "dims": "1800x1400→1800x1400",
+  "alpha": "true→true",
+  "corner": null,
+  "exifGone": true,
+  "leakedRequests": [],
+  "psnr": 45.2,
+  "ssim": 0.9914,
+  "ms": 906,
+  "integrity": [
+   {
+    "file": "fs-conv-IMAGE-F-t-webp-IMAGE-F-transparent.webp",
+    "bytes": 429154,
+    "ok": true,
+    "kind": "webp",
+    "w": 1800,
+    "h": 1400,
+    "alpha": true
+   }
+  ]
+ },
+ {
+  "tool": "Image Converter",
+  "test": "odd-size PNG 1001x777 → JPG",
+  "verdict": "PASS",
+  "fixture": "X-odd-1001x777.png",
+  "input": 1170612,
+  "output": 297255,
+  "format": "jpeg",
+  "dims": "1001x777→1001x777",
+  "alpha": "false→false",
+  "corner": null,
+  "exifGone": true,
+  "leakedRequests": [],
+  "psnr": 34.9,
+  "ssim": 0.9457,
+  "ms": 284,
+  "integrity": [
+   {
+    "file": "fs-conv-X-odd-100-jpeg-X-odd-1001x777.jpg",
+    "bytes": 297255,
+    "ok": true,
+    "kind": "jpeg",
+    "w": 1001,
+    "h": 777,
+    "alpha": false
+   }
+  ]
+ },
+ {
+  "tool": "Image Converter",
+  "test": "tiny 64x48 transparent PNG → WebP",
+  "verdict": "PASS",
+  "fixture": "X-tiny-64x48.png",
+  "input": 6518,
+  "output": 2492,
+  "format": "webp",
+  "dims": "64x48→64x48",
+  "alpha": "true→true",
+  "corner": null,
+  "exifGone": true,
+  "leakedRequests": [],
+  "psnr": 35.35,
+  "ssim": 0.9981,
+  "ms": 112,
+  "integrity": [
+   {
+    "file": "fs-conv-X-tiny-64-webp-X-tiny-64x48.webp",
+    "bytes": 2492,
+    "ok": true,
+    "kind": "webp",
+    "w": 64,
+    "h": 48,
+    "alpha": true
+   }
+  ]
+ },
+ {
+  "tool": "Image Converter",
+  "test": "WebP → JPG",
+  "verdict": "PASS",
+  "fixture": "IMAGE-H-photo.webp",
+  "input": 1167856,
+  "output": 1603537,
+  "format": "jpeg",
+  "dims": "2400x1600→2400x1600",
+  "alpha": "false→false",
+  "corner": null,
+  "exifGone": true,
+  "leakedRequests": [],
+  "psnr": 41.43,
+  "ssim": 0.9834,
+  "ms": 1120,
+  "integrity": [
+   {
+    "file": "fs-conv-IMAGE-H-p-jpeg-IMAGE-H-photo.jpg",
+    "bytes": 1603537,
+    "ok": true,
+    "kind": "jpeg",
+    "w": 2400,
+    "h": 1600,
+    "alpha": false
+   }
+  ]
+ },
+ {
+  "tool": "Image Converter",
+  "test": "transparent WebP → PNG (alpha kept)",
+  "verdict": "PASS",
+  "fixture": "X-transparent.webp",
+  "input": 136976,
+  "output": 906494,
+  "format": "png",
+  "dims": "900x700→900x700",
+  "alpha": "true→true",
+  "corner": null,
+  "exifGone": true,
+  "leakedRequests": [],
+  "psnr": 99,
+  "ssim": 1,
+  "ms": 295,
+  "integrity": [
+   {
+    "file": "fs-conv-X-transpa-png-X-transparent.png",
+    "bytes": 906494,
+    "ok": true,
+    "kind": "png",
+    "w": 900,
+    "h": 700,
+    "alpha": true
+   }
+  ]
+ },
+ {
+  "tool": "Image Converter",
+  "test": "SVG → PNG",
+  "verdict": "PASS",
+  "fixture": "IMAGE-I-vector.svg",
+  "input": 372,
+  "output": 34648,
+  "format": "png",
+  "dims": "svg→1024x640",
+  "alpha": "false→false",
+  "corner": null,
+  "exifGone": true,
+  "leakedRequests": [],
+  "ms": 120,
+  "integrity": [
+   {
+    "file": "fs-conv-IMAGE-I-v-png-IMAGE-I-vector.png",
+    "bytes": 34648,
+    "ok": true,
+    "kind": "png",
+    "w": 1024,
+    "h": 640,
+    "alpha": false
+   }
+  ]
+ },
+ {
+  "tool": "Image Converter",
+  "test": "SVG → JPG",
+  "verdict": "PASS",
+  "fixture": "IMAGE-I-vector.svg",
+  "input": 372,
+  "output": 22253,
+  "format": "jpeg",
+  "dims": "svg→1024x640",
+  "alpha": "false→false",
+  "corner": null,
+  "exifGone": true,
+  "leakedRequests": [],
+  "ms": 171,
+  "integrity": [
+   {
+    "file": "fs-conv-IMAGE-I-v-jpeg-IMAGE-I-vector.jpg",
+    "bytes": 22253,
+    "ok": true,
+    "kind": "jpeg",
+    "w": 1024,
+    "h": 640,
+    "alpha": false
+   }
+  ]
+ },
+ {
+  "tool": "Image Converter",
+  "test": "unsafe SVG (script, onload, external refs) → PNG",
+  "verdict": "PASS",
+  "fixture": "IMAGE-J-unsafe.svg",
+  "input": 633,
+  "output": 32334,
+  "format": "png",
+  "dims": "svg→1024x683",
+  "alpha": "false→false",
+  "corner": null,
+  "exifGone": true,
+  "leakedRequests": [],
+  "ms": 137,
+  "integrity": [
+   {
+    "file": "fs-conv-IMAGE-J-u-png-IMAGE-J-unsafe.png",
+    "bytes": 32334,
+    "ok": true,
+    "kind": "png",
+    "w": 1024,
+    "h": 683,
+    "alpha": false
+   }
+  ]
+ },
+ {
+  "tool": "Image Converter",
+  "test": "EXIF Orientation 6 JPG → PNG (upright, metadata dropped)",
+  "verdict": "PASS",
+  "fixture": "IMAGE-K-exif-rich.jpg",
+  "input": 679943,
+  "output": 4364762,
+  "format": "png",
+  "dims": "1200x1600→1200x1600",
+  "alpha": "false→false",
+  "corner": null,
+  "exifGone": true,
+  "leakedRequests": [],
+  "psnr": 99,
+  "ssim": 1,
+  "ms": 475,
+  "integrity": [
+   {
+    "file": "fs-conv-IMAGE-K-e-png-IMAGE-K-exif-rich.png",
+    "bytes": 4364762,
+    "ok": true,
+    "kind": "png",
+    "w": 1200,
+    "h": 1600,
+    "alpha": false
+   }
+  ]
+ },
+ {
+  "tool": "Image Converter",
+  "test": "15 MB 48 MP JPG → WebP",
+  "verdict": "PASS",
+  "fixture": "IMAGE-E-photo-15mb.jpg",
+  "input": 14688976,
+  "output": 19616272,
+  "format": "webp",
+  "dims": "8000x6000→8000x6000",
+  "alpha": "false→false",
+  "corner": null,
+  "exifGone": true,
+  "leakedRequests": [],
+  "psnr": 38.09,
+  "ssim": 0.9911,
+  "ms": 31368,
+  "integrity": [
+   {
+    "file": "fs-conv-IMAGE-E-p-webp-IMAGE-E-photo-15mb.webp",
+    "bytes": 19616272,
+    "ok": true,
+    "kind": "webp",
+    "w": 8000,
+    "h": 6000,
+    "alpha": false
+   }
+  ]
+ },
+ {
+  "tool": "Image Converter",
+  "test": "8 MB photographic PNG → JPG",
+  "verdict": "PASS",
+  "fixture": "IMAGE-G-large-photo.png",
+  "input": 8311892,
+  "output": 2579433,
+  "format": "jpeg",
+  "dims": "3000x2000→3000x2000",
+  "alpha": "false→false",
+  "corner": null,
+  "exifGone": true,
+  "leakedRequests": [],
+  "psnr": 40.3,
+  "ssim": 0.9839,
+  "ms": 880,
+  "integrity": [
+   {
+    "file": "fs-conv-IMAGE-G-l-jpeg-IMAGE-G-large-photo.jpg",
+    "bytes": 2579433,
+    "ok": true,
+    "kind": "jpeg",
+    "w": 3000,
+    "h": 2000,
+    "alpha": false
+   }
+  ]
+ },
+ {
+  "tool": "Image Converter",
+  "test": "JPEG mislabelled .png → WebP",
+  "verdict": "PASS",
+  "fixture": "X-jpeg-named.png",
+  "input": 23430,
+  "output": 32274,
+  "format": "webp",
+  "dims": "480x320→480x320",
+  "alpha": "false→false",
+  "corner": null,
+  "exifGone": true,
+  "leakedRequests": [],
+  "psnr": 38.21,
+  "ssim": 0.9789,
+  "ms": 166,
+  "integrity": [
+   {
+    "file": "fs-conv-X-jpeg-na-webp-X-jpeg-named.webp",
+    "bytes": 32274,
+    "ok": true,
+    "kind": "webp",
+    "w": 480,
+    "h": 320,
+    "alpha": false
+   }
+  ]
+ },
+ {
+  "tool": "Image Converter",
+  "test": "batch of 4 → PNG ZIP",
+  "verdict": "PASS",
+  "entries": [
+   "IMAGE-B-photo-500k.png",
+   "IMAGE-H-photo.png"
+  ],
+  "skipped": 2,
+  "integrity": [
+   {
+    "file": "fs-conv-batch-converted-images.zip",
+    "bytes": 16570587,
+    "ok": true,
+    "kind": "zip",
+    "entries": 2
+   }
+  ]
+ },
+ {
+  "tool": "All tools",
+  "test": "console errors / unexpected dialogs",
+  "verdict": "PASS"
+ }
+]

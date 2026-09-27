@@ -2,6 +2,7 @@ import { PDFDocument, PDFTextField, PDFCheckBox, PDFRadioGroup, PDFDropdown } fr
 import { generateUuidV4 } from "@/lib/id";
 import type { EditorDocument, EditorPage, FormFieldValue } from "./types";
 import type { Rotation } from "./coordinates";
+import { EncryptedPdfError, loadPdfForEditing } from "@/lib/pdf/load";
 
 export class EditorDocumentError extends Error {}
 
@@ -13,8 +14,9 @@ function normalizeRotation(angle: number): Rotation {
 async function parsePdf(file: File): Promise<PDFDocument> {
   const bytes = await file.arrayBuffer();
   try {
-    return await PDFDocument.load(bytes, { ignoreEncryption: true });
-  } catch {
+    return await loadPdfForEditing(bytes);
+  } catch (e) {
+    if (e instanceof EncryptedPdfError) throw new EditorDocumentError(e.message);
     throw new EditorDocumentError("We couldn't read this PDF. It may be damaged, encrypted, or incomplete.");
   }
 }
