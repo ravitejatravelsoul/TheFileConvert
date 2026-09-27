@@ -67,10 +67,7 @@ export default function Home() {
               <span className="muted-display">Files in.</span>
               <br />
               Done in{" "}
-              <span className="relative whitespace-nowrap">
-                <span className="absolute inset-x-[-0.06em] bottom-[0.06em] top-[0.52em] -z-10 rounded-[0.12em] bg-[var(--accent)]" aria-hidden="true" />
-                seconds.
-              </span>
+              <span className="whitespace-nowrap">seconds.</span>
             </h1>
             <p className="lead mt-6 max-w-md">Compress, convert and edit your files directly in your browser. No account, no clutter.</p>
             <ul className="mt-8 hidden flex-wrap gap-x-6 gap-y-2 text-sm text-[var(--ink-2)] sm:flex">
