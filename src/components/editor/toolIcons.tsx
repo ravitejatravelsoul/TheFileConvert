@@ -131,14 +131,6 @@ export function IconSignature(props: IconProps) {
   );
 }
 
-export function IconRecognizeText(props: IconProps) {
-  return (
-    <svg viewBox="0 0 24 24" {...base} {...props}>
-      <path d="M4 8V5a1 1 0 0 1 1-1h3M20 8V5a1 1 0 0 0-1-1h-3M4 16v3a1 1 0 0 0 1 1h3M20 16v3a1 1 0 0 1-1 1h-3" />
-      <path d="M8 10h8M8 14h5" />
-    </svg>
-  );
-}
 
 export function IconPages(props: IconProps) {
   return (
@@ -149,31 +141,8 @@ export function IconPages(props: IconProps) {
   );
 }
 
-export function IconWatermark(props: IconProps) {
-  return (
-    <svg viewBox="0 0 24 24" {...base} {...props}>
-      <path d="M12 3c3 4 6 7.5 6 11a6 6 0 0 1-12 0c0-3.5 3-7 6-11Z" />
-    </svg>
-  );
-}
 
-export function IconPageNumbers(props: IconProps) {
-  return (
-    <svg viewBox="0 0 24 24" {...base} {...props}>
-      <rect x="5" y="3" width="14" height="18" rx="1.5" />
-      <path d="M9.5 14.5h1.2v3.5H9.5m3.3-3.5h1.6a1 1 0 0 1 0 2h-1.6v1.5h1.6" />
-    </svg>
-  );
-}
 
-export function IconHeaderFooter(props: IconProps) {
-  return (
-    <svg viewBox="0 0 24 24" {...base} {...props}>
-      <rect x="4" y="4" width="16" height="16" rx="1.5" />
-      <path d="M4 8h16M4 16h16" />
-    </svg>
-  );
-}
 
 export function IconUndo(props: IconProps) {
   return (
@@ -229,10 +198,3 @@ export function IconFitPage(props: IconProps) {
   );
 }
 
-export function IconFullscreen(props: IconProps) {
-  return (
-    <svg viewBox="0 0 24 24" {...base} {...props}>
-      <path d="M9 4H5a1 1 0 0 0-1 1v4M15 4h4a1 1 0 0 1 1 1v4M9 20H5a1 1 0 0 1-1-1v-4M15 20h4a1 1 0 0 0 1-1v-4" />
-    </svg>
-  );
-}

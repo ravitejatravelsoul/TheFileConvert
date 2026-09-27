@@ -4,6 +4,7 @@ import { test, expect, type Page } from "@playwright/test";
 import { PDFDocument } from "pdf-lib";
 import { renderPdfPage, isBlank } from "./helpers/pdf-render";
 import { EDITOR_BASE_SCALE } from "../src/lib/editor/types";
+import { pickTool } from "./helpers/editor";
 
 const OCR_FIXTURES = path.join(__dirname, "fixtures", "ocr");
 const FIXTURES = path.join(__dirname, "fixtures");
@@ -18,8 +19,8 @@ const RENDER_SCALE = 2;
 const PIXEL_SCALE = RENDER_SCALE / EDITOR_BASE_SCALE;
 
 async function openFile(page: Page, filePath: string) {
-  await page.goto("/pdf/editor");
-  await page.locator('input[type="file"]').setInputFiles(filePath);
+  await page.goto("/pdf-editor");
+  await page.getByTestId("file-input").first().setInputFiles(filePath);
   await expect(page.locator('[data-testid="page-surface"]').first()).toBeVisible({ timeout: 15_000 });
   await page.getByRole("button", { name: "Actual size (100%)" }).click(); // these tests assume 100% (a phone opens fit to width)
 }
@@ -64,7 +65,7 @@ test.describe("PDF Editor: signature", () => {
   test("draws a signature, places and resizes it, and it renders at the intended location after export", async ({ page }) => {
     await openFile(page, path.join(OCR_FIXTURES, "native-text.pdf"));
 
-    await page.getByRole("button", { name: "Sign", exact: true }).click();
+    await pickTool(page, "Sign");
     const dialog = page.getByRole("dialog", { name: "Add signature" });
     await expect(dialog).toBeVisible();
 
@@ -188,7 +189,7 @@ test.describe("PDF Editor: image placement", () => {
 // ==================================================================================
 
 async function dragAnnotationRect(page: Page, tool: "Highlight" | "Underline" | "Strike") {
-  await page.getByRole("button", { name: tool, exact: true }).click();
+  await pickTool(page, tool);
   const surface = page.locator('[data-testid="page-surface"]').first();
   await surface.scrollIntoViewIfNeeded();
   const box = await surface.boundingBox();
@@ -208,7 +209,10 @@ test.describe("PDF Editor: annotations", () => {
   test("highlight fills the selected region with a translucent color", async ({ page, isMobile }) => {
     await openFile(page, path.join(OCR_FIXTURES, "native-text.pdf"));
     // Pick a bright, unmistakable color before drawing.
-    await openPropertiesPanel(page, isMobile);
+    // The colours shown are the active tool's, so arm Highlight first.
+    await pickTool(page, "Highlight");
+    // Open the panel without Escape (which would disarm Highlight and hide its colours).
+    if (isMobile) await page.getByRole("button", { name: "Properties", exact: true }).click();
     await page.getByRole("button", { name: "Yellow", exact: true }).click();
     await page.keyboard.press("Escape"); // close the mobile drawer so the page surface is reachable
     const rect = await dragAnnotationRect(page, "Highlight");
@@ -293,7 +297,7 @@ test.describe("PDF Editor: crop", () => {
   test("applies a crop box to the current page and it's reflected in the exported PDF's page box", async ({ page, isMobile }) => {
     await openFile(page, path.join(FIXTURES, "multi-page.pdf")); // 5 pages, 400x500pt each
 
-    await page.getByRole("button", { name: "Crop", exact: true }).click();
+    await pickTool(page, "Crop");
     const surface = page.locator('[data-testid="page-surface"]').first();
     await surface.scrollIntoViewIfNeeded();
     const box = await surface.boundingBox();

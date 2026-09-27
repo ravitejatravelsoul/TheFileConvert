@@ -60,7 +60,7 @@ describe("validateFileForTool", () => {
   it("lists every accepted image format once", async () => {
     const tool = TOOLS.find((t) => t.id === "compress-image")!;
     const result = await validateFileForTool(new File([new Uint8Array([1])], "x.gif", { type: "image/gif" }), tool);
-    expect(result.error).toMatch(/JPG, PNG or WEBP files/);
+    expect(result.error).toMatch(/JPG, PNG or WebP files/);
   });
 });
 

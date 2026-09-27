@@ -134,7 +134,7 @@ export function PdfToImageTool() {
 
   return (
     <div className="space-y-6">
-      <SelectedFile file={file} meta={count ? `${count} ${count === 1 ? "page" : "pages"}` : undefined} onChange={reset} />
+      <SelectedFile rules={tool} file={file} meta={count ? `${count} ${count === 1 ? "page" : "pages"}` : undefined} onChange={reset} />
       {(openError || phase === "error") && <Alert tone="danger">{openError ?? "Some pages couldn't be rendered. The PDF may be damaged."}</Alert>}
       {count !== null && (
         <>

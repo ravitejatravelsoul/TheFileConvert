@@ -31,7 +31,8 @@ export async function validateFileForTool(file: File, tool: ToolInputRules): Pro
 }
 
 function describeAccepted(tool: ToolInputRules): string {
-  const exts = [...new Set(tool.acceptedExtensions.map((e) => (e === "jpeg" ? "jpg" : e)))].map((e) => e.toUpperCase());
+  const label: Record<string, string> = { jpg: "JPG", jpeg: "JPG", png: "PNG", webp: "WebP", svg: "SVG", pdf: "PDF" };
+  const exts = [...new Set(tool.acceptedExtensions.map((e) => label[e] ?? e.toUpperCase()))];
   if (exts.length === 1) return `${exts[0]} files`;
   return `${exts.slice(0, -1).join(", ")} or ${exts[exts.length - 1]} files`;
 }

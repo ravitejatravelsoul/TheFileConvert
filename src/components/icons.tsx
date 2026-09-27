@@ -71,11 +71,6 @@ export const IconPlus = (p: IconProps) => (
     <path d="M12 5v14M5 12h14" />
   </Base>
 );
-export const IconMinus = (p: IconProps) => (
-  <Base {...p}>
-    <path d="M5 12h14" />
-  </Base>
-);
 export const IconUpload = (p: IconProps) => (
   <Base {...p}>
     <path d="M12 15V4M7 9l5-5 5 5M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3" />
@@ -108,11 +103,6 @@ export const IconDevice = (p: IconProps) => (
   <Base {...p}>
     <rect x="3" y="4.5" width="18" height="12" rx="2" />
     <path d="M8.5 20h7M12 16.5V20" />
-  </Base>
-);
-export const IconWifiOff = (p: IconProps) => (
-  <Base {...p}>
-    <path d="M3 3l18 18M8.5 16.4a5 5 0 0 1 7 0M5 12.9a10 10 0 0 1 5-2.6M19 12.9a10 10 0 0 0-2.3-1.6M2 9.3a15 15 0 0 1 4.4-2.7M22 9.3A15 15 0 0 0 11 5.1M12 20h.01" />
   </Base>
 );
 export const IconTrash = (p: IconProps) => (
@@ -165,11 +155,6 @@ export const IconArchive = (p: IconProps) => (
     <path d="M5 8.5V18a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8.5M10 12.5h4" />
   </Base>
 );
-export const IconSparkle = (p: IconProps) => (
-  <Base {...p}>
-    <path d="M12 3.5c.6 4.2 2.3 5.9 6.5 6.5-4.2.6-5.9 2.3-6.5 6.5-.6-4.2-2.3-5.9-6.5-6.5 4.2-.6 5.9-2.3 6.5-6.5Z" />
-  </Base>
-);
 export const IconTarget = (p: IconProps) => (
   <Base {...p}>
     <circle cx="12" cy="12" r="8.5" />
@@ -177,18 +162,8 @@ export const IconTarget = (p: IconProps) => (
     <circle cx="12" cy="12" r="0.8" fill="currentColor" />
   </Base>
 );
-export const IconBolt = (p: IconProps) => (
-  <Base {...p}>
-    <path d="M13 3 5 13.5h6L10.5 21 19 10h-6.2Z" />
-  </Base>
-);
 export const IconScan = (p: IconProps) => (
   <Base {...p}>
     <path d="M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2M7 12h10" />
-  </Base>
-);
-export const IconGithub = (p: IconProps) => (
-  <Base {...p}>
-    <path d="M9 19c-4.3 1.4-4.3-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6 0 0 0-1.3-3.2 4.2 4.2 0 0 0-.1-3.2s-1.1-.3-3.5 1.3a12.3 12.3 0 0 0-6.2 0C6.5 2.8 5.4 3.1 5.4 3.1a4.2 4.2 0 0 0-.1 3.2A4.6 4.6 0 0 0 4 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21" />
   </Base>
 );

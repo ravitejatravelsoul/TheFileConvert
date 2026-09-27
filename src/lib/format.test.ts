@@ -1,43 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatBytes, percentSmaller, getExtension, stripExtension, withExtension, safeOutputName } from "./format";
-
-describe("formatBytes", () => {
-  it("formats zero", () => {
-    expect(formatBytes(0)).toBe("0 B");
-  });
-
-  it("formats bytes without decimals", () => {
-    expect(formatBytes(512)).toBe("512 B");
-  });
-
-  it("formats kilobytes", () => {
-    expect(formatBytes(2048)).toBe("2.0 KB");
-  });
-
-  it("formats megabytes", () => {
-    expect(formatBytes(5 * 1024 * 1024)).toBe("5.0 MB");
-  });
-
-  it("handles negative or invalid input safely", () => {
-    expect(formatBytes(-5)).toBe("0 B");
-    expect(formatBytes(NaN)).toBe("0 B");
-  });
-});
-
-describe("percentSmaller", () => {
-  it("computes percentage reduction", () => {
-    expect(percentSmaller(100, 50)).toBe(50);
-    expect(percentSmaller(100, 25)).toBe(75);
-  });
-
-  it("returns 0 when new size is not smaller", () => {
-    expect(percentSmaller(100, 120)).toBe(0);
-  });
-
-  it("returns 0 for zero-size original to avoid dividing by zero", () => {
-    expect(percentSmaller(0, 0)).toBe(0);
-  });
-});
+import { getExtension, stripExtension, withExtension, safeOutputName } from "./format";
 
 describe("getExtension", () => {
   it("extracts a lowercase extension", () => {

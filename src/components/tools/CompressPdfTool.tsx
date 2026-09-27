@@ -130,7 +130,7 @@ export function CompressPdfTool() {
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
-      <SelectedFile file={file} onChange={reset} />
+      <SelectedFile rules={tool} file={file} onChange={reset} />
       {outlook?.file === file && <p className="text-[0.9375rem] leading-relaxed text-[var(--ink-2)]" aria-live="polite">{outlook.text}</p>}
       {phase.name === "error" && <Alert tone="danger">{phase.message}</Alert>}
       <div className="card p-5 sm:p-7">

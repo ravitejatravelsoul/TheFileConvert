@@ -191,6 +191,3 @@ export interface EditorDocument {
   formFields: FormFieldValue[];
 }
 
-export function createEmptyDocument(): EditorDocument {
-  return { sourceFiles: {}, pages: [], objects: [], formFields: [] };
-}

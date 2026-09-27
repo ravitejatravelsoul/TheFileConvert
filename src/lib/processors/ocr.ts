@@ -348,10 +348,3 @@ export async function buildSearchablePdf(file: File, results: OcrPageResult[]): 
 // Plain-text extraction
 // ---------------------------------------------------------------------------
 
-export function formatExtractedText(results: OcrPageResult[]): string {
-  return results
-    .slice()
-    .sort((a, b) => a.pageIndex - b.pageIndex)
-    .map((r) => `Page ${r.pageIndex + 1}\n${r.text}`)
-    .join("\n\n");
-}

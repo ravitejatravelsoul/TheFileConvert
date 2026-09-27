@@ -18,8 +18,8 @@ const PIXEL_SCALE = RENDER_SCALE / EDITOR_BASE_SCALE;
 // enough that even unrelated, non-OCR assertions elsewhere can miss their timeout.
 
 async function openFile(page: Page, filePath: string) {
-  await page.goto("/pdf/editor");
-  await page.locator('input[type="file"]').setInputFiles(filePath);
+  await page.goto("/pdf-editor");
+  await page.getByTestId("file-input").first().setInputFiles(filePath);
   await expect(page.locator('[data-testid="page-surface"]').first()).toBeVisible({ timeout: 15_000 });
   await page.getByRole("button", { name: "Actual size (100%)" }).click(); // these tests assume 100% (a phone opens fit to width)
 }
@@ -27,7 +27,7 @@ async function openFile(page: Page, filePath: string) {
 async function openMobilePanel(page: Page, isMobile: boolean, panel: "Pages" | "Properties") {
   if (!isMobile) return;
   await page.keyboard.press("Escape");
-  const label = panel === "Pages" ? /Pages \(/ : "Properties";
+  const label = panel;
   await page.getByRole("button", { name: label }).click();
 }
 
@@ -140,7 +140,7 @@ test.describe("PDF Editor: OCR integration", () => {
   test("recognizes a scanned page inside a mixed document and lets you correct the text", async ({ page, isMobile }) => {
     await openFile(page, path.join(OCR_FIXTURES, "mixed-native-scanned.pdf"));
     await openMobilePanel(page, isMobile, "Pages");
-    await expect(page.getByText("3 pages")).toBeVisible();
+    await expect(page.getByText("3 pages").first()).toBeVisible();
 
     // Page 2 is the scanned one — navigate to it via the thumbnail rail.
     await page.getByRole("button", { name: "Go to page 2" }).click();

@@ -1,0 +1,54 @@
+[
+ {
+  "tool": "Compress PDF",
+  "test": "mobile: homepage hand-off + custom 700 KB",
+  "verdict": "PASS",
+  "output": 638222,
+  "pages": 3
+ },
+ {
+  "tool": "Compress Image",
+  "test": "mobile: custom 300 KB",
+  "verdict": "PASS",
+  "output": 245259
+ },
+ {
+  "tool": "Image Converter",
+  "test": "mobile: WebP → JPG",
+  "verdict": "PASS",
+  "output": 1305456
+ },
+ {
+  "tool": "Merge PDF",
+  "test": "mobile: touch-drag reorder then merge",
+  "verdict": "PASS",
+  "firstDocument": "CHARLIE"
+ },
+ {
+  "tool": "Organize PDF",
+  "test": "mobile: touch-drag, rotate, delete, save",
+  "verdict": "PASS",
+  "labels": "3,1,2,4,5,6,7,8,9,10,11",
+  "rotations": "0,0,90,0,0,0,0,0,0,0,0"
+ },
+ {
+  "tool": "PDF Editor",
+  "test": "mobile: OCR, edit word, add text, draw (touch), crop (touch), export",
+  "verdict": "PASS",
+  "typed": "Mobile check",
+  "drawings": "0→1",
+  "crop": "575x689",
+  "text": "12/20/2028  Mobile check"
+ },
+ {
+  "tool": "Mobile",
+  "test": "tap targets ≥ 44px on the editor dock and top bar",
+  "verdict": "PASS",
+  "small": []
+ },
+ {
+  "tool": "Mobile",
+  "test": "console errors",
+  "verdict": "PASS"
+ }
+]

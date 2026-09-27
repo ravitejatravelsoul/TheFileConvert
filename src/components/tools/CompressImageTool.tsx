@@ -101,7 +101,7 @@ export function CompressImageTool() {
   const currentDims = dims?.file === file ? dims : null;
   return (
     <div className="mx-auto max-w-3xl space-y-6">
-      <SelectedFile file={file} meta={currentDims ? `${currentDims.w} × ${currentDims.h}px` : undefined} onChange={reset} />
+      <SelectedFile rules={tool} file={file} meta={currentDims ? `${currentDims.w} × ${currentDims.h}px` : undefined} onChange={reset} />
       {phase.name === "error" && <Alert tone="danger">{phase.message}</Alert>}
       <div className="card p-5 sm:p-7">
         <TargetPicker presets={PRESETS} value={choice} onChange={setChoice} originalBytes={file.size} />

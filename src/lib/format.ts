@@ -1,21 +1,4 @@
-export function formatBytes(bytes: number, decimals = 1): string {
-  if (!Number.isFinite(bytes) || bytes < 0) return "0 B";
-  if (bytes === 0) return "0 B";
-  const units = ["B", "KB", "MB", "GB", "TB"];
-  const exponent = Math.min(
-    Math.floor(Math.log(bytes) / Math.log(1024)),
-    units.length - 1
-  );
-  const value = bytes / Math.pow(1024, exponent);
-  const rounded = exponent === 0 ? value.toFixed(0) : value.toFixed(decimals);
-  return `${rounded} ${units[exponent]}`;
-}
 
-export function percentSmaller(originalBytes: number, newBytes: number): number {
-  if (originalBytes <= 0) return 0;
-  const diff = originalBytes - newBytes;
-  return Math.max(0, Math.round((diff / originalBytes) * 100));
-}
 
 export function getExtension(filename: string): string {
   const idx = filename.lastIndexOf(".");

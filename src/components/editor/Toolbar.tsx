@@ -125,7 +125,7 @@ export function ToolDock({ api, onRequestImage, onRequestSign, pagesOpen, onTogg
       <Divider />
       <DockButton label="Pages" icon={IconPages} pressed={pagesOpen} onClick={onTogglePages} />
       <DockMenu label="More" icon={more?.icon ?? IconCrop} pressed={Boolean(more)} items={MORE} active={active} onPick={pick} />
-      {onOpenProperties && <DockButton label="Properties" icon={IconSliders} onClick={onOpenProperties} className="lg:hidden" />}
+      {onOpenProperties && <DockButton label="Properties" icon={IconSliders} onClick={onOpenProperties} />}
     </div>
   );
 }

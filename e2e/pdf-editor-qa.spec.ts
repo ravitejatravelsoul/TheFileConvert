@@ -1,13 +1,14 @@
 import path from "node:path";
 import { test, expect, type Page } from "@playwright/test";
 import { withOcrLock } from "./helpers/ocr-lock";
+import { pickTool } from "./helpers/editor";
 
 const OCR_FIXTURES = path.join(__dirname, "fixtures", "ocr");
 const FIXTURES = path.join(__dirname, "fixtures");
 
 async function openFile(page: Page, filePath: string) {
-  await page.goto("/pdf/editor");
-  await page.locator('input[type="file"]').setInputFiles(filePath);
+  await page.goto("/pdf-editor");
+  await page.getByTestId("file-input").first().setInputFiles(filePath);
   await expect(page.locator('[data-testid="page-surface"]').first()).toBeVisible({ timeout: 15_000 });
   await page.getByRole("button", { name: "Actual size (100%)" }).click(); // these tests assume 100% (a phone opens fit to width)
 }
@@ -15,7 +16,7 @@ async function openFile(page: Page, filePath: string) {
 async function openMobilePanel(page: Page, isMobile: boolean, panel: "Pages" | "Properties") {
   if (!isMobile) return;
   await page.keyboard.press("Escape");
-  const label = panel === "Pages" ? /Pages \(/ : "Properties";
+  const label = panel;
   await page.getByRole("button", { name: label }).click();
 }
 
@@ -27,7 +28,7 @@ test.describe("PDF Editor: large document smoke test", () => {
   test("handles a 25-page document: thumbnails, navigation, zoom, an annotation, and export", async ({ page, isMobile }) => {
     await openFile(page, path.join(FIXTURES, "large-document.pdf"));
     await openMobilePanel(page, isMobile, "Pages");
-    await expect(page.getByText("25 pages")).toBeVisible();
+    await expect(page.getByText("25 pages").first()).toBeVisible();
 
     // Thumbnail rail renders and lets us navigate without crashing/hanging.
     await page.getByRole("button", { name: "Go to page 1", exact: true }).hover();
@@ -42,7 +43,7 @@ test.describe("PDF Editor: large document smoke test", () => {
     await page.getByRole("button", { name: "Fit width" }).click();
 
     // A basic annotation still works this deep into the document.
-    await page.getByRole("button", { name: "Rectangle", exact: true }).click();
+    await pickTool(page, "Rectangle");
     const surface = page.locator('[data-testid="page-surface"]').first();
     await surface.scrollIntoViewIfNeeded();
     const box = await surface.boundingBox();
@@ -106,7 +107,7 @@ test.describe("PDF Editor: mobile editing checklist", () => {
     await expect(dialog).not.toBeVisible();
 
     // 4. Signature.
-    await page.getByRole("button", { name: "Sign", exact: true }).click();
+    await pickTool(page, "Sign");
     const sigDialog = page.getByRole("dialog", { name: "Add signature" });
     const sigCanvas = sigDialog.getByRole("img", { name: "Signature drawing area" });
     const sigBox = await sigCanvas.boundingBox();
@@ -188,14 +189,14 @@ test.describe("PDF Editor: privacy regression (signature / image / form / crop /
     page.on("request", (req) => requests.push(req.url()));
 
     await page.goto("/pdf/editor", { waitUntil: "networkidle" });
-    await page.locator('input[type="file"]').setInputFiles(path.join(FIXTURES, "acroform.pdf"));
+    await page.getByTestId("file-input").first().setInputFiles(path.join(FIXTURES, "acroform.pdf"));
     await expect(page.locator('[data-testid="page-surface"]').first()).toBeVisible({ timeout: 15_000 });
     await page.getByRole("button", { name: "Actual size (100%)" }).click(); // a phone opens fit to width
 
     requests.length = 0; // only care about traffic from here on
 
     // Signature.
-    await page.getByRole("button", { name: "Sign", exact: true }).click();
+    await pickTool(page, "Sign");
     const sigDialog = page.getByRole("dialog", { name: "Add signature" });
     const sigCanvas = sigDialog.getByRole("img", { name: "Signature drawing area" });
     const sigBox = await sigCanvas.boundingBox();
@@ -229,7 +230,7 @@ test.describe("PDF Editor: privacy regression (signature / image / form / crop /
     // happened since surfaceBox was first captured, any of which could have shifted layout
     // or scroll position and made that earlier box stale.
     await page.keyboard.press("Escape");
-    await page.getByRole("button", { name: "Crop", exact: true }).click();
+    await pickTool(page, "Crop");
     await surface.scrollIntoViewIfNeeded();
     const cropSurfaceBox = await surface.boundingBox();
     if (!cropSurfaceBox) throw new Error("no page surface bounding box before crop");

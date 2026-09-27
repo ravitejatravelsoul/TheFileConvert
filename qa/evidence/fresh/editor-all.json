@@ -1,0 +1,121 @@
+[
+ {
+  "tool": "PDF Editor",
+  "test": "native session: edit, add text, 3× highlight, 3× underline, draw, shape, image, signature, whiteout, undo/redo, blank page, reorder, rotate, crop, export, reopen",
+  "verdict": "PASS",
+  "steps": [
+   "region:\"Jordan Smith\"",
+   "edit-existing",
+   "add-text:\"Approved for payment\"",
+   "markup-armed:true",
+   "live-stroke:true",
+   "undo:13->12->13",
+   "pages:blank+move+rotate+crop"
+  ],
+  "types": {
+   "native-text-replacement": 1,
+   "added-text": 1,
+   "annotation": 6,
+   "drawing": 1,
+   "shape": 1,
+   "image": 1,
+   "signature": 1,
+   "whiteout": 1
+  },
+  "checks": {
+   "pages": true,
+   "rotation": true,
+   "editedText": true,
+   "addedText": true,
+   "highlights": true,
+   "underlines": true,
+   "drawing": true,
+   "rectangle": true,
+   "image": true,
+   "signature": true,
+   "whiteout": true,
+   "originalLine11Intact": true,
+   "crop": true
+  },
+  "output": 657284
+ },
+ {
+  "tool": "PDF Editor",
+  "test": "scanned session (condensed): OCR 6.6s, 12/20/2026→12/20/2028, Jordan→Morgan, Consultation→Consultations, add text, highlight, draw, signature, export, reopen",
+  "verdict": "PASS",
+  "edits": [
+   {
+    "word": "12/20/2026",
+    "replacement": "12/20/2028",
+    "current": "12/20/2026",
+    "overflow": false,
+    "forced": false
+   },
+   {
+    "word": "Jordan",
+    "replacement": "Morgan",
+    "current": "Jordan",
+    "overflow": false,
+    "forced": false
+   },
+   {
+    "word": "Consultation",
+    "replacement": "Consultations",
+    "current": "Consultation",
+    "overflow": false,
+    "forced": false
+   }
+  ],
+  "textLayer": "12/20/2028  Morgan  Consultations  Checked on device",
+  "changedPct": 1.2,
+  "pages": "1/1"
+ },
+ {
+  "tool": "PDF Editor",
+  "test": "scanned session (fixture): OCR 8.7s, 12/20/2026→12/20/2028, Jordan→Morgan, Consultation→Consultations, add text, highlight, draw, signature, export, reopen",
+  "verdict": "PASS",
+  "edits": [
+   {
+    "word": "12/20/2026",
+    "replacement": "12/20/2028",
+    "current": "12/20/2026",
+    "overflow": false,
+    "forced": false
+   },
+   {
+    "word": "Jordan",
+    "replacement": "Morgan",
+    "current": "Jordan",
+    "overflow": false,
+    "forced": false
+   },
+   {
+    "word": "Consultation",
+    "replacement": "Consultations",
+    "current": "Consultation",
+    "overflow": false,
+    "forced": false
+   }
+  ],
+  "textLayer": "12/20/2028  Morgan  Consultations  Checked on device",
+  "changedPct": 1.24,
+  "pages": "1/1"
+ },
+ {
+  "tool": "PDF Editor",
+  "test": "scanned session (user-supplied): OCR 6.6s, 12/20/2026→12/20/2028, add text, highlight, draw, signature, export, reopen",
+  "verdict": "PASS",
+  "edits": [
+   {
+    "word": "12/20/2026",
+    "replacement": "12/20/2028",
+    "current": "12/20/2026",
+    "overflow": false,
+    "forced": false
+   }
+  ],
+  "textLayer": "12/20/2028  Checked on device",
+  "changedPct": 1.02,
+  "pages": "2/2"
+ }
+]

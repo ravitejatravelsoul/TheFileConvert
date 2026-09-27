@@ -25,12 +25,6 @@ export function revokeObjectUrl(url: string): void {
   }
 }
 
-export function revokeAllObjectUrls(): void {
-  for (const url of activeObjectUrls) {
-    URL.revokeObjectURL(url);
-  }
-  activeObjectUrls.clear();
-}
 
 /** Makes names unique ("page.png", "page (2).png") so no entry silently overwrites another in a ZIP. */
 export function uniqueNames(names: string[]): string[] {

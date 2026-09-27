@@ -15,6 +15,7 @@ import { PageSurface, type EditableRegionRequest } from "./PageSurface";
 import { TextEditModal } from "./TextEditModal";
 import { SignaturePad } from "./SignaturePad";
 import { DEFAULT_TOOL_OPTIONS, PRESET_COLORS, type ToolOptions } from "./toolOptions";
+import { useMediaQuery } from "./useMediaQuery";
 
 /**
  * The full-screen editing workspace. Loaded on demand (see EditorLauncher) once a PDF has been
@@ -23,6 +24,9 @@ import { DEFAULT_TOOL_OPTIONS, PRESET_COLORS, type ToolOptions } from "./toolOpt
 export default function EditorWorkspace({ file, onExit }: { file: File; onExit: (error?: string) => void }) {
   const api = useEditorWorkspace();
   const { state } = api;
+  // Desktop and phone layouts are rendered exclusively (not both with one CSS-hidden), so each panel
+  // exists once and keeps a single state.
+  const isDesktop = useMediaQuery("(min-width: 1024px)");
 
   const [baseToolOptions, setToolOptions] = useState<ToolOptions>(DEFAULT_TOOL_OPTIONS);
   // Highlighting in near-black is useless (a translucent gray smear), so until the user picks a
@@ -242,9 +246,11 @@ export default function EditorWorkspace({ file, onExit }: { file: File; onExit: 
       <EditorTopBar api={api} fileName={fileName} onExport={handleExport} />
 
       {/* Desktop dock sits under the top bar. */}
-      <div className="hidden shrink-0 justify-center border-b border-[var(--line)] bg-[var(--surface)] py-1.5 lg:flex">
-        <ToolDock {...dockProps} pagesOpen={railOpen} onTogglePages={() => setRailOpen((o) => !o)} />
-      </div>
+      {isDesktop && (
+        <div className="flex shrink-0 justify-center border-b border-[var(--line)] bg-[var(--surface)] py-1.5">
+          <ToolDock {...dockProps} pagesOpen={railOpen} onTogglePages={() => setRailOpen((o) => !o)} />
+        </div>
+      )}
 
       {/* Status strip: errors, OCR progress, scanned-page prompt, crop instructions. */}
       <div className="shrink-0" aria-live="polite">
@@ -289,36 +295,12 @@ export default function EditorWorkspace({ file, onExit }: { file: File; onExit: 
             </button>
           </Strip>
         )}
-        {(state.cropDraft || state.activeTool === "crop") && (
-          <Strip tone="info" role="status">
-            {state.cropDraft ? (
-              <>
-                <span className="flex-1">
-                  Crop area selected on page {state.doc.pages.findIndex((p) => p.id === state.cropDraft!.pageId) + 1}. Drag its corners to adjust, or draw a new one.
-                </span>
-                <button type="button" onClick={() => api.applyCrop(false)} className="btn btn-primary btn-sm">
-                  Keep this area
-                </button>
-                {state.doc.pages.length > 1 && (
-                  <button type="button" onClick={() => api.applyCrop(true)} className="btn btn-secondary btn-sm">
-                    Keep on all pages
-                  </button>
-                )}
-                <button type="button" onClick={() => api.setCropDraft(null)} className="btn btn-ghost btn-sm">
-                  Discard area
-                </button>
-              </>
-            ) : (
-              <span>Drag on the page to choose the area to keep. Everything outside it is trimmed.</span>
-            )}
-          </Strip>
-        )}
       </div>
 
       <div className="flex min-h-0 flex-1">
         {/* Pages: a column on desktop, a bottom sheet on phones. */}
-        {railOpen && (
-          <aside aria-label="Pages" className="hidden w-44 shrink-0 border-r border-[var(--line)] bg-[var(--surface)] lg:block">
+        {isDesktop && railOpen && (
+          <aside aria-label="Pages" className="w-44 shrink-0 border-r border-[var(--line)] bg-[var(--surface)]">
             <ThumbnailRail
               api={api}
               doc={state.doc}
@@ -331,14 +313,44 @@ export default function EditorWorkspace({ file, onExit }: { file: File; onExit: 
         )}
 
         <div className="relative flex min-w-0 flex-1 flex-col">
-          {/* Floats over the page rather than pushing it down, so the page doesn't move under the pointer. */}
-          {pendingPlacement && (
+          {/* Prompts that appear while you're about to tap or drag on the page float over it
+              instead of pushing it down, so the page never moves under the pointer. */}
+          {(pendingPlacement || state.cropDraft || state.activeTool === "crop") && (
             <div className="pointer-events-none absolute inset-x-0 top-3 z-10 flex justify-center px-3">
-              <div role="status" className="animate-sheet pointer-events-auto flex items-center gap-3 rounded-full bg-[var(--ink)] py-1.5 pl-4 pr-1.5 text-sm text-white shadow-[var(--shadow-3)]">
-                <span>Tap the page where the {pendingPlacement.kind} should go.</span>
-                <button type="button" onClick={() => setPendingPlacement(null)} className="btn btn-sm bg-white/15 text-white hover:bg-white/25">
-                  Cancel
-                </button>
+              {/* Only a prompt with buttons takes touches; a plain instruction lets a drag that starts under it through to the page. */}
+              <div
+                role="status"
+                className={`animate-sheet flex max-w-full flex-wrap items-center justify-center gap-2 rounded-[var(--radius-lg)] bg-[var(--ink)] px-4 py-2 text-sm text-white shadow-[var(--shadow-3)] ${
+                  pendingPlacement || state.cropDraft ? "pointer-events-auto" : "pointer-events-none opacity-90"
+                }`}
+              >
+                {pendingPlacement ? (
+                  <>
+                    <span>Tap the page where the {pendingPlacement.kind} should go.</span>
+                    <button type="button" onClick={() => setPendingPlacement(null)} className="btn btn-sm bg-white/15 text-white hover:bg-white/25">
+                      Cancel
+                    </button>
+                  </>
+                ) : state.cropDraft ? (
+                  <>
+                    <span>Crop area on page {state.doc.pages.findIndex((p) => p.id === state.cropDraft!.pageId) + 1} — drag its corners to adjust.</span>
+                    <span className="flex flex-wrap gap-2">
+                      <button type="button" onClick={() => api.applyCrop(false)} className="btn btn-sm bg-[var(--accent)] text-[var(--ink)] hover:bg-[var(--accent-strong)]">
+                        Keep this area
+                      </button>
+                      {state.doc.pages.length > 1 && (
+                        <button type="button" onClick={() => api.applyCrop(true)} className="btn btn-sm bg-white/15 text-white hover:bg-white/25">
+                          Keep on all pages
+                        </button>
+                      )}
+                      <button type="button" onClick={() => api.setCropDraft(null)} className="btn btn-sm bg-white/15 text-white hover:bg-white/25">
+                        Discard area
+                      </button>
+                    </span>
+                  </>
+                ) : (
+                  <span>Drag on the page to choose the area to keep. Everything outside it is trimmed.</span>
+                )}
               </div>
             </div>
           )}
@@ -368,7 +380,8 @@ export default function EditorWorkspace({ file, onExit }: { file: File; onExit: 
           </div>
         </div>
 
-        <aside aria-label="Properties" className="hidden w-80 shrink-0 border-l border-[var(--line)] bg-[var(--surface)] lg:block">
+        {isDesktop && (
+        <aside aria-label="Properties" className="w-80 shrink-0 border-l border-[var(--line)] bg-[var(--surface)]">
           <PropertiesPanel
             api={api}
             doc={state.doc}
@@ -379,14 +392,17 @@ export default function EditorWorkspace({ file, onExit }: { file: File; onExit: 
             }}
           />
         </aside>
+        )}
       </div>
 
       {/* Phone dock sits at the bottom, within thumb reach. */}
-      <div className="shrink-0 border-t border-[var(--line)] bg-[var(--surface)] py-1 pb-[max(0.25rem,env(safe-area-inset-bottom))] lg:hidden">
-        <ToolDock {...dockProps} pagesOpen={mobilePanel === "thumbnails"} onTogglePages={() => setMobilePanel((p) => (p === "thumbnails" ? null : "thumbnails"))} onOpenProperties={() => setMobilePanel("properties")} />
-      </div>
+      {!isDesktop && (
+        <div className="shrink-0 border-t border-[var(--line)] bg-[var(--surface)] py-1 pb-[max(0.25rem,env(safe-area-inset-bottom))]">
+          <ToolDock {...dockProps} pagesOpen={mobilePanel === "thumbnails"} onTogglePages={() => setMobilePanel((p) => (p === "thumbnails" ? null : "thumbnails"))} onOpenProperties={() => setMobilePanel("properties")} />
+        </div>
+      )}
 
-      {mobilePanel && (
+      {!isDesktop && mobilePanel && (
         <Sheet title={mobilePanel === "thumbnails" ? "Pages" : "Properties"} onClose={() => setMobilePanel(null)}>
           {mobilePanel === "thumbnails" ? (
             <ThumbnailRail
