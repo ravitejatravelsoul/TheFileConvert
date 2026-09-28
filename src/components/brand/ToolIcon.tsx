@@ -31,6 +31,13 @@ const GLYPHS: Record<ToolId, React.ReactNode> = {
       <path d="m12 18.5 2.6-2.4 1.8 1.6 1.4-1.2 1.7 1.5" strokeWidth={1.6} />
     </>
   ),
+  "pdf-to-word": (
+    <>
+      <path d="M4.5 3.5h5l3 3V14a1 1 0 0 1-1 1h-7a1 1 0 0 1-1-1V4.5a1 1 0 0 1 1-1Z" />
+      <rect x="10.5" y="9.5" width="10" height="11" rx="1.8" fill="var(--glyph-fill, #fff)" />
+      <path d="m12.8 12.6 1 5 1.7-3.4 1.7 3.4 1-5" strokeWidth={1.7} />
+    </>
+  ),
   "image-to-pdf": (
     <>
       <rect x="3.5" y="3.5" width="9.5" height="9" rx="1.8" />

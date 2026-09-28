@@ -21,6 +21,8 @@ const SETS = [
   ["Repeat use / stale state", "fs-tools-repeat"],
   ["Mobile", "mobile"],
   ["Privacy", "privacy"],
+  ["PDF to Word", "fs-word"],
+  ["PDF to Word — mobile", "fs-word-mobile"],
 ];
 const EXPECT = {
   "Compress PDF": "output ≤ target and valid with every page, or — only when unreachable — honest “Target not reached” with the closest valid file; under-target input returned byte-for-byte",
@@ -89,12 +91,41 @@ for (const [title, file] of SETS) {
   totals.reopened += c.ok;
   totals.corrupt += c.outputs - c.ok;
   summary.push(`| ${title} | ${rows.length} | ${c.pass} | ${c.limited} | ${c.fail} | ${c.outputs} downloaded, ${c.ok} reopened |`);
+  if (file.startsWith("fs-word")) continue; // has its own section above
   sections.push(`## ${title}\n\nExpected: ${EXPECT[title] ?? ""}.\n\n| Scenario | Input bytes | Options | Output bytes | Opened | Parser result (qpdf + MuPDF + pdf-lib + pdf.js / image decode / ZIP) | Visual / quality | Actual | Verdict |\n|---|---:|---|---:|---|---|---|---|---|\n${lines.join("\n")}\n`);
 }
 
 const sha = execFileSync("git", ["rev-parse", "--short", "HEAD"], { encoding: "utf8" }).trim();
 const before = load("repro-before-1000")[0];
 const after = load("fs-compress-pdf").find((r) => /REAL user scan .* → 1 MB/.test(r.test));
+// PDF → Word: its own table with the columns that matter for a document conversion.
+const wordRows = [...load("fs-word"), ...load("fs-word-mobile")].filter((r) => r.fixture || r.message);
+const wordSection = `## PDF → Word
+
+Every scenario ran through /pdf-to-word in real Chromium (desktop, then Pixel 7 touch emulation): upload → Convert to Word → download the .docx. Each .docx was then reopened independently three ways: \`qa/validate/docxcheck.py\` (ZIP/OOXML package — required parts, well-formed XML, content types, relationship targets, image decode — plus python-docx), the shared validator gate, and mammoth.js (a second DOCX reader; its HTML renders are in \`qa/review/fresh-launch-polish/pdf-to-word-renders/\`). LibreOffice isn't installed on this machine, so it wasn't used.
+
+Text accuracy is measured against the fixture's ground truth (\`qa/fresh-scenario-fixtures/word/truth.json\`): **recall** = share of source words present, **order** = longest common word subsequence ÷ source words, **separation** = source paragraphs/headings/list items that land in their own Word paragraph (not merged with a neighbour, not split). For scanned pages the same numbers are the OCR accuracy.
+
+| Fixture | Kind | Input pages | Input bytes | Time | DOCX bytes | Recall / order | Paragraph separation | Structure checks | Images | DOCX valid | Verdict |
+|---|---|---:|---:|---:|---:|---|---|---|---|---|---|
+${wordRows
+  .map((r) => {
+    const test = String(r.test);
+    const mobile = test.includes("[mobile]") ? " (mobile)" : "";
+    if (r.message) return `| ${test.split(" ")[0]}${mobile} | corrupt | — | ${n(r.input)} | — | — | — | — | refused: “${esc(r.message)}” | — | no file offered | **${r.verdict}** |`;
+    const checks = r.structure ? Object.entries(r.structure).filter(([k]) => k !== "missing").map(([k, v]) => `${k} ${v ? "✓" : "✗"}`).join(", ") : "";
+    const images = r.structure && "images" in r.structure ? `${r.pictures} embedded, aspect kept ${r.structure.images ? "✓" : "✗"}` : r.pictures ? `${r.pictures}` : "—";
+    const acc = r.recall !== undefined ? `${r.recall}% / ${r.order}%` : "n/a (no ground truth)";
+    const sep = r.separation !== undefined ? `${r.separation}% (${r.paragraphsIntact})` : `${r.paragraphs} paragraphs, ${r.tables} table`;
+    return `| ${r.fixture}${mobile} | ${r.kind} | ${r.inputPages} | ${n(r.input)} | ${(r.ms / 1000).toFixed(1)} s | ${n(r.output)} | ${acc} | ${sep} | ${esc(checks)} | ${images} | ${r.docxValid ? "YES" : "**NO**"} | **${r.verdict}** |`;
+  })
+  .join("\n")}
+
+The user-supplied scan (2 pages, 3,982,736 bytes) has no ground truth; its recognised text contains the name, the dates (02/08/2026, 12/20/2026), the account number, the amount ($182.50), the registrar and the certificate text in page order. Label/value pairs came out as a borderless two-column table, and one line of OCR noise (“= ee CCCSTR”) comes from a stamp.
+
+Automated regressions: \`src/lib/processors/pdf-to-word/layout.test.ts\` (paragraphs, headings, lists, tables, columns, images, characters), \`docx.test.ts\` (package validity, structure, verifier), \`e2e/pdf-to-word.spec.ts\` (native, lists, images, special characters, corrupt, password; desktop + mobile) and \`e2e/pdf-to-word-ocr.spec.ts\` (scanned, mixed, no upload; desktop + mobile).
+`;
+
 const md = `# Full scenario acceptance — fresh launch
 
 Branch \`rebuild/fresh-launch\` (base commit \`${sha}\` + this change). Local production build (\`next build && next start\`), real Chromium through Playwright, every file added through the tool's own file input and every result downloaded through the tool's own Download button.
@@ -130,6 +161,7 @@ ${summary.join("\n")}
 
 PSNR/SSIM compare the output with the original — PDFs as the worst of their first six pages rendered at 50 %, images after scaling the original to the output's size. The synthetic photos carry heavy per-pixel noise (like a high-ISO sensor) so that they compress like real photos; removing that noise lowers PSNR/SSIM a lot while the picture looks the same, so values in the mid-20s dB for the noisiest fixtures (IMAGE-D/E, the scan pages) are expected and are not a visual failure. Text-only pages score 99 dB (identical render). The real user scan scores 50.8 dB / SSIM 0.9985 at 1 MB.
 
+${wordSection}
 ## Fixtures
 
 \`qa/fresh-scenario-fixtures/\` (built by \`node qa/scripts/fs-fixtures.mjs\`, described in its README). Plus the user-supplied scan \`TheFileConvert_Scanned_OCR_Test.pdf\` (3,982,736 bytes), read in place; the editor/mobile/privacy scripts also use the first-launch set in \`qa-fixtures/fresh/\`.

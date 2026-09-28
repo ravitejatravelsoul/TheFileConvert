@@ -6,6 +6,7 @@ const TOOLS = [
   ["/compress-image", "Compress Image"],
   ["/convert-image", "Convert Images"],
   ["/pdf-to-image", "PDF to Image"],
+  ["/pdf-to-word", "PDF to Word"],
   ["/image-to-pdf", "Images to PDF"],
   ["/merge-pdf", "Merge PDF"],
   ["/split-pdf", "Split PDF"],
@@ -31,7 +32,7 @@ test.describe("Homepage", () => {
     await page.goto("/");
     await addFiles(page, [fx("sample-a.pdf")]);
     await expect(page.getByText("What do you want to do?")).toBeVisible();
-    for (const action of ["Compress", "Edit", "Merge with other PDFs", "Split", "Convert to images", "Organize pages"]) {
+    for (const action of ["Compress", "Edit", "Convert to Word", "Merge with other PDFs", "Split", "Convert to images", "Organize pages"]) {
       await expect(page.locator("main").getByRole("button", { name: action, exact: true })).toBeVisible();
     }
     await page.locator("main").getByRole("button", { name: "Split", exact: true }).click();
@@ -92,10 +93,10 @@ test.describe("Navigation", () => {
     await expect(sheet).toBeHidden();
   });
 
-  test("All tools lists the nine launch tools and nothing else", async ({ page }) => {
+  test("All tools lists the ten launch tools and nothing else", async ({ page }) => {
     await page.goto("/tools");
     const cards = page.locator("main li a");
-    await expect(cards).toHaveCount(9);
+    await expect(cards).toHaveCount(10);
     for (const [href, name] of TOOLS) await expect(page.locator(`main a[href="${href}"]`)).toContainText(name);
   });
 
@@ -126,7 +127,7 @@ test.describe("SEO", () => {
     });
   }
 
-  test("sitemap lists the home page, tools page and all nine tools; robots points to it", async ({ request }) => {
+  test("sitemap lists the home page, tools page and all ten tools; robots points to it", async ({ request }) => {
     const sitemap = await (await request.get("/sitemap.xml")).text();
     for (const [href] of TOOLS) expect(sitemap).toContain(`https://thefileconvert.com${href}</loc>`);
     expect(sitemap).not.toContain("/data/");

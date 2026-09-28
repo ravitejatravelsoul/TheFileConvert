@@ -10,6 +10,7 @@ export type ToolId =
   | "compress-image"
   | "convert-image"
   | "pdf-to-image"
+  | "pdf-to-word"
   | "image-to-pdf"
   | "merge-pdf"
   | "split-pdf"
@@ -163,6 +164,40 @@ export const TOOLS: Tool[] = [
       {
         q: "Can I convert only some pages?",
         a: "Yes. Every page shows as a thumbnail — select the ones you want, or convert them all.",
+      },
+    ],
+  },
+  {
+    id: "pdf-to-word",
+    href: "/pdf-to-word",
+    name: "PDF to Word",
+    short: "Turn a PDF into an editable Word document (.docx) — scans included.",
+    seoTitle: "PDF to Word (DOCX) converter",
+    seoDescription:
+      "Convert a PDF into an editable Word .docx in your browser. Text, headings, lists and pictures come across; scanned pages are read with on-device OCR. No upload.",
+    category: "convert",
+    inputNoun: "PDF",
+    accept: ".pdf,application/pdf",
+    acceptedExtensions: PDF_EXT,
+    acceptedMimeTypes: PDF_MIME,
+    multiple: false,
+    maxRecommendedSizeMb: 100,
+    faq: [
+      {
+        q: "Will the Word file look exactly like the PDF?",
+        a: "Close, but not identical. We keep the text, headings, paragraphs, lists, simple tables and pictures in reading order, and start each PDF page on a new Word page. Complex layouts may need small formatting touch-ups.",
+      },
+      {
+        q: "What about scanned PDFs?",
+        a: "Scanned pages are recognised with OCR on your device, so the text in the Word document is editable. Check names, dates and numbers against the original — OCR can misread poor scans.",
+      },
+      {
+        q: "Is my PDF uploaded?",
+        a: "No. Reading the PDF, OCR and building the .docx all happen in your browser. Nothing is sent to a server.",
+      },
+      {
+        q: "Does it work with password-protected PDFs?",
+        a: "Not with ones that need a password to open. Remove the password in your PDF app first, then convert.",
       },
     ],
   },
@@ -335,7 +370,7 @@ export function entryKindFor(file: { name: string; type: string }): EntryKind {
 export function suggestionsFor(kind: EntryKind, count: number): ToolId[] {
   switch (kind) {
     case "pdf":
-      return count > 1 ? ["merge-pdf"] : ["compress-pdf", "pdf-editor", "merge-pdf", "split-pdf", "pdf-to-image", "organize-pdf"];
+      return count > 1 ? ["merge-pdf"] : ["compress-pdf", "pdf-editor", "pdf-to-word", "merge-pdf", "split-pdf", "pdf-to-image", "organize-pdf"];
     case "image":
       return count > 1 ? ["image-to-pdf", "convert-image"] : ["compress-image", "convert-image", "image-to-pdf"];
     case "svg":

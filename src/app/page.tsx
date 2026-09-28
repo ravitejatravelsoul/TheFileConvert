@@ -15,7 +15,7 @@ const POPULAR: { id: ToolId; art: React.ReactNode; wide?: boolean }[] = [
   { id: "convert-image", art: <ConvertVignette /> },
   { id: "image-to-pdf", art: <ImagesVignette /> },
 ];
-const MORE: ToolId[] = ["split-pdf", "organize-pdf", "pdf-to-image"];
+const MORE: ToolId[] = ["pdf-to-word", "split-pdf", "organize-pdf", "pdf-to-image"];
 
 const HOME_FAQ = [
   {
@@ -175,7 +175,7 @@ export default function Home() {
               <span className="muted-display">Several possibilities.</span>
             </h2>
             <p className="lead mt-5 max-w-md">
-              Drop a file on the homepage and see only what makes sense for it. A PDF offers compress, edit, merge, split, images and page order. A photo offers compress, convert and PDF.
+              Drop a file on the homepage and see only what makes sense for it. A PDF offers compress, edit, Word, merge, split, images and page order. A photo offers compress, convert and PDF.
             </p>
             <Link href="#start" className="btn btn-primary mt-8">
               Try it with a file

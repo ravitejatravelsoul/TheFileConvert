@@ -1,0 +1,56 @@
+[
+ {
+  "tool": "PDF to Word",
+  "test": "PDF-WORD-05 A bulleted list (3 items) and a numbered list (4 items)",
+  "verdict": "FAIL",
+  "fixture": "PDF-WORD-05",
+  "kind": "native",
+  "inputPages": 1,
+  "input": 40493,
+  "meta": "40 KB · 1 page · Text PDF",
+  "ocrNote": false,
+  "progress": [
+   "Building your Word document…"
+  ],
+  "ms": 409,
+  "output": 4330,
+  "docxValid": true,
+  "problems": [],
+  "paragraphs": 10,
+  "tables": 0,
+  "pictures": 0,
+  "sections": 1,
+  "recall": 100,
+  "order": 100,
+  "paragraphsIntact": "10/10",
+  "merged": 0,
+  "separation": 100,
+  "structure": {
+   "bullets": false,
+   "numbered": true,
+   "pageBreaks": true
+  },
+  "mammoth": {
+   "ok": false,
+   "error": "Error: Command failed: npx.cmd -y mammoth@1.8.0 C:\\Users\\ravit\\Desktop\\my projects\\thefileconvert\\qa\\evidence\\fresh\\out\\word-PDFWORD05-PDF-WORD-05-lists.docx C:\\Users\\ravit\\Desktop\\my projects\\thefile"
+  },
+  "uploads": [],
+  "integrity": [
+   {
+    "file": "word-PDFWORD05-PDF-WORD-05-lists.docx",
+    "bytes": 4330,
+    "ok": true,
+    "kind": "docx",
+    "pages": 1,
+    "paragraphs": 10,
+    "tables": 0,
+    "pictures": 0
+   }
+  ]
+ },
+ {
+  "tool": "PDF to Word",
+  "test": "console errors",
+  "verdict": "PASS"
+ }
+]

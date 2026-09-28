@@ -114,6 +114,7 @@ function actionLabel(id: ReturnType<typeof suggestionsFor>[number], count: numbe
   const labels: Record<typeof id, string> = {
     "compress-pdf": "Compress",
     "pdf-editor": "Edit",
+    "pdf-to-word": "Convert to Word",
     "merge-pdf": count > 1 ? `Merge ${count} PDFs` : "Merge with other PDFs",
     "split-pdf": "Split",
     "pdf-to-image": "Convert to images",

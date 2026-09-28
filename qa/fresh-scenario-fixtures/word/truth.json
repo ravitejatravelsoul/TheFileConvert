@@ -1,0 +1,1535 @@
+[
+ {
+  "id": "PDF-WORD-01",
+  "file": "PDF-WORD-01-simple-text.pdf",
+  "bytes": 35839,
+  "sha": "5422eba64163",
+  "what": "One page: a title and three paragraphs",
+  "kind": "native",
+  "pages": 1,
+  "blocks": [
+   {
+    "tag": "h1",
+    "text": "Meeting Notes"
+   },
+   {
+    "tag": "p",
+    "text": "The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline."
+   },
+   {
+    "tag": "p",
+    "text": "Customer response times improved after the new intake process, which routes each request to the right team on the first day."
+   },
+   {
+    "tag": "p",
+    "text": "Supplier costs increased slightly because of freight surcharges, but renegotiated packaging contracts offset most of the change."
+   }
+  ],
+  "headings": [
+   "Meeting Notes"
+  ]
+ },
+ {
+  "id": "PDF-WORD-02",
+  "file": "PDF-WORD-02-multipage.pdf",
+  "bytes": 44631,
+  "sha": "7d892195bfad",
+  "what": "Four pages, one chapter per page",
+  "kind": "native",
+  "pages": 4,
+  "blocks": [
+   {
+    "tag": "h2",
+    "text": "Chapter 1"
+   },
+   {
+    "tag": "p",
+    "text": "The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline. (Chapter 1.)"
+   },
+   {
+    "tag": "p",
+    "text": "Customer response times improved after the new intake process, which routes each request to the right team on the first day. (Chapter 1.)"
+   },
+   {
+    "tag": "p",
+    "text": "Supplier costs increased slightly because of freight surcharges, but renegotiated packaging contracts offset most of the change. (Chapter 1.)"
+   },
+   {
+    "tag": "p",
+    "text": "The audit committee examined purchase approvals across all departments and found no exceptions that required further action. (Chapter 1.)"
+   },
+   {
+    "tag": "p",
+    "text": "Next quarter the team will pilot the scheduling tool in two locations and report the results at the planning meeting. (Chapter 1.)"
+   },
+   {
+    "tag": "h2",
+    "text": "Chapter 2"
+   },
+   {
+    "tag": "p",
+    "text": "The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline. (Chapter 2.)"
+   },
+   {
+    "tag": "p",
+    "text": "Customer response times improved after the new intake process, which routes each request to the right team on the first day. (Chapter 2.)"
+   },
+   {
+    "tag": "p",
+    "text": "Supplier costs increased slightly because of freight surcharges, but renegotiated packaging contracts offset most of the change. (Chapter 2.)"
+   },
+   {
+    "tag": "p",
+    "text": "The audit committee examined purchase approvals across all departments and found no exceptions that required further action. (Chapter 2.)"
+   },
+   {
+    "tag": "p",
+    "text": "Next quarter the team will pilot the scheduling tool in two locations and report the results at the planning meeting. (Chapter 2.)"
+   },
+   {
+    "tag": "h2",
+    "text": "Chapter 3"
+   },
+   {
+    "tag": "p",
+    "text": "The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline. (Chapter 3.)"
+   },
+   {
+    "tag": "p",
+    "text": "Customer response times improved after the new intake process, which routes each request to the right team on the first day. (Chapter 3.)"
+   },
+   {
+    "tag": "p",
+    "text": "Supplier costs increased slightly because of freight surcharges, but renegotiated packaging contracts offset most of the change. (Chapter 3.)"
+   },
+   {
+    "tag": "p",
+    "text": "The audit committee examined purchase approvals across all departments and found no exceptions that required further action. (Chapter 3.)"
+   },
+   {
+    "tag": "p",
+    "text": "Next quarter the team will pilot the scheduling tool in two locations and report the results at the planning meeting. (Chapter 3.)"
+   },
+   {
+    "tag": "h2",
+    "text": "Chapter 4"
+   },
+   {
+    "tag": "p",
+    "text": "The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline. (Chapter 4.)"
+   },
+   {
+    "tag": "p",
+    "text": "Customer response times improved after the new intake process, which routes each request to the right team on the first day. (Chapter 4.)"
+   },
+   {
+    "tag": "p",
+    "text": "Supplier costs increased slightly because of freight surcharges, but renegotiated packaging contracts offset most of the change. (Chapter 4.)"
+   },
+   {
+    "tag": "p",
+    "text": "The audit committee examined purchase approvals across all departments and found no exceptions that required further action. (Chapter 4.)"
+   },
+   {
+    "tag": "p",
+    "text": "Next quarter the team will pilot the scheduling tool in two locations and report the results at the planning meeting. (Chapter 4.)"
+   }
+  ],
+  "headings": [
+   "Chapter 1",
+   "Chapter 2",
+   "Chapter 3",
+   "Chapter 4"
+  ]
+ },
+ {
+  "id": "PDF-WORD-03",
+  "file": "PDF-WORD-03-headings.pdf",
+  "bytes": 40947,
+  "sha": "20413230af13",
+  "what": "Heading levels 1–3 with paragraphs between",
+  "kind": "native",
+  "pages": 1,
+  "blocks": [
+   {
+    "tag": "h1",
+    "text": "Annual Report 2026"
+   },
+   {
+    "tag": "p",
+    "text": "The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline."
+   },
+   {
+    "tag": "h2",
+    "text": "Operations"
+   },
+   {
+    "tag": "p",
+    "text": "Customer response times improved after the new intake process, which routes each request to the right team on the first day."
+   },
+   {
+    "tag": "h3",
+    "text": "Staffing"
+   },
+   {
+    "tag": "p",
+    "text": "Supplier costs increased slightly because of freight surcharges, but renegotiated packaging contracts offset most of the change."
+   },
+   {
+    "tag": "h2",
+    "text": "Finance"
+   },
+   {
+    "tag": "p",
+    "text": "The audit committee examined purchase approvals across all departments and found no exceptions that required further action."
+   },
+   {
+    "tag": "h3",
+    "text": "Outlook"
+   },
+   {
+    "tag": "p",
+    "text": "Next quarter the team will pilot the scheduling tool in two locations and report the results at the planning meeting."
+   }
+  ],
+  "headings": [
+   "Annual Report 2026",
+   "Operations",
+   "Staffing",
+   "Finance",
+   "Outlook"
+  ],
+  "headingLevels": {
+   "Annual Report 2026": 1,
+   "Operations": 2,
+   "Staffing": 3,
+   "Finance": 2,
+   "Outlook": 3
+  }
+ },
+ {
+  "id": "PDF-WORD-04",
+  "file": "PDF-WORD-04-bold-italic.pdf",
+  "bytes": 54759,
+  "sha": "5a53d0b14e5b",
+  "what": "Bold, italic and bold-italic phrases inside paragraphs",
+  "kind": "native",
+  "pages": 1,
+  "blocks": [
+   {
+    "tag": "h2",
+    "text": "Formatting"
+   },
+   {
+    "tag": "p",
+    "text": "This sentence has a bold phrase in the middle."
+   },
+   {
+    "tag": "p",
+    "text": "This one has an italic phrase instead."
+   },
+   {
+    "tag": "p",
+    "text": "And this one has bold italic words together."
+   },
+   {
+    "tag": "p",
+    "text": "Plain text ends the page."
+   }
+  ],
+  "bold": [
+   "bold phrase",
+   "bold italic words"
+  ],
+  "italic": [
+   "italic phrase",
+   "bold italic words"
+  ]
+ },
+ {
+  "id": "PDF-WORD-05",
+  "file": "PDF-WORD-05-lists.pdf",
+  "bytes": 40493,
+  "sha": "5f4bdf60257c",
+  "what": "A bulleted list (3 items) and a numbered list (4 items)",
+  "kind": "native",
+  "pages": 1,
+  "blocks": [
+   {
+    "tag": "h2",
+    "text": "Packing list"
+   },
+   {
+    "tag": "li",
+    "text": "Passport and tickets"
+   },
+   {
+    "tag": "li",
+    "text": "Phone charger"
+   },
+   {
+    "tag": "li",
+    "text": "Rain jacket"
+   },
+   {
+    "tag": "h2",
+    "text": "Steps"
+   },
+   {
+    "tag": "li",
+    "text": "Book the venue"
+   },
+   {
+    "tag": "li",
+    "text": "Send the invitations"
+   },
+   {
+    "tag": "li",
+    "text": "Order the food"
+   },
+   {
+    "tag": "li",
+    "text": "Confirm the numbers"
+   },
+   {
+    "tag": "p",
+    "text": "That is everything for now."
+   }
+  ],
+  "bullets": [
+   "Passport and tickets",
+   "Phone charger",
+   "Rain jacket"
+  ],
+  "numbered": [
+   "Book the venue",
+   "Send the invitations",
+   "Order the food",
+   "Confirm the numbers"
+  ]
+ },
+ {
+  "id": "PDF-WORD-06",
+  "file": "PDF-WORD-06-table.pdf",
+  "bytes": 39069,
+  "sha": "6070b47ef4ac",
+  "what": "A 3-column, 5-row bordered table between paragraphs",
+  "kind": "native",
+  "pages": 1,
+  "blocks": [
+   {
+    "tag": "h2",
+    "text": "Order summary"
+   },
+   {
+    "tag": "p",
+    "text": "The table below lists the items in this order."
+   },
+   {
+    "tag": "tr",
+    "text": "Item Quantity Price"
+   },
+   {
+    "tag": "tr",
+    "text": "Notebooks 12 $36.00"
+   },
+   {
+    "tag": "tr",
+    "text": "Pens 40 $18.50"
+   },
+   {
+    "tag": "tr",
+    "text": "Folders 8 $9.60"
+   },
+   {
+    "tag": "tr",
+    "text": "Total 60 $64.10"
+   },
+   {
+    "tag": "p",
+    "text": "Thank you for your order."
+   }
+  ],
+  "table": [
+   [
+    "Item",
+    "Quantity",
+    "Price"
+   ],
+   [
+    "Notebooks",
+    "12",
+    "$36.00"
+   ],
+   [
+    "Pens",
+    "40",
+    "$18.50"
+   ],
+   [
+    "Folders",
+    "8",
+    "$9.60"
+   ],
+   [
+    "Total",
+    "60",
+    "$64.10"
+   ]
+  ]
+ },
+ {
+  "id": "PDF-WORD-07",
+  "file": "PDF-WORD-07-images.pdf",
+  "bytes": 134201,
+  "sha": "507a6a98dccf",
+  "what": "Text with two pictures between paragraphs (landscape 5:3 and portrait 3:4)",
+  "kind": "native",
+  "pages": 1,
+  "blocks": [
+   {
+    "tag": "h2",
+    "text": "Site visit"
+   },
+   {
+    "tag": "p",
+    "text": "The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline."
+   },
+   {
+    "tag": "p",
+    "text": "Customer response times improved after the new intake process, which routes each request to the right team on the first day."
+   },
+   {
+    "tag": "p",
+    "text": "Supplier costs increased slightly because of freight surcharges, but renegotiated packaging contracts offset most of the change."
+   }
+  ],
+  "images": [
+   {
+    "aspect": 1.6666666666666667
+   },
+   {
+    "aspect": 0.75
+   }
+  ]
+ },
+ {
+  "id": "PDF-WORD-08",
+  "file": "PDF-WORD-08-two-column.pdf",
+  "bytes": 40941,
+  "sha": "6340e9e3c830",
+  "what": "Two-column newsletter: a full-width title, then left column then right column",
+  "kind": "native",
+  "pages": 1,
+  "blocks": [
+   {
+    "tag": "h1",
+    "text": "Community Newsletter"
+   },
+   {
+    "tag": "p",
+    "text": "Left 1: The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline."
+   },
+   {
+    "tag": "p",
+    "text": "Left 2: Customer response times improved after the new intake process, which routes each request to the right team on the first day."
+   },
+   {
+    "tag": "p",
+    "text": "Left 3: Supplier costs increased slightly because of freight surcharges, but renegotiated packaging contracts offset most of the change."
+   },
+   {
+    "tag": "p",
+    "text": "Left 4: The audit committee examined purchase approvals across all departments and found no exceptions that required further action."
+   },
+   {
+    "tag": "p",
+    "text": "Left 5: Next quarter the team will pilot the scheduling tool in two locations and report the results at the planning meeting."
+   },
+   {
+    "tag": "p",
+    "text": "Right 1: The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline."
+   },
+   {
+    "tag": "p",
+    "text": "Right 2: Customer response times improved after the new intake process, which routes each request to the right team on the first day."
+   },
+   {
+    "tag": "p",
+    "text": "Right 3: Supplier costs increased slightly because of freight surcharges, but renegotiated packaging contracts offset most of the change."
+   },
+   {
+    "tag": "p",
+    "text": "Right 4: The audit committee examined purchase approvals across all departments and found no exceptions that required further action."
+   },
+   {
+    "tag": "p",
+    "text": "Right 5: Next quarter the team will pilot the scheduling tool in two locations and report the results at the planning meeting."
+   }
+  ]
+ },
+ {
+  "id": "PDF-WORD-09",
+  "file": "PDF-WORD-09-scanned.pdf",
+  "bytes": 101223,
+  "sha": "a09d1d617654",
+  "what": "Image-only scan (200 dpi JPEG): receipt with name, date, amount and two paragraphs",
+  "kind": "scanned",
+  "pages": 1,
+  "blocks": [
+   {
+    "tag": "h1",
+    "text": "Service Receipt"
+   },
+   {
+    "tag": "p",
+    "text": "Name: Jordan Smith"
+   },
+   {
+    "tag": "p",
+    "text": "Date: 12/20/2026"
+   },
+   {
+    "tag": "p",
+    "text": "Amount: $1,250.00"
+   },
+   {
+    "tag": "h2",
+    "text": "Notes"
+   },
+   {
+    "tag": "p",
+    "text": "The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline."
+   },
+   {
+    "tag": "p",
+    "text": "Customer response times improved after the new intake process, which routes each request to the right team on the first day."
+   }
+  ],
+  "mustContain": [
+   "Jordan Smith",
+   "12/20/2026",
+   "$1,250.00"
+  ]
+ },
+ {
+  "id": "PDF-WORD-10",
+  "file": "PDF-WORD-10-mixed.pdf",
+  "bytes": 145265,
+  "sha": "323de2c9b7b0",
+  "what": "3 pages: native (Chapter 1), scanned appendix, native (Chapter 2)",
+  "kind": "mixed",
+  "pages": 3,
+  "blocks": [
+   {
+    "tag": "h2",
+    "text": "Chapter 1"
+   },
+   {
+    "tag": "p",
+    "text": "The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline. (Chapter 1.)"
+   },
+   {
+    "tag": "p",
+    "text": "Customer response times improved after the new intake process, which routes each request to the right team on the first day. (Chapter 1.)"
+   },
+   {
+    "tag": "p",
+    "text": "Supplier costs increased slightly because of freight surcharges, but renegotiated packaging contracts offset most of the change. (Chapter 1.)"
+   },
+   {
+    "tag": "p",
+    "text": "The audit committee examined purchase approvals across all departments and found no exceptions that required further action. (Chapter 1.)"
+   },
+   {
+    "tag": "p",
+    "text": "Next quarter the team will pilot the scheduling tool in two locations and report the results at the planning meeting. (Chapter 1.)"
+   },
+   {
+    "tag": "h2",
+    "text": "Scanned Appendix"
+   },
+   {
+    "tag": "p",
+    "text": "Reference number 48213 was approved on 03/14/2026."
+   },
+   {
+    "tag": "p",
+    "text": "The audit committee examined purchase approvals across all departments and found no exceptions that required further action."
+   },
+   {
+    "tag": "h2",
+    "text": "Chapter 2"
+   },
+   {
+    "tag": "p",
+    "text": "The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline. (Chapter 2.)"
+   },
+   {
+    "tag": "p",
+    "text": "Customer response times improved after the new intake process, which routes each request to the right team on the first day. (Chapter 2.)"
+   },
+   {
+    "tag": "p",
+    "text": "Supplier costs increased slightly because of freight surcharges, but renegotiated packaging contracts offset most of the change. (Chapter 2.)"
+   },
+   {
+    "tag": "p",
+    "text": "The audit committee examined purchase approvals across all departments and found no exceptions that required further action. (Chapter 2.)"
+   },
+   {
+    "tag": "p",
+    "text": "Next quarter the team will pilot the scheduling tool in two locations and report the results at the planning meeting. (Chapter 2.)"
+   }
+  ],
+  "scannedPages": [
+   2
+  ],
+  "mustContain": [
+   "48213",
+   "03/14/2026",
+   "Chapter 1",
+   "Chapter 2"
+  ]
+ },
+ {
+  "id": "PDF-WORD-11",
+  "file": "PDF-WORD-11-rotated.pdf",
+  "bytes": 39672,
+  "sha": "aff84196a284",
+  "what": "Two copies of PDF-WORD-03; page 2 stored with /Rotate 90 (sideways in viewers)",
+  "kind": "native",
+  "pages": 2,
+  "blocks": [
+   {
+    "tag": "h1",
+    "text": "Annual Report 2026"
+   },
+   {
+    "tag": "p",
+    "text": "The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline."
+   },
+   {
+    "tag": "h2",
+    "text": "Operations"
+   },
+   {
+    "tag": "p",
+    "text": "Customer response times improved after the new intake process, which routes each request to the right team on the first day."
+   },
+   {
+    "tag": "h3",
+    "text": "Staffing"
+   },
+   {
+    "tag": "p",
+    "text": "Supplier costs increased slightly because of freight surcharges, but renegotiated packaging contracts offset most of the change."
+   },
+   {
+    "tag": "h2",
+    "text": "Finance"
+   },
+   {
+    "tag": "p",
+    "text": "The audit committee examined purchase approvals across all departments and found no exceptions that required further action."
+   },
+   {
+    "tag": "h3",
+    "text": "Outlook"
+   },
+   {
+    "tag": "p",
+    "text": "Next quarter the team will pilot the scheduling tool in two locations and report the results at the planning meeting."
+   },
+   {
+    "tag": "h1",
+    "text": "Annual Report 2026"
+   },
+   {
+    "tag": "p",
+    "text": "The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline."
+   },
+   {
+    "tag": "h2",
+    "text": "Operations"
+   },
+   {
+    "tag": "p",
+    "text": "Customer response times improved after the new intake process, which routes each request to the right team on the first day."
+   },
+   {
+    "tag": "h3",
+    "text": "Staffing"
+   },
+   {
+    "tag": "p",
+    "text": "Supplier costs increased slightly because of freight surcharges, but renegotiated packaging contracts offset most of the change."
+   },
+   {
+    "tag": "h2",
+    "text": "Finance"
+   },
+   {
+    "tag": "p",
+    "text": "The audit committee examined purchase approvals across all departments and found no exceptions that required further action."
+   },
+   {
+    "tag": "h3",
+    "text": "Outlook"
+   },
+   {
+    "tag": "p",
+    "text": "Next quarter the team will pilot the scheduling tool in two locations and report the results at the planning meeting."
+   }
+  ]
+ },
+ {
+  "id": "PDF-WORD-12",
+  "file": "PDF-WORD-12-special-chars.pdf",
+  "bytes": 60660,
+  "sha": "f9f0f7c1af2f",
+  "what": "Accents, currency, smart quotes, bullets, check marks, Greek and Cyrillic",
+  "kind": "native",
+  "pages": 1,
+  "blocks": [
+   {
+    "tag": "h2",
+    "text": "Special characters"
+   },
+   {
+    "tag": "p",
+    "text": "English: The quick brown fox jumps over the lazy dog."
+   },
+   {
+    "tag": "p",
+    "text": "Español: El niño comió jalapeños en la montaña; ¿qué pasó? ¡Olé!"
+   },
+   {
+    "tag": "p",
+    "text": "Currency: €120.50, £99.99, ¥2,000, $45.00 and ₹1,250"
+   },
+   {
+    "tag": "p",
+    "text": "Quotes: “double”, ‘single’ and an apostrophe’s curl — plus an en dash – too"
+   },
+   {
+    "tag": "p",
+    "text": "Symbols: • bullet, ✓ check, ✔ heavy check, © 2026, ® and ™"
+   },
+   {
+    "tag": "p",
+    "text": "Unicode: naïve café, Zürich, Ærøskøbing, Łódź, Ελληνικά, Русский"
+   }
+  ],
+  "mustContain": [
+   "niño",
+   "jalapeños",
+   "¿qué pasó?",
+   "€120.50",
+   "£99.99",
+   "¥2,000",
+   "₹1,250",
+   "“double”",
+   "‘single’",
+   "—",
+   "✓",
+   "✔",
+   "©",
+   "™",
+   "naïve",
+   "Zürich",
+   "Ærøskøbing",
+   "Łódź",
+   "Ελληνικά",
+   "Русский"
+  ]
+ },
+ {
+  "id": "PDF-WORD-13",
+  "file": "PDF-WORD-13-large-24-pages.pdf",
+  "bytes": 100745,
+  "sha": "9164ff934102",
+  "what": "24 pages, a section per page with paragraphs and a list",
+  "kind": "native",
+  "pages": 24,
+  "blocks": [
+   {
+    "tag": "h2",
+    "text": "Section 1"
+   },
+   {
+    "tag": "p",
+    "text": "1.1 The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline."
+   },
+   {
+    "tag": "p",
+    "text": "1.2 Customer response times improved after the new intake process, which routes each request to the right team on the first day."
+   },
+   {
+    "tag": "p",
+    "text": "1.3 Supplier costs increased slightly because of freight surcharges, but renegotiated packaging contracts offset most of the change."
+   },
+   {
+    "tag": "p",
+    "text": "1.4 The audit committee examined purchase approvals across all departments and found no exceptions that required further action."
+   },
+   {
+    "tag": "p",
+    "text": "1.5 Next quarter the team will pilot the scheduling tool in two locations and report the results at the planning meeting."
+   },
+   {
+    "tag": "li",
+    "text": "Point A of section 1"
+   },
+   {
+    "tag": "li",
+    "text": "Point B of section 1"
+   },
+   {
+    "tag": "h2",
+    "text": "Section 2"
+   },
+   {
+    "tag": "p",
+    "text": "2.1 The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline."
+   },
+   {
+    "tag": "p",
+    "text": "2.2 Customer response times improved after the new intake process, which routes each request to the right team on the first day."
+   },
+   {
+    "tag": "p",
+    "text": "2.3 Supplier costs increased slightly because of freight surcharges, but renegotiated packaging contracts offset most of the change."
+   },
+   {
+    "tag": "p",
+    "text": "2.4 The audit committee examined purchase approvals across all departments and found no exceptions that required further action."
+   },
+   {
+    "tag": "p",
+    "text": "2.5 Next quarter the team will pilot the scheduling tool in two locations and report the results at the planning meeting."
+   },
+   {
+    "tag": "li",
+    "text": "Point A of section 2"
+   },
+   {
+    "tag": "li",
+    "text": "Point B of section 2"
+   },
+   {
+    "tag": "h2",
+    "text": "Section 3"
+   },
+   {
+    "tag": "p",
+    "text": "3.1 The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline."
+   },
+   {
+    "tag": "p",
+    "text": "3.2 Customer response times improved after the new intake process, which routes each request to the right team on the first day."
+   },
+   {
+    "tag": "p",
+    "text": "3.3 Supplier costs increased slightly because of freight surcharges, but renegotiated packaging contracts offset most of the change."
+   },
+   {
+    "tag": "p",
+    "text": "3.4 The audit committee examined purchase approvals across all departments and found no exceptions that required further action."
+   },
+   {
+    "tag": "p",
+    "text": "3.5 Next quarter the team will pilot the scheduling tool in two locations and report the results at the planning meeting."
+   },
+   {
+    "tag": "li",
+    "text": "Point A of section 3"
+   },
+   {
+    "tag": "li",
+    "text": "Point B of section 3"
+   },
+   {
+    "tag": "h2",
+    "text": "Section 4"
+   },
+   {
+    "tag": "p",
+    "text": "4.1 The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline."
+   },
+   {
+    "tag": "p",
+    "text": "4.2 Customer response times improved after the new intake process, which routes each request to the right team on the first day."
+   },
+   {
+    "tag": "p",
+    "text": "4.3 Supplier costs increased slightly because of freight surcharges, but renegotiated packaging contracts offset most of the change."
+   },
+   {
+    "tag": "p",
+    "text": "4.4 The audit committee examined purchase approvals across all departments and found no exceptions that required further action."
+   },
+   {
+    "tag": "p",
+    "text": "4.5 Next quarter the team will pilot the scheduling tool in two locations and report the results at the planning meeting."
+   },
+   {
+    "tag": "li",
+    "text": "Point A of section 4"
+   },
+   {
+    "tag": "li",
+    "text": "Point B of section 4"
+   },
+   {
+    "tag": "h2",
+    "text": "Section 5"
+   },
+   {
+    "tag": "p",
+    "text": "5.1 The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline."
+   },
+   {
+    "tag": "p",
+    "text": "5.2 Customer response times improved after the new intake process, which routes each request to the right team on the first day."
+   },
+   {
+    "tag": "p",
+    "text": "5.3 Supplier costs increased slightly because of freight surcharges, but renegotiated packaging contracts offset most of the change."
+   },
+   {
+    "tag": "p",
+    "text": "5.4 The audit committee examined purchase approvals across all departments and found no exceptions that required further action."
+   },
+   {
+    "tag": "p",
+    "text": "5.5 Next quarter the team will pilot the scheduling tool in two locations and report the results at the planning meeting."
+   },
+   {
+    "tag": "li",
+    "text": "Point A of section 5"
+   },
+   {
+    "tag": "li",
+    "text": "Point B of section 5"
+   },
+   {
+    "tag": "h2",
+    "text": "Section 6"
+   },
+   {
+    "tag": "p",
+    "text": "6.1 The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline."
+   },
+   {
+    "tag": "p",
+    "text": "6.2 Customer response times improved after the new intake process, which routes each request to the right team on the first day."
+   },
+   {
+    "tag": "p",
+    "text": "6.3 Supplier costs increased slightly because of freight surcharges, but renegotiated packaging contracts offset most of the change."
+   },
+   {
+    "tag": "p",
+    "text": "6.4 The audit committee examined purchase approvals across all departments and found no exceptions that required further action."
+   },
+   {
+    "tag": "p",
+    "text": "6.5 Next quarter the team will pilot the scheduling tool in two locations and report the results at the planning meeting."
+   },
+   {
+    "tag": "li",
+    "text": "Point A of section 6"
+   },
+   {
+    "tag": "li",
+    "text": "Point B of section 6"
+   },
+   {
+    "tag": "h2",
+    "text": "Section 7"
+   },
+   {
+    "tag": "p",
+    "text": "7.1 The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline."
+   },
+   {
+    "tag": "p",
+    "text": "7.2 Customer response times improved after the new intake process, which routes each request to the right team on the first day."
+   },
+   {
+    "tag": "p",
+    "text": "7.3 Supplier costs increased slightly because of freight surcharges, but renegotiated packaging contracts offset most of the change."
+   },
+   {
+    "tag": "p",
+    "text": "7.4 The audit committee examined purchase approvals across all departments and found no exceptions that required further action."
+   },
+   {
+    "tag": "p",
+    "text": "7.5 Next quarter the team will pilot the scheduling tool in two locations and report the results at the planning meeting."
+   },
+   {
+    "tag": "li",
+    "text": "Point A of section 7"
+   },
+   {
+    "tag": "li",
+    "text": "Point B of section 7"
+   },
+   {
+    "tag": "h2",
+    "text": "Section 8"
+   },
+   {
+    "tag": "p",
+    "text": "8.1 The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline."
+   },
+   {
+    "tag": "p",
+    "text": "8.2 Customer response times improved after the new intake process, which routes each request to the right team on the first day."
+   },
+   {
+    "tag": "p",
+    "text": "8.3 Supplier costs increased slightly because of freight surcharges, but renegotiated packaging contracts offset most of the change."
+   },
+   {
+    "tag": "p",
+    "text": "8.4 The audit committee examined purchase approvals across all departments and found no exceptions that required further action."
+   },
+   {
+    "tag": "p",
+    "text": "8.5 Next quarter the team will pilot the scheduling tool in two locations and report the results at the planning meeting."
+   },
+   {
+    "tag": "li",
+    "text": "Point A of section 8"
+   },
+   {
+    "tag": "li",
+    "text": "Point B of section 8"
+   },
+   {
+    "tag": "h2",
+    "text": "Section 9"
+   },
+   {
+    "tag": "p",
+    "text": "9.1 The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline."
+   },
+   {
+    "tag": "p",
+    "text": "9.2 Customer response times improved after the new intake process, which routes each request to the right team on the first day."
+   },
+   {
+    "tag": "p",
+    "text": "9.3 Supplier costs increased slightly because of freight surcharges, but renegotiated packaging contracts offset most of the change."
+   },
+   {
+    "tag": "p",
+    "text": "9.4 The audit committee examined purchase approvals across all departments and found no exceptions that required further action."
+   },
+   {
+    "tag": "p",
+    "text": "9.5 Next quarter the team will pilot the scheduling tool in two locations and report the results at the planning meeting."
+   },
+   {
+    "tag": "li",
+    "text": "Point A of section 9"
+   },
+   {
+    "tag": "li",
+    "text": "Point B of section 9"
+   },
+   {
+    "tag": "h2",
+    "text": "Section 10"
+   },
+   {
+    "tag": "p",
+    "text": "10.1 The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline."
+   },
+   {
+    "tag": "p",
+    "text": "10.2 Customer response times improved after the new intake process, which routes each request to the right team on the first day."
+   },
+   {
+    "tag": "p",
+    "text": "10.3 Supplier costs increased slightly because of freight surcharges, but renegotiated packaging contracts offset most of the change."
+   },
+   {
+    "tag": "p",
+    "text": "10.4 The audit committee examined purchase approvals across all departments and found no exceptions that required further action."
+   },
+   {
+    "tag": "p",
+    "text": "10.5 Next quarter the team will pilot the scheduling tool in two locations and report the results at the planning meeting."
+   },
+   {
+    "tag": "li",
+    "text": "Point A of section 10"
+   },
+   {
+    "tag": "li",
+    "text": "Point B of section 10"
+   },
+   {
+    "tag": "h2",
+    "text": "Section 11"
+   },
+   {
+    "tag": "p",
+    "text": "11.1 The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline."
+   },
+   {
+    "tag": "p",
+    "text": "11.2 Customer response times improved after the new intake process, which routes each request to the right team on the first day."
+   },
+   {
+    "tag": "p",
+    "text": "11.3 Supplier costs increased slightly because of freight surcharges, but renegotiated packaging contracts offset most of the change."
+   },
+   {
+    "tag": "p",
+    "text": "11.4 The audit committee examined purchase approvals across all departments and found no exceptions that required further action."
+   },
+   {
+    "tag": "p",
+    "text": "11.5 Next quarter the team will pilot the scheduling tool in two locations and report the results at the planning meeting."
+   },
+   {
+    "tag": "li",
+    "text": "Point A of section 11"
+   },
+   {
+    "tag": "li",
+    "text": "Point B of section 11"
+   },
+   {
+    "tag": "h2",
+    "text": "Section 12"
+   },
+   {
+    "tag": "p",
+    "text": "12.1 The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline."
+   },
+   {
+    "tag": "p",
+    "text": "12.2 Customer response times improved after the new intake process, which routes each request to the right team on the first day."
+   },
+   {
+    "tag": "p",
+    "text": "12.3 Supplier costs increased slightly because of freight surcharges, but renegotiated packaging contracts offset most of the change."
+   },
+   {
+    "tag": "p",
+    "text": "12.4 The audit committee examined purchase approvals across all departments and found no exceptions that required further action."
+   },
+   {
+    "tag": "p",
+    "text": "12.5 Next quarter the team will pilot the scheduling tool in two locations and report the results at the planning meeting."
+   },
+   {
+    "tag": "li",
+    "text": "Point A of section 12"
+   },
+   {
+    "tag": "li",
+    "text": "Point B of section 12"
+   },
+   {
+    "tag": "h2",
+    "text": "Section 13"
+   },
+   {
+    "tag": "p",
+    "text": "13.1 The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline."
+   },
+   {
+    "tag": "p",
+    "text": "13.2 Customer response times improved after the new intake process, which routes each request to the right team on the first day."
+   },
+   {
+    "tag": "p",
+    "text": "13.3 Supplier costs increased slightly because of freight surcharges, but renegotiated packaging contracts offset most of the change."
+   },
+   {
+    "tag": "p",
+    "text": "13.4 The audit committee examined purchase approvals across all departments and found no exceptions that required further action."
+   },
+   {
+    "tag": "p",
+    "text": "13.5 Next quarter the team will pilot the scheduling tool in two locations and report the results at the planning meeting."
+   },
+   {
+    "tag": "li",
+    "text": "Point A of section 13"
+   },
+   {
+    "tag": "li",
+    "text": "Point B of section 13"
+   },
+   {
+    "tag": "h2",
+    "text": "Section 14"
+   },
+   {
+    "tag": "p",
+    "text": "14.1 The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline."
+   },
+   {
+    "tag": "p",
+    "text": "14.2 Customer response times improved after the new intake process, which routes each request to the right team on the first day."
+   },
+   {
+    "tag": "p",
+    "text": "14.3 Supplier costs increased slightly because of freight surcharges, but renegotiated packaging contracts offset most of the change."
+   },
+   {
+    "tag": "p",
+    "text": "14.4 The audit committee examined purchase approvals across all departments and found no exceptions that required further action."
+   },
+   {
+    "tag": "p",
+    "text": "14.5 Next quarter the team will pilot the scheduling tool in two locations and report the results at the planning meeting."
+   },
+   {
+    "tag": "li",
+    "text": "Point A of section 14"
+   },
+   {
+    "tag": "li",
+    "text": "Point B of section 14"
+   },
+   {
+    "tag": "h2",
+    "text": "Section 15"
+   },
+   {
+    "tag": "p",
+    "text": "15.1 The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline."
+   },
+   {
+    "tag": "p",
+    "text": "15.2 Customer response times improved after the new intake process, which routes each request to the right team on the first day."
+   },
+   {
+    "tag": "p",
+    "text": "15.3 Supplier costs increased slightly because of freight surcharges, but renegotiated packaging contracts offset most of the change."
+   },
+   {
+    "tag": "p",
+    "text": "15.4 The audit committee examined purchase approvals across all departments and found no exceptions that required further action."
+   },
+   {
+    "tag": "p",
+    "text": "15.5 Next quarter the team will pilot the scheduling tool in two locations and report the results at the planning meeting."
+   },
+   {
+    "tag": "li",
+    "text": "Point A of section 15"
+   },
+   {
+    "tag": "li",
+    "text": "Point B of section 15"
+   },
+   {
+    "tag": "h2",
+    "text": "Section 16"
+   },
+   {
+    "tag": "p",
+    "text": "16.1 The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline."
+   },
+   {
+    "tag": "p",
+    "text": "16.2 Customer response times improved after the new intake process, which routes each request to the right team on the first day."
+   },
+   {
+    "tag": "p",
+    "text": "16.3 Supplier costs increased slightly because of freight surcharges, but renegotiated packaging contracts offset most of the change."
+   },
+   {
+    "tag": "p",
+    "text": "16.4 The audit committee examined purchase approvals across all departments and found no exceptions that required further action."
+   },
+   {
+    "tag": "p",
+    "text": "16.5 Next quarter the team will pilot the scheduling tool in two locations and report the results at the planning meeting."
+   },
+   {
+    "tag": "li",
+    "text": "Point A of section 16"
+   },
+   {
+    "tag": "li",
+    "text": "Point B of section 16"
+   },
+   {
+    "tag": "h2",
+    "text": "Section 17"
+   },
+   {
+    "tag": "p",
+    "text": "17.1 The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline."
+   },
+   {
+    "tag": "p",
+    "text": "17.2 Customer response times improved after the new intake process, which routes each request to the right team on the first day."
+   },
+   {
+    "tag": "p",
+    "text": "17.3 Supplier costs increased slightly because of freight surcharges, but renegotiated packaging contracts offset most of the change."
+   },
+   {
+    "tag": "p",
+    "text": "17.4 The audit committee examined purchase approvals across all departments and found no exceptions that required further action."
+   },
+   {
+    "tag": "p",
+    "text": "17.5 Next quarter the team will pilot the scheduling tool in two locations and report the results at the planning meeting."
+   },
+   {
+    "tag": "li",
+    "text": "Point A of section 17"
+   },
+   {
+    "tag": "li",
+    "text": "Point B of section 17"
+   },
+   {
+    "tag": "h2",
+    "text": "Section 18"
+   },
+   {
+    "tag": "p",
+    "text": "18.1 The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline."
+   },
+   {
+    "tag": "p",
+    "text": "18.2 Customer response times improved after the new intake process, which routes each request to the right team on the first day."
+   },
+   {
+    "tag": "p",
+    "text": "18.3 Supplier costs increased slightly because of freight surcharges, but renegotiated packaging contracts offset most of the change."
+   },
+   {
+    "tag": "p",
+    "text": "18.4 The audit committee examined purchase approvals across all departments and found no exceptions that required further action."
+   },
+   {
+    "tag": "p",
+    "text": "18.5 Next quarter the team will pilot the scheduling tool in two locations and report the results at the planning meeting."
+   },
+   {
+    "tag": "li",
+    "text": "Point A of section 18"
+   },
+   {
+    "tag": "li",
+    "text": "Point B of section 18"
+   },
+   {
+    "tag": "h2",
+    "text": "Section 19"
+   },
+   {
+    "tag": "p",
+    "text": "19.1 The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline."
+   },
+   {
+    "tag": "p",
+    "text": "19.2 Customer response times improved after the new intake process, which routes each request to the right team on the first day."
+   },
+   {
+    "tag": "p",
+    "text": "19.3 Supplier costs increased slightly because of freight surcharges, but renegotiated packaging contracts offset most of the change."
+   },
+   {
+    "tag": "p",
+    "text": "19.4 The audit committee examined purchase approvals across all departments and found no exceptions that required further action."
+   },
+   {
+    "tag": "p",
+    "text": "19.5 Next quarter the team will pilot the scheduling tool in two locations and report the results at the planning meeting."
+   },
+   {
+    "tag": "li",
+    "text": "Point A of section 19"
+   },
+   {
+    "tag": "li",
+    "text": "Point B of section 19"
+   },
+   {
+    "tag": "h2",
+    "text": "Section 20"
+   },
+   {
+    "tag": "p",
+    "text": "20.1 The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline."
+   },
+   {
+    "tag": "p",
+    "text": "20.2 Customer response times improved after the new intake process, which routes each request to the right team on the first day."
+   },
+   {
+    "tag": "p",
+    "text": "20.3 Supplier costs increased slightly because of freight surcharges, but renegotiated packaging contracts offset most of the change."
+   },
+   {
+    "tag": "p",
+    "text": "20.4 The audit committee examined purchase approvals across all departments and found no exceptions that required further action."
+   },
+   {
+    "tag": "p",
+    "text": "20.5 Next quarter the team will pilot the scheduling tool in two locations and report the results at the planning meeting."
+   },
+   {
+    "tag": "li",
+    "text": "Point A of section 20"
+   },
+   {
+    "tag": "li",
+    "text": "Point B of section 20"
+   },
+   {
+    "tag": "h2",
+    "text": "Section 21"
+   },
+   {
+    "tag": "p",
+    "text": "21.1 The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline."
+   },
+   {
+    "tag": "p",
+    "text": "21.2 Customer response times improved after the new intake process, which routes each request to the right team on the first day."
+   },
+   {
+    "tag": "p",
+    "text": "21.3 Supplier costs increased slightly because of freight surcharges, but renegotiated packaging contracts offset most of the change."
+   },
+   {
+    "tag": "p",
+    "text": "21.4 The audit committee examined purchase approvals across all departments and found no exceptions that required further action."
+   },
+   {
+    "tag": "p",
+    "text": "21.5 Next quarter the team will pilot the scheduling tool in two locations and report the results at the planning meeting."
+   },
+   {
+    "tag": "li",
+    "text": "Point A of section 21"
+   },
+   {
+    "tag": "li",
+    "text": "Point B of section 21"
+   },
+   {
+    "tag": "h2",
+    "text": "Section 22"
+   },
+   {
+    "tag": "p",
+    "text": "22.1 The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline."
+   },
+   {
+    "tag": "p",
+    "text": "22.2 Customer response times improved after the new intake process, which routes each request to the right team on the first day."
+   },
+   {
+    "tag": "p",
+    "text": "22.3 Supplier costs increased slightly because of freight surcharges, but renegotiated packaging contracts offset most of the change."
+   },
+   {
+    "tag": "p",
+    "text": "22.4 The audit committee examined purchase approvals across all departments and found no exceptions that required further action."
+   },
+   {
+    "tag": "p",
+    "text": "22.5 Next quarter the team will pilot the scheduling tool in two locations and report the results at the planning meeting."
+   },
+   {
+    "tag": "li",
+    "text": "Point A of section 22"
+   },
+   {
+    "tag": "li",
+    "text": "Point B of section 22"
+   },
+   {
+    "tag": "h2",
+    "text": "Section 23"
+   },
+   {
+    "tag": "p",
+    "text": "23.1 The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline."
+   },
+   {
+    "tag": "p",
+    "text": "23.2 Customer response times improved after the new intake process, which routes each request to the right team on the first day."
+   },
+   {
+    "tag": "p",
+    "text": "23.3 Supplier costs increased slightly because of freight surcharges, but renegotiated packaging contracts offset most of the change."
+   },
+   {
+    "tag": "p",
+    "text": "23.4 The audit committee examined purchase approvals across all departments and found no exceptions that required further action."
+   },
+   {
+    "tag": "p",
+    "text": "23.5 Next quarter the team will pilot the scheduling tool in two locations and report the results at the planning meeting."
+   },
+   {
+    "tag": "li",
+    "text": "Point A of section 23"
+   },
+   {
+    "tag": "li",
+    "text": "Point B of section 23"
+   },
+   {
+    "tag": "h2",
+    "text": "Section 24"
+   },
+   {
+    "tag": "p",
+    "text": "24.1 The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline."
+   },
+   {
+    "tag": "p",
+    "text": "24.2 Customer response times improved after the new intake process, which routes each request to the right team on the first day."
+   },
+   {
+    "tag": "p",
+    "text": "24.3 Supplier costs increased slightly because of freight surcharges, but renegotiated packaging contracts offset most of the change."
+   },
+   {
+    "tag": "p",
+    "text": "24.4 The audit committee examined purchase approvals across all departments and found no exceptions that required further action."
+   },
+   {
+    "tag": "p",
+    "text": "24.5 Next quarter the team will pilot the scheduling tool in two locations and report the results at the planning meeting."
+   },
+   {
+    "tag": "li",
+    "text": "Point A of section 24"
+   },
+   {
+    "tag": "li",
+    "text": "Point B of section 24"
+   }
+  ]
+ },
+ {
+  "id": "PDF-WORD-14",
+  "file": "PDF-WORD-14-corrupt.pdf",
+  "bytes": 14356,
+  "sha": "6d331af3cfc9",
+  "what": "First 35% of PDF-WORD-03 then garbage — must be refused",
+  "kind": "corrupt",
+  "pages": 0
+ }
+]

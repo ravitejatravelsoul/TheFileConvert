@@ -28,7 +28,7 @@ export function rec(tool, test, verdict, detail = {}) {
   const outputs = pendingOutputs;
   pendingOutputs = [];
   if (outputs.length) {
-    detail = { ...detail, integrity: outputs.map((o) => ({ file: o.file, bytes: o.bytes, ok: o.ok, kind: o.kind, pages: o.pages, w: o.w, h: o.h, alpha: o.alpha, entries: o.entries?.length, problems: o.problems.length ? o.problems.slice(0, 4) : undefined })) };
+    detail = { ...detail, integrity: outputs.map((o) => ({ file: o.file, bytes: o.bytes, ok: o.ok, kind: o.kind, pages: o.pages, w: o.w, h: o.h, alpha: o.alpha, entries: o.entries?.length, paragraphs: o.paragraphs, tables: o.tables, pictures: o.pictures, problems: o.problems.length ? o.problems.slice(0, 4) : undefined })) };
     if (outputs.some((o) => !o.ok) && verdict !== "FAIL") {
       detail.gate = `output failed integrity validation (was ${verdict})`;
       verdict = "FAIL";

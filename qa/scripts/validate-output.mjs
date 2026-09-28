@@ -27,7 +27,7 @@ export function sniff(bytes) {
   return "unknown";
 }
 
-const EXT = { pdf: [".pdf"], jpeg: [".jpg", ".jpeg"], png: [".png"], webp: [".webp"], zip: [".zip"] };
+const EXT = { pdf: [".pdf"], jpeg: [".jpg", ".jpeg"], png: [".png"], webp: [".webp"], zip: [".zip"], docx: [".docx"] };
 
 async function validatePdf(file, bytes) {
   const r = { kind: "pdf", problems: [] };
@@ -121,7 +121,15 @@ export async function validateFile(file) {
   if (bytes.length === 0) r = { kind, problems: ["empty file"] };
   else if (kind === "pdf") r = await validatePdf(file, bytes);
   else if (kind === "jpeg" || kind === "png" || kind === "webp") r = await validateImage(kind, bytes);
-  else if (kind === "zip") {
+  else if (kind === "zip" && ext === ".docx") {
+    // Word documents: package + OOXML structure and python-docx (qa/validate/docxcheck.py).
+    try {
+      const d = JSON.parse(execFileSync("python", [path.resolve("qa/validate/docxcheck.py"), file], { encoding: "utf8", maxBuffer: 1 << 26 }).trim().split("\n").pop());
+      r = { kind: "docx", problems: d.problems, paragraphs: d.paragraphs?.length, tables: d.tables?.length, pictures: d.pictures?.length, sections: d.sections?.length, pages: d.sections?.length, docx: d };
+    } catch (e) {
+      r = { kind: "docx", problems: [`docxcheck crashed: ${String(e).slice(0, 200)}`] };
+    }
+  } else if (kind === "zip") {
     r = { kind, problems: [], entries: [] };
     try {
       const zip = await JSZip.loadAsync(bytes);

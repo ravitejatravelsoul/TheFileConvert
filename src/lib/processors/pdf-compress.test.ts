@@ -224,7 +224,7 @@ describe("target contract: small files and ICC-profile images (regression)", () 
       const r = await compressPdfToTarget(input, target, halfSize);
       expect(r.targetAchieved).toBe(true);
       expect(r.attempts).toHaveLength(0);
-      expect(new Uint8Array(await r.blob.arrayBuffer())).toEqual(input);
+      expect(Buffer.from(await r.blob.arrayBuffer()).equals(Buffer.from(input))).toBe(true); // byte-for-byte (fast compare)
     }
   });
 

@@ -2,8 +2,8 @@ import { describe, expect, it } from "vitest";
 import { TOOLS, entryKindFor, entryKindForAll, getTool, suggestionsFor, toolsInCategory } from "./registry";
 
 describe("tool registry", () => {
-  it("has exactly the nine first-launch tools, each with a matching route and FAQ", () => {
-    expect(TOOLS.map((t) => t.id)).toEqual(["compress-pdf", "compress-image", "convert-image", "pdf-to-image", "image-to-pdf", "merge-pdf", "split-pdf", "organize-pdf", "pdf-editor"]);
+  it("has exactly the ten first-launch tools, each with a matching route and FAQ", () => {
+    expect(TOOLS.map((t) => t.id)).toEqual(["compress-pdf", "compress-image", "convert-image", "pdf-to-image", "pdf-to-word", "image-to-pdf", "merge-pdf", "split-pdf", "organize-pdf", "pdf-editor"]);
     for (const t of TOOLS) {
       expect(t.href).toBe(`/${t.id}`);
       expect(t.faq.length).toBeGreaterThanOrEqual(2);
@@ -40,6 +40,7 @@ describe("smart file entry", () => {
   it("offers PDF tools for a PDF, and only multi-file tools for several files", () => {
     expect(suggestionsFor("pdf", 1)[0]).toBe("compress-pdf");
     expect(suggestionsFor("pdf", 1)).toContain("pdf-editor");
+    expect(suggestionsFor("pdf", 1)).toContain("pdf-to-word");
     expect(suggestionsFor("pdf", 3)).toEqual(["merge-pdf"]);
     expect(suggestionsFor("image", 1)).toEqual(["compress-image", "convert-image", "image-to-pdf"]);
     expect(suggestionsFor("image", 2)).toEqual(["image-to-pdf", "convert-image"]);

@@ -24,11 +24,11 @@ export default function ToolsPage() {
       <section className="relative isolate">
         <div className="hero-backdrop" aria-hidden="true" />
         <div className="container-x pb-12 pt-10 sm:pb-16 sm:pt-16">
-        <p className="kicker">Nine tools · all in your browser</p>
+        <p className="kicker">Ten tools · all in your browser</p>
         <h1 className="h1 mt-4">
           <span className="muted-display">All</span> tools.
         </h1>
-        <p className="lead mt-4 max-w-lg">Nine focused tools for PDFs and images. Each one does one job, right in your browser.</p>
+        <p className="lead mt-4 max-w-lg">Ten focused tools for PDFs and images. Each one does one job, right in your browser.</p>
         </div>
       </section>
       {ORDER.map(({ category, blurb }, i) => (

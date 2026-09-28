@@ -12,18 +12,7 @@ const TESSERACT_WORKER_PATH = "/tesseract/worker.min.js";
 const TESSERACT_CORE_PATH = "/tesseract/tesseract-core-lstm.wasm.js";
 const TESSERACT_LANG_PATH = "/tesseract/lang-data";
 
-export interface OcrLanguageOption {
-  code: string;
-  label: string;
-}
-
-/** Languages we actually ship trained data for and have verified with real fixtures.
- * Do not add a language here until it has been tested — see docs/OCR.md. */
-export const SUPPORTED_OCR_LANGUAGES: OcrLanguageOption[] = [
-  { code: "eng", label: "English" },
-  { code: "spa", label: "Spanish" },
-  { code: "fra", label: "French" },
-];
+export { SUPPORTED_OCR_LANGUAGES, type OcrLanguageOption } from "./ocr-languages";
 
 // ---------------------------------------------------------------------------
 // Per-page classification: native text vs. scanned vs. mixed
