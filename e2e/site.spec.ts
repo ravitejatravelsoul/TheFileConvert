@@ -4,10 +4,11 @@ import { addFiles, expectNoHorizontalOverflow, fx, trackPageErrors } from "./hel
 const TOOLS = [
   ["/compress-pdf", "Compress PDF"],
   ["/compress-image", "Compress Image"],
-  ["/convert-image", "Convert Images"],
-  ["/pdf-to-image", "PDF to Image"],
   ["/pdf-to-word", "PDF to Word"],
-  ["/image-to-pdf", "Images to PDF"],
+  ["/word-to-pdf", "Word to PDF"],
+  ["/pdf-to-image", "PDF to Image"],
+  ["/image-to-pdf", "Image to PDF"],
+  ["/convert-image", "Image Converter"],
   ["/merge-pdf", "Merge PDF"],
   ["/split-pdf", "Split PDF"],
   ["/organize-pdf", "Organize PDF"],
@@ -51,6 +52,23 @@ test.describe("Homepage", () => {
     await expect(page.locator("main").getByRole("button", { name: "Compress", exact: true })).toHaveCount(0);
   });
 
+  test("a Word document is offered Word to PDF and handed over; an old .doc is explained", async ({ page }) => {
+    await page.goto("/");
+    await addFiles(page, [fx("docx", "WORD-02-headings.docx")]);
+    await expect(page.locator("main").getByRole("button", { name: "Convert to PDF", exact: true })).toBeVisible();
+    await expect(page.locator("main").getByRole("button", { name: "Compress", exact: true })).toHaveCount(0);
+    await page.locator("main").getByRole("button", { name: "Convert to PDF", exact: true }).click();
+    await expect(page).toHaveURL(/\/word-to-pdf$/);
+    await expect(page.getByText("WORD-02-headings.docx")).toBeVisible();
+    await expect(page.getByRole("button", { name: "Convert to PDF" })).toBeVisible();
+
+    await page.goto("/");
+    await addFiles(page, [fx("docx", "X-legacy.doc")]);
+    await expect(page.locator("main").getByRole("alert")).toContainText("Save the document as .docx");
+    await addFiles(page, [fx("docx", "WORD-02-headings.docx"), fx("sample-a.pdf")]);
+    await expect(page.locator("main").getByRole("alert")).toContainText("one kind of file at a time");
+  });
+
   test("an unsupported file is explained, not accepted", async ({ page }) => {
     await page.goto("/");
     await addFiles(page, [fx("sample.csv")]);
@@ -77,6 +95,11 @@ test.describe("Navigation", () => {
       await expect(nav.getByRole("link").first()).toBeVisible();
       await page.keyboard.press("Escape");
     }
+    // The Convert menu reads in pairs, each direction next to its reverse.
+    await nav.getByRole("button", { name: "Convert" }).click();
+    for (const name of ["PDF to Word", "Word to PDF", "PDF to Image", "Image to PDF", "Image Converter"]) await expect(nav.getByRole("link", { name: new RegExp(`^${name}`) })).toBeVisible();
+    await nav.getByRole("link", { name: /Word to PDF/ }).click();
+    await expect(page).toHaveURL(/\/word-to-pdf$/);
     await nav.getByRole("button", { name: "Convert" }).click();
     await nav.getByRole("link", { name: /PDF to Image/ }).click();
     await expect(page).toHaveURL(/\/pdf-to-image$/);
@@ -93,10 +116,10 @@ test.describe("Navigation", () => {
     await expect(sheet).toBeHidden();
   });
 
-  test("All tools lists the ten launch tools and nothing else", async ({ page }) => {
+  test("All tools lists every launch tool and nothing else", async ({ page }) => {
     await page.goto("/tools");
     const cards = page.locator("main li a");
-    await expect(cards).toHaveCount(10);
+    await expect(cards).toHaveCount(TOOLS.length);
     for (const [href, name] of TOOLS) await expect(page.locator(`main a[href="${href}"]`)).toContainText(name);
   });
 
@@ -105,6 +128,11 @@ test.describe("Navigation", () => {
     await expect(page).toHaveURL(/\/compress-pdf$/);
     await page.goto("/convert/png-to-jpg");
     await expect(page).toHaveURL(/\/convert-image$/);
+    // Common search-style names land on the one canonical page.
+    for (const [alias, target] of [["/docx-to-pdf", "/word-to-pdf"], ["/pdf-to-docx", "/pdf-to-word"], ["/jpg-to-pdf", "/image-to-pdf"], ["/pdf-to-jpg", "/pdf-to-image"], ["/edit-pdf", "/pdf-editor"]]) {
+      await page.goto(alias);
+      await expect(page).toHaveURL(new RegExp(`${target}$`));
+    }
     const gone = await page.goto("/data/json-formatter");
     expect(gone?.status()).toBe(404);
     await expect(page.getByRole("heading", { level: 1 })).toContainText("isn’t here");
@@ -127,7 +155,7 @@ test.describe("SEO", () => {
     });
   }
 
-  test("sitemap lists the home page, tools page and all ten tools; robots points to it", async ({ request }) => {
+  test("sitemap lists the home page, tools page and every tool; robots points to it", async ({ request }) => {
     const sitemap = await (await request.get("/sitemap.xml")).text();
     for (const [href] of TOOLS) expect(sitemap).toContain(`https://thefileconvert.com${href}</loc>`);
     expect(sitemap).not.toContain("/data/");

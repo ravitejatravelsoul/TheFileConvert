@@ -26,9 +26,32 @@ const MOVED: [string, string][] = [
   ["/image", "/tools"],
 ];
 
+/** The names people type or search for, pointing at the one canonical page for each job (no duplicate pages). */
+const ALIASES: [string, string][] = [
+  ["/docx-to-pdf", "/word-to-pdf"],
+  ["/doc-to-pdf", "/word-to-pdf"],
+  ["/pdf-to-docx", "/pdf-to-word"],
+  ["/pdf-to-jpg", "/pdf-to-image"],
+  ["/pdf-to-png", "/pdf-to-image"],
+  ["/jpg-to-pdf", "/image-to-pdf"],
+  ["/png-to-pdf", "/image-to-pdf"],
+  ["/images-to-pdf", "/image-to-pdf"],
+  ["/image-converter", "/convert-image"],
+  ["/jpg-to-png", "/convert-image"],
+  ["/png-to-jpg", "/convert-image"],
+  ["/webp-to-jpg", "/convert-image"],
+  ["/webp-to-png", "/convert-image"],
+  ["/jpg-to-webp", "/convert-image"],
+  ["/png-to-webp", "/convert-image"],
+  ["/svg-to-png", "/convert-image"],
+  ["/edit-pdf", "/pdf-editor"],
+  ["/rotate-pdf", "/organize-pdf"],
+  ["/delete-pdf-pages", "/organize-pdf"],
+];
+
 const nextConfig: NextConfig = {
   async redirects() {
-    return MOVED.map(([source, destination]) => ({ source, destination, permanent: true }));
+    return [...MOVED, ...ALIASES].map(([source, destination]) => ({ source, destination, permanent: true }));
   },
 };
 

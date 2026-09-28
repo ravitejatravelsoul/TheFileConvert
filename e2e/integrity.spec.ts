@@ -118,7 +118,7 @@ test.describe("output integrity", () => {
     expect(errors).toEqual([]);
   });
 
-  test("E: a JPEG cut off halfway (decodes grey in browsers) is refused by Images to PDF and the converter", async ({ page }) => {
+  test("E: a JPEG cut off halfway (decodes grey in browsers) is refused by Image to PDF and the converter", async ({ page }) => {
     const full = fs.readFileSync(fx("qa", "img-landscape.jpg"));
     const half = { name: "half.jpg", mimeType: "image/jpeg", buffer: full.subarray(0, Math.floor(full.length / 2)) };
     await page.goto("/image-to-pdf");

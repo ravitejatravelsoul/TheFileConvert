@@ -11,7 +11,7 @@ const SETS = [
   ["Compress Image", "fs-compress-image"],
   ["Image Converter", "fs-tools-convert"],
   ["PDF → Image", "fs-tools-p2i"],
-  ["Images → PDF", "fs-tools-i2p"],
+  ["Image → PDF", "fs-tools-i2p"],
   ["Merge PDF", "fs-tools-merge"],
   ["Split PDF", "fs-tools-split"],
   ["Organize PDF", "fs-tools-organize"],
@@ -23,13 +23,16 @@ const SETS = [
   ["Privacy", "privacy"],
   ["PDF to Word", "fs-word"],
   ["PDF to Word — mobile", "fs-word-mobile"],
+  ["Word to PDF", "fs-docx"],
+  ["Word to PDF — mobile", "fs-docx-mobile"],
+  ["Journeys and round trips", "fs-journeys"],
 ];
 const EXPECT = {
   "Compress PDF": "output ≤ target and valid with every page, or — only when unreachable — honest “Target not reached” with the closest valid file; under-target input returned byte-for-byte",
   "Compress Image": "output ≤ target, decodes, same aspect, alpha kept, EXIF location/camera data dropped, upright; or honest “Target not reached”",
   "Image Converter": "right format, same pixel size (upright), alpha kept (or white under JPG), no script run / no external request",
   "PDF → Image": "one valid image per selected page, in the page's displayed orientation and proportions",
-  "Images → PDF": "one page per image, in order, right page size/orientation, transparent areas white",
+  "Image → PDF": "one page per image, in order, right page size/orientation, transparent areas white",
   "Merge PDF": "all pages in order, sizes and rotations kept; unreadable/encrypted input refused, no output",
   "Split PDF": "exactly the chosen pages, in order",
   "Organize PDF": "order, rotation, deletions and duplicates exactly as arranged",
@@ -39,6 +42,7 @@ const EXPECT = {
   "Repeat use / stale state": "the second output comes only from the second input",
   Mobile: "the same result as desktop through touch",
   Privacy: "no upload, no third-party request, nothing stored",
+  "Journeys and round trips": "each step hands its file to the next through the product's own “Continue with” (or its link), every output valid, the end result meets the goal (size target, pages, rotation, edits, text); round trips keep text, order, pictures and page count",
 };
 const fixtures = JSON.parse(fs.readFileSync("qa/fresh-scenario-fixtures/fixtures.json", "utf8"));
 const n = (v) => (typeof v === "number" ? v.toLocaleString("en-US") : v ?? "");
@@ -91,7 +95,7 @@ for (const [title, file] of SETS) {
   totals.reopened += c.ok;
   totals.corrupt += c.outputs - c.ok;
   summary.push(`| ${title} | ${rows.length} | ${c.pass} | ${c.limited} | ${c.fail} | ${c.outputs} downloaded, ${c.ok} reopened |`);
-  if (file.startsWith("fs-word")) continue; // has its own section above
+  if (file.startsWith("fs-word") || file.startsWith("fs-docx")) continue; // have their own sections above
   sections.push(`## ${title}\n\nExpected: ${EXPECT[title] ?? ""}.\n\n| Scenario | Input bytes | Options | Output bytes | Opened | Parser result (qpdf + MuPDF + pdf-lib + pdf.js / image decode / ZIP) | Visual / quality | Actual | Verdict |\n|---|---:|---|---:|---|---|---|---|---|\n${lines.join("\n")}\n`);
 }
 
@@ -126,6 +130,27 @@ The user-supplied scan (2 pages, 3,982,736 bytes) has no ground truth; its recog
 Automated regressions: \`src/lib/processors/pdf-to-word/layout.test.ts\` (paragraphs, headings, lists, tables, columns, images, characters), \`docx.test.ts\` (package validity, structure, verifier), \`e2e/pdf-to-word.spec.ts\` (native, lists, images, special characters, corrupt, password; desktop + mobile) and \`e2e/pdf-to-word-ocr.spec.ts\` (scanned, mixed, no upload; desktop + mobile).
 `;
 
+// Word → PDF: structure checks from MuPDF (qa/validate/pdfstruct.py) against what the fixture's author wrote.
+const docxRows = [...load("fs-docx"), ...load("fs-docx-mobile")].filter((r) => r.fixture);
+const docxSection = `## Word → PDF
+
+Every scenario ran through /word-to-pdf in real Chromium (desktop, then Pixel 7 touch emulation): upload the .docx → Convert to PDF → Download PDF. The fixtures were written by python-docx (\`qa/scripts/fs-docx-fixtures.py\`), not by our code. Each PDF went through the shared validator (qpdf, MuPDF, pdf-lib, pdf.js — every page rendered, blank pages flagged) and then \`qa/validate/pdfstruct.py\` (MuPDF: text, fonts, sizes, bold/italic, colours, pictures, links, vector lines, bookmarks), checked against \`qa/fresh-scenario-fixtures/docx/truth.json\`. **Recall / order** compare the PDF's text with the document's text. For visual review, page 1 of each document is shown next to an independent DOCX renderer (docx-preview) in \`qa/review/fresh-launch-polish/word-to-pdf-renders/\`; LibreOffice isn't installed here.
+
+| Fixture | Input bytes | Time | PDF bytes | Pages | Pictures | Links | Bookmarks | Recall / order | Checks | Verdict |
+|---|---:|---:|---:|---:|---:|---:|---:|---|---|---|
+${docxRows
+  .map((r) => {
+    const mobile = String(r.test).includes("[mobile]") ? " (mobile)" : "";
+    if (r.kind === "error") return `| ${r.fixture}${mobile} | ${n(r.input)} | — | — | — | — | — | — | — | refused: “${esc(r.message)}”, nothing to download | **${r.verdict}** |`;
+    if (r.error) return `| ${r.fixture}${mobile} | | | | | | | | | ${esc(r.error).slice(0, 160)} | **${r.verdict}** |`;
+    const checks = Object.entries(r.checks ?? {}).filter(([k]) => k !== "missingChars").map(([k, v]) => `${k} ${v ? "✓" : "✗"}`).join(", ");
+    return `| ${r.fixture}${mobile} | ${n(r.input)} | ${(r.ms / 1000).toFixed(1)} s | ${n(r.output)} | ${r.pages} | ${r.pictures} | ${r.links} | ${r.bookmarks} | ${r.recall ?? "—"}% / ${r.order ?? "—"}% | ${esc(checks)} | **${r.verdict}** |`;
+  })
+  .join("\n")}
+
+Automated regressions: \`src/lib/processors/word-to-pdf/word-to-pdf.test.ts\` (style chain, list numbering, tables, headers/footers and fields, special characters, error files, line breaking, alignment, page breaks, keep-with-next, footer page numbers, font glyph padding, end-to-end PDFs checked with pdf.js) and \`e2e/word-to-pdf.spec.ts\` (copy, header/footer page numbers, text, pictures, continue-to-compress, error files, no upload; desktop + mobile).
+`;
+
 const md = `# Full scenario acceptance — fresh launch
 
 Branch \`rebuild/fresh-launch\` (base commit \`${sha}\` + this change). Local production build (\`next build && next start\`), real Chromium through Playwright, every file added through the tool's own file input and every result downloaded through the tool's own Download button.
@@ -138,6 +163,7 @@ Every downloaded file goes through the shared output-integrity validator (\`qa/s
 - **PDF**: qpdf structural check + decode of every stream (\`qa/validate/pdfcheck.py\`, pikepdf ${"10.14"} / qpdf 12), MuPDF open without repair + render of every page (blank-page detection) + its warnings, pdf-lib parse, pdf.js parse + text extraction + render of every page; all four engines must agree on the page count.
 - **Image**: magic bytes match the extension, file complete (JPEG EOI / PNG IEND / WebP RIFF length), full decode (Skia), dimensions, alpha.
 - **ZIP**: opens, every entry extracts, every entry validated by its own type.
+- **DOCX**: ZIP/OOXML package (required parts, well-formed XML, content types, relationship targets, picture decode) and python-docx (\`qa/validate/docxcheck.py\`).
 
 Verdicts: **PASS** — worked and every output valid. **LIMITED** — honest, valid outcome that isn't the ideal (e.g. a target that can't be reached without wrecking the file, reported as "Target not reached" with the closest valid result). **FAIL** — wrong, dishonest, or any output invalid.
 
@@ -162,6 +188,7 @@ ${summary.join("\n")}
 PSNR/SSIM compare the output with the original — PDFs as the worst of their first six pages rendered at 50 %, images after scaling the original to the output's size. The synthetic photos carry heavy per-pixel noise (like a high-ISO sensor) so that they compress like real photos; removing that noise lowers PSNR/SSIM a lot while the picture looks the same, so values in the mid-20s dB for the noisiest fixtures (IMAGE-D/E, the scan pages) are expected and are not a visual failure. Text-only pages score 99 dB (identical render). The real user scan scores 50.8 dB / SSIM 0.9985 at 1 MB.
 
 ${wordSection}
+${docxSection}
 ## Fixtures
 
 \`qa/fresh-scenario-fixtures/\` (built by \`node qa/scripts/fs-fixtures.mjs\`, described in its README). Plus the user-supplied scan \`TheFileConvert_Scanned_OCR_Test.pdf\` (3,982,736 bytes), read in place; the editor/mobile/privacy scripts also use the first-launch set in \`qa-fixtures/fresh/\`.

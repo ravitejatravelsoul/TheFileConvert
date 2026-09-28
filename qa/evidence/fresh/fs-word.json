@@ -12,7 +12,7 @@
   "progress": [
    "Building your Word document…"
   ],
-  "ms": 917,
+  "ms": 413,
   "output": 4002,
   "docxValid": true,
   "problems": [],
@@ -63,7 +63,7 @@
   "progress": [
    "Reading page 4 of 4…"
   ],
-  "ms": 895,
+  "ms": 377,
   "output": 4291,
   "docxValid": true,
   "problems": [],
@@ -114,8 +114,8 @@
   "progress": [
    "Building your Word document…"
   ],
-  "ms": 362,
-  "output": 4195,
+  "ms": 369,
+  "output": 4196,
   "docxValid": true,
   "problems": [],
   "paragraphs": 10,
@@ -143,7 +143,7 @@
   "integrity": [
    {
     "file": "word-PDFWORD03-PDF-WORD-03-headings.docx",
-    "bytes": 4195,
+    "bytes": 4196,
     "ok": true,
     "kind": "docx",
     "pages": 1,
@@ -163,11 +163,9 @@
   "input": 54759,
   "meta": "55 KB · 1 page · Text PDF",
   "ocrNote": false,
-  "progress": [
-   "Building your Word document…"
-  ],
-  "ms": 378,
-  "output": 3890,
+  "progress": [],
+  "ms": 371,
+  "output": 3891,
   "docxValid": true,
   "problems": [],
   "paragraphs": 5,
@@ -195,7 +193,7 @@
   "integrity": [
    {
     "file": "word-PDFWORD04-PDF-WORD-04-bold-italic.docx",
-    "bytes": 3890,
+    "bytes": 3891,
     "ok": true,
     "kind": "docx",
     "pages": 1,
@@ -215,11 +213,9 @@
   "input": 40493,
   "meta": "40 KB · 1 page · Text PDF",
   "ocrNote": false,
-  "progress": [
-   "Building your Word document…"
-  ],
-  "ms": 398,
-  "output": 3960,
+  "progress": [],
+  "ms": 366,
+  "output": 3961,
   "docxValid": true,
   "problems": [],
   "paragraphs": 10,
@@ -247,7 +243,7 @@
   "integrity": [
    {
     "file": "word-PDFWORD05-PDF-WORD-05-lists.docx",
-    "bytes": 3960,
+    "bytes": 3961,
     "ok": true,
     "kind": "docx",
     "pages": 1,
@@ -267,10 +263,8 @@
   "input": 39069,
   "meta": "39 KB · 1 page · Text PDF",
   "ocrNote": false,
-  "progress": [
-   "Building your Word document…"
-  ],
-  "ms": 391,
+  "progress": [],
+  "ms": 371,
   "output": 4152,
   "docxValid": true,
   "problems": [],
@@ -321,8 +315,8 @@
   "progress": [
    "Reading page 1 of 1…"
   ],
-  "ms": 898,
-  "output": 425435,
+  "ms": 910,
+  "output": 425436,
   "docxValid": true,
   "problems": [],
   "paragraphs": 4,
@@ -349,7 +343,7 @@
   "integrity": [
    {
     "file": "word-PDFWORD07-PDF-WORD-07-images.docx",
-    "bytes": 425435,
+    "bytes": 425436,
     "ok": true,
     "kind": "docx",
     "pages": 1,
@@ -369,11 +363,9 @@
   "input": 40941,
   "meta": "41 KB · 1 page · Text PDF",
   "ocrNote": false,
-  "progress": [
-   "Building your Word document…"
-  ],
-  "ms": 384,
-  "output": 4175,
+  "progress": [],
+  "ms": 379,
+  "output": 4176,
   "docxValid": true,
   "problems": [],
   "paragraphs": 11,
@@ -400,7 +392,7 @@
   "integrity": [
    {
     "file": "word-PDFWORD08-PDF-WORD-08-two-column.docx",
-    "bytes": 4175,
+    "bytes": 4176,
     "ok": true,
     "kind": "docx",
     "pages": 1,
@@ -422,9 +414,10 @@
   "ocrNote": true,
   "progress": [
    "Reading page 1 of 1…",
-   "Recognizing page 1 of 1…"
+   "Recognizing page 1 of 1…",
+   "Building your Word document…"
   ],
-  "ms": 6557,
+  "ms": 5003,
   "output": 3998,
   "docxValid": true,
   "problems": [],
@@ -478,8 +471,8 @@
    "Recognizing page 1 of 1…",
    "Building your Word document…"
   ],
-  "ms": 3973,
-  "output": 4320,
+  "ms": 3467,
+  "output": 4321,
   "docxValid": true,
   "problems": [],
   "paragraphs": 15,
@@ -506,7 +499,7 @@
   "integrity": [
    {
     "file": "word-PDFWORD10-PDF-WORD-10-mixed.docx",
-    "bytes": 4320,
+    "bytes": 4321,
     "ok": true,
     "kind": "docx",
     "pages": 3,
@@ -527,9 +520,9 @@
   "meta": "40 KB · 2 pages · Text PDF",
   "ocrNote": false,
   "progress": [
-   "Reading page 2 of 2…"
+   "Building your Word document…"
   ],
-  "ms": 899,
+  "ms": 387,
   "output": 4274,
   "docxValid": true,
   "problems": [],
@@ -576,10 +569,8 @@
   "input": 60660,
   "meta": "61 KB · 1 page · Text PDF",
   "ocrNote": false,
-  "progress": [
-   "Reading page 1 of 1…"
-  ],
-  "ms": 918,
+  "progress": [],
+  "ms": 381,
   "output": 4144,
   "docxValid": true,
   "problems": [],
@@ -628,11 +619,10 @@
   "meta": "101 KB · 24 pages · Text PDF",
   "ocrNote": false,
   "progress": [
-   "Reading page 3 of 24…",
-   "Building your Word document…"
+   "Reading page 5 of 24…"
   ],
-  "ms": 910,
-  "output": 5096,
+  "ms": 880,
+  "output": 5097,
   "docxValid": true,
   "problems": [],
   "paragraphs": 192,
@@ -658,7 +648,7 @@
   "integrity": [
    {
     "file": "word-PDFWORD13-PDF-WORD-13-large-24-pages.docx",
-    "bytes": 5096,
+    "bytes": 5097,
     "ok": true,
     "kind": "docx",
     "pages": 24,
@@ -692,8 +682,8 @@
    "Recognizing page 1 of 2…",
    "Recognizing page 2 of 2…"
   ],
-  "ms": 12266,
-  "output": 4657,
+  "ms": 9570,
+  "output": 4659,
   "docxValid": true,
   "problems": [],
   "paragraphs": 18,
@@ -715,7 +705,7 @@
   "integrity": [
    {
     "file": "word-REALuserscan-TheFileConvert_Scanned_OCR_Test.docx",
-    "bytes": 4657,
+    "bytes": 4659,
     "ok": true,
     "kind": "docx",
     "pages": 2,

@@ -1,0 +1,575 @@
+[
+ {
+  "tool": "Word to PDF",
+  "test": "WORD-01-simple [mobile]",
+  "verdict": "PASS",
+  "fixture": "WORD-01-simple",
+  "kind": "docx",
+  "input": 37010,
+  "meta": "37 KB · Word document · 1 page",
+  "ms": 403,
+  "output": 10608,
+  "pages": 1,
+  "pictures": 0,
+  "links": 0,
+  "bookmarks": 0,
+  "fonts": [
+   "LiberationSerif-9668"
+  ],
+  "recall": 100,
+  "order": 100,
+  "checks": {
+   "pages": true
+  },
+  "uploads": [],
+  "integrity": [
+   {
+    "file": "w2p-WORD-01-simple-m-WORD-01-simple.pdf",
+    "bytes": 10608,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 1
+   }
+  ]
+ },
+ {
+  "tool": "Word to PDF",
+  "test": "WORD-02-headings [mobile]",
+  "verdict": "PASS",
+  "fixture": "WORD-02-headings",
+  "kind": "docx",
+  "input": 36892,
+  "meta": "37 KB · Word document · 1 page",
+  "ms": 375,
+  "output": 17151,
+  "pages": 1,
+  "pictures": 0,
+  "links": 0,
+  "bookmarks": 5,
+  "fonts": [
+   "Carlito-Bold-9668",
+   "LiberationSerif-250"
+  ],
+  "recall": 100,
+  "order": 100,
+  "checks": {
+   "pages": true,
+   "headings": true,
+   "bookmarks": true
+  },
+  "uploads": [],
+  "integrity": [
+   {
+    "file": "w2p-WORD-02-headings-m-WORD-02-headings.pdf",
+    "bytes": 17151,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 1
+   }
+  ]
+ },
+ {
+  "tool": "Word to PDF",
+  "test": "WORD-03-formatting [mobile]",
+  "verdict": "PASS",
+  "fixture": "WORD-03-formatting",
+  "kind": "docx",
+  "input": 36903,
+  "meta": "37 KB · Word document · 1 page",
+  "ms": 486,
+  "output": 40926,
+  "pages": 1,
+  "pictures": 0,
+  "links": 0,
+  "bookmarks": 0,
+  "fonts": [
+   "Carlito-Regular-6837",
+   "LiberationMono-6611",
+   "LiberationSans-578",
+   "LiberationSerif-2163",
+   "LiberationSerif-Bold-4824",
+   "LiberationSerif-BoldItalic-7592",
+   "LiberationSerif-Italic-5845"
+  ],
+  "recall": 100,
+  "order": 100,
+  "checks": {
+   "pages": true,
+   "sizes": true,
+   "fonts": true,
+   "bold": true,
+   "italic": true,
+   "underline": true,
+   "color": true
+  },
+  "uploads": [],
+  "integrity": [
+   {
+    "file": "w2p-WORD-03-formatting-m-WORD-03-formatting.pdf",
+    "bytes": 40926,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 1
+   }
+  ]
+ },
+ {
+  "tool": "Word to PDF",
+  "test": "WORD-04-lists [mobile]",
+  "verdict": "PASS",
+  "fixture": "WORD-04-lists",
+  "kind": "docx",
+  "input": 36772,
+  "meta": "37 KB · Word document · 1 page",
+  "ms": 362,
+  "output": 11291,
+  "pages": 1,
+  "pictures": 0,
+  "links": 0,
+  "bookmarks": 0,
+  "fonts": [
+   "LiberationSerif-4824"
+  ],
+  "recall": 100,
+  "order": 100,
+  "checks": {
+   "pages": true,
+   "bullets": true,
+   "numbers": true,
+   "nested": true
+  },
+  "uploads": [],
+  "integrity": [
+   {
+    "file": "w2p-WORD-04-lists-m-WORD-04-lists.pdf",
+    "bytes": 11291,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 1
+   }
+  ]
+ },
+ {
+  "tool": "Word to PDF",
+  "test": "WORD-05-table [mobile]",
+  "verdict": "PASS",
+  "fixture": "WORD-05-table",
+  "kind": "docx",
+  "input": 36920,
+  "meta": "37 KB · Word document · 1 page",
+  "ms": 382,
+  "output": 15924,
+  "pages": 1,
+  "pictures": 0,
+  "links": 0,
+  "bookmarks": 0,
+  "fonts": [
+   "LiberationSerif-7959",
+   "LiberationSerif-Bold-2163"
+  ],
+  "recall": 100,
+  "order": 100,
+  "checks": {
+   "pages": true,
+   "tableRow": true,
+   "tableBorders": true
+  },
+  "uploads": [],
+  "integrity": [
+   {
+    "file": "w2p-WORD-05-table-m-WORD-05-table.pdf",
+    "bytes": 15924,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 1
+   }
+  ]
+ },
+ {
+  "tool": "Word to PDF",
+  "test": "WORD-06-images [mobile]",
+  "verdict": "PASS",
+  "fixture": "WORD-06-images",
+  "kind": "docx",
+  "input": 57489,
+  "meta": "57 KB · Word document · 1 page",
+  "ms": 429,
+  "output": 126005,
+  "pages": 1,
+  "pictures": 2,
+  "links": 0,
+  "bookmarks": 1,
+  "fonts": [
+   "Carlito-Bold-5824",
+   "LiberationSerif-1848"
+  ],
+  "recall": 100,
+  "order": 100,
+  "checks": {
+   "pages": true,
+   "images": true,
+   "aspect": true
+  },
+  "uploads": [],
+  "integrity": [
+   {
+    "file": "w2p-WORD-06-images-m-WORD-06-images.pdf",
+    "bytes": 126005,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 1
+   }
+  ]
+ },
+ {
+  "tool": "Word to PDF",
+  "test": "WORD-07-page-breaks [mobile]",
+  "verdict": "PASS",
+  "fixture": "WORD-07-page-breaks",
+  "kind": "docx",
+  "input": 36668,
+  "meta": "37 KB · Word document · 3 pages",
+  "ms": 387,
+  "output": 12239,
+  "pages": 3,
+  "pictures": 0,
+  "links": 0,
+  "bookmarks": 3,
+  "fonts": [
+   "Carlito-Bold-8659",
+   "LiberationSerif-5824"
+  ],
+  "recall": 100,
+  "order": 100,
+  "checks": {
+   "pages": true,
+   "perPage": true
+  },
+  "uploads": [],
+  "integrity": [
+   {
+    "file": "w2p-WORD-07-page-breaks-m-WORD-07-page-breaks.pdf",
+    "bytes": 12239,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 3
+   }
+  ]
+ },
+ {
+  "tool": "Word to PDF",
+  "test": "WORD-08-special-characters [mobile]",
+  "verdict": "PASS",
+  "fixture": "WORD-08-special-characters",
+  "kind": "docx",
+  "input": 36901,
+  "meta": "37 KB · Word document · 1 page",
+  "ms": 395,
+  "output": 20825,
+  "pages": 1,
+  "pictures": 0,
+  "links": 0,
+  "bookmarks": 0,
+  "fonts": [
+   "DejaVuSans-2708",
+   "LiberationSerif-979"
+  ],
+  "recall": 100,
+  "order": 100,
+  "checks": {
+   "pages": true,
+   "chars": true
+  },
+  "uploads": [],
+  "integrity": [
+   {
+    "file": "w2p-WORD-08-special-characters-m-WORD-08-special-characters.pdf",
+    "bytes": 20825,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 1
+   }
+  ]
+ },
+ {
+  "tool": "Word to PDF",
+  "test": "WORD-09-alignment [mobile]",
+  "verdict": "PASS",
+  "fixture": "WORD-09-alignment",
+  "kind": "docx",
+  "input": 36858,
+  "meta": "37 KB · Word document · 1 page",
+  "ms": 311,
+  "output": 10653,
+  "pages": 1,
+  "pictures": 0,
+  "links": 0,
+  "bookmarks": 0,
+  "fonts": [
+   "LiberationSerif-4734"
+  ],
+  "recall": 100,
+  "order": 100,
+  "checks": {
+   "pages": true,
+   "align": true,
+   "justified": true
+  },
+  "uploads": [],
+  "integrity": [
+   {
+    "file": "w2p-WORD-09-alignment-m-WORD-09-alignment.pdf",
+    "bytes": 10653,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 1
+   }
+  ]
+ },
+ {
+  "tool": "Word to PDF",
+  "test": "WORD-10-header-footer [mobile]",
+  "verdict": "PASS",
+  "fixture": "WORD-10-header-footer",
+  "kind": "docx",
+  "input": 38142,
+  "meta": "38 KB · Word document · 3 pages",
+  "ms": 376,
+  "output": 17531,
+  "pages": 3,
+  "pictures": 0,
+  "links": 0,
+  "bookmarks": 3,
+  "fonts": [
+   "Carlito-Bold-8268",
+   "LiberationSerif-1733"
+  ],
+  "recall": 100,
+  "order": 100,
+  "checks": {
+   "pages": true,
+   "header": true,
+   "footer": true
+  },
+  "uploads": [],
+  "integrity": [
+   {
+    "file": "w2p-WORD-10-header-footer-m-WORD-10-header-footer.pdf",
+    "bytes": 17531,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 3
+   }
+  ]
+ },
+ {
+  "tool": "Word to PDF",
+  "test": "WORD-11-multipage [mobile]",
+  "verdict": "PASS",
+  "fixture": "WORD-11-multipage",
+  "kind": "docx",
+  "input": 38643,
+  "meta": "39 KB · Word document · 23 pages",
+  "ms": 758,
+  "output": 67957,
+  "pages": 23,
+  "pictures": 0,
+  "links": 0,
+  "bookmarks": 36,
+  "fonts": [
+   "Carlito-Bold-5864",
+   "LiberationSerif-4381"
+  ],
+  "recall": 100,
+  "order": 100,
+  "checks": {
+   "pages": true,
+   "bookmarkCount": true
+  },
+  "uploads": [],
+  "integrity": [
+   {
+    "file": "w2p-WORD-11-multipage-m-WORD-11-multipage.pdf",
+    "bytes": 67957,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 23
+   }
+  ]
+ },
+ {
+  "tool": "Word to PDF",
+  "test": "WORD-12-complex [mobile]",
+  "verdict": "PASS",
+  "fixture": "WORD-12-complex",
+  "kind": "docx",
+  "input": 41716,
+  "meta": "42 KB · Word document · 2 pages",
+  "ms": 490,
+  "output": 37733,
+  "pages": 2,
+  "pictures": 1,
+  "links": 1,
+  "bookmarks": 5,
+  "fonts": [
+   "Carlito-Bold-4734",
+   "Carlito-Regular-7312",
+   "LiberationSerif-4533",
+   "LiberationSerif-Bold-2514"
+  ],
+  "recall": 100,
+  "order": 100,
+  "checks": {
+   "pages": true,
+   "images": true,
+   "header": true,
+   "links": true,
+   "landscape": true,
+   "leader": true
+  },
+  "uploads": [],
+  "integrity": [
+   {
+    "file": "w2p-WORD-12-complex-m-WORD-12-complex.pdf",
+    "bytes": 37733,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 2
+   }
+  ]
+ },
+ {
+  "tool": "Word to PDF",
+  "test": "WORD-15-photos [mobile]",
+  "verdict": "PASS",
+  "fixture": "WORD-15-photos",
+  "kind": "docx",
+  "input": 3646378,
+  "meta": "3.65 MB · Word document · 2 pages",
+  "ms": 1003,
+  "output": 3639698,
+  "pages": 2,
+  "pictures": 3,
+  "links": 0,
+  "bookmarks": 1,
+  "fonts": [
+   "Carlito-Bold-5824",
+   "LiberationSerif-1848"
+  ],
+  "recall": 100,
+  "order": 100,
+  "checks": {
+   "pages": true,
+   "images": true
+  },
+  "uploads": [],
+  "integrity": [
+   {
+    "file": "w2p-WORD-15-photos-m-WORD-15-photos.pdf",
+    "bytes": 3639698,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 2
+   }
+  ]
+ },
+ {
+  "tool": "Word to PDF",
+  "test": "WORD-13-corrupt [mobile]",
+  "verdict": "PASS",
+  "fixture": "WORD-13-corrupt",
+  "kind": "error",
+  "input": 22206,
+  "message": "This Word document couldn't be read. It may be damaged or incomplete.",
+  "convertOffered": false
+ },
+ {
+  "tool": "Word to PDF",
+  "test": "X-zero-byte [mobile]",
+  "verdict": "PASS",
+  "fixture": "X-zero-byte",
+  "kind": "error",
+  "input": 0,
+  "message": "“X-zero-byte.docx” is empty.",
+  "convertOffered": false
+ },
+ {
+  "tool": "Word to PDF",
+  "test": "X-fake [mobile]",
+  "verdict": "PASS",
+  "fixture": "X-fake",
+  "kind": "error",
+  "input": 44,
+  "message": "This file isn't a Word document. Word to PDF works with .docx files.",
+  "convertOffered": false
+ },
+ {
+  "tool": "Word to PDF",
+  "test": "X-legacy [mobile]",
+  "verdict": "PASS",
+  "fixture": "X-legacy",
+  "kind": "error",
+  "input": 4608,
+  "message": "“X-legacy.doc” is an older Word 97–2003 file (.doc). Open it in Word, Google Docs or LibreOffice, save it as .docx, then add it here.",
+  "convertOffered": false
+ },
+ {
+  "tool": "Word to PDF",
+  "test": "X-encrypted [mobile]",
+  "verdict": "PASS",
+  "fixture": "X-encrypted",
+  "kind": "error",
+  "input": 42496,
+  "message": "This Word document is password-protected. Open it in Word, remove the password (File → Info → Protect Document), save it, then try again.",
+  "convertOffered": false
+ },
+ {
+  "tool": "Word to PDF",
+  "test": "X-spreadsheet [mobile]",
+  "verdict": "PASS",
+  "fixture": "X-spreadsheet",
+  "kind": "error",
+  "input": 438,
+  "message": "This file isn't a Word document. Word to PDF works with .docx files.",
+  "convertOffered": false
+ },
+ {
+  "tool": "Word to PDF",
+  "test": "WORD-14-from-pdf-to-word [mobile]",
+  "verdict": "PASS",
+  "fixture": "WORD-14-from-pdf-to-word",
+  "kind": "docx",
+  "input": 4195,
+  "meta": "4.2 KB · Word document · 1 page",
+  "ms": 297,
+  "output": 16894,
+  "pages": 1,
+  "pictures": 0,
+  "links": 0,
+  "bookmarks": 5,
+  "fonts": [
+   "LiberationSans-250",
+   "LiberationSans-Bold-9668"
+  ],
+  "recall": 100,
+  "order": 100,
+  "checks": {
+   "pages": true
+  },
+  "uploads": [],
+  "integrity": [
+   {
+    "file": "w2p-WORD-14-from-pdf-to-word-m-WORD-14-from-pdf-to-word.pdf",
+    "bytes": 16894,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 1
+   }
+  ]
+ },
+ {
+  "tool": "Word to PDF",
+  "test": "console errors [mobile]",
+  "verdict": "PASS"
+ }
+]

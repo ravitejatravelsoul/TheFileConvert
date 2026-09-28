@@ -2,7 +2,8 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Working } from "@/components/tool/Feedback";
-import { IconClose, IconScan, IconWarning } from "@/components/icons";
+import { ContinueWith } from "@/components/tool/ContinueWith";
+import { IconCheck, IconClose, IconScan, IconWarning } from "@/components/icons";
 import { triggerDownload } from "@/lib/download";
 import { safeOutputName } from "@/lib/format";
 import { viewportDimensions, computeFitZoom } from "@/lib/editor/coordinates";
@@ -188,9 +189,14 @@ export default function EditorWorkspace({ file, onExit }: { file: File; onExit: 
     return () => window.removeEventListener("beforeunload", onBeforeUnload);
   }, [api.canUndo]);
 
+  // After a download, offer the next step (compress, merge, Word) without re-picking the file.
+  const [exported, setExported] = useState<File | null>(null);
   const handleExport = useCallback(async () => {
     const blob = await api.exportDocument();
-    if (blob) triggerDownload(safeOutputName(fileName, "edited", "pdf"), blob);
+    if (!blob) return;
+    const name = safeOutputName(fileName, "edited", "pdf");
+    triggerDownload(name, blob);
+    setExported(new File([blob], name, { type: "application/pdf" }));
   }, [api, fileName]);
 
   function handleImagePicked(file: File | undefined) {
@@ -315,6 +321,23 @@ export default function EditorWorkspace({ file, onExit }: { file: File; onExit: 
         <div className="relative flex min-w-0 flex-1 flex-col">
           {/* Prompts that appear while you're about to tap or drag on the page float over it
               instead of pushing it down, so the page never moves under the pointer. */}
+          {/* After a download: the next step, floating over the canvas so the page never shifts under the pointer. */}
+          {exported && !api.exportError && !(pendingPlacement || state.cropDraft || state.activeTool === "crop") && (
+            <div className="pointer-events-none absolute inset-x-0 top-3 z-10 flex justify-center px-3">
+              <div role="status" className="animate-sheet pointer-events-auto relative flex max-w-full flex-wrap items-center gap-x-3 gap-y-2 rounded-[var(--radius-lg)] border border-[var(--line)] bg-[var(--surface)] py-2 pl-4 pr-12 text-sm shadow-[var(--shadow-3)]">
+                <IconCheck className="h-4 w-4 shrink-0 text-[var(--success)]" strokeWidth={2.6} />
+                <span className="min-w-0 max-w-[16rem] truncate">
+                  <strong className="font-semibold">Downloaded</strong> {exported.name}
+                </span>
+                <span data-testid="editor-continue">
+                  <ContinueWith files={[exported]} tools={["compress-pdf", "merge-pdf", "pdf-to-word"]} />
+                </span>
+                <button type="button" onClick={() => setExported(null)} aria-label="Dismiss" className="absolute right-1.5 top-1.5 inline-flex h-9 w-9 items-center justify-center rounded-full hover:bg-black/5 [@media(pointer:coarse)]:h-11 [@media(pointer:coarse)]:w-11">
+                  <IconClose className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+          )}
           {(pendingPlacement || state.cropDraft || state.activeTool === "crop") && (
             <div className="pointer-events-none absolute inset-x-0 top-3 z-10 flex justify-center px-3">
               {/* Only a prompt with buttons takes touches; a plain instruction lets a drag that starts under it through to the page. */}

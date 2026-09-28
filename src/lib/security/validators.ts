@@ -23,15 +23,22 @@ export async function validateFileForTool(file: File, tool: ToolInputRules): Pro
   }
 
   const detected = await detectFile(file);
+  const ext = detected.extension.toLowerCase();
+  const takesWord = tool.acceptedExtensions.includes("docx");
+  if (takesWord && ext === "doc") {
+    return { valid: false, error: `“${file.name}” is an older Word 97–2003 file (.doc). Open it in Word, Google Docs or LibreOffice, save it as .docx, then add it here.` };
+  }
   if (!matchesAcceptedTypes(detected.extension, detected.mimeType, tool.acceptedExtensions, tool.acceptedMimeTypes)) {
-    return { valid: false, error: `“${file.name}” isn't supported here. ${tool.name} takes ${describeAccepted(tool)}.` };
+    // Point people who picked the wrong direction to the tool that does what they want.
+    const hint = !takesWord && (ext === "docx" || ext === "doc") ? " To turn a Word document into a PDF, use Word to PDF." : "";
+    return { valid: false, error: `“${file.name}” isn't supported here. ${tool.name} takes ${describeAccepted(tool)}.${hint}` };
   }
 
   return { valid: true };
 }
 
 function describeAccepted(tool: ToolInputRules): string {
-  const label: Record<string, string> = { jpg: "JPG", jpeg: "JPG", png: "PNG", webp: "WebP", svg: "SVG", pdf: "PDF" };
+  const label: Record<string, string> = { jpg: "JPG", jpeg: "JPG", png: "PNG", webp: "WebP", svg: "SVG", pdf: "PDF", docx: "Word (.docx)" };
   const exts = [...new Set(tool.acceptedExtensions.map((e) => label[e] ?? e.toUpperCase()))];
   if (exts.length === 1) return `${exts[0]} files`;
   return `${exts.slice(0, -1).join(", ")} or ${exts[exts.length - 1]} files`;

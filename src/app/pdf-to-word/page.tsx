@@ -20,7 +20,7 @@ export default function Page() {
         { title: "Scanned pages", body: "They're recognised with OCR on this device. Check names, dates and amounts against the original — poor scans can be misread." },
         { title: "Two columns", body: "Newsletter-style columns are read column by column, so sentences stay in order." },
       ]}
-      related={["pdf-editor", "compress-pdf", "pdf-to-image"]}
+      related={["word-to-pdf", "pdf-editor", "compress-pdf"]}
     >
       <PdfToWordTool />
     </ToolPage>

@@ -7,7 +7,7 @@ import { pageMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = pageMetadata({
   title: "All tools",
-  description: "Every TheFileConvert tool in one place: compress, convert, organize and edit PDFs and images in your browser.",
+  description: "Every TheFileConvert tool in one place: compress, convert, organize and edit PDFs, Word documents and images in your browser.",
   path: "/tools",
 });
 
@@ -24,11 +24,11 @@ export default function ToolsPage() {
       <section className="relative isolate">
         <div className="hero-backdrop" aria-hidden="true" />
         <div className="container-x pb-12 pt-10 sm:pb-16 sm:pt-16">
-        <p className="kicker">Ten tools · all in your browser</p>
+        <p className="kicker">Every tool · all in your browser</p>
         <h1 className="h1 mt-4">
           <span className="muted-display">All</span> tools.
         </h1>
-        <p className="lead mt-4 max-w-lg">Ten focused tools for PDFs and images. Each one does one job, right in your browser.</p>
+        <p className="lead mt-4 max-w-lg">Focused tools for PDFs, Word documents and images. Each one does one job, right in your browser.</p>
         </div>
       </section>
       {ORDER.map(({ category, blurb }, i) => (

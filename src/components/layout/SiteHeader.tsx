@@ -173,7 +173,7 @@ function NavMenu({
             onClick={() => setOpen(null)}
             className="flex items-center justify-between border-t border-[var(--line)] bg-[var(--band)] px-5 py-3 text-sm font-semibold text-[var(--ink)] hover:bg-[var(--surface-2)]"
           >
-            See all ten tools
+            See all tools
             <IconArrowRight className="h-4 w-4" />
           </Link>
         </div>

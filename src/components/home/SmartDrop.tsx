@@ -7,10 +7,10 @@ import { Dropzone } from "@/components/tool/Dropzone";
 import { ToolIcon } from "@/components/brand/ToolIcon";
 import { IconArrowRight, IconClose, IconImage, IconPdf } from "@/components/icons";
 import { setPendingFiles } from "@/lib/file-handoff";
-import { entryKindFor, entryKindForAll, getTool, suggestionsFor } from "@/lib/tools/registry";
+import { DOCX_MIME, entryKindFor, entryKindForAll, getTool, suggestionsFor } from "@/lib/tools/registry";
 import { formatSize } from "@/lib/size";
 
-const ACCEPT = ".pdf,.jpg,.jpeg,.png,.webp,.svg,application/pdf,image/jpeg,image/png,image/webp,image/svg+xml";
+const ACCEPT = `.pdf,.docx,.doc,.jpg,.jpeg,.png,.webp,.svg,application/pdf,${DOCX_MIME},application/msword,image/jpeg,image/png,image/webp,image/svg+xml`;
 
 /**
  * The homepage's one big entry point: drop any supported file and get the tools that fit it,
@@ -31,16 +31,14 @@ export function SmartDrop() {
 
   function take(picked: File[]) {
     const kindsNow = new Set(picked.map(entryKindFor));
-    if (kindsNow.has("unsupported")) {
-      setProblem("That file type isn't supported yet. TheFileConvert works with PDF, JPG, PNG, WebP and SVG files.");
+    const fail = (message: string) => {
+      setProblem(message);
       setFiles([]);
-      return;
-    }
-    if (kindsNow.has("pdf") && kindsNow.size > 1) {
-      setProblem("Drop PDFs or images, not both at once — they go to different tools.");
-      setFiles([]);
-      return;
-    }
+    };
+    if (picked.some((f) => /\.doc$/i.test(f.name))) return fail("Older .doc files (Word 97–2003) can't be converted yet. Save the document as .docx in Word, Google Docs or LibreOffice, then drop it here.");
+    if (kindsNow.has("unsupported")) return fail("That file type isn't supported yet. TheFileConvert works with PDF, Word (.docx), JPG, PNG, WebP and SVG files.");
+    if ((kindsNow.has("pdf") || kindsNow.has("word")) && kindsNow.size > 1) return fail("Drop one kind of file at a time — PDFs, Word documents and images go to different tools.");
+    if (kindsNow.has("word") && picked.length > 1) return fail("Word to PDF converts one document at a time — drop a single .docx.");
     setProblem(null);
     setFiles(picked);
   }
@@ -53,11 +51,20 @@ export function SmartDrop() {
   if (files.length && suggestions.length) {
     const first = files[0];
     const isPdf = kind === "pdf";
+    const isWord = kind === "word";
     return (
       <div ref={panelRef} tabIndex={-1} className="animate-sheet rounded-[var(--radius-xl)] border border-[var(--line)] bg-[var(--surface)] p-4 outline-none sm:p-6" aria-live="polite">
         <div className="flex items-center gap-3 rounded-[var(--radius-md)] border border-[var(--line)] bg-[var(--band)] p-2.5">
           <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[12px] bg-[var(--ink)] text-white shadow-[var(--shadow-button)]">
-            {isPdf ? <IconPdf className="h-5 w-5" /> : <IconImage className="h-5 w-5" />}
+            {isWord ? (
+              <span aria-hidden="true" className="text-base font-bold">
+                W
+              </span>
+            ) : isPdf ? (
+              <IconPdf className="h-5 w-5" />
+            ) : (
+              <IconImage className="h-5 w-5" />
+            )}
           </span>
           <div className="min-w-0 flex-1 text-left">
             <p className="truncate font-semibold tracking-[-0.01em]">{files.length === 1 ? first.name : `${files.length} ${isPdf ? "PDFs" : "images"}`}</p>
@@ -94,7 +101,7 @@ export function SmartDrop() {
 
   return (
     <div className="space-y-3">
-      <Dropzone accept={ACCEPT} multiple onFiles={take} title="Drop a PDF or image" buttonLabel="Choose file" hint="Files stay on your device" />
+      <Dropzone accept={ACCEPT} multiple onFiles={take} title="Drop a PDF, Word file or image" buttonLabel="Choose file" hint="Files stay on your device" />
       {problem && (
         <p role="alert" className="text-sm font-medium text-[var(--danger)]">
           {problem}
@@ -115,6 +122,7 @@ function actionLabel(id: ReturnType<typeof suggestionsFor>[number], count: numbe
     "compress-pdf": "Compress",
     "pdf-editor": "Edit",
     "pdf-to-word": "Convert to Word",
+    "word-to-pdf": "Convert to PDF",
     "merge-pdf": count > 1 ? `Merge ${count} PDFs` : "Merge with other PDFs",
     "split-pdf": "Split",
     "pdf-to-image": "Convert to images",

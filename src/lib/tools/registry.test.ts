@@ -2,13 +2,19 @@ import { describe, expect, it } from "vitest";
 import { TOOLS, entryKindFor, entryKindForAll, getTool, suggestionsFor, toolsInCategory } from "./registry";
 
 describe("tool registry", () => {
-  it("has exactly the ten first-launch tools, each with a matching route and FAQ", () => {
-    expect(TOOLS.map((t) => t.id)).toEqual(["compress-pdf", "compress-image", "convert-image", "pdf-to-image", "pdf-to-word", "image-to-pdf", "merge-pdf", "split-pdf", "organize-pdf", "pdf-editor"]);
+  it("has exactly the first-launch tools, each with a matching route and FAQ", () => {
+    expect(TOOLS.map((t) => t.id)).toEqual(["compress-pdf", "compress-image", "pdf-to-word", "word-to-pdf", "pdf-to-image", "image-to-pdf", "convert-image", "merge-pdf", "split-pdf", "organize-pdf", "pdf-editor"]);
     for (const t of TOOLS) {
       expect(t.href).toBe(`/${t.id}`);
       expect(t.faq.length).toBeGreaterThanOrEqual(2);
       expect(t.seoDescription.length).toBeGreaterThan(60);
     }
+  });
+
+  it("names conversions one way: “X to Y”, and every conversion has its reverse", () => {
+    const convert = toolsInCategory("convert").map((t) => t.name);
+    expect(convert).toEqual(["PDF to Word", "Word to PDF", "PDF to Image", "Image to PDF", "Image Converter"]);
+    expect(new Set(TOOLS.map((t) => t.seoTitle)).size).toBe(TOOLS.length);
   });
 
   it("groups every tool into exactly one category", () => {
@@ -27,6 +33,8 @@ describe("smart file entry", () => {
     expect(entryKindFor({ name: "a.PDF", type: "" })).toBe("pdf");
     expect(entryKindFor({ name: "a.webp", type: "image/webp" })).toBe("image");
     expect(entryKindFor({ name: "logo.svg", type: "" })).toBe("svg");
+    expect(entryKindFor({ name: "Resume.DOCX", type: "" })).toBe("word");
+    expect(entryKindFor({ name: "old.doc", type: "application/msword" })).toBe("unsupported");
     expect(entryKindFor({ name: "notes.txt", type: "text/plain" })).toBe("unsupported");
   });
 
@@ -35,6 +43,7 @@ describe("smart file entry", () => {
     expect(entryKindForAll([{ name: "a.jpg", type: "" }, { name: "b.txt", type: "" }])).toBe("unsupported");
     expect(entryKindForAll([{ name: "a.jpg", type: "" }, { name: "b.svg", type: "" }])).toBe("svg");
     expect(entryKindForAll([])).toBe("unsupported");
+    expect(entryKindForAll([{ name: "a.docx", type: "" }, { name: "b.pdf", type: "" }])).toBe("unsupported");
   });
 
   it("offers PDF tools for a PDF, and only multi-file tools for several files", () => {
@@ -45,6 +54,8 @@ describe("smart file entry", () => {
     expect(suggestionsFor("image", 1)).toEqual(["compress-image", "convert-image", "image-to-pdf"]);
     expect(suggestionsFor("image", 2)).toEqual(["image-to-pdf", "convert-image"]);
     expect(suggestionsFor("svg", 1)).toEqual(["convert-image"]);
+    expect(suggestionsFor("word", 1)).toEqual(["word-to-pdf"]);
+    expect(suggestionsFor("word", 2)).toEqual([]);
     expect(suggestionsFor("unsupported", 1)).toEqual([]);
   });
 });

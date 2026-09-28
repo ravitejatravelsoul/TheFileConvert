@@ -48,6 +48,7 @@ if (run("convert")) {
     ["X-transparent.webp", "PNG", "png", "transparent WebP → PNG (alpha kept)"],
     ["IMAGE-I-vector.svg", "PNG", "png", "SVG → PNG"],
     ["IMAGE-I-vector.svg", "JPG", "jpeg", "SVG → JPG"],
+    ["IMAGE-I-vector.svg", "WebP", "webp", "SVG → WebP"],
     ["IMAGE-J-unsafe.svg", "PNG", "png", "unsafe SVG (script, onload, external refs) → PNG"],
     ["IMAGE-K-exif-rich.jpg", "PNG", "png", "EXIF Orientation 6 JPG → PNG (upright, metadata dropped)"],
     ["IMAGE-E-photo-15mb.jpg", "WebP", "webp", "15 MB 48 MP JPG → WebP"],

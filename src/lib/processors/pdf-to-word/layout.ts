@@ -313,7 +313,10 @@ function blocksFor(entries: Entry[], region: Region, stats: DocumentStats, conte
             }
             return row;
           });
-          const columns = anchors.map((a, k) => (k + 1 < anchors.length ? anchors[k + 1] - a : Math.max(40, Math.max(...rowsLines.map((l) => l.x1)) - a)));
+          // The last column has no next column to measure against: give its widest text the cell
+          // padding and a little air, or Word wraps "$36.00" inside it.
+          const lastPad = Math.max(...rowsLines.map((l) => l.size)) * 1.6 + 8;
+          const columns = anchors.map((a, k) => (k + 1 < anchors.length ? anchors[k + 1] - a : Math.max(40, Math.max(...rowsLines.map((l) => l.x1)) - a + lastPad)));
           blocks.push({ kind: "table", columns, rows, bordered: anchors.length >= 3 });
           currentList = null;
           i = j;

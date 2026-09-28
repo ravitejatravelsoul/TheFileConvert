@@ -11,6 +11,7 @@ export type ToolId =
   | "convert-image"
   | "pdf-to-image"
   | "pdf-to-word"
+  | "word-to-pdf"
   | "image-to-pdf"
   | "merge-pdf"
   | "split-pdf"
@@ -46,6 +47,7 @@ const PDF_EXT = ["pdf"];
 const PDF_MIME = ["application/pdf"];
 const RASTER_EXT = ["jpg", "jpeg", "png", "webp"];
 const RASTER_MIME = ["image/jpeg", "image/png", "image/webp"];
+export const DOCX_MIME = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
 
 export const TOOLS: Tool[] = [
   {
@@ -113,61 +115,6 @@ export const TOOLS: Tool[] = [
     ],
   },
   {
-    id: "convert-image",
-    href: "/convert-image",
-    name: "Convert Images",
-    short: "JPG, PNG, WebP and SVG — choose the format you need, nothing else.",
-    seoTitle: "Convert images — JPG, PNG, WebP, SVG",
-    seoDescription:
-      "Convert JPG to PNG, PNG to JPG, WebP to JPG, SVG to PNG and more. One click, no settings, no upload.",
-    category: "convert",
-    inputNoun: "images",
-    accept: ".jpg,.jpeg,.png,.webp,.svg,image/jpeg,image/png,image/webp,image/svg+xml",
-    acceptedExtensions: [...RASTER_EXT, "svg"],
-    acceptedMimeTypes: [...RASTER_MIME, "image/svg+xml"],
-    multiple: true,
-    maxRecommendedSizeMb: 60,
-    faq: [
-      {
-        q: "Which conversions are supported?",
-        a: "JPG → PNG or WebP, PNG → JPG or WebP, WebP → JPG or PNG, and SVG → PNG.",
-      },
-      {
-        q: "What happens to transparency when converting to JPG?",
-        a: "JPG can't store transparency, so transparent areas are filled with white. PNG and WebP keep it.",
-      },
-      {
-        q: "Are my images uploaded?",
-        a: "No. Conversion happens in your browser; nothing is sent to a server.",
-      },
-    ],
-  },
-  {
-    id: "pdf-to-image",
-    href: "/pdf-to-image",
-    name: "PDF to Image",
-    short: "Turn every page — or just the ones you pick — into JPG or PNG.",
-    seoTitle: "PDF to JPG or PNG",
-    seoDescription: "Convert PDF pages to high-resolution JPG or PNG images. Pick pages, download one or all as a ZIP.",
-    category: "convert",
-    inputNoun: "PDF",
-    accept: ".pdf,application/pdf",
-    acceptedExtensions: PDF_EXT,
-    acceptedMimeTypes: PDF_MIME,
-    multiple: false,
-    maxRecommendedSizeMb: 200,
-    faq: [
-      {
-        q: "What resolution are the images?",
-        a: "Pages are rendered at 2× their PDF size (about 144 DPI), which is sharp on screens and fine for most printing.",
-      },
-      {
-        q: "Can I convert only some pages?",
-        a: "Yes. Every page shows as a thumbnail — select the ones you want, or convert them all.",
-      },
-    ],
-  },
-  {
     id: "pdf-to-word",
     href: "/pdf-to-word",
     name: "PDF to Word",
@@ -202,11 +149,70 @@ export const TOOLS: Tool[] = [
     ],
   },
   {
+    id: "word-to-pdf",
+    href: "/word-to-pdf",
+    name: "Word to PDF",
+    short: "Turn a Word document (.docx) into a PDF that looks the same on every device.",
+    seoTitle: "Word to PDF (DOCX to PDF) converter",
+    seoDescription:
+      "Convert a Word .docx to PDF in your browser. Headings, lists, tables, pictures, headers and footers come across. No upload, no sign-up, no watermark.",
+    category: "convert",
+    inputNoun: "Word document",
+    accept: `.docx,${DOCX_MIME}`,
+    acceptedExtensions: ["docx"],
+    acceptedMimeTypes: [DOCX_MIME],
+    multiple: false,
+    maxRecommendedSizeMb: 50,
+    faq: [
+      {
+        q: "Will the PDF look exactly like my Word document?",
+        a: "Very close for everyday documents. Text, headings, bold and italic, lists, tables, pictures, page breaks, headers and footers come across, and Word's standard fonts are drawn with fonts of the same width, so lines and pages break in nearly the same places. Complex Word layouts — text wrapped around pictures, text boxes, unusual fonts — may vary slightly from Microsoft Word.",
+      },
+      {
+        q: "Can I convert an old .doc file?",
+        a: "Not yet — only .docx (Word 2007 and later). Open the .doc in Word, Google Docs or LibreOffice, save it as .docx, then convert it here.",
+      },
+      {
+        q: "Is my document uploaded?",
+        a: "No. The document is read and the PDF is drawn inside this browser tab. Nothing is sent to a server.",
+      },
+      {
+        q: "Does it work with password-protected documents?",
+        a: "Not with ones that need a password to open. Remove the password in Word (File → Info → Protect Document), save, then convert.",
+      },
+    ],
+  },
+  {
+    id: "pdf-to-image",
+    href: "/pdf-to-image",
+    name: "PDF to Image",
+    short: "Turn every page — or just the ones you pick — into JPG or PNG.",
+    seoTitle: "PDF to JPG or PNG",
+    seoDescription: "Convert PDF pages to high-resolution JPG or PNG images. Pick pages, download one or all as a ZIP.",
+    category: "convert",
+    inputNoun: "PDF",
+    accept: ".pdf,application/pdf",
+    acceptedExtensions: PDF_EXT,
+    acceptedMimeTypes: PDF_MIME,
+    multiple: false,
+    maxRecommendedSizeMb: 200,
+    faq: [
+      {
+        q: "What resolution are the images?",
+        a: "Pages are rendered at 2× their PDF size (about 144 DPI), which is sharp on screens and fine for most printing.",
+      },
+      {
+        q: "Can I convert only some pages?",
+        a: "Yes. Every page shows as a thumbnail — select the ones you want, or convert them all.",
+      },
+    ],
+  },
+  {
     id: "image-to-pdf",
     href: "/image-to-pdf",
-    name: "Images to PDF",
+    name: "Image to PDF",
     short: "Combine photos and scans into one PDF, in the order you choose.",
-    seoTitle: "Images to PDF — JPG, PNG, WebP",
+    seoTitle: "Image to PDF — JPG, PNG or WebP to PDF",
     seoDescription: "Combine JPG, PNG and WebP images into a single PDF. Drag to reorder, choose page size, no upload.",
     category: "convert",
     inputNoun: "images",
@@ -223,6 +229,36 @@ export const TOOLS: Tool[] = [
       {
         q: "Can I change the order?",
         a: "Yes — drag the cards, or use the arrow buttons on each one.",
+      },
+    ],
+  },
+  {
+    id: "convert-image",
+    href: "/convert-image",
+    name: "Image Converter",
+    short: "JPG, PNG, WebP and SVG — choose the format you need, nothing else.",
+    seoTitle: "Image Converter — JPG, PNG, WebP, SVG",
+    seoDescription:
+      "Convert JPG to PNG, PNG to JPG, WebP to JPG, SVG to PNG and more. One click, no settings, no upload.",
+    category: "convert",
+    inputNoun: "images",
+    accept: ".jpg,.jpeg,.png,.webp,.svg,image/jpeg,image/png,image/webp,image/svg+xml",
+    acceptedExtensions: [...RASTER_EXT, "svg"],
+    acceptedMimeTypes: [...RASTER_MIME, "image/svg+xml"],
+    multiple: true,
+    maxRecommendedSizeMb: 60,
+    faq: [
+      {
+        q: "Which conversions are supported?",
+        a: "JPG → PNG or WebP, PNG → JPG or WebP, WebP → JPG or PNG, and SVG → PNG, JPG or WebP.",
+      },
+      {
+        q: "What happens to transparency when converting to JPG?",
+        a: "JPG can't store transparency, so transparent areas are filled with white. PNG and WebP keep it.",
+      },
+      {
+        q: "Are my images uploaded?",
+        a: "No. Conversion happens in your browser; nothing is sent to a server.",
       },
     ],
   },
@@ -354,12 +390,13 @@ export function toolsInCategory(category: ToolCategory): Tool[] {
   return TOOLS.filter((t) => t.category === category);
 }
 
-export type EntryKind = "pdf" | "image" | "svg" | "unsupported";
+export type EntryKind = "pdf" | "word" | "image" | "svg" | "unsupported";
 
 /** Classifies a dropped file for the homepage's "what do you want to do with it?" step. */
 export function entryKindFor(file: { name: string; type: string }): EntryKind {
   const name = file.name.toLowerCase();
   if (file.type === "application/pdf" || name.endsWith(".pdf")) return "pdf";
+  if (file.type === DOCX_MIME || name.endsWith(".docx")) return "word";
   if (file.type === "image/svg+xml" || name.endsWith(".svg")) return "svg";
   if (/^image\/(jpeg|png|webp)$/.test(file.type) || /\.(jpe?g|png|webp)$/.test(name)) return "image";
   return "unsupported";
@@ -371,6 +408,8 @@ export function suggestionsFor(kind: EntryKind, count: number): ToolId[] {
   switch (kind) {
     case "pdf":
       return count > 1 ? ["merge-pdf"] : ["compress-pdf", "pdf-editor", "pdf-to-word", "merge-pdf", "split-pdf", "pdf-to-image", "organize-pdf"];
+    case "word":
+      return count > 1 ? [] : ["word-to-pdf"];
     case "image":
       return count > 1 ? ["image-to-pdf", "convert-image"] : ["compress-image", "convert-image", "image-to-pdf"];
     case "svg":
@@ -385,5 +424,6 @@ export function entryKindForAll(files: { name: string; type: string }[]): EntryK
   const kinds = new Set(files.map(entryKindFor));
   if (kinds.size === 0 || kinds.has("unsupported")) return "unsupported";
   if (kinds.has("pdf")) return kinds.size === 1 ? "pdf" : "unsupported";
+  if (kinds.has("word")) return kinds.size === 1 ? "word" : "unsupported";
   return kinds.has("svg") ? "svg" : "image";
 }

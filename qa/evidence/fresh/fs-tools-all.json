@@ -1,0 +1,1902 @@
+[
+ {
+  "tool": "Image Converter",
+  "test": "landscape JPG → PNG",
+  "verdict": "PASS",
+  "fixture": "IMAGE-B-photo-500k.jpg",
+  "input": 498577,
+  "output": 7725439,
+  "format": "png",
+  "dims": "2400x1600→2400x1600",
+  "alpha": "false→false",
+  "corner": null,
+  "exifGone": true,
+  "leakedRequests": [],
+  "psnr": 99,
+  "ssim": 1,
+  "ms": 955,
+  "integrity": [
+   {
+    "file": "fs-conv-IMAGE-B-p-png-IMAGE-B-photo-500k.png",
+    "bytes": 7725439,
+    "ok": true,
+    "kind": "png",
+    "w": 2400,
+    "h": 1600,
+    "alpha": false
+   }
+  ]
+ },
+ {
+  "tool": "Image Converter",
+  "test": "portrait JPG → WebP",
+  "verdict": "PASS",
+  "fixture": "X-portrait-1200x1800.jpg",
+  "input": 705945,
+  "output": 643258,
+  "format": "webp",
+  "dims": "1200x1800→1200x1800",
+  "alpha": "false→false",
+  "corner": null,
+  "exifGone": true,
+  "leakedRequests": [],
+  "psnr": 37.59,
+  "ssim": 0.9681,
+  "ms": 933,
+  "integrity": [
+   {
+    "file": "fs-conv-X-portrai-webp-X-portrait-1200x1800.webp",
+    "bytes": 643258,
+    "ok": true,
+    "kind": "webp",
+    "w": 1200,
+    "h": 1800,
+    "alpha": false
+   }
+  ]
+ },
+ {
+  "tool": "Image Converter",
+  "test": "transparent PNG → JPG (transparency becomes white)",
+  "verdict": "PASS",
+  "fixture": "IMAGE-F-transparent.png",
+  "input": 3280825,
+  "output": 442969,
+  "format": "jpeg",
+  "dims": "1800x1400→1800x1400",
+  "alpha": "true→false",
+  "corner": [
+   255,
+   255,
+   255
+  ],
+  "exifGone": true,
+  "leakedRequests": [],
+  "psnr": 43.17,
+  "ssim": 0.9838,
+  "ms": 380,
+  "integrity": [
+   {
+    "file": "fs-conv-IMAGE-F-t-jpeg-IMAGE-F-transparent.jpg",
+    "bytes": 442969,
+    "ok": true,
+    "kind": "jpeg",
+    "w": 1800,
+    "h": 1400,
+    "alpha": false
+   }
+  ]
+ },
+ {
+  "tool": "Image Converter",
+  "test": "transparent PNG → WebP (alpha kept)",
+  "verdict": "PASS",
+  "fixture": "IMAGE-F-transparent.png",
+  "input": 3280825,
+  "output": 429154,
+  "format": "webp",
+  "dims": "1800x1400→1800x1400",
+  "alpha": "true→true",
+  "corner": null,
+  "exifGone": true,
+  "leakedRequests": [],
+  "psnr": 45.2,
+  "ssim": 0.9914,
+  "ms": 890,
+  "integrity": [
+   {
+    "file": "fs-conv-IMAGE-F-t-webp-IMAGE-F-transparent.webp",
+    "bytes": 429154,
+    "ok": true,
+    "kind": "webp",
+    "w": 1800,
+    "h": 1400,
+    "alpha": true
+   }
+  ]
+ },
+ {
+  "tool": "Image Converter",
+  "test": "odd-size PNG 1001x777 → JPG",
+  "verdict": "PASS",
+  "fixture": "X-odd-1001x777.png",
+  "input": 1170612,
+  "output": 297255,
+  "format": "jpeg",
+  "dims": "1001x777→1001x777",
+  "alpha": "false→false",
+  "corner": null,
+  "exifGone": true,
+  "leakedRequests": [],
+  "psnr": 34.9,
+  "ssim": 0.9457,
+  "ms": 275,
+  "integrity": [
+   {
+    "file": "fs-conv-X-odd-100-jpeg-X-odd-1001x777.jpg",
+    "bytes": 297255,
+    "ok": true,
+    "kind": "jpeg",
+    "w": 1001,
+    "h": 777,
+    "alpha": false
+   }
+  ]
+ },
+ {
+  "tool": "Image Converter",
+  "test": "tiny 64x48 transparent PNG → WebP",
+  "verdict": "PASS",
+  "fixture": "X-tiny-64x48.png",
+  "input": 6518,
+  "output": 2492,
+  "format": "webp",
+  "dims": "64x48→64x48",
+  "alpha": "true→true",
+  "corner": null,
+  "exifGone": true,
+  "leakedRequests": [],
+  "psnr": 35.35,
+  "ssim": 0.9981,
+  "ms": 93,
+  "integrity": [
+   {
+    "file": "fs-conv-X-tiny-64-webp-X-tiny-64x48.webp",
+    "bytes": 2492,
+    "ok": true,
+    "kind": "webp",
+    "w": 64,
+    "h": 48,
+    "alpha": true
+   }
+  ]
+ },
+ {
+  "tool": "Image Converter",
+  "test": "WebP → JPG",
+  "verdict": "PASS",
+  "fixture": "IMAGE-H-photo.webp",
+  "input": 1167856,
+  "output": 1603537,
+  "format": "jpeg",
+  "dims": "2400x1600→2400x1600",
+  "alpha": "false→false",
+  "corner": null,
+  "exifGone": true,
+  "leakedRequests": [],
+  "psnr": 41.43,
+  "ssim": 0.9834,
+  "ms": 895,
+  "integrity": [
+   {
+    "file": "fs-conv-IMAGE-H-p-jpeg-IMAGE-H-photo.jpg",
+    "bytes": 1603537,
+    "ok": true,
+    "kind": "jpeg",
+    "w": 2400,
+    "h": 1600,
+    "alpha": false
+   }
+  ]
+ },
+ {
+  "tool": "Image Converter",
+  "test": "transparent WebP → PNG (alpha kept)",
+  "verdict": "PASS",
+  "fixture": "X-transparent.webp",
+  "input": 136976,
+  "output": 906494,
+  "format": "png",
+  "dims": "900x700→900x700",
+  "alpha": "true→true",
+  "corner": null,
+  "exifGone": true,
+  "leakedRequests": [],
+  "psnr": 99,
+  "ssim": 1,
+  "ms": 275,
+  "integrity": [
+   {
+    "file": "fs-conv-X-transpa-png-X-transparent.png",
+    "bytes": 906494,
+    "ok": true,
+    "kind": "png",
+    "w": 900,
+    "h": 700,
+    "alpha": true
+   }
+  ]
+ },
+ {
+  "tool": "Image Converter",
+  "test": "SVG → PNG",
+  "verdict": "PASS",
+  "fixture": "IMAGE-I-vector.svg",
+  "input": 372,
+  "output": 34648,
+  "format": "png",
+  "dims": "svg→1024x640",
+  "alpha": "false→false",
+  "corner": null,
+  "exifGone": true,
+  "leakedRequests": [],
+  "ms": 104,
+  "integrity": [
+   {
+    "file": "fs-conv-IMAGE-I-v-png-IMAGE-I-vector.png",
+    "bytes": 34648,
+    "ok": true,
+    "kind": "png",
+    "w": 1024,
+    "h": 640,
+    "alpha": false
+   }
+  ]
+ },
+ {
+  "tool": "Image Converter",
+  "test": "SVG → JPG",
+  "verdict": "PASS",
+  "fixture": "IMAGE-I-vector.svg",
+  "input": 372,
+  "output": 22253,
+  "format": "jpeg",
+  "dims": "svg→1024x640",
+  "alpha": "false→false",
+  "corner": null,
+  "exifGone": true,
+  "leakedRequests": [],
+  "ms": 160,
+  "integrity": [
+   {
+    "file": "fs-conv-IMAGE-I-v-jpeg-IMAGE-I-vector.jpg",
+    "bytes": 22253,
+    "ok": true,
+    "kind": "jpeg",
+    "w": 1024,
+    "h": 640,
+    "alpha": false
+   }
+  ]
+ },
+ {
+  "tool": "Image Converter",
+  "test": "SVG → WebP",
+  "verdict": "PASS",
+  "fixture": "IMAGE-I-vector.svg",
+  "input": 372,
+  "output": 8602,
+  "format": "webp",
+  "dims": "svg→1024x640",
+  "alpha": "false→false",
+  "corner": null,
+  "exifGone": true,
+  "leakedRequests": [],
+  "ms": 266,
+  "integrity": [
+   {
+    "file": "fs-conv-IMAGE-I-v-webp-IMAGE-I-vector.webp",
+    "bytes": 8602,
+    "ok": true,
+    "kind": "webp",
+    "w": 1024,
+    "h": 640,
+    "alpha": false
+   }
+  ]
+ },
+ {
+  "tool": "Image Converter",
+  "test": "unsafe SVG (script, onload, external refs) → PNG",
+  "verdict": "PASS",
+  "fixture": "IMAGE-J-unsafe.svg",
+  "input": 633,
+  "output": 32334,
+  "format": "png",
+  "dims": "svg→1024x683",
+  "alpha": "false→false",
+  "corner": null,
+  "exifGone": true,
+  "leakedRequests": [],
+  "ms": 103,
+  "integrity": [
+   {
+    "file": "fs-conv-IMAGE-J-u-png-IMAGE-J-unsafe.png",
+    "bytes": 32334,
+    "ok": true,
+    "kind": "png",
+    "w": 1024,
+    "h": 683,
+    "alpha": false
+   }
+  ]
+ },
+ {
+  "tool": "Image Converter",
+  "test": "EXIF Orientation 6 JPG → PNG (upright, metadata dropped)",
+  "verdict": "PASS",
+  "fixture": "IMAGE-K-exif-rich.jpg",
+  "input": 679943,
+  "output": 4364762,
+  "format": "png",
+  "dims": "1200x1600→1200x1600",
+  "alpha": "false→false",
+  "corner": null,
+  "exifGone": true,
+  "leakedRequests": [],
+  "psnr": 99,
+  "ssim": 1,
+  "ms": 929,
+  "integrity": [
+   {
+    "file": "fs-conv-IMAGE-K-e-png-IMAGE-K-exif-rich.png",
+    "bytes": 4364762,
+    "ok": true,
+    "kind": "png",
+    "w": 1200,
+    "h": 1600,
+    "alpha": false
+   }
+  ]
+ },
+ {
+  "tool": "Image Converter",
+  "test": "15 MB 48 MP JPG → WebP",
+  "verdict": "PASS",
+  "fixture": "IMAGE-E-photo-15mb.jpg",
+  "input": 14688976,
+  "output": 19616272,
+  "format": "webp",
+  "dims": "8000x6000→8000x6000",
+  "alpha": "false→false",
+  "corner": null,
+  "exifGone": true,
+  "leakedRequests": [],
+  "psnr": 38.09,
+  "ssim": 0.9911,
+  "ms": 47169,
+  "integrity": [
+   {
+    "file": "fs-conv-IMAGE-E-p-webp-IMAGE-E-photo-15mb.webp",
+    "bytes": 19616272,
+    "ok": true,
+    "kind": "webp",
+    "w": 8000,
+    "h": 6000,
+    "alpha": false
+   }
+  ]
+ },
+ {
+  "tool": "Image Converter",
+  "test": "8 MB photographic PNG → JPG",
+  "verdict": "PASS",
+  "fixture": "IMAGE-G-large-photo.png",
+  "input": 8311892,
+  "output": 2579433,
+  "format": "jpeg",
+  "dims": "3000x2000→3000x2000",
+  "alpha": "false→false",
+  "corner": null,
+  "exifGone": true,
+  "leakedRequests": [],
+  "psnr": 40.3,
+  "ssim": 0.9839,
+  "ms": 931,
+  "integrity": [
+   {
+    "file": "fs-conv-IMAGE-G-l-jpeg-IMAGE-G-large-photo.jpg",
+    "bytes": 2579433,
+    "ok": true,
+    "kind": "jpeg",
+    "w": 3000,
+    "h": 2000,
+    "alpha": false
+   }
+  ]
+ },
+ {
+  "tool": "Image Converter",
+  "test": "JPEG mislabelled .png → WebP",
+  "verdict": "PASS",
+  "fixture": "X-jpeg-named.png",
+  "input": 23430,
+  "output": 32274,
+  "format": "webp",
+  "dims": "480x320→480x320",
+  "alpha": "false→false",
+  "corner": null,
+  "exifGone": true,
+  "leakedRequests": [],
+  "psnr": 38.21,
+  "ssim": 0.9789,
+  "ms": 180,
+  "integrity": [
+   {
+    "file": "fs-conv-X-jpeg-na-webp-X-jpeg-named.webp",
+    "bytes": 32274,
+    "ok": true,
+    "kind": "webp",
+    "w": 480,
+    "h": 320,
+    "alpha": false
+   }
+  ]
+ },
+ {
+  "tool": "Image Converter",
+  "test": "batch of 4 → PNG ZIP",
+  "verdict": "PASS",
+  "entries": [
+   "IMAGE-B-photo-500k.png",
+   "IMAGE-H-photo.png"
+  ],
+  "skipped": 2,
+  "integrity": [
+   {
+    "file": "fs-conv-batch-converted-images.zip",
+    "bytes": 16570587,
+    "ok": true,
+    "kind": "zip",
+    "entries": 2
+   }
+  ]
+ },
+ {
+  "tool": "PDF → Image",
+  "test": "1-page scan → PNG",
+  "verdict": "PASS",
+  "fixture": "OCR-A-clean-300dpi.pdf",
+  "images": 1,
+  "dims": "1224x1584",
+  "aspectOk": true,
+  "nonBlank": true,
+  "ms": 967,
+  "integrity": [
+   {
+    "file": "fs-p2i-OCR-A-OCR-A-clean-300dpi-page-1.png",
+    "bytes": 2170336,
+    "ok": true,
+    "kind": "png",
+    "w": 1224,
+    "h": 1584,
+    "alpha": false
+   }
+  ]
+ },
+ {
+  "tool": "PDF → Image",
+  "test": "10-page text+image → JPG ZIP",
+  "verdict": "PASS",
+  "fixture": "PDF-H-multipage-text-image.pdf",
+  "images": 10,
+  "dims": "1224x1584 1224x1584 1224x1584 1224x1584 1224x1584 1224x1584 1224x1584 1224x1584 1224x1584 1224x1584",
+  "aspectOk": true,
+  "nonBlank": true,
+  "ms": 1485,
+  "integrity": [
+   {
+    "file": "fs-p2i-PDF-H-PDF-H-multipage-text-image-images.zip",
+    "bytes": 2611907,
+    "ok": true,
+    "kind": "zip",
+    "entries": 10
+   }
+  ]
+ },
+ {
+  "tool": "PDF → Image",
+  "test": "rotated pages (0/90/180/270) → PNG",
+  "verdict": "PASS",
+  "fixture": "PDF-I-rotated.pdf",
+  "images": 4,
+  "dims": "1224x1584 1584x1224 1224x1584 1584x1224",
+  "aspectOk": true,
+  "nonBlank": true,
+  "ms": 930,
+  "integrity": [
+   {
+    "file": "fs-p2i-PDF-I-PDF-I-rotated-images.zip",
+    "bytes": 4334937,
+    "ok": true,
+    "kind": "zip",
+    "entries": 4
+   }
+  ]
+ },
+ {
+  "tool": "PDF → Image",
+  "test": "mixed page sizes → JPG",
+  "verdict": "PASS",
+  "fixture": "PDF-J-mixed-page-sizes.pdf",
+  "images": 6,
+  "dims": "1224x1584 1190x1684 1224x2016 1190x840 1584x2448 452x1200",
+  "aspectOk": true,
+  "nonBlank": true,
+  "ms": 955,
+  "integrity": [
+   {
+    "file": "fs-p2i-PDF-J-PDF-J-mixed-page-sizes-images.zip",
+    "bytes": 177176,
+    "ok": true,
+    "kind": "zip",
+    "entries": 6
+   }
+  ]
+ },
+ {
+  "tool": "PDF → Image",
+  "test": "scanned (incremental update) → JPG",
+  "verdict": "PASS",
+  "fixture": "PDF-C-scan-3.8mb-incremental.pdf",
+  "images": 2,
+  "dims": "1190x1684 1190x1684",
+  "aspectOk": true,
+  "nonBlank": true,
+  "ms": 958,
+  "integrity": [
+   {
+    "file": "fs-p2i-PDF-C-PDF-C-scan-3.8mb-incremental-images.zip",
+    "bytes": 1276585,
+    "ok": true,
+    "kind": "zip",
+    "entries": 2
+   }
+  ]
+ },
+ {
+  "tool": "PDF → Image",
+  "test": "native text → PNG",
+  "verdict": "PASS",
+  "fixture": "PDF-K-native-text.pdf",
+  "images": 2,
+  "dims": "1224x1584 1224x1584",
+  "aspectOk": true,
+  "nonBlank": true,
+  "ms": 381,
+  "integrity": [
+   {
+    "file": "fs-p2i-PDF-K-PDF-K-native-text-images.zip",
+    "bytes": 309379,
+    "ok": true,
+    "kind": "zip",
+    "entries": 2
+   }
+  ]
+ },
+ {
+  "tool": "PDF → Image",
+  "test": "owner-password-only encrypted → JPG (pdf.js can decrypt)",
+  "verdict": "PASS",
+  "fixture": "PDF-Q-owner-password-only.pdf",
+  "images": 6,
+  "dims": "1224x1584 1224x1584 1224x1584 1224x1584 1224x1584 1224x1584",
+  "aspectOk": true,
+  "nonBlank": true,
+  "ms": 938,
+  "integrity": [
+   {
+    "file": "fs-p2i-PDF-Q-PDF-Q-owner-password-only-images.zip",
+    "bytes": 1912007,
+    "ok": true,
+    "kind": "zip",
+    "entries": 6
+   }
+  ]
+ },
+ {
+  "tool": "PDF → Image",
+  "test": "selected pages 2 and 9 of 10 → PNG",
+  "verdict": "PASS",
+  "names": [
+   "PDF-H-multipage-text-image-page-2.png",
+   "PDF-H-multipage-text-image-page-9.png"
+  ],
+  "integrity": [
+   {
+    "file": "fs-p2i-sel-PDF-H-multipage-text-image-images.zip",
+    "bytes": 1546678,
+    "ok": true,
+    "kind": "zip",
+    "entries": 2
+   }
+  ]
+ },
+ {
+  "tool": "PDF → Image",
+  "test": "password-protected PDF → clear message",
+  "verdict": "PASS",
+  "message": "This PDF couldn't be opened. It may be damaged or password-protected."
+ },
+ {
+  "tool": "Images → PDF",
+  "test": "2 images (landscape + portrait), fit to image",
+  "verdict": "PASS",
+  "pages": 2,
+  "sizes": "1800x1200 900x1350",
+  "corner": null,
+  "output": 1205812,
+  "ms": 303,
+  "integrity": [
+   {
+    "file": "fs-i2p-2-Fittoimage-images.pdf",
+    "bytes": 1205812,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 2
+   }
+  ]
+ },
+ {
+  "tool": "Images → PDF",
+  "test": "portrait + landscape on A4 (auto-orientation)",
+  "verdict": "PASS",
+  "pages": 2,
+  "sizes": "595x842 842x595",
+  "corner": null,
+  "output": 1205862,
+  "ms": 295,
+  "integrity": [
+   {
+    "file": "fs-i2p-2-A4-images.pdf",
+    "bytes": 1205862,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 2
+   }
+  ]
+ },
+ {
+  "tool": "Images → PDF",
+  "test": "transparent PNG on Letter (renders on white)",
+  "verdict": "PASS",
+  "pages": 1,
+  "sizes": "792x612",
+  "corner": [
+   255,
+   255,
+   255
+  ],
+  "output": 2685027,
+  "ms": 1293,
+  "integrity": [
+   {
+    "file": "fs-i2p-1-Letter-IMAGE-F-transparent.pdf",
+    "bytes": 2685027,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 1
+   }
+  ]
+ },
+ {
+  "tool": "Images → PDF",
+  "test": "large images (15 MB + 8 MB JPG)",
+  "verdict": "PASS",
+  "pages": 2,
+  "sizes": "842x595 842x595",
+  "corner": null,
+  "output": 22685406,
+  "ms": 1512,
+  "integrity": [
+   {
+    "file": "fs-i2p-2-A4-images.pdf",
+    "bytes": 22685406,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 2
+   }
+  ]
+ },
+ {
+  "tool": "Images → PDF",
+  "test": "EXIF Orientation 6 photo comes out upright",
+  "verdict": "PASS",
+  "pages": 1,
+  "sizes": "900x1200",
+  "corner": null,
+  "output": 779702,
+  "ms": 426,
+  "integrity": [
+   {
+    "file": "fs-i2p-1-Fittoimage-IMAGE-K-exif-rich.pdf",
+    "bytes": 779702,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 1
+   }
+  ]
+ },
+ {
+  "tool": "Images → PDF",
+  "test": "10 mixed images (JPG, PNG, WebP, transparent, odd, tiny)",
+  "verdict": "PASS",
+  "pages": 10,
+  "sizes": "842x595 842x595 842x595 842x595 595x842 842x595 595x842 842x595 842x595 842x595",
+  "corner": null,
+  "output": 11090177,
+  "ms": 3458,
+  "integrity": [
+   {
+    "file": "fs-i2p-10-A4-images.pdf",
+    "bytes": 11090177,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 10
+   }
+  ]
+ },
+ {
+  "tool": "Images → PDF",
+  "test": "reordered with Move buttons (3 images)",
+  "verdict": "PASS",
+  "sizes": "751x583 1800x1200 900x1350",
+  "integrity": [
+   {
+    "file": "fs-i2p-reorder-images.pdf",
+    "bytes": 2766800,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 3
+   }
+  ]
+ },
+ {
+  "tool": "Merge PDF",
+  "test": "2 PDFs",
+  "verdict": "PASS",
+  "files": 2,
+  "pages": "5/5",
+  "sizesOk": true,
+  "rotOk": true,
+  "output": 4553,
+  "ms": 165,
+  "integrity": [
+   {
+    "file": "fs-merge-2-2PDFs-merged.pdf",
+    "bytes": 4553,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 5
+   }
+  ]
+ },
+ {
+  "tool": "Merge PDF",
+  "test": "3 PDFs",
+  "verdict": "PASS",
+  "files": 3,
+  "pages": "11/11",
+  "sizesOk": true,
+  "rotOk": true,
+  "output": 6345,
+  "ms": 150,
+  "integrity": [
+   {
+    "file": "fs-merge-3-3PDFs-merged.pdf",
+    "bytes": 6345,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 11
+   }
+  ]
+ },
+ {
+  "tool": "Merge PDF",
+  "test": "10 PDFs (scan, photo, forms, rotated, sizes, text)",
+  "verdict": "PASS",
+  "files": 10,
+  "pages": "39/39",
+  "sizesOk": true,
+  "rotOk": true,
+  "formNote": "form fields flattened/dropped (visual appearance kept)",
+  "output": 14932245,
+  "ms": 469,
+  "integrity": [
+   {
+    "file": "fs-merge-10-10PDF-merged.pdf",
+    "bytes": 14932245,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 39
+   }
+  ]
+ },
+ {
+  "tool": "Merge PDF",
+  "test": "mixed: incremental scan + native text + form",
+  "verdict": "PASS",
+  "files": 3,
+  "pages": "5/5",
+  "sizesOk": true,
+  "rotOk": true,
+  "formNote": "form fields flattened/dropped (visual appearance kept)",
+  "output": 3628584,
+  "ms": 256,
+  "integrity": [
+   {
+    "file": "fs-merge-3-mixed-merged.pdf",
+    "bytes": 3628584,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 5
+   }
+  ]
+ },
+ {
+  "tool": "Merge PDF",
+  "test": "rotated pages keep their rotation",
+  "verdict": "PASS",
+  "files": 2,
+  "pages": "6/6",
+  "sizesOk": true,
+  "rotOk": true,
+  "output": 647540,
+  "ms": 152,
+  "integrity": [
+   {
+    "file": "fs-merge-2-rotate-merged.pdf",
+    "bytes": 647540,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 6
+   }
+  ]
+ },
+ {
+  "tool": "Merge PDF",
+  "test": "mixed page sizes keep their sizes",
+  "verdict": "PASS",
+  "files": 2,
+  "pages": "8/8",
+  "sizesOk": true,
+  "rotOk": true,
+  "output": 4092,
+  "ms": 130,
+  "integrity": [
+   {
+    "file": "fs-merge-2-mixed-merged.pdf",
+    "bytes": 4092,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 8
+   }
+  ]
+ },
+ {
+  "tool": "Merge PDF",
+  "test": "reordered (third file moved first)",
+  "verdict": "PASS",
+  "firstPage": "SIZE 1: Letter  612 x 792 pt",
+  "integrity": [
+   {
+    "file": "fs-merge-reorder-merged.pdf",
+    "bytes": 6353,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 11
+   }
+  ]
+ },
+ {
+  "tool": "Merge PDF",
+  "test": "corrupt file in the mix",
+  "verdict": "PASS",
+  "message": "One file can't be read\n\nRemove “PDF-O-corrupted.pdf” to continue — it may be damaged or password-protected.",
+  "mergeBlocked": true,
+  "pagesAfterRemoval": 5,
+  "integrity": [
+   {
+    "file": "fs-merge-after-corrupt-merged.pdf",
+    "bytes": 4552,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 5
+   }
+  ]
+ },
+ {
+  "tool": "Merge PDF",
+  "test": "owner-password-only encrypted file in the mix",
+  "verdict": "PASS",
+  "message": "This PDF is protected with a password or encryption, so it can't be changed here. Remove the protection first (for example, print it to a new PDF from your PDF viewer), then try again.",
+  "producedOutput": false
+ },
+ {
+  "tool": "Split PDF",
+  "test": "selected pages 2, 5, 9",
+  "verdict": "PASS",
+  "pages": "2,5,9",
+  "output": 1601564,
+  "integrity": [
+   {
+    "file": "fs-split-2_5_9-PDF-H-multipage-text-image-pages-2_5_9.pdf",
+    "bytes": 1601564,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 3
+   }
+  ]
+ },
+ {
+  "tool": "Split PDF",
+  "test": "first page only",
+  "verdict": "PASS",
+  "pages": "1",
+  "output": 542473,
+  "integrity": [
+   {
+    "file": "fs-split-1-PDF-H-multipage-text-image-pages-1.pdf",
+    "bytes": 542473,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 1
+   }
+  ]
+ },
+ {
+  "tool": "Split PDF",
+  "test": "middle page only (5)",
+  "verdict": "PASS",
+  "pages": "5",
+  "output": 541765,
+  "integrity": [
+   {
+    "file": "fs-split-5-PDF-H-multipage-text-image-pages-5.pdf",
+    "bytes": 541765,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 1
+   }
+  ]
+ },
+ {
+  "tool": "Split PDF",
+  "test": "last page only (10)",
+  "verdict": "PASS",
+  "pages": "10",
+  "output": 510280,
+  "integrity": [
+   {
+    "file": "fs-split-10-PDF-H-multipage-text-image-pages-10.pdf",
+    "bytes": 510280,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 1
+   }
+  ]
+ },
+ {
+  "tool": "Split PDF",
+  "test": "multiple typed ranges 1-2,5,9-10",
+  "verdict": "PASS",
+  "pages": "1,2,5,9,10",
+  "output": 2652922,
+  "integrity": [
+   {
+    "file": "fs-split-1_2_5_9_10-PDF-H-multipage-text-image-pages-1-2_5_9-10.pdf",
+    "bytes": 2652922,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 5
+   }
+  ]
+ },
+ {
+  "tool": "Split PDF",
+  "test": "split every page (PDF-H) → ZIP",
+  "verdict": "PASS",
+  "files": 10,
+  "names": [
+   "PDF-H-multipage-text-image-page-1.pdf",
+   "PDF-H-multipage-text-image-page-2.pdf",
+   "PDF-H-multipage-text-image-page-3.pdf"
+  ],
+  "integrity": [
+   {
+    "file": "fs-split-every-PDF-H-PDF-H-multipage-text-image-pages.zip",
+    "bytes": 5323039,
+    "ok": true,
+    "kind": "zip",
+    "entries": 10
+   }
+  ]
+ },
+ {
+  "tool": "Split PDF",
+  "test": "split every page (PDF-C) → ZIP",
+  "verdict": "PASS",
+  "files": 2,
+  "names": [
+   "PDF-C-scan-38mb-incremental-page-1.pdf",
+   "PDF-C-scan-38mb-incremental-page-2.pdf"
+  ],
+  "integrity": [
+   {
+    "file": "fs-split-every-PDF-C-PDF-C-scan-38mb-incremental-pages.zip",
+    "bytes": 3624832,
+    "ok": true,
+    "kind": "zip",
+    "entries": 2
+   }
+  ]
+ },
+ {
+  "tool": "Organize PDF",
+  "test": "drag page 4 to the front",
+  "verdict": "PASS",
+  "labels": "4,1,2,3,5,6,7,8,9,10",
+  "rotations": "0,0,0,0,0,0,0,0,0,0",
+  "output": 5315240,
+  "integrity": [
+   {
+    "file": "fs-org-dragpag-PDF-H-multipage-text-image-organized.pdf",
+    "bytes": 5315240,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 10
+   }
+  ]
+ },
+ {
+  "tool": "Organize PDF",
+  "test": "rotate page 2 right",
+  "verdict": "PASS",
+  "labels": "1,2,3,4,5,6,7,8,9,10",
+  "rotations": "0,90,0,0,0,0,0,0,0,0",
+  "output": 5315243,
+  "integrity": [
+   {
+    "file": "fs-org-rotatep-PDF-H-multipage-text-image-organized.pdf",
+    "bytes": 5315243,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 10
+   }
+  ]
+ },
+ {
+  "tool": "Organize PDF",
+  "test": "delete page 10",
+  "verdict": "PASS",
+  "labels": "1,2,3,4,5,6,7,8,9",
+  "rotations": "0,0,0,0,0,0,0,0,0",
+  "output": 4805655,
+  "integrity": [
+   {
+    "file": "fs-org-deletep-PDF-H-multipage-text-image-organized.pdf",
+    "bytes": 4805655,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 9
+   }
+  ]
+ },
+ {
+  "tool": "Organize PDF",
+  "test": "combined: drag, rotate left, delete, duplicate",
+  "verdict": "PASS",
+  "labels": "4,1,1,2,3,5,6,7,8,10",
+  "rotations": "0,0,0,270,0,0,0,0,0,0",
+  "output": 4773314,
+  "integrity": [
+   {
+    "file": "fs-org-combined-PDF-H-multipage-text-image-organized.pdf",
+    "bytes": 4773314,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 10
+   }
+  ]
+ },
+ {
+  "tool": "Organize PDF",
+  "test": "incremental-update scan: rotate + save",
+  "verdict": "PASS",
+  "rotations": "90,0",
+  "output": 3623901,
+  "integrity": [
+   {
+    "file": "fs-org-genone-PDF-C-scan-38mb-incremental-organized.pdf",
+    "bytes": 3623901,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 2
+   }
+  ]
+ },
+ {
+  "tool": "Organize PDF",
+  "test": "already-rotated source: rotations add up",
+  "verdict": "PASS",
+  "rotations": "0,180,180,0",
+  "integrity": [
+   {
+    "file": "fs-org-rotsrc-PDF-I-rotated-organized.pdf",
+    "bytes": 645995,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 4
+   }
+  ]
+ },
+ {
+  "tool": "Merge PDF",
+  "test": "repeat use: second merge after the first (no stale state)",
+  "verdict": "PASS",
+  "firstPages": 5,
+  "secondPages": 10,
+  "integrity": [
+   {
+    "file": "fs-repeat-merge-1-merged.pdf",
+    "bytes": 4552,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 5
+   },
+   {
+    "file": "fs-repeat-merge-2-merged.pdf",
+    "bytes": 647823,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 10
+   }
+  ]
+ },
+ {
+  "tool": "PDF Editor",
+  "test": "repeat use: second document in the same tab (no stale state)",
+  "verdict": "PASS",
+  "firstPages": 2,
+  "secondPages": 3,
+  "secondText": "Annual Summary — Page 1  Quarterly operations review. Revenu",
+  "integrity": [
+   {
+    "file": "fs-repeat-editor-1-PDF-K-native-text-edited.pdf",
+    "bytes": 2744,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 2
+   },
+   {
+    "file": "fs-repeat-editor-2-PDF-N-metadata-rich-edited.pdf",
+    "bytes": 3493,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 3
+   }
+  ]
+ },
+ {
+  "tool": "Errors",
+  "test": "/compress-pdf — wrong type (.txt)",
+  "verdict": "PASS",
+  "message": "“X-notes.txt” isn't supported here. Compress PDF takes PDF files.",
+  "producedOutput": false,
+  "spinnerLeft": false,
+  "recovered": "ok",
+  "consoleErrors": []
+ },
+ {
+  "tool": "Errors",
+  "test": "/compress-pdf — zero-byte PDF",
+  "verdict": "PASS",
+  "message": "“X-zero-byte.pdf” is empty.",
+  "producedOutput": false,
+  "spinnerLeft": false,
+  "recovered": "ok",
+  "consoleErrors": []
+ },
+ {
+  "tool": "Errors",
+  "test": "/compress-pdf — text file named .pdf",
+  "verdict": "PASS",
+  "message": "This PDF couldn't be read. It may be damaged, password-protected or incomplete.",
+  "producedOutput": false,
+  "spinnerLeft": false,
+  "recovered": "ok",
+  "consoleErrors": []
+ },
+ {
+  "tool": "Errors",
+  "test": "/compress-pdf — corrupted PDF",
+  "verdict": "PASS",
+  "message": "This PDF couldn't be read. It may be damaged, password-protected or incomplete.",
+  "producedOutput": false,
+  "spinnerLeft": false,
+  "recovered": "ok",
+  "consoleErrors": []
+ },
+ {
+  "tool": "Errors",
+  "test": "/compress-pdf — password-protected PDF",
+  "verdict": "PASS",
+  "message": "This PDF is protected with a password or encryption, so it can't be changed here. Remove the protection first (for example, print it to a new PDF from your PDF viewer), then try again.",
+  "producedOutput": false,
+  "spinnerLeft": false,
+  "recovered": "ok",
+  "consoleErrors": []
+ },
+ {
+  "tool": "Errors",
+  "test": "/compress-pdf — owner-password-only encrypted PDF",
+  "verdict": "PASS",
+  "message": "This PDF is protected with a password or encryption, so it can't be changed here. Remove the protection first (for example, print it to a new PDF from your PDF viewer), then try again.",
+  "producedOutput": false,
+  "spinnerLeft": false,
+  "recovered": "ok",
+  "consoleErrors": []
+ },
+ {
+  "tool": "Errors",
+  "test": "/pdf-to-image — wrong type (.txt)",
+  "verdict": "PASS",
+  "message": "“X-notes.txt” isn't supported here. PDF to Image takes PDF files.",
+  "producedOutput": false,
+  "spinnerLeft": false,
+  "recovered": "ok",
+  "consoleErrors": []
+ },
+ {
+  "tool": "Errors",
+  "test": "/pdf-to-image — zero-byte PDF",
+  "verdict": "PASS",
+  "message": "“X-zero-byte.pdf” is empty.",
+  "producedOutput": false,
+  "spinnerLeft": false,
+  "recovered": "ok",
+  "consoleErrors": []
+ },
+ {
+  "tool": "Errors",
+  "test": "/pdf-to-image — text file named .pdf",
+  "verdict": "PASS",
+  "message": "This PDF couldn't be opened. It may be damaged or password-protected.",
+  "producedOutput": false,
+  "spinnerLeft": false,
+  "recovered": "ok",
+  "consoleErrors": []
+ },
+ {
+  "tool": "Errors",
+  "test": "/pdf-to-image — corrupted PDF",
+  "verdict": "PASS",
+  "message": "This PDF couldn't be opened. It may be damaged or password-protected.",
+  "producedOutput": false,
+  "spinnerLeft": false,
+  "recovered": "ok",
+  "consoleErrors": []
+ },
+ {
+  "tool": "Errors",
+  "test": "/pdf-to-image — password-protected PDF",
+  "verdict": "PASS",
+  "message": "This PDF couldn't be opened. It may be damaged or password-protected.",
+  "producedOutput": false,
+  "spinnerLeft": false,
+  "recovered": "ok",
+  "consoleErrors": []
+ },
+ {
+  "tool": "Errors",
+  "test": "/merge-pdf — wrong type (.txt)",
+  "verdict": "PASS",
+  "message": "“X-notes.txt” isn't supported here. Merge PDF takes PDF files.",
+  "producedOutput": false,
+  "spinnerLeft": false,
+  "recovered": "n/a",
+  "consoleErrors": []
+ },
+ {
+  "tool": "Errors",
+  "test": "/merge-pdf — zero-byte PDF",
+  "verdict": "PASS",
+  "message": "“X-zero-byte.pdf” is empty.",
+  "producedOutput": false,
+  "spinnerLeft": false,
+  "recovered": "n/a",
+  "consoleErrors": []
+ },
+ {
+  "tool": "Errors",
+  "test": "/merge-pdf — text file named .pdf",
+  "verdict": "PASS",
+  "message": "One file can't be read\n\nRemove “X-fake.pdf” to continue — it may be damaged or password-protected.",
+  "producedOutput": false,
+  "spinnerLeft": false,
+  "recovered": "n/a",
+  "consoleErrors": []
+ },
+ {
+  "tool": "Errors",
+  "test": "/merge-pdf — corrupted PDF",
+  "verdict": "PASS",
+  "message": "One file can't be read\n\nRemove “PDF-O-corrupted.pdf” to continue — it may be damaged or password-protected.",
+  "producedOutput": false,
+  "spinnerLeft": false,
+  "recovered": "n/a",
+  "consoleErrors": []
+ },
+ {
+  "tool": "Errors",
+  "test": "/merge-pdf — password-protected PDF",
+  "verdict": "PASS",
+  "message": "One file can't be read\n\nRemove “PDF-P-encrypted.pdf” to continue — it may be damaged or password-protected.",
+  "producedOutput": false,
+  "spinnerLeft": false,
+  "recovered": "n/a",
+  "consoleErrors": []
+ },
+ {
+  "tool": "Errors",
+  "test": "/merge-pdf — owner-password-only encrypted PDF",
+  "verdict": "PASS",
+  "message": "PDF-Q-owner-password-only.pdf",
+  "producedOutput": false,
+  "spinnerLeft": false,
+  "recovered": "n/a",
+  "consoleErrors": []
+ },
+ {
+  "tool": "Errors",
+  "test": "/split-pdf — wrong type (.txt)",
+  "verdict": "PASS",
+  "message": "“X-notes.txt” isn't supported here. Split PDF takes PDF files.",
+  "producedOutput": false,
+  "spinnerLeft": false,
+  "recovered": "ok",
+  "consoleErrors": []
+ },
+ {
+  "tool": "Errors",
+  "test": "/split-pdf — zero-byte PDF",
+  "verdict": "PASS",
+  "message": "“X-zero-byte.pdf” is empty.",
+  "producedOutput": false,
+  "spinnerLeft": false,
+  "recovered": "ok",
+  "consoleErrors": []
+ },
+ {
+  "tool": "Errors",
+  "test": "/split-pdf — text file named .pdf",
+  "verdict": "PASS",
+  "message": "This PDF couldn't be opened. It may be damaged or password-protected.",
+  "producedOutput": false,
+  "spinnerLeft": false,
+  "recovered": "ok",
+  "consoleErrors": []
+ },
+ {
+  "tool": "Errors",
+  "test": "/split-pdf — corrupted PDF",
+  "verdict": "PASS",
+  "message": "This PDF couldn't be opened. It may be damaged or password-protected.",
+  "producedOutput": false,
+  "spinnerLeft": false,
+  "recovered": "ok",
+  "consoleErrors": []
+ },
+ {
+  "tool": "Errors",
+  "test": "/split-pdf — password-protected PDF",
+  "verdict": "PASS",
+  "message": "This PDF couldn't be opened. It may be damaged or password-protected.",
+  "producedOutput": false,
+  "spinnerLeft": false,
+  "recovered": "ok",
+  "consoleErrors": []
+ },
+ {
+  "tool": "Errors",
+  "test": "/split-pdf — owner-password-only encrypted PDF",
+  "verdict": "PASS",
+  "message": "PDF-Q-owner-password-only.pdf",
+  "producedOutput": false,
+  "spinnerLeft": false,
+  "recovered": "ok",
+  "consoleErrors": []
+ },
+ {
+  "tool": "Errors",
+  "test": "/organize-pdf — wrong type (.txt)",
+  "verdict": "PASS",
+  "message": "“X-notes.txt” isn't supported here. Organize PDF takes PDF files.",
+  "producedOutput": false,
+  "spinnerLeft": false,
+  "recovered": "ok",
+  "consoleErrors": []
+ },
+ {
+  "tool": "Errors",
+  "test": "/organize-pdf — zero-byte PDF",
+  "verdict": "PASS",
+  "message": "“X-zero-byte.pdf” is empty.",
+  "producedOutput": false,
+  "spinnerLeft": false,
+  "recovered": "ok",
+  "consoleErrors": []
+ },
+ {
+  "tool": "Errors",
+  "test": "/organize-pdf — text file named .pdf",
+  "verdict": "PASS",
+  "message": "This PDF couldn't be opened. It may be damaged or password-protected.",
+  "producedOutput": false,
+  "spinnerLeft": false,
+  "recovered": "ok",
+  "consoleErrors": []
+ },
+ {
+  "tool": "Errors",
+  "test": "/organize-pdf — corrupted PDF",
+  "verdict": "PASS",
+  "message": "This PDF couldn't be opened. It may be damaged or password-protected.",
+  "producedOutput": false,
+  "spinnerLeft": false,
+  "recovered": "ok",
+  "consoleErrors": []
+ },
+ {
+  "tool": "Errors",
+  "test": "/organize-pdf — password-protected PDF",
+  "verdict": "PASS",
+  "message": "This PDF couldn't be opened. It may be damaged or password-protected.",
+  "producedOutput": false,
+  "spinnerLeft": false,
+  "recovered": "ok",
+  "consoleErrors": []
+ },
+ {
+  "tool": "Errors",
+  "test": "/organize-pdf — owner-password-only encrypted PDF",
+  "verdict": "PASS",
+  "message": "This PDF is protected with a password or encryption, so it can't be changed here. Remove the protection first (for example, print it to a new PDF from your PDF viewer), then try again.",
+  "producedOutput": false,
+  "spinnerLeft": false,
+  "recovered": "ok",
+  "consoleErrors": []
+ },
+ {
+  "tool": "Errors",
+  "test": "/pdf-editor — wrong type (.txt)",
+  "verdict": "PASS",
+  "message": "“X-notes.txt” isn't supported here. PDF Editor takes PDF files.",
+  "producedOutput": false,
+  "spinnerLeft": false,
+  "recovered": "n/a",
+  "consoleErrors": []
+ },
+ {
+  "tool": "Errors",
+  "test": "/pdf-editor — zero-byte PDF",
+  "verdict": "PASS",
+  "message": "“X-zero-byte.pdf” is empty.",
+  "producedOutput": false,
+  "spinnerLeft": false,
+  "recovered": "n/a",
+  "consoleErrors": []
+ },
+ {
+  "tool": "Errors",
+  "test": "/pdf-editor — text file named .pdf",
+  "verdict": "PASS",
+  "message": "We couldn't read this PDF. It may be damaged, encrypted, or incomplete.",
+  "producedOutput": false,
+  "spinnerLeft": false,
+  "recovered": "n/a",
+  "consoleErrors": []
+ },
+ {
+  "tool": "Errors",
+  "test": "/pdf-editor — corrupted PDF",
+  "verdict": "PASS",
+  "message": "We couldn't read this PDF. It may be damaged, encrypted, or incomplete.",
+  "producedOutput": false,
+  "spinnerLeft": false,
+  "recovered": "n/a",
+  "consoleErrors": []
+ },
+ {
+  "tool": "Errors",
+  "test": "/pdf-editor — password-protected PDF",
+  "verdict": "PASS",
+  "message": "This PDF is protected with a password or encryption, so it can't be changed here. Remove the protection first (for example, print it to a new PDF from your PDF viewer), then try again.",
+  "producedOutput": false,
+  "spinnerLeft": false,
+  "recovered": "n/a",
+  "consoleErrors": []
+ },
+ {
+  "tool": "Errors",
+  "test": "/pdf-editor — owner-password-only encrypted PDF",
+  "verdict": "PASS",
+  "message": "This PDF is protected with a password or encryption, so it can't be changed here. Remove the protection first (for example, print it to a new PDF from your PDF viewer), then try again.",
+  "producedOutput": false,
+  "spinnerLeft": false,
+  "recovered": "n/a",
+  "consoleErrors": []
+ },
+ {
+  "tool": "Errors",
+  "test": "/compress-pdf — oversized (525 MB)",
+  "verdict": "PASS",
+  "message": "“fs-oversized-525mb.pdf” is larger than 500 MB, which is more than a browser can safely process.",
+  "producedOutput": false,
+  "spinnerLeft": false,
+  "recovered": "ok",
+  "consoleErrors": []
+ },
+ {
+  "tool": "Errors",
+  "test": "/compress-image — wrong type (PDF)",
+  "verdict": "PASS",
+  "message": "“PDF-K-native-text.pdf” isn't supported here. Compress Image takes JPG, PNG or WebP files.",
+  "producedOutput": false,
+  "spinnerLeft": false,
+  "recovered": "ok",
+  "consoleErrors": []
+ },
+ {
+  "tool": "Errors",
+  "test": "/compress-image — zero-byte image",
+  "verdict": "PASS",
+  "message": "“X-zero-byte.jpg” is empty.",
+  "producedOutput": false,
+  "spinnerLeft": false,
+  "recovered": "ok",
+  "consoleErrors": []
+ },
+ {
+  "tool": "Errors",
+  "test": "/compress-image — unsupported format (GIF)",
+  "verdict": "PASS",
+  "message": "“X-animation.gif” isn't supported here. Compress Image takes JPG, PNG or WebP files.",
+  "producedOutput": false,
+  "spinnerLeft": false,
+  "recovered": "ok",
+  "consoleErrors": []
+ },
+ {
+  "tool": "Errors",
+  "test": "/compress-image — corrupt JPEG",
+  "verdict": "PASS",
+  "message": "This image couldn't be read. It may be damaged or in a format your browser can't open.",
+  "producedOutput": false,
+  "spinnerLeft": false,
+  "recovered": "ok",
+  "consoleErrors": []
+ },
+ {
+  "tool": "Errors",
+  "test": "/compress-image — JPEG cut off halfway",
+  "verdict": "PASS",
+  "message": "This image couldn't be read. It may be damaged or in a format your browser can't open.",
+  "producedOutput": false,
+  "spinnerLeft": false,
+  "recovered": "ok",
+  "consoleErrors": []
+ },
+ {
+  "tool": "Errors",
+  "test": "/convert-image — wrong type (PDF)",
+  "verdict": "PASS",
+  "message": "“PDF-K-native-text.pdf” isn't supported here. Image Converter takes JPG, PNG, WebP or SVG files.",
+  "producedOutput": false,
+  "spinnerLeft": false,
+  "recovered": "ok",
+  "consoleErrors": []
+ },
+ {
+  "tool": "Errors",
+  "test": "/convert-image — zero-byte image",
+  "verdict": "PASS",
+  "message": "“X-zero-byte.jpg” is empty.",
+  "producedOutput": false,
+  "spinnerLeft": false,
+  "recovered": "ok",
+  "consoleErrors": []
+ },
+ {
+  "tool": "Errors",
+  "test": "/convert-image — unsupported format (GIF)",
+  "verdict": "PASS",
+  "message": "“X-animation.gif” isn't supported here. Image Converter takes JPG, PNG, WebP or SVG files.",
+  "producedOutput": false,
+  "spinnerLeft": false,
+  "recovered": "ok",
+  "consoleErrors": []
+ },
+ {
+  "tool": "Errors",
+  "test": "/convert-image — corrupt JPEG",
+  "verdict": "PASS",
+  "message": "This image couldn't be converted",
+  "producedOutput": false,
+  "spinnerLeft": false,
+  "recovered": "ok",
+  "consoleErrors": []
+ },
+ {
+  "tool": "Errors",
+  "test": "/convert-image — JPEG cut off halfway",
+  "verdict": "PASS",
+  "message": "This image couldn't be converted",
+  "producedOutput": false,
+  "spinnerLeft": false,
+  "recovered": "ok",
+  "consoleErrors": []
+ },
+ {
+  "tool": "Errors",
+  "test": "/image-to-pdf — wrong type (PDF)",
+  "verdict": "PASS",
+  "message": "“PDF-K-native-text.pdf” isn't supported here. Image to PDF takes JPG, PNG or WebP files.",
+  "producedOutput": false,
+  "spinnerLeft": false,
+  "recovered": "ok",
+  "consoleErrors": []
+ },
+ {
+  "tool": "Errors",
+  "test": "/image-to-pdf — zero-byte image",
+  "verdict": "PASS",
+  "message": "“X-zero-byte.jpg” is empty.",
+  "producedOutput": false,
+  "spinnerLeft": false,
+  "recovered": "ok",
+  "consoleErrors": []
+ },
+ {
+  "tool": "Errors",
+  "test": "/image-to-pdf — unsupported format (GIF)",
+  "verdict": "PASS",
+  "message": "“X-animation.gif” isn't supported here. Image to PDF takes JPG, PNG or WebP files.",
+  "producedOutput": false,
+  "spinnerLeft": false,
+  "recovered": "ok",
+  "consoleErrors": []
+ },
+ {
+  "tool": "Errors",
+  "test": "/image-to-pdf — corrupt JPEG",
+  "verdict": "PASS",
+  "message": "“X-corrupt.jpg” couldn't be read. It may be damaged — remove it and try again.",
+  "producedOutput": false,
+  "spinnerLeft": false,
+  "recovered": "ok",
+  "consoleErrors": []
+ },
+ {
+  "tool": "Errors",
+  "test": "/image-to-pdf — JPEG cut off halfway",
+  "verdict": "PASS",
+  "message": "“X-truncated-half.jpg” couldn't be read. It may be damaged — remove it and try again.",
+  "producedOutput": false,
+  "spinnerLeft": false,
+  "recovered": "ok",
+  "consoleErrors": []
+ },
+ {
+  "tool": "Errors",
+  "test": "/compress-image — oversized (525 MB)",
+  "verdict": "PASS",
+  "message": "“fs-oversized-525mb.jpg” is larger than 500 MB, which is more than a browser can safely process.",
+  "producedOutput": false,
+  "spinnerLeft": false,
+  "recovered": "ok",
+  "consoleErrors": []
+ },
+ {
+  "tool": "Compress PDF",
+  "test": "repeat use: second file after the first (no stale state)",
+  "verdict": "PASS",
+  "first": "fs-repeat-CompressPDF-1-PDF-B-mixed-800k.pdf",
+  "second": "fs-repeat-CompressPDF-2-PDF-K-native-text.pdf",
+  "differ": true,
+  "secondFromSecondInput": true,
+  "integrity": [
+   {
+    "file": "fs-repeat-CompressPDF-1-PDF-B-mixed-800k.pdf",
+    "bytes": 751881,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 6
+   },
+   {
+    "file": "fs-repeat-CompressPDF-2-PDF-K-native-text.pdf",
+    "bytes": 2281,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 2
+   }
+  ]
+ },
+ {
+  "tool": "Compress Image",
+  "test": "repeat use: second file after the first (no stale state)",
+  "verdict": "PASS",
+  "first": "fs-repeat-CompressImage-1-IMAGE-B-photo-500k-compressed.jpg",
+  "second": "fs-repeat-CompressImage-2-IMAGE-L-tiny-optimized.jpg",
+  "differ": true,
+  "secondFromSecondInput": true,
+  "integrity": [
+   {
+    "file": "fs-repeat-CompressImage-1-IMAGE-B-photo-500k-compressed.jpg",
+    "bytes": 244707,
+    "ok": true,
+    "kind": "jpeg",
+    "w": 1426,
+    "h": 950,
+    "alpha": false
+   },
+   {
+    "file": "fs-repeat-CompressImage-2-IMAGE-L-tiny-optimized.jpg",
+    "bytes": 23430,
+    "ok": true,
+    "kind": "jpeg",
+    "w": 480,
+    "h": 320,
+    "alpha": false
+   }
+  ]
+ },
+ {
+  "tool": "Image Converter",
+  "test": "repeat use: second file after the first (no stale state)",
+  "verdict": "PASS",
+  "first": "fs-repeat-ImageConverter-1-IMAGE-B-photo-500k.webp",
+  "second": "fs-repeat-ImageConverter-2-X-odd-1001x777.webp",
+  "differ": true,
+  "secondFromSecondInput": true,
+  "integrity": [
+   {
+    "file": "fs-repeat-ImageConverter-1-IMAGE-B-photo-500k.webp",
+    "bytes": 920226,
+    "ok": true,
+    "kind": "webp",
+    "w": 2400,
+    "h": 1600,
+    "alpha": false
+   },
+   {
+    "file": "fs-repeat-ImageConverter-2-X-odd-1001x777.webp",
+    "bytes": 198574,
+    "ok": true,
+    "kind": "webp",
+    "w": 1001,
+    "h": 777,
+    "alpha": false
+   }
+  ]
+ },
+ {
+  "tool": "Images → PDF",
+  "test": "repeat use: second file after the first (no stale state)",
+  "verdict": "PASS",
+  "first": "fs-repeat-ImagesPDF-1-IMAGE-B-photo-500k.pdf",
+  "second": "fs-repeat-ImagesPDF-2-X-portrait-1200x1800.pdf",
+  "differ": true,
+  "secondFromSecondInput": true,
+  "integrity": [
+   {
+    "file": "fs-repeat-ImagesPDF-1-IMAGE-B-photo-500k.pdf",
+    "bytes": 499525,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 1
+   },
+   {
+    "file": "fs-repeat-ImagesPDF-2-X-portrait-1200x1800.pdf",
+    "bytes": 706893,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 1
+   }
+  ]
+ },
+ {
+  "tool": "PDF → Image",
+  "test": "repeat use: second file after the first (no stale state)",
+  "verdict": "PASS",
+  "first": "fs-repeat-PDFImage-1-OCR-A-clean-300dpi-page-1.jpg",
+  "second": "fs-repeat-PDFImage-2-OCR-B-low-res-100dpi-page-1.jpg",
+  "differ": true,
+  "secondFromSecondInput": true,
+  "integrity": [
+   {
+    "file": "fs-repeat-PDFImage-1-OCR-A-clean-300dpi-page-1.jpg",
+    "bytes": 178256,
+    "ok": true,
+    "kind": "jpeg",
+    "w": 1224,
+    "h": 1584,
+    "alpha": false
+   },
+   {
+    "file": "fs-repeat-PDFImage-2-OCR-B-low-res-100dpi-page-1.jpg",
+    "bytes": 301287,
+    "ok": true,
+    "kind": "jpeg",
+    "w": 1224,
+    "h": 1584,
+    "alpha": false
+   }
+  ]
+ },
+ {
+  "tool": "Split PDF",
+  "test": "repeat use: second file after the first (no stale state)",
+  "verdict": "PASS",
+  "first": "fs-repeat-SplitPDF-1-PDF-H-multipage-text-image-pages-2.pdf",
+  "second": "fs-repeat-SplitPDF-2-PDF-K-native-text-pages-2.pdf",
+  "differ": true,
+  "secondFromSecondInput": true,
+  "integrity": [
+   {
+    "file": "fs-repeat-SplitPDF-1-PDF-H-multipage-text-image-pages-2.pdf",
+    "bytes": 518541,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 1
+   },
+   {
+    "file": "fs-repeat-SplitPDF-2-PDF-K-native-text-pages-2.pdf",
+    "bytes": 1449,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 1
+   }
+  ]
+ },
+ {
+  "tool": "Organize PDF",
+  "test": "repeat use: second file after the first (no stale state)",
+  "verdict": "PASS",
+  "first": "fs-repeat-OrganizePDF-1-PDF-H-multipage-text-image-organized.pdf",
+  "second": "fs-repeat-OrganizePDF-2-PDF-K-native-text-organized.pdf",
+  "differ": true,
+  "secondFromSecondInput": true,
+  "integrity": [
+   {
+    "file": "fs-repeat-OrganizePDF-1-PDF-H-multipage-text-image-organized.pdf",
+    "bytes": 5315245,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 10
+   },
+   {
+    "file": "fs-repeat-OrganizePDF-2-PDF-K-native-text-organized.pdf",
+    "bytes": 2292,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 2
+   }
+  ]
+ },
+ {
+  "tool": "All tools",
+  "test": "console errors / unexpected dialogs",
+  "verdict": "PASS"
+ }
+]

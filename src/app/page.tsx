@@ -15,7 +15,17 @@ const POPULAR: { id: ToolId; art: React.ReactNode; wide?: boolean }[] = [
   { id: "convert-image", art: <ConvertVignette /> },
   { id: "image-to-pdf", art: <ImagesVignette /> },
 ];
-const MORE: ToolId[] = ["pdf-to-word", "split-pdf", "organize-pdf", "pdf-to-image"];
+const MORE: ToolId[] = ["pdf-to-word", "word-to-pdf", "pdf-to-image", "split-pdf", "organize-pdf"];
+
+/** Short action names for the "suggested for this PDF" illustration. */
+const SHORT_LABEL: Partial<Record<ToolId, string>> = {
+  "compress-pdf": "Compress",
+  "pdf-editor": "Edit",
+  "pdf-to-word": "To Word",
+  "merge-pdf": "Merge",
+  "split-pdf": "Split",
+  "organize-pdf": "Organize",
+};
 
 const HOME_FAQ = [
   {
@@ -32,7 +42,7 @@ const HOME_FAQ = [
   },
   {
     q: "Which files work?",
-    a: "PDF, JPG, PNG and WebP, plus SVG for conversion to PNG. Very large files depend on your device's memory; most everyday documents and photos are processed in seconds.",
+    a: "PDF, Word (.docx), JPG, PNG and WebP, plus SVG for conversion to PNG. Very large files depend on your device's memory; most everyday documents and photos are processed in seconds.",
   },
   {
     q: "Can I edit a scanned PDF?",
@@ -51,7 +61,7 @@ export default function Home() {
             "@type": "WebSite",
             name: SITE_NAME,
             url: SITE_URL,
-            description: "Compress, convert and edit PDFs and images directly in your browser.",
+            description: "Compress, convert and edit PDFs, Word documents and images directly in your browser.",
           }),
         }}
       />
@@ -87,7 +97,7 @@ export default function Home() {
               </ul>
               <p className="mt-6 hidden items-center gap-2 text-[0.8125rem] text-[var(--ink-2)] sm:flex">
                 Works with
-                {["PDF", "JPG", "PNG", "WebP", "SVG"].map((f) => (
+                {["PDF", "DOCX", "JPG", "PNG", "WebP", "SVG"].map((f) => (
                   <span key={f} className="rounded-md border border-[var(--line)] bg-[var(--surface)]/70 px-1.5 py-0.5 font-mono text-[0.72rem] font-medium text-[var(--ink)]">
                     {f}
                   </span>
@@ -175,7 +185,7 @@ export default function Home() {
               <span className="muted-display">Several possibilities.</span>
             </h2>
             <p className="lead mt-5 max-w-md">
-              Drop a file on the homepage and see only what makes sense for it. A PDF offers compress, edit, Word, merge, split, images and page order. A photo offers compress, convert and PDF.
+              Drop a file on the homepage and see only what makes sense for it. A PDF offers compress, edit, Word, merge, split, images and page order. A Word document becomes a PDF. A photo offers compress, convert and PDF.
             </p>
             <Link href="#start" className="btn btn-primary mt-8">
               Try it with a file
@@ -195,7 +205,7 @@ export default function Home() {
               </div>
               <p className="mt-5 text-sm font-semibold">Suggested for this PDF</p>
               <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
-                {(["compress-pdf", "pdf-editor", "merge-pdf", "split-pdf", "pdf-to-image", "organize-pdf"] as ToolId[]).map((id, i) => {
+                {(["compress-pdf", "pdf-editor", "pdf-to-word", "merge-pdf", "split-pdf", "organize-pdf"] as ToolId[]).map((id, i) => {
                   const t = getTool(id);
                   return (
                     <span
@@ -203,7 +213,7 @@ export default function Home() {
                       className={`flex items-center gap-2 rounded-[12px] border p-2 text-sm font-semibold ${i === 0 ? "border-[var(--ink)] bg-[var(--ink)] text-white" : "border-[var(--line)] bg-[var(--surface)]"}`}
                     >
                       <ToolIcon id={id} category={t.category} size="sm" />
-                      <span className="truncate">{t.name.replace(" PDF", "").replace("PDF ", "")}</span>
+                      <span className="truncate">{SHORT_LABEL[id] ?? t.name}</span>
                     </span>
                   );
                 })}

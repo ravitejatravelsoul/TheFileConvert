@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { Dropzone } from "@/components/tool/Dropzone";
 import { Alert, Working } from "@/components/tool/Feedback";
@@ -146,6 +147,12 @@ export function PdfToWordTool() {
             </div>
           </div>
         </div>
+        <p className="text-sm text-[var(--ink-2)]">
+          Edited it and need a PDF again?{" "}
+          <Link href="/word-to-pdf" className="font-medium text-[var(--ink)] underline decoration-[var(--line-strong)] underline-offset-4 hover:decoration-[var(--ink)]">
+            Word to PDF
+          </Link>
+        </p>
       </div>
     );
   }

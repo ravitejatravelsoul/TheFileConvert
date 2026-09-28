@@ -55,6 +55,10 @@ next-env.d.ts
 /qa/fresh-scenario-fixtures/word/*
 !/qa/fresh-scenario-fixtures/word/README.md
 !/qa/fresh-scenario-fixtures/word/truth.json
+!/qa/fresh-scenario-fixtures/docx/
+/qa/fresh-scenario-fixtures/docx/*
+!/qa/fresh-scenario-fixtures/docx/README.md
+!/qa/fresh-scenario-fixtures/docx/truth.json
 /qa/evidence/fresh/*.log
 /qa/review/fresh-launch-polish/pdf-to-word-renders/*.html
 /qa/review/fresh-launch-polish/pdf-to-word-renders/REAL*
