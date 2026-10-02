@@ -286,7 +286,7 @@ pages broke in different places, a 40 pt jump after page breaks).
   tall in LibreOffice and 20.4 pt in ours. LibreOffice's own identical rows in column 2 are 20.4 pt (text 13.8
   + 6 pt paragraph spacing + 0.5 pt border), the row fits above the margin with 8.8 pt to spare, and nothing
   in the markup shortens it — LibreOffice shortens only the row that ends a column. Ours is consistent with
-  every other row. Microsoft Word reference unavailable, so this stays LIMITED rather than PASS.
+  every other row. No automated Microsoft Word render (Word is installed but unlicensed; automation hangs), so this stays LIMITED rather than PASS.
 - **Review result:** APPROVED.
 
 ### OCR-01 · Exported scans weren't searchable
@@ -317,6 +317,129 @@ pages broke in different places, a 40 pt jump after page breaks).
   searchable, no duplicates, corrected word found once / old gone, 0.000 % pixels changed outside the
   correction, page counts kept.
 - **Review result:** APPROVED.
+
+---
+
+## Scanned PDF → Word reconstruction (after commit 69c8a27)
+
+**Correction to the previous report.** It said "Microsoft Word reference available: NO". That was wrong:
+Microsoft Word (Office16, `WINWORD.EXE`) is installed. It runs as an *unlicensed product* and COM automation
+(`qa/validate/wordrender.ps1`) hangs on export, so no automated Word render could be made. All renders below
+are LibreOffice (independent of our code); **Word fidelity must still be confirmed by opening the DOCX in Word
+by hand.** Nothing here claims Word fidelity.
+
+### Why structure was lost (SCAN-01)
+On a scanned page the old pipeline had only OCR words. Everything else on the page — rules, underlines,
+boxes, table grids, shading, bold — exists only as pixels, and nothing looked at the pixels:
+- **rules/borders:** never detected → every line, box and table border vanished (user scan: 0 % of rules);
+- **tables:** the grid lines were read by OCR as characters ("ER / CC / CS / TR", "= ee") and the cell text
+  around them lost or garbled; a table without lines can't be recognised from words alone;
+- **typography:** sizes came from OCR box heights (which depend on the letters, not the size) and every word
+  was regular → body text, labels and titles came out at random sizes;
+- **noise:** speckle read as words was written as text.
+
+### Architecture (staged)
+`extract.ts` classifies each page (`readPage`: text / scanned / blank — text pages keep the native pipeline).
+A scanned page then goes through:
+1. **render** at 3 px/pt (216 dpi; was 2 — at 144 dpi body text is ~9 px x-height and the recogniser misses
+   and misreads words);
+2. **pixel layout analysis** (`scan.ts`, pure, unit-tested on synthetic rasters): rules, solid bands, enclosed
+   tints (below);
+3. **OCR preparation:** light-on-dark bands made dark-on-paper (`invertBars`), tints flattened to paper
+   (`flattenFills`), rules erased (`eraseRules`) — so the recogniser reads the words, not the grid;
+4. **OCR** (local Tesseract, with each word's line and each line's baseline);
+5. **assembly** (`scanPage.ts`): noise filter, baselines per visual row, typography from widths, bold per
+   phrase, words joined into runs, rules/fills/bands mapped to page space, hybrid crops, ink accounting,
+   strategy choice;
+6. **semantic reconstruction** (`layout.ts`, shared with native PDFs): page frame → page border, grids →
+   Word tables, rows of label/value → borderless tables or tab stops, rules → paragraph/cell borders or rule
+   paragraphs, tints/bands → shading;
+7. **DOCX generation** (`docx.ts`) and **validation** (`verifyDocx`; QA adds python-docx, mammoth, an
+   independent LibreOffice render and the visual diff).
+
+### Layout and table detection (`scan.ts`)
+- **Rules:** runs of ink ≥ 36 pt (horizontal) / 14 pt (vertical) collected at a permissive level
+  (paper − 20, each pixel averaged with its neighbours along the line so noise doesn't break a faint line;
+  3 px gaps bridged), stacked into strokes. A stack's **dark cores** (rows darker than halfway between its
+  darkest row and the paper) are the lines — a line bordering a tinted row stacks with the tint, and one stack
+  can hold several lines. A core must be thin (≤ 3.5 pt), stand alone (neighbours lighter than the core on
+  60 % of its length), be dark along its whole length (median contrast ≥ 25, ≥ 80 % covered) and — when
+  vertical and shorter than 48 pt — meet horizontal rules at both ends (a box side, a cell wall; alone it is a
+  letter stem of large bold type). Colour = darkest third; **weight** = ink mass ÷ contrast (a blurred grey
+  1 pt line is rebuilt as 1 pt of that grey, not a pale hairline), snapped to Word's border widths.
+- **Bands** (`solidBars`): flat dark rectangles ≥ 60 × 8 pt on a 4 px grid (a cell must have dark
+  neighbours both across and along, so a table's rules don't join a band to its table); colour variance
+  rejects photos. A band crossed by a table's verticals becomes that table's header row (its edges join the
+  grid).
+- **Tints** (`enclosedFills`): colour inside each rule-bounded rectangle vs the paper (≥ 10 levels).
+- **Tables:** grids (≥ 2 h × ≥ 2 v rules) become Word tables with real borders; cell text keeps its own tab
+  stops and position (padding carried as space-before so LibreOffice and Word agree); a fill-in line under a
+  value in a label/value table becomes that cell's bottom border.
+
+### Text assembly (`scanPage.ts`)
+- **Noise:** confidence < 25, or < 45 with < 3 letters / mostly symbols → dropped (reported, never written).
+- **Baselines:** each OCR line is split into visual rows (parts > 3 em apart — a left address and right invoice
+  details are read as one line); a row uses the recogniser's baseline when it crosses most of its words, else
+  the median of the words' box estimates; outliers within 0.75 em snap (box bottoms are stretched by stray
+  marks).
+- **Typography:** font family and size from word *widths* (advance widths of metric-compatible open fonts:
+  Liberation ≙ Times/Arial/Courier, Gelasio ≙ Georgia, Carlito ≙ Calibri, Caladea ≙ Cambria; the family with
+  the least size scatter over the page wins). **Bold** per phrase: stroke width − ½ pt blur ÷ (size), > 1.3 ×
+  the page's median.
+- **Runs:** neighbouring words of one style join into one run (as a native PDF gives it) — without this, the
+  aligned word gaps of justified text were taken for a column gutter.
+
+### Hybrid fallback and confidence thresholds (`SCAN_THRESHOLDS`)
+| Threshold | Value | Effect |
+|---|---|---|
+| noiseConfidence / hardNoiseConfidence | 45 / 25 | OCR fragments dropped |
+| regionConfidence | 60 | a ruled region whose words average below → kept as a picture of the region (hybrid) |
+| graphicWordConfidence | 70 | words below don't explain ink; ink clusters ≥ 24 × 12 pt nothing explains (stamps, signatures, logos) → pictures, the garbage OCR made of them dropped |
+| pageConfidence / pageInkExplained | 50 / 0.45 | page kept as its image behind invisible text (visual fallback) |
+| boldRatio | 1.3 | bold phrase |
+The strategy is chosen per page and reported (`strategies`, `scanReports`); the UI only says "Convert to
+Word" and shows the stages (Analyzing → Detecting layout → Recognizing → Building → Validating).
+
+### Layout fixes found by the scanned suite (also affect native PDFs)
+- paragraph line pitch is the paragraph's *mean* baseline gap (median drifted with OCR jitter);
+- a rule is a paragraph's bottom border only if no other text lies between them (a title took the address
+  line's rule);
+- a single-line paragraph's border runs exactly from the rule's start to its end (indents + first-line
+  indent keep the text in place);
+- a ruled table's outer border lies half outside its lines (accounted, ~1 pt per table of drift removed);
+- a free rule paragraph reserves 1 pt + the border (was 1 pt + half);
+- a borderless table's last left-aligned column runs to the text edge (values set a little wider no longer
+  wrap and push the page down);
+- a column gutter needs continuous running text on both sides (an invoice's item table is not two columns).
+
+### Visual diff system (`qa/validate/scanform.py`, `qa/scripts/fid-scans.mjs`)
+Original and LibreOffice render at 110 dpi, compared without trusting text layers: words in place (a rendered
+word's box must hold original ink, IoU ≥ 0.35), words without ink (garbage), rules kept (long dark lines at the
+same place ± 4 pt), typography (glyph-height ratio, rule pixels excluded), text recall against the native
+original (`--ref`), plus document-specific structure checks (`expect.json`: same line, boxed, order, table
+cells, near top). Writes `original-page-N.png`, `word-page-N.png`, `diff-page-N.png` (red = original only,
+blue = Word only, black = both). Known gap: rules lighter than the ink threshold (≈ paper − 60) aren't
+measured by `rules kept` (the transcript's grey grid shows "n/a").
+
+### Regression risks and performance
+- **Native PDFs** go through the changed layout rules above — re-run of the full PDF → Word suite: see the
+  final report.
+- **Rule detection** is now permissive-then-validated; a page of dense hatching could still yield short false
+  rules (they need ≥ 36 pt, thin, standing alone, dark along their length).
+- **Typography** is width-based: an unusual font is mapped to the nearest of six families by width.
+- **Performance:** rendering at 216 dpi makes OCR ≈ 2.2 × slower per page than at 144 dpi (user scan: ~10 s
+  for 2 pages on this machine); pixel analysis is linear in pixels (+ the 4 px grid). The UI stays responsive
+  (work runs between progress updates; no freeze observed).
+
+### Tests (each fails on 69c8a27 — verified in a worktree of that commit)
+`scan.test.ts` (16, the module doesn't exist at 69c8a27): rules found / text strokes ignored; blurred grey line
+rebuilt at weight and darkness; title + rule; label/value aligned with its underline; sentence rule kept;
+boxed date row one row in its border; 4 × 3 table with borders; label/value rows aligned; OCR noise dropped;
+order + file check; hybrid table picture; visual fallback (invisible text over image); dark band found and
+inverted; banded/tinted table keeps every line; faint grey line found whole; justified line joined (no
+false columns). `layout.test.ts` (+5) and `docx.test.ts` (+2): page border, free rule, border snapping,
+sparse-column table rejected, boxed-row tabs / space before, pgBorders / rule paragraph / cell tabs, w14
+transparent text — all 7 fail on the old code, and the scan suite fails to load there.
 
 ---
 

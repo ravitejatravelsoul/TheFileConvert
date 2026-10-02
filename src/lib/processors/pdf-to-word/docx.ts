@@ -11,7 +11,7 @@ import type { Block, CellParagraph, FloatingImage, PageLayout, ParaFormat, Run }
  */
 
 const W_NS =
-  'xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture"';
+  'xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:w14="http://schemas.microsoft.com/office/word/2010/wordml" mc:Ignorable="w14"';
 
 /** XML-escapes text and drops the few code points XML 1.0 can't carry (control characters, unpaired
  * surrogates). Every other character — accents, currency, smart quotes, check marks, CJK — is kept. */
@@ -31,6 +31,9 @@ function normalizeText(s: string): string {
 }
 
 const twips = (pt: number) => Math.round(pt * 20);
+/** Border width in eighths of a point, snapped to the widths Word offers (it rounds others itself, unevenly). */
+const BORDER_SIZES = [2, 4, 6, 8, 12, 18, 24, 36, 48];
+export const borderSz = (pt: number) => BORDER_SIZES.reduce((best, s) => (Math.abs(s - pt * 8) < Math.abs(best - pt * 8) ? s : best));
 const emu = (pt: number) => Math.round(pt * 12700);
 
 interface Media {
@@ -52,6 +55,8 @@ export async function buildDocx(pages: PageLayout[], options: DocxOptions): Prom
   const bodySize = options.bodySize;
   const bodyFont = options.bodyFont || "Arial";
   let drawingId = 1;
+  // Visual-fallback pages: their text is fully transparent (still there to search, select and copy).
+  let transparent = false;
 
   // ------------------------------------------------------------------ runs and paragraphs
   const rPr = (r: Omit<Run, "text">) => {
@@ -64,6 +69,7 @@ export async function buildDocx(pages: PageLayout[], options: DocxOptions): Prom
     const half = Math.max(2, Math.round(r.size * 2));
     if (half !== Math.round(bodySize * 2)) p.push(`<w:sz w:val="${half}"/><w:szCs w:val="${half}"/>`);
     if (r.underline) p.push('<w:u w:val="single"/>');
+    if (transparent) p.push('<w14:textFill><w14:solidFill><w14:srgbClr w14:val="000000"><w14:alpha w14:val="100000"/></w14:srgbClr></w14:solidFill></w14:textFill>');
     return p.length ? `<w:rPr>${p.join("")}</w:rPr>` : "";
   };
   const runXml = (r: Run): string => {
@@ -82,7 +88,7 @@ export async function buildDocx(pages: PageLayout[], options: DocxOptions): Prom
     const p: string[] = [extra];
     if (fmt.borderBottom) {
       const b = fmt.borderBottom;
-      p.push(`<w:pBdr><w:bottom w:val="single" w:sz="${Math.max(2, Math.min(96, Math.round(b.thickness * 8)))}" w:space="${Math.max(0, Math.min(31, Math.round(b.space)))}" w:color="${b.color.toUpperCase()}"/></w:pBdr>`);
+      p.push(`<w:pBdr><w:bottom w:val="single" w:sz="${borderSz(b.thickness)}" w:space="${Math.max(0, Math.min(31, Math.round(b.space)))}" w:color="${b.color.toUpperCase()}"/></w:pBdr>`);
     }
     if (fmt.shading) p.push(`<w:shd w:val="clear" w:color="auto" w:fill="${fmt.shading.toUpperCase()}"/>`);
     if (fmt.tabs.length) p.push(`<w:tabs>${fmt.tabs.map((t) => `<w:tab w:val="${t.align}"${t.leader ? ` w:leader="${t.leader}"` : ""} w:pos="${twips(t.pos)}"/>`).join("")}</w:tabs>`);
@@ -130,16 +136,18 @@ export async function buildDocx(pages: PageLayout[], options: DocxOptions): Prom
     const id = drawingId++;
     const cx = emu(f.width);
     const cy = emu(f.height);
-    return `<w:r><w:drawing><wp:anchor distT="0" distB="0" distL="0" distR="0" simplePos="0" relativeHeight="${id}" behindDoc="0" locked="0" layoutInCell="1" allowOverlap="1"><wp:simplePos x="0" y="0"/><wp:positionH relativeFrom="page"><wp:posOffset>${emu(f.x)}</wp:posOffset></wp:positionH><wp:positionV relativeFrom="page"><wp:posOffset>${emu(f.y)}</wp:posOffset></wp:positionV><wp:extent cx="${cx}" cy="${cy}"/><wp:effectExtent l="0" t="0" r="0" b="0"/><wp:wrapNone/><wp:docPr id="${id}" name="Picture ${id}"/><wp:cNvGraphicFramePr><a:graphicFrameLocks noChangeAspect="1"/></wp:cNvGraphicFramePr>${graphic(m, id, cx, cy)}</wp:anchor></w:drawing></w:r>`;
+    return `<w:r><w:drawing><wp:anchor distT="0" distB="0" distL="0" distR="0" simplePos="0" relativeHeight="${id}" behindDoc="${f.behind ? 1 : 0}" locked="0" layoutInCell="1" allowOverlap="1"><wp:simplePos x="0" y="0"/><wp:positionH relativeFrom="page"><wp:posOffset>${emu(f.x)}</wp:posOffset></wp:positionH><wp:positionV relativeFrom="page"><wp:posOffset>${emu(f.y)}</wp:posOffset></wp:positionV><wp:extent cx="${cx}" cy="${cy}"/><wp:effectExtent l="0" t="0" r="0" b="0"/><wp:wrapNone/><wp:docPr id="${id}" name="Picture ${id}"/><wp:cNvGraphicFramePr><a:graphicFrameLocks noChangeAspect="1"/></wp:cNvGraphicFramePr>${graphic(m, id, cx, cy)}</wp:anchor></w:drawing></w:r>`;
   };
 
   // ------------------------------------------------------------------ blocks
   const cellParagraph = (p: CellParagraph) => {
     const line = p.line ? `w:line="${twips(p.line)}" w:lineRule="exact"` : 'w:line="240" w:lineRule="auto"';
-    return `<w:p><w:pPr><w:spacing w:before="0" w:after="0" ${line}/><w:jc w:val="${jc(p.align)}"/></w:pPr>${p.runs.map(runXml).join("")}</w:p>`;
+    const tabs = p.tabs?.length ? `<w:tabs>${p.tabs.map((t) => `<w:tab w:val="${t.align}" w:pos="${twips(t.pos)}"/>`).join("")}</w:tabs>` : "";
+    return `<w:p><w:pPr>${tabs}<w:spacing w:before="${twips(p.spaceBefore ?? 0)}" w:after="0" ${line}/><w:jc w:val="${jc(p.align)}"/></w:pPr>${p.runs.map(runXml).join("")}</w:p>`;
   };
   const spacer = (pt: number) => (pt >= 1 ? `<w:p><w:pPr><w:spacing w:before="0" w:after="0" w:line="${twips(pt)}" w:lineRule="exact"/></w:pPr></w:p>` : "");
 
+  let pageTextWidth = 468;
   const blockXml = (b: Block, lead = ""): string => {
     switch (b.kind) {
       case "paragraph": {
@@ -153,7 +161,7 @@ export async function buildDocx(pages: PageLayout[], options: DocxOptions): Prom
       case "image":
         return `<w:p>${pPrXml(b.fmt)}${lead}${inlineImage(b.image, b.width, b.height)}</w:p>`;
       case "table": {
-        const border = b.border ? `w:val="single" w:sz="${Math.max(2, Math.min(96, Math.round(b.border.thickness * 8)))}" w:space="0" w:color="${b.border.color.toUpperCase()}"` : 'w:val="nil"';
+        const border = b.border ? `w:val="single" w:sz="${borderSz(b.border.thickness)}" w:space="0" w:color="${b.border.color.toUpperCase()}"` : 'w:val="nil"';
         const borders = `<w:tblBorders><w:top ${border}/><w:left ${border}/><w:bottom ${border}/><w:right ${border}/><w:insideH ${border}/><w:insideV ${border}/></w:tblBorders>`;
         const grid = b.columns.map((c) => `<w:gridCol w:w="${twips(c)}"/>`).join("");
         const total = b.columns.reduce((s, c) => s + c, 0);
@@ -164,7 +172,7 @@ export async function buildDocx(pages: PageLayout[], options: DocxOptions): Prom
               .map((cell) => {
                 const w = b.columns.slice(col, col + cell.span).reduce((s, c) => s + c, 0);
                 col += cell.span;
-                const tcPr = [`<w:tcW w:w="${twips(w)}" w:type="dxa"/>`, cell.span > 1 ? `<w:gridSpan w:val="${cell.span}"/>` : "", cell.vMerge === "restart" ? '<w:vMerge w:val="restart"/>' : cell.vMerge === "continue" ? "<w:vMerge/>" : "", cell.shading ? `<w:shd w:val="clear" w:color="auto" w:fill="${cell.shading.toUpperCase()}"/>` : ""].join("");
+                const tcPr = [`<w:tcW w:w="${twips(w)}" w:type="dxa"/>`, cell.span > 1 ? `<w:gridSpan w:val="${cell.span}"/>` : "", cell.vMerge === "restart" ? '<w:vMerge w:val="restart"/>' : cell.vMerge === "continue" ? "<w:vMerge/>" : "", cell.borderBottom ? `<w:tcBorders><w:bottom w:val="single" w:sz="${borderSz(cell.borderBottom.thickness)}" w:space="0" w:color="${cell.borderBottom.color.toUpperCase()}"/></w:tcBorders>` : "", cell.shading ? `<w:shd w:val="clear" w:color="auto" w:fill="${cell.shading.toUpperCase()}"/>` : ""].join("");
                 return `<w:tc><w:tcPr>${tcPr}</w:tcPr>${cell.paragraphs.map(cellParagraph).join("")}</w:tc>`;
               })
               .join("");
@@ -180,6 +188,11 @@ export async function buildDocx(pages: PageLayout[], options: DocxOptions): Prom
       }
       case "columns":
         return ""; // written by the page loop (it needs its own section)
+      case "rule": {
+        // An empty 1-point paragraph whose bottom border is the line, indented to the line's extent.
+        const sz = borderSz(b.thickness);
+        return `<w:p><w:pPr><w:pBdr><w:bottom w:val="single" w:sz="${sz}" w:space="0" w:color="${b.color.toUpperCase()}"/></w:pBdr><w:spacing w:before="${twips(b.spaceBefore)}" w:after="0" w:line="20" w:lineRule="exact"/><w:ind w:left="${twips(b.indLeft)}" w:right="${twips(Math.max(0, pageTextWidth - b.indLeft - b.width))}"/></w:pPr>${lead}</w:p>`;
+      }
     }
   };
 
@@ -206,12 +219,17 @@ export async function buildDocx(pages: PageLayout[], options: DocxOptions): Prom
     const mar = `<w:pgMar w:top="${twips(p.margins.top)}" w:right="${twips(p.margins.right)}" w:bottom="${twips(p.margins.bottom)}" w:left="${twips(p.margins.left)}" w:header="${twips(p.headerDistance)}" w:footer="${twips(p.footerDistance)}" w:gutter="0"/>`;
     const refs = `${opts.header ? `<w:headerReference w:type="default" r:id="${opts.header}"/>` : ""}${opts.footer ? `<w:footerReference w:type="default" r:id="${opts.footer}"/>` : ""}`;
     const cols = opts.cols ? `<w:cols w:num="${opts.cols.count}" w:space="${twips(opts.cols.gap)}"/>` : '<w:cols w:space="720"/>';
-    return `<w:sectPr>${refs}<w:type w:val="${opts.continuous ? "continuous" : "nextPage"}"/>${pg}${mar}${cols}</w:sectPr>`;
+    const pb = p.pageBorder;
+    const edge = (side: string, space: number) => `<w:${side} w:val="${pb!.style}" w:sz="${borderSz(pb!.thickness)}" w:space="${Math.max(0, Math.min(31, Math.round(space)))}" w:color="${pb!.color.toUpperCase()}"/>`;
+    const borders = pb ? `<w:pgBorders w:offsetFrom="page">${edge("top", pb.space.top)}${edge("left", pb.space.left)}${edge("bottom", pb.space.bottom)}${edge("right", pb.space.right)}</w:pgBorders>` : "";
+    return `<w:sectPr>${refs}<w:type w:val="${opts.continuous ? "continuous" : "nextPage"}"/>${pg}${mar}${borders}${cols}</w:sectPr>`;
   };
   const sectionEnd = (xml: string) => `<w:p><w:pPr><w:spacing w:before="0" w:after="0" w:line="20" w:lineRule="exact"/>${xml}</w:pPr></w:p>`;
 
   let finalSect = "";
   pages.forEach((p, i) => {
+    transparent = Boolean(p.transparentText);
+    pageTextWidth = p.width - p.margins.left - p.margins.right;
     const header = bandPart("header", p.header);
     const footer = bandPart("footer", p.footer);
     // Pictures pinned to the page ride on the page's first paragraph.

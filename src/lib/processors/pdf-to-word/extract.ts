@@ -1,5 +1,7 @@
 import type { PDFDocumentProxy, PDFPageProxy } from "pdfjs-dist";
 import type { Fill, PageImage, PageInput, Rule, TextItem } from "./layout";
+import { analyzeScan, eraseRules, flattenFills, invertBars, type Raster, type ScanAnalysis } from "./scan";
+import { scannedPageInput, type ScanReport } from "./scanPage";
 
 /**
  * Browser side of PDF → Word: reads each page with pdf.js (positioned text, fonts, pictures), decides
@@ -16,7 +18,12 @@ export interface PdfAnalysis {
   label: "Text PDF" | "Scanned PDF" | "Mixed PDF";
 }
 
-export type Progress = { stage: "reading"; page: number; total: number } | { stage: "ocr"; index: number; total: number; fraction: number } | { stage: "building" };
+export type Progress =
+  | { stage: "reading"; page: number; total: number }
+  | { stage: "layout"; index: number; total: number }
+  | { stage: "ocr"; index: number; total: number; fraction: number }
+  | { stage: "building" }
+  | { stage: "validating" };
 
 /** Fewer visible characters than this, with a picture covering most of the page, means a scan. */
 const MIN_TEXT_CHARS = 20;
@@ -430,8 +437,43 @@ export async function analyzePdf(file: File): Promise<PdfAnalysis> {
   return { pages: kinds.length, kinds, label };
 }
 
+type Prepared = { analysis: ScanAnalysis; original: Raster; map: { toPdf: (x: number, y: number) => [number, number]; toPx: (x: number, y: number) => [number, number] } };
+
+/** A region of a page raster as a picture (PNG for regions, JPEG for a whole page). */
+async function encodeRegion(r: Raster, box: { x: number; y: number; w: number; h: number }, mime: "image/png" | "image/jpeg"): Promise<PageImage | null> {
+  const x = Math.max(0, Math.floor(box.x));
+  const y = Math.max(0, Math.floor(box.y));
+  const w = Math.min(r.width - x, Math.ceil(box.w));
+  const h = Math.min(r.height - y, Math.ceil(box.h));
+  if (w < 2 || h < 2) return null;
+  const canvas = document.createElement("canvas");
+  canvas.width = w;
+  canvas.height = h;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return null;
+  const img = ctx.createImageData(w, h);
+  for (let row = 0; row < h; row++) img.data.set(r.data.subarray(((y + row) * r.width + x) * 4, ((y + row) * r.width + x + w) * 4), row * w * 4);
+  ctx.putImageData(img, 0, 0);
+  const blob = await new Promise<Blob | null>((res) => canvas.toBlob(res, mime, 0.88));
+  if (!blob) return null;
+  return { x: 0, y: 0, w: 0, h: 0, bytes: new Uint8Array(await blob.arrayBuffer()), mime, pxWidth: w, pxHeight: h };
+}
+
+export interface ExtractResult {
+  pages: PageInput[];
+  /** Per page: how a scanned page was rebuilt (absent for text pages). */
+  reports: (ScanReport | undefined)[];
+}
+
+/**
+ * Pixels per point a scanned page is rendered at for layout analysis and OCR: 216 dpi. At 144 dpi body text
+ * has an x-height of ~9 px, below what the recogniser reads reliably (it misses and misreads words); scans
+ * are usually 200–300 dpi, so this keeps most of their detail at a bounded cost.
+ */
+const OCR_SCALE = 3;
+
 /** Reads every page; scanned pages are recognised with the local OCR engine in `ocrLang`. */
-export async function extractPages(file: File, ocrLang: string, onProgress: (p: Progress) => void): Promise<PageInput[]> {
+export async function extractPages(file: File, ocrLang: string, onProgress: (p: Progress) => void): Promise<ExtractResult> {
   const { doc, close } = await openDocument(file);
   const reads: PageRead[] = [];
   for (let i = 1; i <= doc.numPages; i++) {
@@ -443,6 +485,7 @@ export async function extractPages(file: File, ocrLang: string, onProgress: (p: 
   await close();
 
   const scannedIdx = reads.map((r, i) => (r.kind === "scanned" ? i : -1)).filter((i) => i >= 0);
+  const reports: (ScanReport | undefined)[] = reads.map(() => undefined);
   if (scannedIdx.length) {
     const { createOcrSession } = await import("@/lib/processors/ocr");
     const session = await createOcrSession(ocrLang);
@@ -451,34 +494,47 @@ export async function extractPages(file: File, ocrLang: string, onProgress: (p: 
         onProgress({ stage: "ocr", index: n + 1, total: scannedIdx.length, fraction: 0 });
         const read = reads[idx];
         const result = await session.recognizePage(file, idx + 1, {
-          scale: 2,
+          scale: OCR_SCALE,
           rotate: (((read.rotate % 360) + 360) % 360) as 0 | 90 | 180 | 270,
           onProgress: (fraction) => onProgress({ stage: "ocr", index: n + 1, total: scannedIdx.length, fraction }),
+          // Layout from the pixels first (rules, boxes, tables, shading), then the lines are erased so the
+          // OCR engine reads the words between them instead of the grid.
+          prepare: (image, map) => {
+            onProgress({ stage: "layout", index: n + 1, total: scannedIdx.length });
+            const original = { data: new Uint8ClampedArray(image.data), width: image.width, height: image.height };
+            const analysis = analyzeScan(image, OCR_SCALE);
+            const bg = analysis.backgroundColor.match(/../g)!.map((h) => parseInt(h, 16)) as [number, number, number];
+            // Light text on dark bands is turned dark-on-paper (the recogniser reads it badly otherwise).
+            invertBars(image, analysis.bars, bg);
+            flattenFills(image, analysis.fills.filter((f) => !analysis.bars.some((b) => b.x === f.x && b.y === f.y)), bg);
+            eraseRules(image, analysis.rules, bg);
+            onProgress({ stage: "ocr", index: n + 1, total: scannedIdx.length, fraction: 0 });
+            return { analysis, original, map } satisfies Prepared;
+          },
         });
         // The page as shown is upright; in page space its text runs at the page's /Rotate angle.
         const frame = frameFor(read.view, read.rotate);
-        const toBox = (b: { x: number; y: number; width: number; height: number }) => {
-          const corners = [frame.point(b.x, b.y), frame.point(b.x + b.width, b.y), frame.point(b.x, b.y + b.height), frame.point(b.x + b.width, b.y + b.height)];
-          const x = Math.min(...corners.map((c) => c.x));
-          const y = Math.min(...corners.map((c) => c.y));
-          return { x, y, w: Math.max(...corners.map((c) => c.x)) - x, h: Math.max(...corners.map((c) => c.y)) - y };
-        };
-        const lines = result.lines.map((l) => toBox(l.pdfBox));
-        const items: TextItem[] = [];
-        for (const word of result.words) {
-          const b = toBox(word.pdfBox);
-          const line = lines.find((l) => b.y + b.h / 2 >= l.y && b.y + b.h / 2 <= l.y + l.h);
-          // A line's box spans ascenders to descenders — about 1.2× the type size.
-          const size = Math.max(4, (line ? line.h : b.h * 1.3) / 1.2);
-          items.push({ str: word.text, x: b.x, y: line ? line.y + line.h * 0.22 : b.y, w: b.w, size, bold: false, italic: false, ocr: true });
-        }
-        // The scan itself isn't repeated as a picture: the recognised text is the editable version.
-        read.input = { ...read.input, width: frame.width, height: frame.height, items, images: [] };
+        const words = result.words.map((w) => ({ text: w.text, confidence: w.confidence, pdfBox: w.pdfBox, line: w.line }));
+        const prep = result.prepared as Prepared | undefined;
+        if (!prep) throw new PdfToWordError("This scanned page couldn't be analysed.");
+        const { input, report } = await scannedPageInput({
+          words,
+          lines: result.lines,
+          analysis: prep.analysis,
+          raster: prep.original,
+          toPdf: prep.map.toPdf,
+          toPx: prep.map.toPx,
+          frame,
+          encode: (box, mime) => encodeRegion(prep.original, box, mime),
+        });
+        read.input = input;
+        reports[idx] = report;
       }
     } finally {
       await session.terminate();
     }
   }
   onProgress({ stage: "building" });
-  return reads.map((r) => r.input);
+  for (const r of reads) if (r.kind !== "scanned") r.input.strategy = "native";
+  return { pages: reads.map((r) => r.input), reports };
 }

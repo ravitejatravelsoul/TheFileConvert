@@ -65,11 +65,15 @@ export interface OcrWord {
    * reconstruct `text`, but isn't guaranteed to (OCR symbol merges/splits happen); callers
    * that need geometry should verify that before trusting it. */
   chars: { text: string; pdfBox: { x: number; y: number; width: number; height: number } }[];
+  /** Index into the page's `lines` of the line Tesseract read this word in. */
+  line?: number;
 }
 
 export interface OcrLine {
   text: string;
   pdfBox: { x: number; y: number; width: number; height: number };
+  /** The line's baseline, from one end to the other, in PDF point space (when the recogniser gives one). */
+  baseline?: { x0: number; y0: number; x1: number; y1: number };
 }
 
 export interface OcrPageResult {
@@ -105,8 +109,14 @@ export interface OcrSession {
       rotate?: 0 | 90 | 180 | 270;
       enhance?: boolean;
       onProgress?: (fraction: number) => void;
+      /**
+       * Layout analysis on the rendered page before recognition: gets the pixels (RGBA, may be changed —
+       * e.g. lines erased so OCR reads the text between them) and pixel ↔ PDF mappers; its return value comes
+       * back as `prepared`. Used by PDF → Word; the editor doesn't pass it.
+       */
+      prepare?: (image: { data: Uint8ClampedArray; width: number; height: number }, map: { toPdf: (x: number, y: number) => [number, number]; toPx: (x: number, y: number) => [number, number] }) => unknown | Promise<unknown>;
     }
-  ): Promise<OcrPageResult>;
+  ): Promise<OcrPageResult & { prepared?: unknown }>;
   terminate(): Promise<void>;
 }
 
@@ -154,7 +164,7 @@ function mapBboxToPdf(bbox: Bbox, viewport: PageViewport): OcrWord["pdfBox"] {
 }
 
 function mapWordsToPdfSpace(
-  words: { text: string; confidence: number; bbox: Bbox; symbols: { text: string; bbox: Bbox }[] }[],
+  words: { text: string; confidence: number; bbox: Bbox; symbols: { text: string; bbox: Bbox }[]; line?: number }[],
   viewport: PageViewport
 ): OcrWord[] {
   return words
@@ -164,16 +174,26 @@ function mapWordsToPdfSpace(
       confidence: w.confidence,
       pdfBox: mapBboxToPdf(w.bbox, viewport),
       chars: w.symbols.map((s) => ({ text: s.text, pdfBox: mapBboxToPdf(s.bbox, viewport) })),
+      line: w.line,
     }));
 }
 
 function mapLinesToPdfSpace(
-  lines: { text: string; bbox: Bbox }[],
+  lines: { text: string; bbox: Bbox; baseline?: Bbox & { has_baseline?: boolean } }[],
   viewport: PageViewport
 ): OcrLine[] {
   return lines
     .filter((l) => l.text.trim().length > 0)
-    .map((l) => ({ text: l.text.trimEnd(), pdfBox: mapBboxToPdf(l.bbox, viewport) }));
+    .map((l) => {
+      const out: OcrLine = { text: l.text.trimEnd(), pdfBox: mapBboxToPdf(l.bbox, viewport) };
+      const b = l.baseline;
+      if (b && b.has_baseline !== false && b.x1 > b.x0) {
+        const [x0, y0] = viewport.convertToPdfPoint(b.x0, b.y0);
+        const [x1, y1] = viewport.convertToPdfPoint(b.x1, b.y1);
+        out.baseline = { x0, y0, x1, y1 };
+      }
+      return out;
+    });
 }
 
 export async function createOcrSession(langCode: string): Promise<OcrSession> {
@@ -226,6 +246,16 @@ export async function createOcrSession(langCode: string): Promise<OcrSession> {
 
       if (options.enhance) enhanceCanvasForOcr(canvas);
 
+      let prepared: unknown;
+      if (options.prepare) {
+        const image = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        prepared = await options.prepare(image, {
+          toPdf: (x, y) => viewport.convertToPdfPoint(x, y) as [number, number],
+          toPx: (x, y) => viewport.convertToViewportPoint(x, y) as [number, number],
+        });
+        ctx.putImageData(image, 0, 0);
+      }
+
       activeProgressHandler = options.onProgress ?? null;
       options.onProgress?.(0);
 
@@ -239,18 +269,21 @@ export async function createOcrSession(langCode: string): Promise<OcrSession> {
         options.onProgress?.(1);
       }
 
-      const rawWords: { text: string; confidence: number; bbox: Bbox; symbols: { text: string; bbox: Bbox }[] }[] = [];
-      const rawLines: { text: string; bbox: Bbox }[] = [];
+      const rawWords: { text: string; confidence: number; bbox: Bbox; symbols: { text: string; bbox: Bbox }[]; line?: number }[] = [];
+      const rawLines: { text: string; bbox: Bbox; baseline?: Bbox & { has_baseline?: boolean } }[] = [];
       for (const block of result.data.blocks ?? []) {
         for (const paragraph of block.paragraphs) {
           for (const line of paragraph.lines) {
-            rawLines.push({ text: line.text, bbox: line.bbox });
+            // Index among the non-empty lines (the ones returned), so words can name theirs.
+            const lineIndex = line.text.trim().length > 0 ? rawLines.filter((l) => l.text.trim().length > 0).length : undefined;
+            rawLines.push({ text: line.text, bbox: line.bbox, baseline: line.baseline });
             for (const word of line.words) {
               rawWords.push({
                 text: word.text,
                 confidence: word.confidence,
                 bbox: word.bbox,
                 symbols: (word.symbols ?? []).map((s) => ({ text: s.text, bbox: s.bbox })),
+                line: lineIndex,
               });
             }
           }
@@ -271,6 +304,7 @@ export async function createOcrSession(langCode: string): Promise<OcrSession> {
         meanConfidence,
         lowConfidenceWordCount,
         rotation: rotate,
+        prepared,
       };
     },
 

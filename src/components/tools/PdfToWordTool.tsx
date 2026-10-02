@@ -94,17 +94,22 @@ export function PdfToWordTool() {
 
   if (phase.name === "working") {
     const p = phase.progress;
+    // The engine's real stages, in order (no fake progress).
     const label = !p
       ? "Opening your PDF…"
       : p.stage === "reading"
-        ? `Reading page ${p.page} of ${p.total}…`
-        : p.stage === "ocr"
-          ? `Recognizing page ${p.index} of ${p.total}…`
-          : "Building your Word document…";
-    const fraction = !p ? null : p.stage === "reading" ? (p.page - 1) / p.total : p.stage === "ocr" ? (p.index - 1 + p.fraction) / p.total : null;
+        ? `Analyzing document — page ${p.page} of ${p.total}…`
+        : p.stage === "layout"
+          ? `Detecting layout — page ${p.index} of ${p.total}…`
+          : p.stage === "ocr"
+            ? `Recognizing page ${p.index} of ${p.total}…`
+            : p.stage === "validating"
+              ? "Validating result…"
+              : "Building Word document…";
+    const fraction = !p ? null : p.stage === "reading" ? (p.page - 1) / p.total : p.stage === "ocr" ? (p.index - 1 + p.fraction) / p.total : p.stage === "layout" ? (p.index - 1) / p.total : null;
     return (
       <div className="mx-auto max-w-3xl">
-        <Working label={label} fraction={fraction} detail={p?.stage === "ocr" ? "Scanned pages are read with OCR on this device — the first run downloads a small recognition model." : "Everything happens in this tab. Nothing is uploaded."} />
+        <Working label={label} fraction={fraction} detail={p?.stage === "ocr" || p?.stage === "layout" ? "Scanned pages are read with OCR on this device — the first run downloads a small recognition model." : "Everything happens in this tab. Nothing is uploaded."} />
       </div>
     );
   }

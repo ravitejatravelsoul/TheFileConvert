@@ -187,3 +187,38 @@ describe("xmlText", () => {
     expect(xmlText("café ✓ €5 “q” 中文")).toBe("café ✓ €5 “q” 中文");
   });
 });
+
+describe("buildDocx — scanned-form structure", () => {
+  it("writes a page border, a rule paragraph, cell tabs and space before, at Word's border widths", async () => {
+    const rows: TableRow[] = [{ height: 24, cells: [{ paragraphs: [{ runs: [run("VALID FROM\t02/08/2026")], align: "left", tabs: [{ pos: 91, align: "left" }], spaceBefore: 6 }], span: 1 }] }];
+    const p = pageOf(
+      [
+        { kind: "rule", indLeft: 0, width: 300, thickness: 1, color: "6e6e6d", spaceBefore: 4 },
+        table(rows, { columns: [468], border: { thickness: 1.1, color: "6e6e6d" } }),
+      ],
+      { pageBorder: { style: "double", thickness: 0.75, color: "333333", space: { top: 18, left: 18, bottom: 18, right: 18 } } },
+    );
+    const zip = await JSZip.loadAsync(await buildDocx([p], { title: "t", bodySize: 11, bodyFont: "" }));
+    const xml = await zip.file("word/document.xml")!.async("string");
+    expect(xml).toMatch(/<w:pgBorders w:offsetFrom="page"><w:top w:val="double" w:sz="6" w:space="18"/);
+    expect(xml).toMatch(/<w:pBdr><w:bottom w:val="single" w:sz="8" w:space="0" w:color="6E6E6D"\/><\/w:pBdr><w:spacing w:before="80" w:after="0" w:line="20" w:lineRule="exact"\/>/);
+    // 1.1 pt is drawn as Word's 1 pt (sz 8), not an in-between width Word rounds on its own.
+    expect(xml).toMatch(/<w:insideH w:val="single" w:sz="8"/);
+    expect(xml).toContain('<w:tab w:val="left" w:pos="1820"/>');
+    expect(xml).toMatch(/<w:spacing w:before="120"/);
+    expect(await verifyDocx(await buildDocx([p], { title: "t", bodySize: 11, bodyFont: "" }))).toEqual([]);
+  });
+
+  it("makes text invisible over a page image kept behind it (visual fallback)", async () => {
+    const bg = { x: 0, y: 0, w: 612, h: 792, bytes: PNG, mime: "image/png" as const, pxWidth: 1, pxHeight: 1 };
+    const p = pageOf([{ kind: "paragraph", style: "normal", align: "left", runs: [run("Searchable text")], fmt: fmt() }], {
+      floating: [{ image: bg, x: 0, y: 0, width: 612, height: 792, behind: true }],
+      transparentText: true,
+    });
+    const zip = await JSZip.loadAsync(await buildDocx([p], { title: "t", bodySize: 11, bodyFont: "" }));
+    const xml = await zip.file("word/document.xml")!.async("string");
+    expect(xml).toContain('behindDoc="1"');
+    expect(xml).toMatch(/<w14:textFill><w14:solidFill><w14:srgbClr w14:val="[0-9A-F]{6}"><w14:alpha w14:val="100000"\/>/);
+    expect(xml).toContain('mc:Ignorable="w14"');
+  });
+});

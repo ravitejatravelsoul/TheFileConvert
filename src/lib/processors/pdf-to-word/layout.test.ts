@@ -271,3 +271,60 @@ describe("PDF font names → Word font names", () => {
     ]);
   });
 });
+
+describe("layoutPage — rules and frames (scanned forms)", () => {
+  const thin = (x0: number, y0: number, x1: number, y1: number, thickness = 1): Rule => ({ x0, y0, x1, y1, thickness, color: "6e6e6d" });
+  const body = lines(["Certificate of completion", "Awarded to the student named below."], { y: 600 });
+
+  it("turns lines framing the whole page into a page border (double when nested)", () => {
+    const rules = [
+      thin(18, 774, 594, 774), thin(18, 18, 594, 18), thin(18, 18, 18, 774), thin(594, 18, 594, 774),
+      thin(24, 768, 588, 768), thin(24, 24, 588, 24), thin(24, 24, 24, 768), thin(588, 24, 588, 768),
+    ];
+    const l = lay({ ...page(body), rules });
+    expect(l.pageBorder?.style).toBe("double");
+    expect(l.pageBorder?.space.top).toBeCloseTo(18, 0);
+    // The frame isn't also rebuilt as a table around the text.
+    expect(l.blocks.some((b) => b.kind === "table")).toBe(false);
+  });
+
+  it("keeps a free-standing line as a rule at its place and weight", () => {
+    const rules = [thin(72, 560, 400, 560, 1)];
+    const blocks = lay({ ...page([...body, ...lines(["Signature"], { y: 540 })]), rules }).blocks;
+    const i = blocks.findIndex((b) => b.kind === "rule");
+    expect(i).toBeGreaterThan(0);
+    const r = blocks[i];
+    if (r.kind !== "rule") return;
+    expect(r.width).toBeCloseTo(328, 0);
+    expect(r.thickness).toBe(1);
+    expect(textOf(blocks[i + 1])).toBe("Signature");
+  });
+
+  it("snaps scanned line weights to the widths Word draws", () => {
+    const rules = [thin(72, 560, 400, 560, 1.37)];
+    const r = lay({ ...page(body), rules }).blocks.find((b) => b.kind === "rule");
+    expect(r?.kind === "rule" && r.thickness).toBe(1.5);
+  });
+
+  it("doesn't make a borderless table out of rows where a column is mostly empty", () => {
+    const cellText = (str: string, x: number, y: number): TextItem => ({ str, x, y, w: str.length * 5, size: 10, bold: false, italic: false });
+    // Two rows whose parts sit apart, but at different places: the third "column" holds one cell of two.
+    const items = [cellText("Classification:", 90, 500), cellText("Honours", 220, 500), cellText("First class", 380, 500), cellText("Score:", 90, 480), cellText("92 / 100", 220, 480)];
+    const blocks = lay(page(items)).blocks;
+    expect(blocks.some((b) => b.kind === "table")).toBe(false);
+  });
+
+  it("gives a boxed row's cell tab stops where its parts sit, and carries the top padding as space before", () => {
+    const rules = [thin(36, 580, 560, 580), thin(36, 550, 560, 550), thin(36, 550, 36, 580), thin(560, 550, 560, 580)];
+    const it0 = (str: string, x: number): TextItem => ({ str, x, y: 561, w: str.length * 5.5, size: 11, bold: false, italic: false });
+    const items = [it0("VALID FROM", 44), it0("02/08/2026", 135), it0("UNTIL", 258), it0("12/20/2026", 362)];
+    const t = lay({ ...page(items), rules }).blocks.find((b) => b.kind === "table");
+    expect(t?.kind).toBe("table");
+    if (t?.kind !== "table") return;
+    const p = t.rows[0].cells[0].paragraphs[0];
+    expect(p.runs.map((r) => r.text).join("")).toBe("VALID FROM\t02/08/2026\tUNTIL\t12/20/2026");
+    expect(p.tabs?.length).toBe(3);
+    expect(t.cellMargin.top).toBe(0);
+    expect(p.spaceBefore ?? 0).toBeGreaterThan(0);
+  });
+});

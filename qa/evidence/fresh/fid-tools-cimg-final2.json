@@ -1,0 +1,238 @@
+[
+ {
+  "tool": "Compress Image",
+  "test": "IMAGE-B-photo-500k.jpg → 250 KB",
+  "verdict": "LIMITED",
+  "visual": "PASS",
+  "alpha": "n/a",
+  "dims": "LIMITED",
+  "targetMet": true,
+  "ssim": 0.807,
+  "psnr": 32.46,
+  "changedPct": 0.076,
+  "sizeSrc": "2400x1600",
+  "sizeOut": "1482x988",
+  "input": 498577,
+  "output": 243433,
+  "details": "JPG · 1482 × 988px (resized to 62%) · quality 75% · 0.9 s",
+  "integrity": [
+   {
+    "file": "fid-cimg-IMAGE-B-p-IMAGE-B-photo-500k-compressed.jpg",
+    "bytes": 243433,
+    "ok": true,
+    "kind": "jpeg",
+    "w": 1482,
+    "h": 988,
+    "alpha": false
+   }
+  ]
+ },
+ {
+  "tool": "Compress Image",
+  "test": "IMAGE-C-photo-3mb.jpg → 1000 KB",
+  "verdict": "LIMITED",
+  "visual": "PASS",
+  "alpha": "n/a",
+  "dims": "LIMITED",
+  "targetMet": true,
+  "ssim": 0.7515,
+  "psnr": 31.18,
+  "changedPct": 0.108,
+  "sizeSrc": "4000x3000",
+  "sizeOut": "2244x1683",
+  "input": 2975516,
+  "output": 648203,
+  "details": "JPG · 2244 × 1683px (resized to 56%) · quality 75% · 2.9 s",
+  "integrity": [
+   {
+    "file": "fid-cimg-IMAGE-C-p-IMAGE-C-photo-3mb-compressed.jpg",
+    "bytes": 648203,
+    "ok": true,
+    "kind": "jpeg",
+    "w": 2244,
+    "h": 1683,
+    "alpha": false
+   }
+  ]
+ },
+ {
+  "tool": "Compress Image",
+  "test": "IMAGE-E-photo-15mb.jpg → 2000 KB",
+  "verdict": "LIMITED",
+  "visual": "PASS",
+  "alpha": "n/a",
+  "dims": "LIMITED",
+  "targetMet": true,
+  "ssim": 0.7786,
+  "psnr": 32.71,
+  "changedPct": 0.044,
+  "sizeSrc": "8000x6000",
+  "sizeOut": "2874x2156",
+  "input": 14688976,
+  "output": 898603,
+  "details": "JPG · 2874 × 2156px (resized to 36%) · quality 75% · 10.5 s",
+  "integrity": [
+   {
+    "file": "fid-cimg-IMAGE-E-p-IMAGE-E-photo-15mb-compressed.jpg",
+    "bytes": 898603,
+    "ok": true,
+    "kind": "jpeg",
+    "w": 2874,
+    "h": 2156,
+    "alpha": false
+   }
+  ]
+ },
+ {
+  "tool": "Compress Image",
+  "test": "IMAGE-F-transparent.png → 300 KB",
+  "verdict": "PASS",
+  "visual": "PASS",
+  "alpha": "PASS",
+  "dims": "PASS",
+  "targetMet": true,
+  "ssim": 0.9587,
+  "psnr": 41.32,
+  "changedPct": 0,
+  "sizeSrc": "1800x1400",
+  "sizeOut": "1800x1400",
+  "input": 3280825,
+  "output": 273164,
+  "details": "WebP · 1800 × 1400px · quality 74% · 2.7 s",
+  "integrity": [
+   {
+    "file": "fid-cimg-IMAGE-F-t-IMAGE-F-transparent-compressed.webp",
+    "bytes": 273164,
+    "ok": true,
+    "kind": "webp",
+    "w": 1800,
+    "h": 1400,
+    "alpha": true
+   }
+  ]
+ },
+ {
+  "tool": "Compress Image",
+  "test": "IMAGE-G-large-photo.png → 1000 KB",
+  "verdict": "LIMITED",
+  "visual": "PASS",
+  "alpha": "n/a",
+  "dims": "LIMITED",
+  "targetMet": true,
+  "ssim": 0.8156,
+  "psnr": 32.27,
+  "changedPct": 0.043,
+  "sizeSrc": "3000x2000",
+  "sizeOut": "2894x1929",
+  "input": 8311892,
+  "output": 773738,
+  "details": "WebP · 2894 × 1929px (resized to 96%) · quality 75% · 9.6 s",
+  "integrity": [
+   {
+    "file": "fid-cimg-IMAGE-G-l-IMAGE-G-large-photo-compressed.webp",
+    "bytes": 773738,
+    "ok": true,
+    "kind": "webp",
+    "w": 2894,
+    "h": 1929,
+    "alpha": false
+   }
+  ]
+ },
+ {
+  "tool": "Compress Image",
+  "test": "IMAGE-H-photo.webp → 100 KB",
+  "verdict": "LIMITED",
+  "visual": "PASS",
+  "alpha": "n/a",
+  "dims": "LIMITED",
+  "targetMet": true,
+  "ssim": 0.8458,
+  "psnr": 34.24,
+  "changedPct": 0.141,
+  "sizeSrc": "2400x1600",
+  "sizeOut": "1217x811",
+  "input": 1167856,
+  "output": 96062,
+  "details": "WebP · 1217 × 811px (resized to 51%) · quality 75% · 5.7 s",
+  "integrity": [
+   {
+    "file": "fid-cimg-IMAGE-H-p-IMAGE-H-photo-compressed.webp",
+    "bytes": 96062,
+    "ok": true,
+    "kind": "webp",
+    "w": 1217,
+    "h": 811,
+    "alpha": false
+   }
+  ]
+ },
+ {
+  "tool": "Compress Image",
+  "test": "IMAGE-K-exif-rich.jpg → 150 KB",
+  "verdict": "LIMITED",
+  "visual": "PASS",
+  "alpha": "n/a",
+  "dims": "LIMITED",
+  "targetMet": true,
+  "ssim": 0.8262,
+  "psnr": 33.1,
+  "changedPct": 0.152,
+  "sizeSrc": "1200x1600",
+  "sizeOut": "760x1013",
+  "input": 679943,
+  "output": 124826,
+  "details": "JPG · 760 × 1013px (resized to 63%) · quality 75% · 0.7 s",
+  "integrity": [
+   {
+    "file": "fid-cimg-IMAGE-K-e-IMAGE-K-exif-rich-compressed.jpg",
+    "bytes": 124826,
+    "ok": true,
+    "kind": "jpeg",
+    "w": 760,
+    "h": 1013,
+    "alpha": false
+   }
+  ]
+ },
+ {
+  "tool": "Compress Image",
+  "test": "X-transparent.webp → 20 KB",
+  "verdict": "LIMITED",
+  "visual": "PASS",
+  "alpha": "PASS",
+  "dims": "LIMITED",
+  "targetMet": true,
+  "ssim": 0.9663,
+  "psnr": 39.9,
+  "changedPct": 0.001,
+  "sizeSrc": "900x700",
+  "sizeOut": "480x373",
+  "input": 136976,
+  "output": 16846,
+  "details": "WebP · 480 × 373px (resized to 53%) · quality 50% · 0.9 s",
+  "integrity": [
+   {
+    "file": "fid-cimg-X-transpa-X-transparent-compressed.webp",
+    "bytes": 16846,
+    "ok": true,
+    "kind": "webp",
+    "w": 480,
+    "h": 373,
+    "alpha": true
+   }
+  ]
+ },
+ {
+  "tool": "Fidelity tools",
+  "test": "no third-party requests",
+  "verdict": "PASS",
+  "leaked": []
+ },
+ {
+  "tool": "Fidelity tools",
+  "test": "console errors (all steps)",
+  "verdict": "PASS",
+  "count": 0
+ }
+]

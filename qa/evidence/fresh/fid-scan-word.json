@@ -1,0 +1,70 @@
+[
+ {
+  "tool": "Scan → Word",
+  "test": "SCAN-WORD-07-mixed-rules.pdf",
+  "verdict": "PASS",
+  "ms": 5525,
+  "stages": [
+   "Analyzing document — page 1 of 1…\n\nEverything happens in this tab. Nothing is uploaded.",
+   "Recognizing page 1 of 1…\n\nScanned pages are read with OCR on this device — the first run downloads a small recognition model.",
+   "Validating result…\n\nEverything happens in this tab. Nothing is uploaded.",
+   "Your Word document is ready"
+  ],
+  "uploads": 0,
+  "pagesSrc": 1,
+  "pagesOut": 1,
+  "pages": [
+   {
+    "page": 1,
+    "wordsOut": 52,
+    "wordsInPlacePct": 96.2,
+    "wordsWithoutInk": [],
+    "rulesH": {
+     "src": 14,
+     "out": 14,
+     "keptPct": 92.1
+    },
+    "rulesV": {
+     "src": 11,
+     "out": 15,
+     "keptPct": 97.2
+    }
+   }
+  ],
+  "wordsInPlacePct": 96.2,
+  "wordsWithoutInk": 0,
+  "rulesKeptPct": 94.7,
+  "typographyPct": 100,
+  "tables": [
+   "2x2",
+   "1x1",
+   "1x1",
+   "4x3"
+  ],
+  "textRecallPct": 100,
+  "layout": "PASS",
+  "rules": "PASS",
+  "typography": "PASS",
+  "text": "PASS",
+  "garbage": "PASS",
+  "overall": "PASS",
+  "integrity": [
+   {
+    "file": "userscan-SCAN-WORD-07-mixed-rules.docx",
+    "bytes": 4732,
+    "ok": true,
+    "kind": "docx",
+    "pages": 1,
+    "paragraphs": 3,
+    "tables": 4,
+    "pictures": 0
+   }
+  ]
+ },
+ {
+  "tool": "User scan → Word",
+  "test": "console errors",
+  "verdict": "PASS",
+  "errors": []
+ }
+]

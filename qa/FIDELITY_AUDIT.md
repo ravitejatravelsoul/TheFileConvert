@@ -12,9 +12,10 @@ they are not collapsed into a single PASS.
 **READY FOR FINAL USER REVIEW** (final closure, after commit `c277426`). PDF → Word, Word → PDF, round
 trips, compression, the converters, page tools, the editor and OCR meet the fidelity contract for supported
 cases; the remaining differences are documented as LIMITED with their cause. Exported OCR scans are now
-searchable. No Microsoft Word reference render is available on this machine: "Microsoft Word reference
-unavailable" — the reference throughout is LibreOffice 26.2.6, and where Word and LibreOffice may disagree
-this report says so instead of claiming certainty.
+searchable. **Correction:** an earlier version said Microsoft Word was unavailable. Word is installed, but
+as an unlicensed product whose COM automation hangs, so no automated Word render exists; the reference
+throughout is LibreOffice 26.2.6, Word fidelity has to be confirmed by opening the DOCX in Word, and where Word
+and LibreOffice may disagree this report says so instead of claiming certainty.
 
 Everything below was measured on the local **production build** (`next build && next start`, Next.js 16.3.8)
 of the final code, desktop and Pixel 7 touch emulation. "Before" is the same harness run against the baseline
@@ -95,7 +96,7 @@ all four styles), so lines break identically; the remaining ~2 pt is glyph shape
 fixed: W2P-09) and all 29/29 + 2/2 lines break as in the reference (a kerning measurement bug made one line
 overflow its column — fixed: W2P-08). LIMITED: LibreOffice draws the last table row of column 1 at 13.3 pt while
 its identical rows in column 2 are 20.4 pt, as ours are; nothing in the document shortens that row. Renderer
-behaviour, Microsoft Word reference unavailable.
+behaviour; no automated Microsoft Word render (see the correction above).
 
 ### Round trips
 
@@ -136,6 +137,36 @@ Visual diffs: `qa/fidelity/pdf-to-word/`, `word-to-pdf/`, `round-trip/` (source 
 source only, blue = output only), and `compress-pdf/`, `compress-image/`, `converters/`,
 `merge-split-organize/`, `pdf-editor/`, `ocr/` (source | output | changed pixels). Files tagged `before` show
 the baseline build, `final` the current one. Renders of the user's scan stay in git-ignored `_private/`.
+
+## Scanned PDF → Word (after commit 69c8a27)
+
+Every scanned page is now analysed from its pixels (rules, boxes, grids, bands, tints, bold) before OCR and
+rebuilt as Word structure (tables with borders, paragraph/cell borders, shading, page border), with pictures
+for what can't be read (stamps, signatures, unreadable regions) and a visual fallback for unreadable pages —
+see `qa/CODE_REVIEW.md` "Scanned PDF → Word reconstruction". Graded by `qa/validate/scanform.py` through the
+real UI (`qa/scripts/fid-scans.mjs`, production build), LibreOffice render at 110 dpi:
+
+| Fixture | Text recall | Words in place | Rules kept | Typography | Garbage words | Verdict |
+|---|---:|---:|---:|---:|---:|---|
+| SCAN-WORD-01 form (section bands, fill-in lines, check boxes) | 90.4 % | 60.7 % | 0 % | 35 % | 29 | FAIL |
+| SCAN-WORD-02 invoice (banded item table, side-by-side blocks) | 95.0 % | 37.2 % | n/a | 59 % | 49 | FAIL |
+| SCAN-WORD-03 transcript (grey grids, tinted headers) | 93.8 % | 93.5 % | n/a¹ | 98 % | 0 | LIMITED |
+| SCAN-WORD-04 table-heavy (blue band, tinted total row) | 98.1 % | 91.6 % | 100 % | 92 % | 0 | LIMITED |
+| SCAN-WORD-05 two-column (Georgia, chart) | 99.7 % | 89.9 % | 0 %² | 40 % | 21 | FAIL |
+| SCAN-WORD-06 letter + stamp + signature | 97.4 % | 98.5 % | 100 % | 81 % | 0 | LIMITED |
+| SCAN-WORD-07 mixed rules (boxes, double rule, panel, grid) | 100 % | 96.2 % | 94.7 % | 100 % | 0 | PASS |
+| SCAN-WORD-08 the user's scan (2 pages) | — | 100 % | 99.8 % | 100 % | 0 | PASS (17/17 structure checks) |
+
+¹ the transcript's grid is lighter than the measurement's ink threshold — rebuilt as 4 bordered tables, not
+measured. ² the only rule is the chart's axis, kept inside the chart picture.
+
+The user's scan at 69c8a27 (same harness): words in place 80.6 %, 14 garbage words, rules 0 %, typography
+80 %, one 2 × 3 table, 6 structure checks failed → FAIL. Desktop and mobile (Pixel 7) both PASS now; 0 uploads.
+
+Known causes of the remaining FAIL/LIMITED: side-by-side text blocks on slightly different baselines are
+stacked (invoice header); fill-in lines after a label and check boxes on forms are not rebuilt as leader tabs /
+symbols; bold Georgia headings are measured as regular and set ~19 % too large (two-column); the stamp's
+picture is placed in the flow rather than floating.
 
 ## Defects
 

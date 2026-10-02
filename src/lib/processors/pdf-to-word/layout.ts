@@ -27,6 +27,8 @@ export interface TextItem {
   color?: string;
   /** Descent below the baseline as a fraction of the size (from the font), for vertical placement. */
   descent?: number;
+  /** OCR words: recognition confidence, 0–100. */
+  conf?: number;
 }
 
 /** A straight line drawn on the page (underline, table border, rule under a heading). */
@@ -68,6 +70,10 @@ export interface PageInput {
   /** Horizontal and vertical lines (y0 === y1 or x0 === x1 within the thickness). */
   rules?: Rule[];
   fills?: Fill[];
+  /** Visual fallback: the page image, kept behind the (then invisible) recognised text. */
+  background?: PageImage;
+  /** How the page is rebuilt (see scanPage.ts); native text pages leave it out. */
+  strategy?: "native" | "structured-scan" | "hybrid" | "visual-fallback";
 }
 
 export interface Run {
@@ -112,11 +118,17 @@ export interface CellParagraph {
   align: Align;
   /** Baseline-to-baseline distance inside the cell (exact), or null for single spacing. */
   line?: number | null;
+  /** Tab stops (from the cell's text edge) for a line whose parts sit apart, like "VALID FROM ⇥ date". */
+  tabs?: TabStop[];
+  /** Space above the paragraph (a cell's top padding, carried by its first paragraph). */
+  spaceBefore?: number;
 }
 
 export interface TableCell {
   paragraphs: CellParagraph[];
   shading?: string;
+  /** A line drawn under this cell only (a form's fill-in line under a value). */
+  borderBottom?: { thickness: number; color: string };
   /** Grid columns this cell spans. */
   span: number;
   vMerge?: "restart" | "continue";
@@ -143,7 +155,9 @@ export type Block =
       float?: { x: number; y: number };
     }
   | { kind: "image"; image: PageImage; width: number; height: number; fmt: ParaFormat }
-  | { kind: "columns"; gap: number; spaceBefore: number; left: Block[]; right: Block[] };
+  | { kind: "columns"; gap: number; spaceBefore: number; left: Block[]; right: Block[] }
+  /** A drawn horizontal line on its own (a signature or fill-in line, a separator): from indLeft, width long. */
+  | { kind: "rule"; indLeft: number; width: number; thickness: number; color: string; spaceBefore: number };
 
 /** A picture drawn at a fixed place on the page (next to text), not in the flow. */
 export interface FloatingImage {
@@ -153,6 +167,16 @@ export interface FloatingImage {
   y: number;
   width: number;
   height: number;
+  /** Behind the text (a scanned page kept as its own background). */
+  behind?: boolean;
+}
+
+/** A border around the whole page (a certificate's frame). Distance from the page edge in points. */
+export interface PageBorder {
+  style: "single" | "double";
+  thickness: number;
+  color: string;
+  space: { top: number; left: number; bottom: number; right: number };
 }
 
 export interface PageLayout {
@@ -166,6 +190,9 @@ export interface PageLayout {
   /** Distance from the page edge to the header's top / the footer's bottom. */
   headerDistance: number;
   footerDistance: number;
+  pageBorder?: PageBorder;
+  /** Visual fallback: the text sits invisibly over the page image, for search and copy. */
+  transparentText?: boolean;
 }
 
 export interface DocumentStats {
@@ -180,6 +207,9 @@ export interface DocumentStats {
 const r2 = (n: number) => Math.round(n * 2) / 2;
 /** Horizontal lengths keep Word's own precision (1/20 pt): half a point is enough to re-wrap a full line. */
 const tw = (n: number) => Math.round(n * 20) / 20;
+/** Border widths Word offers, in points (eighths 2, 4, 6, 8, 12, 18, 24, 36, 48); others it rounds unevenly. */
+const BORDER_PT = [0.25, 0.5, 0.75, 1, 1.5, 2.25, 3, 4.5, 6];
+export const snapBorder = (pt: number) => BORDER_PT.reduce((best, s) => (Math.abs(s - pt) < Math.abs(best - pt) ? s : best));
 /** How much wider than its longest line the text area is (less than any word, so lines break where they did). */
 const WRAP_SLACK = 0.25;
 const clamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, v));
@@ -437,7 +467,7 @@ function findGrids(rules: Rule[]): Grid[] {
     const xs = cluster(vs.map((r) => r.x0), 1.2);
     const x0 = Math.min(...g.map((r) => r.x0));
     const x1 = Math.max(...g.map((r) => r.x1));
-    const thickness = median(g.map((r) => r.thickness));
+    const thickness = snapBorder(median(g.map((r) => r.thickness)));
     const color = g[0].color;
     if (ys.length >= 2 && xs.length >= 2) grids.push({ xs, ys, hRules: hs, vRules: vs, border: { thickness, color }, x0, x1, y0: Math.min(...ys), y1: Math.max(...ys), openSides: false });
     // Three or more stacked horizontal lines of about the same width: a table ruled by rows only.
@@ -489,6 +519,10 @@ function findGutter(items: TextItem[], left: number, right: number): { x: number
   const lw = p75(leftLines.map((l) => l.x1 - l.x0));
   const rw = p75(rightLines.map((l) => l.x1 - l.x0));
   if (lw < (gx - left) * 0.6 || rw < (right - gx) * 0.6) return null;
+  // …and is continuous: most of its lines are one stretch of text, where a table row (an invoice's
+  // "24   £11.50   £276.00") is parts set apart.
+  const continuous = (ls: Line[]) => ls.filter((l) => l.cells.length === 1).length / ls.length;
+  if (continuous(leftLines) < 0.5 || continuous(rightLines) < 0.5) return null;
   return { x: gx, leftEnd: Math.max(...leftLines.map((l) => l.x1)), rightStart: Math.min(...rightLines.map((l) => l.x0)) };
 }
 
@@ -558,7 +592,7 @@ function lineBoxBottom(l: Line, pageH: number) {
  * value pairs) become a borderless table. Columns are the merged horizontal extents of the cells, so a
  * right-aligned column (amounts, dates) is recognised by its common right edge.
  */
-function borderlessTable(rowsLines: Line[], marginLeft: number, pitch: number): Block | null {
+function borderlessTable(rowsLines: Line[], marginLeft: number, pitch: number, rightEdge = Infinity): Extract<Block, { kind: "table" }> | null {
   const spans = rowsLines.flatMap((l) => l.cells.map((c) => ({ x0: c.x0, x1: c.x1 }))).sort((a, b) => a.x0 - b.x0);
   const cols: { x0: number; x1: number }[] = [];
   for (const sp of spans) {
@@ -576,6 +610,10 @@ function borderlessTable(rowsLines: Line[], marginLeft: number, pitch: number): 
     }
     return { height: pitch, cells };
   });
+  // A real table fills its columns; lines whose parts merely sit at different places (label/value pairs at
+  // different tab positions) leave most cells empty — those stay paragraphs with their own tab stops.
+  const filled = cols.map((_, k) => rows.filter((r) => r.cells[k].paragraphs[0].runs.length).length / rows.length);
+  if (Math.min(...filled) < 0.6) return null;
   // Column alignment from where its cells line up.
   cols.forEach((col, k) => {
     const members = rowsLines.flatMap((l) => l.cells.filter((c) => colOf(c) === k));
@@ -591,9 +629,41 @@ function borderlessTable(rowsLines: Line[], marginLeft: number, pitch: number): 
   const alignOfCol = (k: number) => rows[0].cells[k].paragraphs[0].align;
   const edges = [cols[0].x0];
   for (let k = 1; k < cols.length; k++) edges.push(alignOfCol(k) === "left" ? cols[k].x0 : alignOfCol(k - 1) === "right" ? cols[k - 1].x1 + 0.5 : (cols[k - 1].x1 + cols[k].x0) / 2);
-  edges.push(cols[cols.length - 1].x1 + 2);
+  // The last column has nothing to its right: it may run to the text edge, so a value set a little wider
+  // than it was measured (another font's widths, OCR's box) doesn't wrap and push everything below down.
+  const lastAlign = alignOfCol(cols.length - 1);
+  edges.push(lastAlign === "left" && Number.isFinite(rightEdge) ? Math.max(cols[cols.length - 1].x1 + 2, rightEdge) : cols[cols.length - 1].x1 + 2);
   const columns = edges.slice(1).map((e, k) => e - edges[k]);
   return { kind: "table", columns, rows, bordered: false, border: null, indent: tw(edges[0] - marginLeft), spaceBefore: 0, cellMargin: { left: 0, right: 0, top: 0 } };
+}
+
+/**
+ * Fill-in lines under a borderless table's values ("Applicant  Maria Lopez" over a line) become those
+ * cells' bottom borders — the line belongs to the value, not to the whole row, and can't sit between rows
+ * as a paragraph. A line running past the table's last column widens that column to where it ends.
+ */
+function underlineCells(table: Extract<Block, { kind: "table" }>, rowsLines: Line[], ctx: FlowContext) {
+  const starts: number[] = [];
+  let x = ctx.marginLeft + table.indent;
+  for (const w of table.columns) {
+    starts.push(x);
+    x += w;
+  }
+  rowsLines.forEach((l, r) => {
+    const bottom = l.y - l.descent * l.size;
+    for (const rule of [...ctx.rules]) {
+      if (Math.abs(rule.y1 - rule.y0) > 0.6 || rule.y0 >= bottom + 1 || bottom - rule.y0 > l.size * 1.2) continue;
+      const k = starts.findIndex((s, i) => rule.x0 >= s - 8 && rule.x0 < s + table.columns[i] - 4);
+      if (k < 0) continue;
+      const cell = table.rows[r].cells[k];
+      if (!cell?.paragraphs[0]?.runs.length) continue;
+      const end = starts[k] + table.columns[k];
+      if (rule.x1 < starts[k] + Math.min(table.columns[k], 24)) continue;
+      cell.borderBottom = { thickness: snapBorder(rule.thickness), color: rule.color };
+      if (k === table.columns.length - 1 && rule.x1 > end) table.columns[k] = rule.x1 - starts[k];
+      ctx.rules.splice(ctx.rules.indexOf(rule), 1);
+    }
+  });
 }
 
 /** Turns an ordered list of lines and pictures from one text flow into blocks. */
@@ -650,9 +720,13 @@ function blocksFor(entries: Entry[], region: Region, ctx: FlowContext): Placed[]
 
   const pitchFor = (group: Line[]) => {
     if (group.length >= 2) {
+      // The mean gap, so the paragraph is exactly as tall as it was (a median drifts when baselines jitter,
+      // as OCR's do) — unless one gap is far off (a stray line), then the median.
       const ds: number[] = [];
       for (let k = 1; k < group.length; k++) ds.push(group[k - 1].y - group[k].y);
-      return median(ds);
+      const mid = median(ds);
+      const mean = (group[0].y - group[group.length - 1].y) / (group.length - 1);
+      return ds.every((d) => Math.abs(d - mid) <= mid * 0.25) ? mean : mid;
     }
     return group[0].size * stats.leading;
   };
@@ -711,10 +785,21 @@ function blocksFor(entries: Entry[], region: Region, ctx: FlowContext): Placed[]
     // A line drawn just under the paragraph is its bottom border.
     const last = group[group.length - 1];
     const textBottom = last.y - last.descent * last.size;
-    const under = ctx.rules.find((r) => Math.abs(r.y1 - r.y0) <= 0.6 && r.y0 < textBottom && textBottom - r.y0 < last.size * 1.2 && r.x1 - r.x0 > width * 0.6 && r.x0 < first.x0 + 4);
+    // (Nothing else written between the text and the line: a rule under the next line isn't this one's.)
+    const between = (r: Rule) => ctx.page.items.some((it) => it.y > r.y0 + 0.5 && it.y < textBottom - 0.5 && it.x < r.x1 && it.x + it.w > r.x0);
+    const under = ctx.rules.find((r) => Math.abs(r.y1 - r.y0) <= 0.6 && r.y0 < textBottom && textBottom - r.y0 < last.size * 1.2 && r.x1 - r.x0 > width * 0.6 && r.x0 < first.x0 + 4 && !between(r));
     if (under) {
-      fmt.borderBottom = { thickness: under.thickness, color: under.color, space: Math.max(0, Math.round(textBottom - under.y0 - under.thickness / 2)) };
+      fmt.borderBottom = { thickness: snapBorder(under.thickness), color: under.color, space: Math.max(0, Math.round(textBottom - under.y0 - snapBorder(under.thickness) / 2)) };
       ctx.rules.splice(ctx.rules.indexOf(under), 1);
+      // Word draws the border from the paragraph's left indent to its right one. For a single left-aligned
+      // line, the indents are set to the line's own ends and a first-line indent keeps the text where it was.
+      if (group.length === 1 && align === "left" && fmt.indFirst === 0 && under.x1 >= first.x1 + 2) {
+        const textAt = ml + fmt.indLeft;
+        fmt.indLeft = tw(Math.max(0, under.x0 - ml));
+        fmt.indFirst = tw(textAt - (ml + fmt.indLeft));
+        fmt.indRight = Math.max(0, Math.floor((mr - under.x1) * 20) / 20);
+        if (Math.abs(fmt.indFirst) < 0.3) fmt.indFirst = 0;
+      }
     }
     // Shading behind the whole paragraph.
     const top = first.y + first.size * 0.8;
@@ -758,8 +843,9 @@ function blocksFor(entries: Entry[], region: Region, ctx: FlowContext): Placed[]
       }
       const rowsLines = entries.slice(i, j) as Line[];
       if (rowsLines.length >= 2) {
-        const table = borderlessTable(rowsLines, ctx.marginLeft, pitchFor(rowsLines));
+        const table = borderlessTable(rowsLines, ctx.marginLeft, pitchFor(rowsLines), region.right);
         if (table) {
+          underlineCells(table, rowsLines, ctx);
           placed.push({ block: table, top: lineBoxTop(rowsLines[0], pitchFor(rowsLines), pageH), bottom: lineBoxBottom(rowsLines[rowsLines.length - 1], pageH) });
           currentList = null;
           i = j;
@@ -1026,7 +1112,7 @@ function gridTable(g: Grid, items: Decorated[], fills: Fill[], page: PageInput, 
       const content = inside.filter((it) => it.x + it.w / 2 >= xl && it.x + it.w / 2 <= xr && it.y < yTop && it.y > yBot);
       const lines = groupLines(content);
       const paragraphs: CellParagraph[] = lines.length
-        ? lines.map((l) => ({ runs: l.runs, line: Math.round(l.size * pitchRatio * 20) / 20, align: l.x0 - xl > 8 && Math.abs(xr - l.x1 - (l.x0 - xl)) > 4 && xr - l.x1 < l.x0 - xl ? "right" : l.x0 - xl > 8 && Math.abs((l.x0 + l.x1) / 2 - (xl + xr) / 2) < 2 ? "center" : "left" }))
+        ? lines.map((l) => ({ runs: l.runs, line: Math.round(l.size * pitchRatio * 20) / 20, tabs: l.cells.length >= 2 ? l.cells.slice(1).map((c) => ({ pos: c.x0 - xl, align: "left" as const })) : undefined, align: l.x0 - xl > 8 && Math.abs(xr - l.x1 - (l.x0 - xl)) > 4 && xr - l.x1 < l.x0 - xl ? "right" : l.x0 - xl > 8 && Math.abs((l.x0 + l.x1) / 2 - (xl + xr) / 2) < 2 ? "center" : "left" }))
         : [{ runs: [], align: "left" }];
       if (lines.length) {
         cellMarginsL.push(Math.min(...lines.map((l) => l.x0)) - xl);
@@ -1068,7 +1154,12 @@ function gridTable(g: Grid, items: Decorated[], fills: Fill[], page: PageInput, 
   // Cell padding from left-aligned text only (right-aligned amounts sit far from the left edge).
   const lefts = cellMarginsL.filter((m) => m >= 0).sort((a, b) => a - b);
   const left = lefts.length ? clamp(lefts[Math.floor(lefts.length * 0.25)], 0, 12) : 5.4;
+  // Tab stops count from the cell's text edge, inside the padding.
+  for (const row of rows) for (const cell of row.cells) for (const p of cell.paragraphs) if (p.tabs) p.tabs = p.tabs.map((t) => ({ ...t, pos: tw(Math.max(0, t.pos - left)) }));
   const top = cellTops.length ? clamp(median(cellTops), 0, 12) : 0;
+  // The top padding rides on each cell's first paragraph, not on the cell margin: Word counts a cell's margins
+  // inside an "at least" row height, LibreOffice adds them on top — paragraph spacing reads the same in both.
+  if (top > 0) for (const row of rows) for (const cell of row.cells) if (cell.paragraphs[0]?.runs.length) cell.paragraphs[0].spaceBefore = tw(top);
   const block: Block = {
     kind: "table",
     columns: cols,
@@ -1077,9 +1168,11 @@ function gridTable(g: Grid, items: Decorated[], fills: Fill[], page: PageInput, 
     border: g.border,
     indent: tw(xs[0] - marginLeft),
     spaceBefore: 0,
-    cellMargin: { left, right: Math.min(left, 5.4), top },
+    cellMargin: { left, right: Math.min(left, 5.4), top: 0 },
   };
-  return { block, top: page.height - g.y1, bottom: page.height - g.y0 };
+  // Half of the outer border lies outside the lines' centres.
+  const half = (g.border?.thickness ?? 0) / 2;
+  return { block, top: page.height - g.y1 - half, bottom: page.height - g.y0 + half };
 }
 
 /** The tightest right edge a group of wrapped lines allows: each line ended because its next word didn't fit. */
@@ -1131,6 +1224,32 @@ function textAreaRight(lines: Line[], contentRight: number, contentLeft: number,
   return maxX + clamp(bound - maxX - 0.5, Math.min(1.5, bound - maxX - 0.5), 6);
 }
 
+/**
+ * Lines framing the whole page (left/right ≥ 80 % of its height, top/bottom ≥ 80 % of its width, near the
+ * edges): a certificate's border. Two nested frames a few points apart are a double border.
+ */
+function pageFrame(rules: Rule[], page: PageInput): { rules: Rule[]; border: PageBorder } | null {
+  const H = rules.filter((r) => Math.abs(r.y1 - r.y0) <= 0.6 && r.x1 - r.x0 >= page.width * 0.8);
+  const V = rules.filter((r) => Math.abs(r.x1 - r.x0) <= 0.6 && r.y1 - r.y0 >= page.height * 0.8);
+  const top = H.filter((r) => r.y0 > page.height * 0.85).sort((a, b) => b.y0 - a.y0);
+  const bottom = H.filter((r) => r.y0 < page.height * 0.15).sort((a, b) => a.y0 - b.y0);
+  const left = V.filter((r) => r.x0 < page.width * 0.15).sort((a, b) => a.x0 - b.x0);
+  const right = V.filter((r) => r.x0 > page.width * 0.85).sort((a, b) => b.x0 - a.x0);
+  if (!top.length || !bottom.length || !left.length || !right.length) return null;
+  const nested = (list: Rule[], pos: (r: Rule) => number) => list.length >= 2 && Math.abs(pos(list[1]) - pos(list[0])) <= 8;
+  const double = nested(top, (r) => r.y0) && nested(bottom, (r) => r.y0) && nested(left, (r) => r.x0) && nested(right, (r) => r.x0);
+  const used = double ? [top[0], top[1], bottom[0], bottom[1], left[0], left[1], right[0], right[1]] : [top[0], bottom[0], left[0], right[0]];
+  return {
+    rules: used,
+    border: {
+      style: double ? "double" : "single",
+      thickness: snapBorder(median(used.map((r) => r.thickness))),
+      color: top[0].color,
+      space: { top: page.height - top[0].y0, bottom: bottom[0].y0, left: left[0].x0, right: page.width - right[0].x0 },
+    },
+  };
+}
+
 /** Lays out one page. `listKeys` numbers lists across the whole document. `bands` are this page's
  * header/footer items (see findHeadersFooters). */
 export function layoutPage(page: PageInput, stats: DocumentStats, listKeys: { next: number } = { next: 1 }, bands?: PageBands): PageLayout {
@@ -1147,6 +1266,9 @@ export function layoutPage(page: PageInput, stats: DocumentStats, listKeys: { ne
   const images = page.images.filter((im) => im.w >= 12 && im.h >= 12 && !(hasText && (im.w * im.h) / (page.width * page.height) > 0.85));
 
   // Ruled tables take their text out of the flow.
+  // A frame around the whole page is the page's border, not a table holding everything.
+  const frame = pageFrame(rules, page);
+  if (frame) rules.splice(0, rules.length, ...rules.filter((r) => !frame.rules.includes(r)));
   const grids = findGrids(rules).filter((g) => items.some((it) => it.x >= g.x0 - 2 && it.x <= g.x1 && it.y <= g.y1 && it.y >= g.y0));
   const inGrid = (it: { x: number; y: number }, g: Grid) => it.x >= g.x0 - 2 && it.x <= g.x1 + 2 && it.y <= g.y1 + 1 && it.y >= g.y0 - 1;
   const flowItems = items.filter((it) => !grids.some((g) => inGrid(it, g)));
@@ -1167,6 +1289,8 @@ export function layoutPage(page: PageInput, stats: DocumentStats, listKeys: { ne
   // two-column page a picture inside one column belongs to that column's flow.
   const gutter = findGutter(flowItems, textLeft, textRight);
   const floating: FloatingImage[] = [];
+  // Visual fallback: the scan stays the page's look; the recognised text sits over it, invisible.
+  if (page.background) floating.push({ image: page.background, x: 0, y: 0, width: page.width, height: page.height, behind: true });
   const flowImages: PageImage[] = [];
   for (const im of images) {
     if (gutter && (im.x + im.w <= gutter.x + 1 || im.x >= gutter.x - 1)) {
@@ -1234,6 +1358,15 @@ export function layoutPage(page: PageInput, stats: DocumentStats, listKeys: { ne
     }
     placed.push(p);
   }
+  // Lines nothing else used (a signature or fill-in line, a separator) stay where they were drawn.
+  for (const r of ctx.rules) {
+    if (Math.abs(r.y1 - r.y0) > 0.6 || r.x1 - r.x0 < 36) continue;
+    const y = (r.y0 + r.y1) / 2;
+    const t = snapBorder(r.thickness);
+    // An empty 1 pt line with the rule as its bottom border: Word draws the border below the line, so the
+    // block spans 1 pt + the border, centred on where the rule was drawn.
+    placed.push({ block: { kind: "rule", indLeft: tw(Math.max(0, r.x0 - marginLeft)), width: tw(r.x1 - r.x0), thickness: t, color: r.color, spaceBefore: 0 }, top: page.height - y - 1 - t / 2, bottom: page.height - y + t / 2 });
+  }
   placed.sort((a, b) => a.top - b.top);
 
   // Header / footer.
@@ -1265,6 +1398,8 @@ export function layoutPage(page: PageInput, stats: DocumentStats, listKeys: { ne
     footer,
     headerDistance: Math.max(0, Math.round(headerTop * 2) / 2),
     footerDistance: Math.max(0, Math.round(footerBottom * 2) / 2),
+    pageBorder: frame?.border,
+    transparentText: Boolean(page.background),
   };
 }
 
