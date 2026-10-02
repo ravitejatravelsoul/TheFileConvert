@@ -84,7 +84,8 @@ function structure(t, docx) {
     checks.mustContain = missing.length === 0;
     if (missing.length) checks.missing = missing;
   }
-  if (t.pages) checks.pageBreaks = (docx.sections ?? []).length === t.pages;
+  // One page-starting section per PDF page (continuous sections only switch to columns inside a page).
+  if (t.pages) checks.pageBreaks = (docx.sections ?? []).filter((sec, i) => i === 0 || sec.newPage !== false).length === t.pages;
   if (t.id === "PDF-WORD-08") {
     const order = ["Community Newsletter", ...[1, 2, 3, 4, 5].map((n) => `Left ${n}:`), ...[1, 2, 3, 4, 5].map((n) => `Right ${n}:`)].map((s) => text.indexOf(s));
     checks.readingOrder = order.every((v, i) => v >= 0 && (i === 0 || v > order[i - 1]));

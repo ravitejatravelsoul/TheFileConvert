@@ -1,4 +1,4 @@
-import type { FaceStyle, FontApi } from "./fonts";
+import { verticalMetrics, type FaceStyle, type FontApi } from "./fonts";
 import type { Block, Border, Cell, DocModel, Float, HeaderFooterSet, Paragraph, RunStyle, SectionProps, Table, TabStop } from "./model";
 
 /**
@@ -63,6 +63,8 @@ interface Box {
   split?: (avail: number) => [Box, Box] | null;
   styleId?: string;
   contextual?: boolean;
+  /** The paragraph mark that follows a page break: it opens the new page but takes no room there. */
+  breakMark?: boolean;
 }
 
 function box(partial: Partial<Box> & { h: number }): Box {
@@ -109,11 +111,12 @@ interface Line {
 const CJK = /[\u2e80-\u9fff\uac00-\ud7af\uf900-\ufaff\uff00-\uffef]/;
 
 function faceStyle(s: RunStyle): { fs: FaceStyle; rise: number } {
+  const vm = verticalMetrics(s.fontName);
   if (s.vert) {
     const size = s.size * 0.65;
-    return { fs: { family: s.family, bold: s.bold, italic: s.italic, size }, rise: s.vert === "super" ? s.size * 0.35 : -s.size * 0.12 };
+    return { fs: { family: s.family, bold: s.bold, italic: s.italic, size, vm }, rise: s.vert === "super" ? s.size * 0.35 : -s.size * 0.12 };
   }
-  return { fs: { family: s.family, bold: s.bold, italic: s.italic, size: s.size }, rise: 0 };
+  return { fs: { family: s.family, bold: s.bold, italic: s.italic, size: s.size, vm }, rise: 0 };
 }
 
 function textPieces(text: string, style: RunStyle, env: LayoutEnv, note?: string): Piece[] {
@@ -361,6 +364,9 @@ function renderLine(line: Line, p: Paragraph, env: LayoutEnv): LineBox {
   if (rule.rule === "exact") h = rule.value;
   else if (rule.rule === "atLeast") h = Math.max(rule.value, natural, imgH + desc);
   else h = Math.max(natural * rule.value, imgH + desc);
+  // Word lays lines out in whole twips (1/20 pt), rounding each line up; over a page the fractions add up
+  // to whether the last line still fits.
+  h = Math.ceil(h * 20 - 1e-6) / 20;
   const baseline = h - desc;
 
   // Horizontal alignment.
@@ -512,6 +518,12 @@ function paragraphBoxes(p: Paragraph, width: number, env: LayoutEnv): Box[] {
   const right = width - props.indRight;
   const n = boxes.length;
   boxes.forEach(({ lb, breakBefore }, i) => {
+    // A paragraph that ends with a page break keeps its paragraph mark beside the break (Word 2013 and
+    // later): the empty remainder takes no room at the top of the next page.
+    if (i === n - 1 && n > 1 && breakBefore === "page" && lines[i].items.every((it) => it.p.k === "br")) {
+      out.push(box({ h: 0, pageBreakBefore: true, breakMark: true }));
+      return;
+    }
     const ops: Op[] = [];
     let h = lb.h;
     let top = 0;
@@ -560,7 +572,8 @@ function stack(boxes: Box[]): Stack {
   let y = 0;
   let prevAfter = 0;
   boxes.forEach((b, i) => {
-    y += (i === 0 ? 0 : prevAfter) + b.before;
+    // Space between paragraphs is the larger of "after" and "before", not their sum (as Word lays it out).
+    y += i === 0 ? b.before : Math.max(prevAfter, b.before);
     items.push({ y, box: b });
     y += b.h;
     prevAfter = b.after;
@@ -645,6 +658,8 @@ function tableBoxes(t: Table, width: number, env: LayoutEnv): Box[] {
       h = Math.max(h, p.content.h + p.cell.margins.top + p.cell.margins.bottom);
     }
     if (row.height?.rule === "exact") return row.height.value;
+    // The rule under a row takes room of its own, on top of the cell's content and margins.
+    h += Math.max(0, ...rowsPlaced[ri].map((p) => (p.rows <= 1 ? (p.cell.borders.bottom?.width ?? 0) : 0)));
     if (row.height) h = Math.max(h, row.height.value);
     return Math.max(h, 2);
   });
@@ -900,9 +915,17 @@ export function layoutDocument(model: DocModel, env: LayoutEnv): PageOut[] {
         newPage();
         atTopByOverflow = false;
       }
+      if (b.breakMark) {
+        // The page is started (a second break makes a blank page); what follows begins it the way a page
+        // filled by flowing text does, without its space before.
+        placedOnPage++;
+        atTopByOverflow = true;
+        continue;
+      }
       if (b.columnBreakBefore && placedInColumn > 0) nextColumnOrPage(false);
 
-      const beforeOf = (bx: Box) => (placedInColumn === 0 ? (atTopByOverflow ? 0 : bx.before) : prevAfter + bx.before);
+      // The larger of the previous paragraph's "after" and this one's "before" (Word collapses them).
+      const beforeOf = (bx: Box) => (placedInColumn === 0 ? (atTopByOverflow ? 0 : bx.before) : Math.max(prevAfter, bx.before));
       let before = beforeOf(b);
       const newNotes = b.footnotes.filter((id) => !page!.footnotes.includes(id));
       const noteH = newNotes.length ? noteHeight(newNotes) + (page!.footnotes.length ? 0 : 12) : 0;
@@ -917,7 +940,7 @@ export function layoutDocument(model: DocModel, env: LayoutEnv): PageOut[] {
         while (k < queue.length && k < 8) {
           const nb = queue[k];
           if (nb.pageBreakBefore) break;
-          chainH += prevA + nb.before + nb.h;
+          chainH += Math.max(prevA, nb.before) + nb.h;
           prevA = nb.after;
           if (!nb.keepNext) break;
           k++;
@@ -932,6 +955,8 @@ export function layoutDocument(model: DocModel, env: LayoutEnv): PageOut[] {
         if (placedInColumn === 0) {
           // An empty page can't take it whole: split it if we can, else let it run over.
           const parts = b.split?.(limit() - y - before - noteH);
+          // The rest of a split row still belongs to the table: it brings the header row with it.
+          if (parts) parts[1].repeat = b.repeat;
           if (parts) {
             place(parts[0], before);
             fnHeight += noteH;
@@ -943,6 +968,8 @@ export function layoutDocument(model: DocModel, env: LayoutEnv): PageOut[] {
           // Table rows break across pages (Word's default); a row that fits on the next page whole
           // only moves when there's barely room for a line here.
           const parts = remaining > 20 ? b.split?.(remaining) : null;
+          // The rest of a split row still belongs to the table: it brings the header row with it.
+          if (parts) parts[1].repeat = b.repeat;
           if (parts) {
             place(parts[0], before);
             fnHeight += noteH;

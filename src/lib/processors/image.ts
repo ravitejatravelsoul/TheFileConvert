@@ -83,6 +83,10 @@ function drawToCanvas(
     ctx.fillStyle = "#ffffff";
     ctx.fillRect(0, 0, width, height);
   }
+  // The default ("low") filter is plain bilinear: shrinking a photo to a third of its size aliases fine
+  // detail into noise. "high" filters properly before resampling.
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = "high";
   ctx.drawImage(bitmap, 0, 0, width, height);
   return canvas;
 }

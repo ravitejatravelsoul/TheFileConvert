@@ -7,8 +7,8 @@
   "kind": "docx",
   "input": 37010,
   "meta": "37 KB · Word document · 1 page",
-  "ms": 403,
-  "output": 10608,
+  "ms": 292,
+  "output": 10550,
   "pages": 1,
   "pictures": 0,
   "links": 0,
@@ -21,11 +21,12 @@
   "checks": {
    "pages": true
   },
+  "notes": "Cambria isn't available here, so it's drawn with a similar font. Lines may break in slightly different places than in Word.",
   "uploads": [],
   "integrity": [
    {
     "file": "w2p-WORD-01-simple-m-WORD-01-simple.pdf",
-    "bytes": 10608,
+    "bytes": 10550,
     "ok": true,
     "kind": "pdf",
     "pages": 1
@@ -40,8 +41,8 @@
   "kind": "docx",
   "input": 36892,
   "meta": "37 KB · Word document · 1 page",
-  "ms": 375,
-  "output": 17151,
+  "ms": 452,
+  "output": 17107,
   "pages": 1,
   "pictures": 0,
   "links": 0,
@@ -57,11 +58,12 @@
    "headings": true,
    "bookmarks": true
   },
+  "notes": "Cambria isn't available here, so it's drawn with a similar font. Lines may break in slightly different places than in Word.",
   "uploads": [],
   "integrity": [
    {
     "file": "w2p-WORD-02-headings-m-WORD-02-headings.pdf",
-    "bytes": 17151,
+    "bytes": 17107,
     "ok": true,
     "kind": "pdf",
     "pages": 1
@@ -76,8 +78,8 @@
   "kind": "docx",
   "input": 36903,
   "meta": "37 KB · Word document · 1 page",
-  "ms": 486,
-  "output": 40926,
+  "ms": 1021,
+  "output": 40908,
   "pages": 1,
   "pictures": 0,
   "links": 0,
@@ -102,11 +104,12 @@
    "underline": true,
    "color": true
   },
+  "notes": "Cambria isn't available here, so it's drawn with a similar font. Lines may break in slightly different places than in Word.",
   "uploads": [],
   "integrity": [
    {
     "file": "w2p-WORD-03-formatting-m-WORD-03-formatting.pdf",
-    "bytes": 40926,
+    "bytes": 40908,
     "ok": true,
     "kind": "pdf",
     "pages": 1
@@ -121,8 +124,8 @@
   "kind": "docx",
   "input": 36772,
   "meta": "37 KB · Word document · 1 page",
-  "ms": 362,
-  "output": 11291,
+  "ms": 309,
+  "output": 11241,
   "pages": 1,
   "pictures": 0,
   "links": 0,
@@ -138,11 +141,12 @@
    "numbers": true,
    "nested": true
   },
+  "notes": "Cambria isn't available here, so it's drawn with a similar font. Lines may break in slightly different places than in Word.",
   "uploads": [],
   "integrity": [
    {
     "file": "w2p-WORD-04-lists-m-WORD-04-lists.pdf",
-    "bytes": 11291,
+    "bytes": 11241,
     "ok": true,
     "kind": "pdf",
     "pages": 1
@@ -157,8 +161,8 @@
   "kind": "docx",
   "input": 36920,
   "meta": "37 KB · Word document · 1 page",
-  "ms": 382,
-  "output": 15924,
+  "ms": 447,
+  "output": 15819,
   "pages": 1,
   "pictures": 0,
   "links": 0,
@@ -174,11 +178,12 @@
    "tableRow": true,
    "tableBorders": true
   },
+  "notes": "Cambria isn't available here, so it's drawn with a similar font. Lines may break in slightly different places than in Word.",
   "uploads": [],
   "integrity": [
    {
     "file": "w2p-WORD-05-table-m-WORD-05-table.pdf",
-    "bytes": 15924,
+    "bytes": 15819,
     "ok": true,
     "kind": "pdf",
     "pages": 1
@@ -193,8 +198,8 @@
   "kind": "docx",
   "input": 57489,
   "meta": "57 KB · Word document · 1 page",
-  "ms": 429,
-  "output": 126005,
+  "ms": 454,
+  "output": 125992,
   "pages": 1,
   "pictures": 2,
   "links": 0,
@@ -210,11 +215,12 @@
    "images": true,
    "aspect": true
   },
+  "notes": "Cambria isn't available here, so it's drawn with a similar font. Lines may break in slightly different places than in Word.",
   "uploads": [],
   "integrity": [
    {
     "file": "w2p-WORD-06-images-m-WORD-06-images.pdf",
-    "bytes": 126005,
+    "bytes": 125992,
     "ok": true,
     "kind": "pdf",
     "pages": 1
@@ -229,8 +235,8 @@
   "kind": "docx",
   "input": 36668,
   "meta": "37 KB · Word document · 3 pages",
-  "ms": 387,
-  "output": 12239,
+  "ms": 397,
+  "output": 12230,
   "pages": 3,
   "pictures": 0,
   "links": 0,
@@ -245,11 +251,12 @@
    "pages": true,
    "perPage": true
   },
+  "notes": "Cambria isn't available here, so it's drawn with a similar font. Lines may break in slightly different places than in Word.",
   "uploads": [],
   "integrity": [
    {
     "file": "w2p-WORD-07-page-breaks-m-WORD-07-page-breaks.pdf",
-    "bytes": 12239,
+    "bytes": 12230,
     "ok": true,
     "kind": "pdf",
     "pages": 3
@@ -264,8 +271,8 @@
   "kind": "docx",
   "input": 36901,
   "meta": "37 KB · Word document · 1 page",
-  "ms": 395,
-  "output": 20825,
+  "ms": 424,
+  "output": 20807,
   "pages": 1,
   "pictures": 0,
   "links": 0,
@@ -280,11 +287,12 @@
    "pages": true,
    "chars": true
   },
+  "notes": "Cambria isn't available here, so it's drawn with a similar font. Lines may break in slightly different places than in Word.",
   "uploads": [],
   "integrity": [
    {
     "file": "w2p-WORD-08-special-characters-m-WORD-08-special-characters.pdf",
-    "bytes": 20825,
+    "bytes": 20807,
     "ok": true,
     "kind": "pdf",
     "pages": 1
@@ -299,8 +307,8 @@
   "kind": "docx",
   "input": 36858,
   "meta": "37 KB · Word document · 1 page",
-  "ms": 311,
-  "output": 10653,
+  "ms": 416,
+  "output": 10626,
   "pages": 1,
   "pictures": 0,
   "links": 0,
@@ -315,11 +323,12 @@
    "align": true,
    "justified": true
   },
+  "notes": "Cambria isn't available here, so it's drawn with a similar font. Lines may break in slightly different places than in Word.",
   "uploads": [],
   "integrity": [
    {
     "file": "w2p-WORD-09-alignment-m-WORD-09-alignment.pdf",
-    "bytes": 10653,
+    "bytes": 10626,
     "ok": true,
     "kind": "pdf",
     "pages": 1
@@ -334,8 +343,8 @@
   "kind": "docx",
   "input": 38142,
   "meta": "38 KB · Word document · 3 pages",
-  "ms": 376,
-  "output": 17531,
+  "ms": 448,
+  "output": 17422,
   "pages": 3,
   "pictures": 0,
   "links": 0,
@@ -351,11 +360,12 @@
    "header": true,
    "footer": true
   },
+  "notes": "Cambria isn't available here, so it's drawn with a similar font. Lines may break in slightly different places than in Word.",
   "uploads": [],
   "integrity": [
    {
     "file": "w2p-WORD-10-header-footer-m-WORD-10-header-footer.pdf",
-    "bytes": 17531,
+    "bytes": 17422,
     "ok": true,
     "kind": "pdf",
     "pages": 3
@@ -370,8 +380,8 @@
   "kind": "docx",
   "input": 38643,
   "meta": "39 KB · Word document · 23 pages",
-  "ms": 758,
-  "output": 67957,
+  "ms": 823,
+  "output": 65958,
   "pages": 23,
   "pictures": 0,
   "links": 0,
@@ -386,11 +396,12 @@
    "pages": true,
    "bookmarkCount": true
   },
+  "notes": "Cambria isn't available here, so it's drawn with a similar font. Lines may break in slightly different places than in Word.",
   "uploads": [],
   "integrity": [
    {
     "file": "w2p-WORD-11-multipage-m-WORD-11-multipage.pdf",
-    "bytes": 67957,
+    "bytes": 65958,
     "ok": true,
     "kind": "pdf",
     "pages": 23
@@ -405,8 +416,8 @@
   "kind": "docx",
   "input": 41716,
   "meta": "42 KB · Word document · 2 pages",
-  "ms": 490,
-  "output": 37733,
+  "ms": 515,
+  "output": 37659,
   "pages": 2,
   "pictures": 1,
   "links": 1,
@@ -427,11 +438,12 @@
    "landscape": true,
    "leader": true
   },
+  "notes": "Cambria isn't available here, so it's drawn with a similar font. Lines may break in slightly different places than in Word.",
   "uploads": [],
   "integrity": [
    {
     "file": "w2p-WORD-12-complex-m-WORD-12-complex.pdf",
-    "bytes": 37733,
+    "bytes": 37659,
     "ok": true,
     "kind": "pdf",
     "pages": 2
@@ -446,8 +458,8 @@
   "kind": "docx",
   "input": 3646378,
   "meta": "3.65 MB · Word document · 2 pages",
-  "ms": 1003,
-  "output": 3639698,
+  "ms": 981,
+  "output": 3639692,
   "pages": 2,
   "pictures": 3,
   "links": 0,
@@ -462,11 +474,12 @@
    "pages": true,
    "images": true
   },
+  "notes": "Cambria isn't available here, so it's drawn with a similar font. Lines may break in slightly different places than in Word.",
   "uploads": [],
   "integrity": [
    {
     "file": "w2p-WORD-15-photos-m-WORD-15-photos.pdf",
-    "bytes": 3639698,
+    "bytes": 3639692,
     "ok": true,
     "kind": "pdf",
     "pages": 2
@@ -541,8 +554,8 @@
   "kind": "docx",
   "input": 4195,
   "meta": "4.2 KB · Word document · 1 page",
-  "ms": 297,
-  "output": 16894,
+  "ms": 369,
+  "output": 16857,
   "pages": 1,
   "pictures": 0,
   "links": 0,
@@ -560,7 +573,7 @@
   "integrity": [
    {
     "file": "w2p-WORD-14-from-pdf-to-word-m-WORD-14-from-pdf-to-word.pdf",
-    "bytes": 16894,
+    "bytes": 16857,
     "ok": true,
     "kind": "pdf",
     "pages": 1

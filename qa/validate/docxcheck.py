@@ -122,7 +122,9 @@ def check(path):
             )
         tables = [[[c.text for c in row.cells] for row in t.rows] for t in d.tables]
         shapes = [{"w_pt": s.width.pt, "h_pt": s.height.pt} for s in d.inline_shapes]
-        sections = [{"w_pt": round(s.page_width.pt, 1), "h_pt": round(s.page_height.pt, 1)} for s in d.sections]
+        # "newPage": whether the section starts a page (a continuous section — Word's way of switching to
+        # columns part-way down a page — doesn't).
+        sections = [{"w_pt": round(s.page_width.pt, 1), "h_pt": round(s.page_height.pt, 1), "newPage": s.start_type != 0} for s in d.sections]
         out.update({"paragraphs": paras, "tables": tables, "pictures": shapes, "sections": sections, "images": images})
         # Text in document order (paragraphs and table rows as they appear in the body).
         order = []

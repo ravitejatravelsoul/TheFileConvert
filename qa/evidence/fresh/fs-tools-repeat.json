@@ -8,7 +8,7 @@
   "integrity": [
    {
     "file": "fs-repeat-merge-1-merged.pdf",
-    "bytes": 4553,
+    "bytes": 4552,
     "ok": true,
     "kind": "pdf",
     "pages": 5
@@ -32,7 +32,7 @@
   "integrity": [
    {
     "file": "fs-repeat-editor-1-PDF-K-native-text-edited.pdf",
-    "bytes": 2744,
+    "bytes": 2745,
     "ok": true,
     "kind": "pdf",
     "pages": 2
@@ -82,11 +82,11 @@
   "integrity": [
    {
     "file": "fs-repeat-CompressImage-1-IMAGE-B-photo-500k-compressed.jpg",
-    "bytes": 244707,
+    "bytes": 243433,
     "ok": true,
     "kind": "jpeg",
-    "w": 1426,
-    "h": 950,
+    "w": 1482,
+    "h": 988,
     "alpha": false
    },
    {
@@ -194,7 +194,7 @@
   "integrity": [
    {
     "file": "fs-repeat-SplitPDF-1-PDF-H-multipage-text-image-pages-2.pdf",
-    "bytes": 518543,
+    "bytes": 518541,
     "ok": true,
     "kind": "pdf",
     "pages": 1
@@ -226,7 +226,7 @@
    },
    {
     "file": "fs-repeat-OrganizePDF-2-PDF-K-native-text-organized.pdf",
-    "bytes": 2292,
+    "bytes": 2293,
     "ok": true,
     "kind": "pdf",
     "pages": 2

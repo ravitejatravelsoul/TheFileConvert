@@ -5,11 +5,11 @@
   "verdict": "PASS",
   "labels": "4,1,2,3,5,6,7,8,9,10",
   "rotations": "0,0,0,0,0,0,0,0,0,0",
-  "output": 5315239,
+  "output": 5315240,
   "integrity": [
    {
     "file": "fs-org-dragpag-PDF-H-multipage-text-image-organized.pdf",
-    "bytes": 5315239,
+    "bytes": 5315240,
     "ok": true,
     "kind": "pdf",
     "pages": 10
@@ -22,11 +22,11 @@
   "verdict": "PASS",
   "labels": "1,2,3,4,5,6,7,8,9,10",
   "rotations": "0,90,0,0,0,0,0,0,0,0",
-  "output": 5315243,
+  "output": 5315245,
   "integrity": [
    {
     "file": "fs-org-rotatep-PDF-H-multipage-text-image-organized.pdf",
-    "bytes": 5315243,
+    "bytes": 5315245,
     "ok": true,
     "kind": "pdf",
     "pages": 10
@@ -39,11 +39,11 @@
   "verdict": "PASS",
   "labels": "1,2,3,4,5,6,7,8,9",
   "rotations": "0,0,0,0,0,0,0,0,0",
-  "output": 4805655,
+  "output": 4805656,
   "integrity": [
    {
     "file": "fs-org-deletep-PDF-H-multipage-text-image-organized.pdf",
-    "bytes": 4805655,
+    "bytes": 4805656,
     "ok": true,
     "kind": "pdf",
     "pages": 9
@@ -56,11 +56,11 @@
   "verdict": "PASS",
   "labels": "4,1,1,2,3,5,6,7,8,10",
   "rotations": "0,0,0,270,0,0,0,0,0,0",
-  "output": 4773314,
+  "output": 4773316,
   "integrity": [
    {
     "file": "fs-org-combined-PDF-H-multipage-text-image-organized.pdf",
-    "bytes": 4773314,
+    "bytes": 4773316,
     "ok": true,
     "kind": "pdf",
     "pages": 10
@@ -72,11 +72,11 @@
   "test": "incremental-update scan: rotate + save",
   "verdict": "PASS",
   "rotations": "90,0",
-  "output": 3623902,
+  "output": 3623901,
   "integrity": [
    {
     "file": "fs-org-genone-PDF-C-scan-38mb-incremental-organized.pdf",
-    "bytes": 3623902,
+    "bytes": 3623901,
     "ok": true,
     "kind": "pdf",
     "pages": 2
@@ -91,7 +91,7 @@
   "integrity": [
    {
     "file": "fs-org-rotsrc-PDF-I-rotated-organized.pdf",
-    "bytes": 645994,
+    "bytes": 645995,
     "ok": true,
     "kind": "pdf",
     "pages": 4

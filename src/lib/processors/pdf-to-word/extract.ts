@@ -1,5 +1,5 @@
 import type { PDFDocumentProxy, PDFPageProxy } from "pdfjs-dist";
-import type { PageImage, PageInput, TextItem } from "./layout";
+import type { Fill, PageImage, PageInput, Rule, TextItem } from "./layout";
 
 /**
  * Browser side of PDF → Word: reads each page with pdf.js (positioned text, fonts, pictures), decides
@@ -71,7 +71,31 @@ function frameFor(view: number[], angle: number) {
   };
 }
 
-function fontStyle(page: PDFPageProxy, fontName: string): { bold: boolean; italic: boolean } {
+/** A PDF font name ("ABCDEF+Calibri-Bold", "TimesNewRomanPSMT", "Helvetica-Oblique") → the Word font a
+ * .docx should ask for. Open metric-compatible fonts map back to the fonts they stand in for. */
+export function wordFontName(pdfName: string): string {
+  let n = pdfName.replace(/^[A-Z]{6}\+/, "").split(/[,-]/)[0].replace(/(PSMT|PS|MT)$/, "");
+  const known: [RegExp, string][] = [
+    [/^(Carlito|Calibri)/i, "Calibri"],
+    [/^(Caladea|Cambria)/i, "Cambria"],
+    [/^(LiberationSans|Arimo|Arial|Helvetica)/i, "Arial"],
+    [/^(LiberationSerif|Tinos|TimesNewRoman|Times)/i, "Times New Roman"],
+    [/^(LiberationMono|Cousine|CourierNew|Courier)/i, "Courier New"],
+    [/^Georgia/i, "Georgia"],
+    [/^Verdana/i, "Verdana"],
+    [/^Tahoma/i, "Tahoma"],
+    [/^Garamond/i, "Garamond"],
+    [/^Aptos/i, "Aptos"],
+    [/^SegoeUI/i, "Segoe UI"],
+    [/^(Symbol|OpenSymbol|Wingdings)/i, ""],
+  ];
+  for (const [re, name] of known) if (re.test(n)) return name;
+  // "SourceSansPro" → "Source Sans Pro"
+  n = n.replace(/([a-z])([A-Z])/g, "$1 $2").trim();
+  return /^[A-Za-z][A-Za-z ]{1,40}$/.test(n) ? n : "";
+}
+
+function fontInfo(page: PDFPageProxy, fontName: string): { bold: boolean; italic: boolean; family: string } {
   let name = fontName;
   let flags: { bold?: boolean; italic?: boolean; black?: boolean } = {};
   try {
@@ -86,7 +110,23 @@ function fontStyle(page: PDFPageProxy, fontName: string): { bold: boolean; itali
   return {
     bold: Boolean(flags.bold || flags.black) || /bold|black|heavy|semibold|demi/i.test(name),
     italic: Boolean(flags.italic) || /italic|oblique/i.test(name),
+    family: name === fontName ? "" : wordFontName(name),
   };
+}
+
+/** Symbol-font bullets land in the private-use area; map the usual ones to real characters. */
+const PUA_BULLETS: Record<number, string> = { 0xf0b7: "•", 0xf0a7: "▪", 0xf0a8: "◆", 0xf06c: "●", 0xf06e: "■", 0xf06f: "□", 0xf076: "❖", 0xf0d8: "➢", 0xf0fc: "✓", 0xf0e0: "→", 0xe00a: "•", 0xf09f: "•" };
+function mapSymbols(s: string): string {
+  return s.replace(/[\ue000-\uf8ff]/g, (c) => PUA_BULLETS[c.charCodeAt(0)] ?? "•");
+}
+
+function hexColor(args: unknown): string {
+  const a = args as unknown[];
+  const v = a?.[0];
+  if (typeof v === "string" && /^#[0-9a-f]{6}$/i.test(v)) return v.slice(1).toLowerCase();
+  const nums = (Array.isArray(v) || ArrayBuffer.isView(v) ? Array.from(v as ArrayLike<number>) : a) as number[];
+  if (nums.length >= 3 && nums.every((x) => typeof x === "number")) return nums.slice(0, 3).map((x) => Math.round(x > 1 ? x : x * 255).toString(16).padStart(2, "0")).join("");
+  return "000000";
 }
 
 async function imageToBytes(img: unknown): Promise<{ bytes: Uint8Array; mime: "image/png" | "image/jpeg"; w: number; h: number } | null> {
@@ -164,17 +204,56 @@ interface PageRead {
   view: number[];
 }
 
+/** pdf.js path data: [op, coords…] with moveTo=0, lineTo=1, curveTo=2, quadraticCurveTo=3, closePath=4. */
+function pathPoints(data: ArrayLike<number> | undefined): { segments: [number, number, number, number][]; curved: boolean } {
+  const segments: [number, number, number, number][] = [];
+  if (!data) return { segments, curved: false };
+  let x = 0;
+  let y = 0;
+  let sx = 0;
+  let sy = 0;
+  let curved = false;
+  for (let i = 0; i < data.length; ) {
+    const op = data[i++];
+    if (op === 0) {
+      x = sx = data[i++];
+      y = sy = data[i++];
+    } else if (op === 1) {
+      const nx = data[i++];
+      const ny = data[i++];
+      segments.push([x, y, nx, ny]);
+      x = nx;
+      y = ny;
+    } else if (op === 2) {
+      curved = true;
+      i += 4;
+      x = data[i++];
+      y = data[i++];
+    } else if (op === 3) {
+      curved = true;
+      i += 2;
+      x = data[i++];
+      y = data[i++];
+    } else if (op === 4) {
+      if (x !== sx || y !== sy) segments.push([x, y, sx, sy]);
+      x = sx;
+      y = sy;
+    } else break;
+  }
+  return { segments, curved };
+}
+
 async function readPage(page: PDFPageProxy): Promise<PageRead> {
   const pdfjs = await import("pdfjs-dist");
   const OPS = pdfjs.OPS;
   const ops = await page.getOperatorList(); // also loads the page's fonts, so their names are known
   const content = await page.getTextContent();
 
-  type Raw = { str: string; t: number[]; w: number; fontName: string };
+  type Raw = { str: string; t: number[]; w: number; fontName: string; color: string };
   const raws: Raw[] = [];
   for (const it of content.items) {
     if (!("str" in it) || !it.str) continue;
-    raws.push({ str: it.str, t: it.transform, w: it.width, fontName: it.fontName });
+    raws.push({ str: it.str, t: it.transform, w: it.width, fontName: it.fontName, color: "000000" });
   }
   const chars = raws.reduce((n, r) => n + r.str.replace(/\s/g, "").length, 0);
 
@@ -189,44 +268,81 @@ async function readPage(page: PDFPageProxy): Promise<PageRead> {
   for (const [a, w] of angleWeight) if (w > bestW) [angle, bestW] = [a, w];
   const frame = frameFor(page.view, angle);
 
-  const items: TextItem[] = [];
-  for (const r of raws) {
-    const a = ((Math.round((Math.atan2(r.t[1], r.t[0]) * 180) / Math.PI / 90) * 90) % 360 + 360) % 360;
-    if (a !== angle) continue; // stamps and sideways labels at other angles aren't part of the text flow
-    const size = Math.hypot(r.t[2], r.t[3]) || Math.hypot(r.t[0], r.t[1]);
-    const p = frame.point(r.t[4], r.t[5]);
-    const style = fontStyle(page, r.fontName);
-    items.push({ str: r.str, x: p.x, y: p.y, w: r.w, size, bold: style.bold, italic: style.italic });
-  }
-
-  // Pictures: follow the transformation stack through the operator list to find where each is drawn.
+  // One pass over the drawing operators: pictures, bullet dots, lines, filled boxes, and the colour of
+  // every character drawn (text colour isn't part of pdf.js's text content, but the operators carry it).
   const images: PageImage[] = [];
+  const rules: Rule[] = [];
+  const fills: Fill[] = [];
+  const colorStream: { ch: string; color: string }[] = [];
   let ctm: Matrix = [1, 0, 0, 1, 0, 0];
-  const stack: Matrix[] = [];
+  const stack: { ctm: Matrix; fill: string; stroke: string; lineWidth: number }[] = [];
+  let fill = "000000";
+  let stroke = "000000";
+  let lineWidth = 1;
   let imageArea = 0;
   const dots: { x: number; y: number; size: number }[] = [];
   const pageArea = frame.width * frame.height;
+  const toFrame = (x: number, y: number) => {
+    const c = apply(ctm, x, y);
+    return frame.point(c.x, c.y);
+  };
   for (let i = 0; i < ops.fnArray.length; i++) {
     const fn = ops.fnArray[i];
     const args = ops.argsArray[i];
-    if (fn === OPS.save) stack.push(ctm);
-    else if (fn === OPS.restore) ctm = stack.pop() ?? ctm;
-    else if (fn === OPS.transform) ctm = mul(args as Matrix, ctm);
-    else if (fn === OPS.paintFormXObjectBegin) {
-      stack.push(ctm);
+    if (fn === OPS.save) stack.push({ ctm, fill, stroke, lineWidth });
+    else if (fn === OPS.restore) {
+      const st = stack.pop();
+      if (st) ({ ctm, fill, stroke, lineWidth } = st);
+    } else if (fn === OPS.transform) ctm = mul(args as Matrix, ctm);
+    else if (fn === OPS.setFillRGBColor) fill = hexColor(args);
+    else if (fn === OPS.setStrokeRGBColor) stroke = hexColor(args);
+    else if (fn === OPS.setLineWidth) lineWidth = Number(args?.[0]) || 0;
+    else if (fn === OPS.showText || fn === OPS.showSpacedText || fn === OPS.nextLineShowText || fn === OPS.nextLineSetSpacingShowText) {
+      const glyphs = (args as unknown[]).find((a) => Array.isArray(a)) as unknown[] | undefined;
+      for (const g of glyphs ?? []) {
+        const u = (g as { unicode?: string } | null)?.unicode;
+        if (typeof u === "string") for (const ch of mapSymbols(u)) if (ch.trim()) colorStream.push({ ch, color: fill });
+      }
+    } else if (fn === OPS.paintFormXObjectBegin) {
+      stack.push({ ctm, fill, stroke, lineWidth });
       if (Array.isArray(args?.[0]) && args[0].length === 6) ctm = mul(args[0] as Matrix, ctm);
-    } else if (fn === OPS.paintFormXObjectEnd) ctm = stack.pop() ?? ctm;
-    else if (fn === OPS.constructPath) {
-      // List bullets are often drawn as small filled dots rather than "•" text (Chrome and Word both do
-      // this). Remember dot-sized filled shapes; they become bullet characters below.
+    } else if (fn === OPS.paintFormXObjectEnd) {
+      const st = stack.pop();
+      if (st) ({ ctm, fill, stroke, lineWidth } = st);
+    } else if (fn === OPS.constructPath) {
       const paint = args?.[0];
       const box = args?.[2] as ArrayLike<number> | undefined;
-      if ((paint === OPS.fill || paint === OPS.eoFill || paint === OPS.fillStroke || paint === OPS.eoFillStroke) && box && box.length === 4) {
-        const corners = [apply(ctm, box[0], box[1]), apply(ctm, box[2], box[3])].map((c) => frame.point(c.x, c.y));
-        const w = Math.abs(corners[1].x - corners[0].x);
-        const h = Math.abs(corners[1].y - corners[0].y);
-        if (w >= 1.5 && w <= 9 && h >= 1.5 && h <= 9 && Math.abs(w - h) <= Math.max(w, h) * 0.35) {
-          dots.push({ x: (corners[0].x + corners[1].x) / 2, y: (corners[0].y + corners[1].y) / 2, size: Math.max(w, h) });
+      const filled = paint === OPS.fill || paint === OPS.eoFill || paint === OPS.fillStroke || paint === OPS.eoFillStroke || paint === OPS.closeFillStroke || paint === OPS.closeEOFillStroke;
+      const stroked = paint === OPS.stroke || paint === OPS.closeStroke || paint === OPS.fillStroke || paint === OPS.eoFillStroke || paint === OPS.closeFillStroke || paint === OPS.closeEOFillStroke;
+      if (!box || box.length !== 4 || (!filled && !stroked)) continue;
+      const c0 = toFrame(box[0], box[1]);
+      const c1 = toFrame(box[2], box[3]);
+      const bx = Math.min(c0.x, c1.x);
+      const by = Math.min(c0.y, c1.y);
+      const bw = Math.abs(c1.x - c0.x);
+      const bh = Math.abs(c1.y - c0.y);
+      // List bullets are often drawn as small filled dots rather than "•" text (Chrome and Word both do
+      // this). Remember dot-sized filled shapes; they become bullet characters below.
+      if (filled && bw >= 1.5 && bw <= 9 && bh >= 1.5 && bh <= 9 && Math.abs(bw - bh) <= Math.max(bw, bh) * 0.35) {
+        dots.push({ x: bx + bw / 2, y: by + bh / 2, size: Math.max(bw, bh) });
+        continue;
+      }
+      const scale = Math.sqrt(Math.abs(ctm[0] * ctm[3] - ctm[1] * ctm[2])) || 1;
+      if (filled) {
+        // Thin filled bars are lines (borders drawn as rectangles); bigger ones are shading.
+        if (bh <= 2.5 && bw >= 4) rules.push({ x0: bx, x1: bx + bw, y0: by + bh / 2, y1: by + bh / 2, thickness: Math.max(0.25, bh), color: fill });
+        else if (bw <= 2.5 && bh >= 4) rules.push({ x0: bx + bw / 2, x1: bx + bw / 2, y0: by, y1: by + bh, thickness: Math.max(0.25, bw), color: fill });
+        else if (bw >= 4 && bh >= 4 && fill !== "ffffff" && bw * bh < pageArea * 0.9) fills.push({ x: bx, y: by, w: bw, h: bh, color: fill });
+      }
+      if (stroked) {
+        const { segments, curved } = pathPoints((args?.[1] as ArrayLike<number>[] | undefined)?.[0]);
+        if (curved) continue;
+        const t = Math.max(0.25, lineWidth * scale);
+        for (const [x0, y0, x1, y1] of segments) {
+          const a = toFrame(x0, y0);
+          const b = toFrame(x1, y1);
+          if (Math.abs(a.y - b.y) < 0.5 && Math.abs(a.x - b.x) >= 3) rules.push({ x0: Math.min(a.x, b.x), x1: Math.max(a.x, b.x), y0: a.y, y1: a.y, thickness: t, color: stroke });
+          else if (Math.abs(a.x - b.x) < 0.5 && Math.abs(a.y - b.y) >= 3) rules.push({ x0: a.x, x1: a.x, y0: Math.min(a.y, b.y), y1: Math.max(a.y, b.y), thickness: t, color: stroke });
         }
       }
     } else if (fn === OPS.paintImageXObject || fn === OPS.paintInlineImageXObject) {
@@ -243,6 +359,35 @@ async function readPage(page: PDFPageProxy): Promise<PageRead> {
     }
   }
 
+  // Text colour: walk the text items and the drawn characters together (both follow the content
+  // stream's order); each item takes the colour most of its characters were drawn in.
+  let cursor = 0;
+  for (const r of raws) {
+    const tally = new Map<string, number>();
+    for (const ch of mapSymbols(r.str)) {
+      if (!ch.trim()) continue;
+      let k = cursor;
+      while (k < colorStream.length && k < cursor + 40 && colorStream[k].ch !== ch) k++;
+      if (k < colorStream.length && colorStream[k].ch === ch) {
+        tally.set(colorStream[k].color, (tally.get(colorStream[k].color) ?? 0) + 1);
+        cursor = k + 1;
+      }
+    }
+    let best = 0;
+    for (const [c, n] of tally) if (n > best) [r.color, best] = [c, n];
+  }
+
+  const items: TextItem[] = [];
+  for (const r of raws) {
+    const a = ((Math.round((Math.atan2(r.t[1], r.t[0]) * 180) / Math.PI / 90) * 90) % 360 + 360) % 360;
+    if (a !== angle) continue; // stamps and sideways labels at other angles aren't part of the text flow
+    const size = Math.hypot(r.t[2], r.t[3]) || Math.hypot(r.t[0], r.t[1]);
+    const p = frame.point(r.t[4], r.t[5]);
+    const style = fontInfo(page, r.fontName);
+    const descent = Math.abs(content.styles[r.fontName]?.descent ?? 0.22);
+    items.push({ str: mapSymbols(r.str), x: p.x, y: p.y, w: r.w, size, bold: style.bold, italic: style.italic, font: style.family, color: r.color, descent: descent > 0 && descent < 0.6 ? descent : 0.22 });
+  }
+
   // A dot on a text line's x-height, just left of where the line starts, is that line's bullet.
   for (const dot of dots) {
     let best: TextItem | null = null;
@@ -253,12 +398,12 @@ async function readPage(page: PDFPageProxy): Promise<PageRead> {
       if (!best || it.x < best.x) best = it;
     }
     if (best && !/^\s*[•●◦▪]/.test(best.str) && !items.some((it) => it.x < best!.x && it.x >= dot.x - 1 && Math.abs(it.y - best!.y) < 1)) {
-      items.push({ str: "•", x: dot.x - dot.size / 2, y: best.y, w: dot.size, size: best.size, bold: false, italic: false });
+      items.push({ str: "•", x: dot.x - dot.size / 2, y: best.y, w: dot.size, size: best.size, bold: false, italic: false, font: best.font, color: best.color, descent: best.descent });
     }
   }
 
   const kind: PageKind = chars >= MIN_TEXT_CHARS ? "text" : imageArea > pageArea * 0.3 ? "scanned" : chars > 0 ? "text" : "blank";
-  return { kind, input: { width: frame.width, height: frame.height, items, images }, rotate: page.rotate, view: [...page.view] };
+  return { kind, input: { width: frame.width, height: frame.height, items, images, rules, fills }, rotate: page.rotate, view: [...page.view] };
 }
 
 /** Quick look for the upload screen: page count and whether it's text, scanned or mixed. */

@@ -8,7 +8,7 @@
   "dims": "1224x1584",
   "aspectOk": true,
   "nonBlank": true,
-  "ms": 909,
+  "ms": 912,
   "integrity": [
    {
     "file": "fs-p2i-OCR-A-OCR-A-clean-300dpi-page-1.png",
@@ -30,7 +30,7 @@
   "dims": "1224x1584 1224x1584 1224x1584 1224x1584 1224x1584 1224x1584 1224x1584 1224x1584 1224x1584 1224x1584",
   "aspectOk": true,
   "nonBlank": true,
-  "ms": 1454,
+  "ms": 1430,
   "integrity": [
    {
     "file": "fs-p2i-PDF-H-PDF-H-multipage-text-image-images.zip",
@@ -50,7 +50,7 @@
   "dims": "1224x1584 1584x1224 1224x1584 1584x1224",
   "aspectOk": true,
   "nonBlank": true,
-  "ms": 943,
+  "ms": 926,
   "integrity": [
    {
     "file": "fs-p2i-PDF-I-PDF-I-rotated-images.zip",
@@ -70,7 +70,7 @@
   "dims": "1224x1584 1190x1684 1224x2016 1190x840 1584x2448 452x1200",
   "aspectOk": true,
   "nonBlank": true,
-  "ms": 913,
+  "ms": 915,
   "integrity": [
    {
     "file": "fs-p2i-PDF-J-PDF-J-mixed-page-sizes-images.zip",
@@ -90,7 +90,7 @@
   "dims": "1190x1684 1190x1684",
   "aspectOk": true,
   "nonBlank": true,
-  "ms": 914,
+  "ms": 1484,
   "integrity": [
    {
     "file": "fs-p2i-PDF-C-PDF-C-scan-3.8mb-incremental-images.zip",
@@ -130,7 +130,7 @@
   "dims": "1224x1584 1224x1584 1224x1584 1224x1584 1224x1584 1224x1584",
   "aspectOk": true,
   "nonBlank": true,
-  "ms": 913,
+  "ms": 923,
   "integrity": [
    {
     "file": "fs-p2i-PDF-Q-PDF-Q-owner-password-only-images.zip",

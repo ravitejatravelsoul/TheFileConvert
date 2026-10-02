@@ -16,6 +16,26 @@ export interface FaceStyle {
   bold: boolean;
   italic: boolean;
   size: number;
+  /** The requested font's own ascent and descent (em), when it's drawn with a substitute of another height. */
+  vm?: { ascent: number; descent: number };
+}
+
+/**
+ * Ascent and descent (em) of common Word fonts that are drawn with a substitute whose line height differs.
+ * Word spaces lines by the requested font, so a paragraph's height follows these, not the substitute's.
+ * (Calibri, Arial, Times New Roman and Courier New have metric-compatible substitutes and aren't listed.)
+ */
+const VERTICAL: [RegExp, { ascent: number; descent: number }][] = [
+  [/^cambria$/i, { ascent: 1900 / 2048, descent: 500 / 2048 }],
+  [/^georgia$/i, { ascent: 1878 / 2048, descent: 449 / 2048 }],
+  [/^verdana$/i, { ascent: 2059 / 2048, descent: 430 / 2048 }],
+  [/^tahoma$/i, { ascent: 2049 / 2048, descent: 423 / 2048 }],
+  [/^segoe ui$/i, { ascent: 2210 / 2048, descent: 514 / 2048 }],
+];
+
+export function verticalMetrics(fontName: string | undefined): FaceStyle["vm"] {
+  const n = (fontName ?? "").trim();
+  return VERTICAL.find(([re]) => re.test(n))?.[1];
 }
 
 export interface Segment {
@@ -87,12 +107,40 @@ function collectStyles(model: DocModel): RunStyle[] {
 
 function collectText(model: DocModel): Map<FaceKey, Set<string>> {
   const chars = new Map<FaceKey, Set<string>>();
-  const add = (style: RunStyle, text: string) => {
+  forEachText(model, (style, text) => {
     const k = faceKey(style);
     let set = chars.get(k);
     if (!set) chars.set(k, (set = new Set()));
     for (const ch of text) set.add(ch);
-  };
+  });
+  return chars;
+}
+
+/** Fonts drawn with a font of the same widths: lines break exactly where Word breaks them. */
+const METRIC_COMPATIBLE = /^(calibri|calibri light|carlito|arial|helvetica|liberation sans|arimo|times new roman|times|liberation serif|tinos|courier new|courier|liberation mono|cousine)$/i;
+
+/**
+ * The document's fonts that are drawn with a similar but not identical font (so lines may break in
+ * slightly different places), most used first. Fonts on less than 5% of the text aren't worth a notice.
+ */
+export function substitutedFonts(model: DocModel): string[] {
+  const use = new Map<string, number>();
+  let total = 0;
+  forEachText(model, (style, text) => {
+    const n = text.replace(/\s/g, "").length;
+    total += n;
+    const name = style.fontName.trim();
+    if (!name || METRIC_COMPATIBLE.test(name) || /symbol|wingdings|webdings/i.test(name)) return;
+    use.set(name, (use.get(name) ?? 0) + n);
+  });
+  return [...use.entries()]
+    .filter(([, n]) => n >= total * 0.05)
+    .sort((a, b) => b[1] - a[1])
+    .map(([name]) => name);
+}
+
+/** Every piece of text the document draws, with its style (headers, footers, footnotes and list labels included). */
+function forEachText(model: DocModel, add: (style: RunStyle, text: string) => void) {
   const blocks = (list: Block[] | undefined) => {
     for (const b of list ?? []) {
       if (b.kind === "p") {
@@ -112,7 +160,6 @@ function collectText(model: DocModel): Map<FaceKey, Set<string>> {
     }
   }
   for (const f of model.footnotes.values()) blocks(f);
-  return chars;
 }
 
 export interface FontSet extends FontApi {
@@ -260,6 +307,11 @@ export async function loadFonts(model: DocModel, loader: FontLoader): Promise<Fo
     segments,
     measure: (text, style) => segments(text, style).reduce((n, s) => n + s.width, 0),
     metrics(style) {
+      if (style.vm) {
+        const ascent = style.vm.ascent * style.size;
+        const descent = style.vm.descent * style.size;
+        return { ascent, descent, height: ascent + descent };
+      }
       const f = (faces.get(faceKey(style)) ?? faces.get("carlito-r")!).font;
       const s = style.size / f.unitsPerEm;
       const ascent = f.ascent * s;

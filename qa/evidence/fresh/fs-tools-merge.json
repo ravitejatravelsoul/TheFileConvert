@@ -8,7 +8,7 @@
   "sizesOk": true,
   "rotOk": true,
   "output": 4552,
-  "ms": 165,
+  "ms": 176,
   "integrity": [
    {
     "file": "fs-merge-2-2PDFs-merged.pdf",
@@ -27,12 +27,12 @@
   "pages": "11/11",
   "sizesOk": true,
   "rotOk": true,
-  "output": 6345,
-  "ms": 151,
+  "output": 6348,
+  "ms": 127,
   "integrity": [
    {
     "file": "fs-merge-3-3PDFs-merged.pdf",
-    "bytes": 6345,
+    "bytes": 6348,
     "ok": true,
     "kind": "pdf",
     "pages": 11
@@ -49,7 +49,7 @@
   "rotOk": true,
   "formNote": "form fields flattened/dropped (visual appearance kept)",
   "output": 14932245,
-  "ms": 362,
+  "ms": 363,
   "integrity": [
    {
     "file": "fs-merge-10-10PDF-merged.pdf",
@@ -69,12 +69,12 @@
   "sizesOk": true,
   "rotOk": true,
   "formNote": "form fields flattened/dropped (visual appearance kept)",
-  "output": 3628584,
-  "ms": 236,
+  "output": 3628585,
+  "ms": 252,
   "integrity": [
    {
     "file": "fs-merge-3-mixed-merged.pdf",
-    "bytes": 3628584,
+    "bytes": 3628585,
     "ok": true,
     "kind": "pdf",
     "pages": 5
@@ -89,12 +89,12 @@
   "pages": "6/6",
   "sizesOk": true,
   "rotOk": true,
-  "output": 647541,
-  "ms": 195,
+  "output": 647542,
+  "ms": 128,
   "integrity": [
    {
     "file": "fs-merge-2-rotate-merged.pdf",
-    "bytes": 647541,
+    "bytes": 647542,
     "ok": true,
     "kind": "pdf",
     "pages": 6
@@ -109,12 +109,12 @@
   "pages": "8/8",
   "sizesOk": true,
   "rotOk": true,
-  "output": 4092,
-  "ms": 155,
+  "output": 4093,
+  "ms": 128,
   "integrity": [
    {
     "file": "fs-merge-2-mixed-merged.pdf",
-    "bytes": 4092,
+    "bytes": 4093,
     "ok": true,
     "kind": "pdf",
     "pages": 8
@@ -129,7 +129,7 @@
   "integrity": [
    {
     "file": "fs-merge-reorder-merged.pdf",
-    "bytes": 6353,
+    "bytes": 6354,
     "ok": true,
     "kind": "pdf",
     "pages": 11
@@ -146,7 +146,7 @@
   "integrity": [
    {
     "file": "fs-merge-after-corrupt-merged.pdf",
-    "bytes": 4553,
+    "bytes": 4552,
     "ok": true,
     "kind": "pdf",
     "pages": 5

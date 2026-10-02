@@ -8,9 +8,9 @@ import { PDFDocument } from "pdf-lib";
 import * as pdfjs from "pdfjs-dist/legacy/build/pdf.mjs";
 import { convertWordToPdf, WordToPdfError } from "./index";
 import { parseDocx } from "./parse";
-import { padGlyphs, type FaceKey, type FontApi } from "./fonts";
+import { padGlyphs, substitutedFonts, verticalMetrics, type FaceKey, type FontApi } from "./fonts";
 import { decoratePages, layoutDocument } from "./layout";
-import type { DocModel, Paragraph, RunStyle } from "./model";
+import type { Block, Border, Cell, DocModel, Paragraph, Row, RunStyle, Table } from "./model";
 
 // The parser uses the browser's DOMParser; pdf.js wants plain Node — so Node plus jsdom's parser.
 beforeAll(() => {
@@ -109,7 +109,7 @@ describe("layout (fake metrics: every character 0.5 em wide)", () => {
   const fonts: FontApi = {
     measure: (t, s) => Array.from(t).length * s.size * 0.5,
     segments: (t, s) => [{ face: "carlito-r", text: t, width: Array.from(t).length * s.size * 0.5 }],
-    metrics: (s) => ({ ascent: s.size * 0.8, descent: s.size * 0.2, height: s.size * 1.2 }),
+    metrics: (s) => (s.vm ? { ascent: s.vm.ascent * s.size, descent: s.vm.descent * s.size, height: (s.vm.ascent + s.vm.descent) * s.size } : { ascent: s.size * 0.8, descent: s.size * 0.2, height: s.size * 1.2 }),
     underline: (s) => ({ offset: s.size * 0.1, thickness: 0.5 }),
   };
   const style: RunStyle = { family: "carlito", fontName: "Calibri", size: 10, bold: false, italic: false, underline: false, strike: false, color: null, highlight: null, vert: null, caps: false, hidden: false };
@@ -121,7 +121,7 @@ describe("layout (fake metrics: every character 0.5 em wide)", () => {
     floats: [],
     props: { align: "left", indLeft: 0, indRight: 0, indFirst: 0, spaceBefore: 0, spaceAfter: 0, line: { rule: "auto", value: 1 }, keepNext: false, keepLines: false, pageBreakBefore: false, contextualSpacing: false, widowControl: false, tabs: [], borders: {}, shading: null, styleId: "Normal", outline: null, ...props },
   });
-  const model = (blocks: Paragraph[], height = 792): DocModel => ({
+  const model = (blocks: Block[], height = 792): DocModel => ({
     sections: [
       {
         blocks,
@@ -165,6 +165,73 @@ describe("layout (fake metrics: every character 0.5 em wide)", () => {
     const headingPage = pages.findIndex((p) => p.some((t) => t.text === "Heading"));
     const bodyPage = pages.findIndex((p) => p.some((t) => t.text.startsWith("x ")));
     expect(headingPage).toBe(bodyPage);
+  });
+
+  const baselines = (page: { y: number }[]) => [...new Set(page.map((t) => t.y))].sort((a, b) => a - b);
+
+  it("collapses paragraph spacing to the larger of space after and space before, as Word does", () => {
+    const [page] = texts(model([para("one", { spaceAfter: 12 }), para("two", { spaceBefore: 6 })]));
+    const [a, b] = baselines(page);
+    expect(b - a).toBeCloseTo(12 + 12, 5);
+  });
+
+  it("lays lines out in whole twips, rounding each line up", () => {
+    const line = { rule: "auto" as const, value: 1.08 };
+    const [page] = texts(model([para("one", { line }), para("two", { line })]));
+    const [a, b] = baselines(page);
+    expect(b - a).toBeCloseTo(13, 5); // 12 × 1.08 = 12.96 pt → 260 twips
+  });
+
+  it("a paragraph ending in a page break leaves neither an empty line nor space before on the next page", () => {
+    const brk = para("before");
+    brk.inlines.push({ kind: "break", type: "page", style });
+    const pages = texts(model([brk, para("after", { spaceBefore: 24 })]));
+    expect(pages.map((p) => p.map((t) => t.text).join(""))).toEqual(["before", "after"]);
+    expect(pages[1][0].y).toBeCloseTo(pages[0][0].y, 5);
+    // Two breaks in a row still give a blank page between.
+    const only = () => ({ ...para(""), inlines: [{ kind: "break" as const, type: "page" as const, style }] });
+    expect(texts(model([para("a"), only(), only(), para("z")])).map((p) => p.map((t) => t.text).join(""))).toEqual(["a", "", "z"]);
+  });
+
+  it("spaces lines by the requested font's own height when it is drawn with a substitute", () => {
+    const cambria: RunStyle = { ...style, fontName: "Cambria", family: "serif" };
+    const p = (t: string): Paragraph => ({ ...para(t), inlines: [{ kind: "text", text: t, style: cambria }], markStyle: cambria });
+    const [a, b] = baselines(texts(model([p("one"), p("two")]))[0]);
+    expect(b - a).toBeCloseTo(Math.ceil(((1900 + 500) / 2048) * 10 * 20) / 20, 5); // 11.72 pt → 11.75
+    expect(verticalMetrics("Calibri")).toBeUndefined(); // metric-compatible substitute: its own metrics
+  });
+
+  it("names the fonts that are drawn with a similar but not identical font", () => {
+    const run = (fontName: string, text: string): Paragraph => {
+      const s: RunStyle = { ...style, fontName };
+      return { ...para(text), inlines: [{ kind: "text", text, style: s }], markStyle: s };
+    };
+    expect(substitutedFonts(model([run("Calibri", "a".repeat(400)), run("Arial", "b".repeat(100))]))).toEqual([]);
+    expect(substitutedFonts(model([run("Georgia", "a".repeat(400)), run("Cambria", "b".repeat(100)), run("Calibri", "c".repeat(100))]))).toEqual(["Georgia", "Cambria"]);
+    // A font on a sliver of the text (a symbol, a logo word) isn't worth a notice; symbol fonts never are.
+    expect(substitutedFonts(model([run("Calibri", "a".repeat(990)), run("Garamond", "b".repeat(10)), run("Wingdings", "c".repeat(200))]))).toEqual([]);
+  });
+
+  const cell = (text: string, borders: Partial<Cell["borders"]> = {}): Cell => ({ span: 1, vMerge: null, shading: null, borders: { top: null, bottom: null, left: null, right: null, ...borders }, vAlign: "top", margins: { top: 0, bottom: 0, left: 0, right: 0 }, blocks: [para(text)] });
+  const row = (cells: Cell[], header = false): Row => ({ cells, gridBefore: 0, header, cantSplit: false, height: null });
+  const table = (rows: Row[]): Table => ({ kind: "table", grid: [100, 100], width: null, align: "left", indent: 0, rows });
+
+  it("gives each table row its bottom border's thickness on top of its content", () => {
+    const bd: Border = { width: 2, color: "000000", space: 0 };
+    const [page] = texts(model([table([row([cell("r1", { bottom: bd }), cell("a", { bottom: bd })]), row([cell("r2", { bottom: bd }), cell("b", { bottom: bd })])])]));
+    const r1 = page.find((t) => t.text === "r1")!;
+    const r2 = page.find((t) => t.text === "r2")!;
+    expect(r2.y - r1.y).toBeCloseTo(12 + 2, 5);
+  });
+
+  it("repeats the header row above the rest of a row that breaks across pages", () => {
+    const big = cell("l0");
+    big.blocks = Array.from({ length: 14 }, (_, i) => para(`l${i}`));
+    const pages = texts(model([table([row([cell("H"), cell("H2")], true), row([big, cell("v")])])], 200));
+    const withRows = pages.filter((p) => p.some((t) => /^l\d+$/.test(t.text)));
+    expect(withRows.length).toBeGreaterThan(1);
+    for (const p of withRows) expect(p.some((t) => t.text === "H")).toBe(true);
+    expect(new Set(pages.flat().filter((t) => /^l\d+$/.test(t.text)).map((t) => t.text)).size).toBe(14);
   });
 
   it("prints real page numbers in footers", () => {
@@ -281,7 +348,8 @@ describe("convertWordToPdf end to end", () => {
     const r = await convert("WORD-08-special-characters.docx");
     const text = (await pdfText(r.bytes)).join(" ");
     for (const s of ["€120.50", "£99.99", "₹1,250", "✓ done", "™", "“double”", "‘single’", "niño", "Zürich", "Łódź", "Ελληνικά", "Русский", "½", "≈", "→"]) expect(text).toContain(s);
-    expect(r.notes).toEqual([]);
+    // No missing glyphs; the only note is the honest one about the headings' theme font (Cambria).
+    expect(r.notes).toEqual(["Cambria isn't available here, so it's drawn with a similar font. Lines may break in slightly different places than in Word."]);
   }, 60_000);
 
   it("embeds the pictures and keeps lists and tables as text", async () => {

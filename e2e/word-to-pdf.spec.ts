@@ -53,9 +53,11 @@ test.describe("Word to PDF", () => {
     });
     // The page is drawn, not blank.
     const r = await renderPdfPage(bytes, 1, 0.5);
+    // Every pixel, not a sparse grid: thin text at half scale can fall between grid points when lines move
+    // by a fraction of a pixel (a blank page scores 0; this page ~1,100).
     let ink = 0;
-    for (let y = 0; y < r.height; y += 3) for (let x = 0; x < r.width; x += 3) if (r.getPixel(x, y)[0] < 128) ink++;
-    expect(ink).toBeGreaterThan(50);
+    for (let y = 0; y < r.height; y++) for (let x = 0; x < r.width; x++) if (r.getPixel(x, y)[0] < 160) ink++;
+    expect(ink).toBeGreaterThan(500);
     await expectNoHorizontalOverflow(page);
     // Nothing left the device.
     const origin = new URL(page.url()).origin;

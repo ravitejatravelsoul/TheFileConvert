@@ -3,7 +3,7 @@
   "tool": "Privacy",
   "test": "no request carries a body (no uploads) across all 9 tools",
   "verdict": "PASS",
-  "requests": 253,
+  "requests": 262,
   "withBody": []
  },
  {
@@ -38,15 +38,15 @@
   "test": "requests per flow (page code, fonts, pdf.js worker, OCR assets only)",
   "verdict": "PASS",
   "byTool": {
-   "compress-pdf": 25,
-   "compress-image": 24,
-   "convert-image": 23,
-   "pdf-to-image": 30,
-   "image-to-pdf": 27,
-   "merge-pdf": 30,
-   "split-pdf": 29,
-   "organize-pdf": 29,
-   "pdf-editor (OCR + export)": 36
+   "compress-pdf": 26,
+   "compress-image": 25,
+   "convert-image": 24,
+   "pdf-to-image": 31,
+   "image-to-pdf": 28,
+   "merge-pdf": 31,
+   "split-pdf": 30,
+   "organize-pdf": 30,
+   "pdf-editor (OCR + export)": 37
   }
  }
 ]

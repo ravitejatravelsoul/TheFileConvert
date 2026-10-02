@@ -14,7 +14,7 @@
   "leakedRequests": [],
   "psnr": 99,
   "ssim": 1,
-  "ms": 442,
+  "ms": 394,
   "integrity": [
    {
     "file": "fs-conv-IMAGE-B-p-png-IMAGE-B-photo-500k.png",
@@ -42,7 +42,7 @@
   "leakedRequests": [],
   "psnr": 37.59,
   "ssim": 0.9681,
-  "ms": 913,
+  "ms": 917,
   "integrity": [
    {
     "file": "fs-conv-X-portrai-webp-X-portrait-1200x1800.webp",
@@ -74,7 +74,7 @@
   "leakedRequests": [],
   "psnr": 43.17,
   "ssim": 0.9838,
-  "ms": 427,
+  "ms": 401,
   "integrity": [
    {
     "file": "fs-conv-IMAGE-F-t-jpeg-IMAGE-F-transparent.jpg",
@@ -102,7 +102,7 @@
   "leakedRequests": [],
   "psnr": 45.2,
   "ssim": 0.9914,
-  "ms": 906,
+  "ms": 938,
   "integrity": [
    {
     "file": "fs-conv-IMAGE-F-t-webp-IMAGE-F-transparent.webp",
@@ -130,7 +130,7 @@
   "leakedRequests": [],
   "psnr": 34.9,
   "ssim": 0.9457,
-  "ms": 284,
+  "ms": 276,
   "integrity": [
    {
     "file": "fs-conv-X-odd-100-jpeg-X-odd-1001x777.jpg",
@@ -158,7 +158,7 @@
   "leakedRequests": [],
   "psnr": 35.35,
   "ssim": 0.9981,
-  "ms": 112,
+  "ms": 114,
   "integrity": [
    {
     "file": "fs-conv-X-tiny-64-webp-X-tiny-64x48.webp",
@@ -186,7 +186,7 @@
   "leakedRequests": [],
   "psnr": 41.43,
   "ssim": 0.9834,
-  "ms": 1120,
+  "ms": 923,
   "integrity": [
    {
     "file": "fs-conv-IMAGE-H-p-jpeg-IMAGE-H-photo.jpg",
@@ -214,7 +214,7 @@
   "leakedRequests": [],
   "psnr": 99,
   "ssim": 1,
-  "ms": 295,
+  "ms": 282,
   "integrity": [
    {
     "file": "fs-conv-X-transpa-png-X-transparent.png",
@@ -240,7 +240,7 @@
   "corner": null,
   "exifGone": true,
   "leakedRequests": [],
-  "ms": 120,
+  "ms": 157,
   "integrity": [
    {
     "file": "fs-conv-IMAGE-I-v-png-IMAGE-I-vector.png",
@@ -266,13 +266,39 @@
   "corner": null,
   "exifGone": true,
   "leakedRequests": [],
-  "ms": 171,
+  "ms": 175,
   "integrity": [
    {
     "file": "fs-conv-IMAGE-I-v-jpeg-IMAGE-I-vector.jpg",
     "bytes": 22253,
     "ok": true,
     "kind": "jpeg",
+    "w": 1024,
+    "h": 640,
+    "alpha": false
+   }
+  ]
+ },
+ {
+  "tool": "Image Converter",
+  "test": "SVG → WebP",
+  "verdict": "PASS",
+  "fixture": "IMAGE-I-vector.svg",
+  "input": 372,
+  "output": 8602,
+  "format": "webp",
+  "dims": "svg→1024x640",
+  "alpha": "false→false",
+  "corner": null,
+  "exifGone": true,
+  "leakedRequests": [],
+  "ms": 155,
+  "integrity": [
+   {
+    "file": "fs-conv-IMAGE-I-v-webp-IMAGE-I-vector.webp",
+    "bytes": 8602,
+    "ok": true,
+    "kind": "webp",
     "w": 1024,
     "h": 640,
     "alpha": false
@@ -292,7 +318,7 @@
   "corner": null,
   "exifGone": true,
   "leakedRequests": [],
-  "ms": 137,
+  "ms": 125,
   "integrity": [
    {
     "file": "fs-conv-IMAGE-J-u-png-IMAGE-J-unsafe.png",
@@ -320,7 +346,7 @@
   "leakedRequests": [],
   "psnr": 99,
   "ssim": 1,
-  "ms": 475,
+  "ms": 937,
   "integrity": [
    {
     "file": "fs-conv-IMAGE-K-e-png-IMAGE-K-exif-rich.png",
@@ -348,7 +374,7 @@
   "leakedRequests": [],
   "psnr": 38.09,
   "ssim": 0.9911,
-  "ms": 31368,
+  "ms": 35384,
   "integrity": [
    {
     "file": "fs-conv-IMAGE-E-p-webp-IMAGE-E-photo-15mb.webp",
@@ -376,7 +402,7 @@
   "leakedRequests": [],
   "psnr": 40.3,
   "ssim": 0.9839,
-  "ms": 880,
+  "ms": 961,
   "integrity": [
    {
     "file": "fs-conv-IMAGE-G-l-jpeg-IMAGE-G-large-photo.jpg",
@@ -404,7 +430,7 @@
   "leakedRequests": [],
   "psnr": 38.21,
   "ssim": 0.9789,
-  "ms": 166,
+  "ms": 157,
   "integrity": [
    {
     "file": "fs-conv-X-jpeg-na-webp-X-jpeg-named.webp",

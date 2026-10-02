@@ -20,11 +20,11 @@
   "test": "first page only",
   "verdict": "PASS",
   "pages": "1",
-  "output": 542474,
+  "output": 542475,
   "integrity": [
    {
     "file": "fs-split-1-PDF-H-multipage-text-image-pages-1.pdf",
-    "bytes": 542474,
+    "bytes": 542475,
     "ok": true,
     "kind": "pdf",
     "pages": 1
@@ -52,11 +52,11 @@
   "test": "last page only (10)",
   "verdict": "PASS",
   "pages": "10",
-  "output": 510280,
+  "output": 510279,
   "integrity": [
    {
     "file": "fs-split-10-PDF-H-multipage-text-image-pages-10.pdf",
-    "bytes": 510280,
+    "bytes": 510279,
     "ok": true,
     "kind": "pdf",
     "pages": 1
@@ -92,7 +92,7 @@
   "integrity": [
    {
     "file": "fs-split-every-PDF-H-PDF-H-multipage-text-image-pages.zip",
-    "bytes": 5323035,
+    "bytes": 5323037,
     "ok": true,
     "kind": "zip",
     "entries": 10
@@ -111,7 +111,7 @@
   "integrity": [
    {
     "file": "fs-split-every-PDF-C-PDF-C-scan-38mb-incremental-pages.zip",
-    "bytes": 3624830,
+    "bytes": 3624828,
     "ok": true,
     "kind": "zip",
     "entries": 2

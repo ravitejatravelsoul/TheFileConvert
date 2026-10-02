@@ -45,11 +45,11 @@
    "originalLine11Intact": true,
    "crop": true
   },
-  "output": 657581,
+  "output": 657614,
   "integrity": [
    {
     "file": "editor-native-FL-PDF-07-native-text-edited.pdf",
-    "bytes": 657581,
+    "bytes": 657614,
     "ok": true,
     "kind": "pdf",
     "pages": 2
@@ -58,14 +58,14 @@
  },
  {
   "tool": "PDF Editor",
-  "test": "scanned session (condensed): OCR 3.4s, 12/20/2026→12/20/2028, Jordan→Morgan, Consultation→Consultations, add text, highlight, draw, signature, export, reopen",
+  "test": "scanned session (condensed): OCR 4.5s, 12/20/2026→12/20/2028, Jordan→Morgan, Consultation→Consultations, add text, highlight, draw, signature, export, reopen",
   "verdict": "PASS",
   "edits": [
    {
     "word": "12/20/2026",
     "replacement": "12/20/2028",
     "current": "12/20/2026",
-    "overflow": false,
+    "overflow": true,
     "forced": false
    },
    {
@@ -84,12 +84,12 @@
    }
   ],
   "textLayer": "12/20/2028  Morgan  Consultations  Checked on device",
-  "changedPct": 1.2,
+  "changedPct": 1.19,
   "pages": "1/1",
   "integrity": [
    {
     "file": "editor-scan-condensed-FL-PDF-08b-scanned-condensed-edited.pdf",
-    "bytes": 728674,
+    "bytes": 728683,
     "ok": true,
     "kind": "pdf",
     "pages": 1
@@ -98,7 +98,7 @@
  },
  {
   "tool": "PDF Editor",
-  "test": "scanned session (fixture): OCR 3.4s, 12/20/2026→12/20/2028, Jordan→Morgan, Consultation→Consultations, add text, highlight, draw, signature, export, reopen",
+  "test": "scanned session (fixture): OCR 6.1s, 12/20/2026→12/20/2028, Jordan→Morgan, Consultation→Consultations, add text, highlight, draw, signature, export, reopen",
   "verdict": "PASS",
   "edits": [
    {
@@ -119,17 +119,17 @@
     "word": "Consultation",
     "replacement": "Consultations",
     "current": "Consultation",
-    "overflow": false,
+    "overflow": true,
     "forced": false
    }
   ],
   "textLayer": "12/20/2028  Morgan  Consultations  Checked on device",
-  "changedPct": 1.24,
+  "changedPct": 1.27,
   "pages": "1/1",
   "integrity": [
    {
     "file": "editor-scan-fixture-FL-PDF-08-scanned-text-edited.pdf",
-    "bytes": 765222,
+    "bytes": 765238,
     "ok": true,
     "kind": "pdf",
     "pages": 1
@@ -138,7 +138,7 @@
  },
  {
   "tool": "PDF Editor",
-  "test": "scanned session (user-supplied): OCR 3.0s, 12/20/2026→12/20/2028, add text, highlight, draw, signature, export, reopen",
+  "test": "scanned session (user-supplied): OCR 5.0s, 12/20/2026→12/20/2028, add text, highlight, draw, signature, export, reopen",
   "verdict": "PASS",
   "edits": [
    {
@@ -150,12 +150,12 @@
    }
   ],
   "textLayer": "12/20/2028  Checked on device",
-  "changedPct": 0.99,
+  "changedPct": 0.96,
   "pages": "2/2",
   "integrity": [
    {
     "file": "editor-scan-user-supplied-TheFileConvert_Scanned_OCR_Test-edited.pdf",
-    "bytes": 3959850,
+    "bytes": 3959980,
     "ok": true,
     "kind": "pdf",
     "pages": 2

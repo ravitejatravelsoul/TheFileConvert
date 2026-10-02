@@ -1,11 +1,11 @@
 /**
- * Rebuilds the reading structure of PDF pages — lines, paragraphs, headings, lists, simple tables,
- * columns and pictures — from positioned text and images. Pure (no DOM, no pdf.js) so it can be tested
- * directly. Coordinates are in the page's reading frame: points, origin bottom-left, y up, text running
- * along +x (extract.ts turns rotated pages and rotated text into this frame first).
+ * Rebuilds an editable document from positioned PDF content: lines → paragraphs, headings, lists, tables,
+ * columns, pictures, headers and footers — and measures how each one looks on the page (font, size, colour,
+ * underline, indents, spacing, line pitch, tab stops, rules, borders, shading), so the Word document keeps
+ * the original's layout, not just its words. Pure (no DOM, no pdf.js) so it can be tested directly.
  *
- * This is layout inference, not a renderer: the aim is an editable document that reads in the right
- * order and keeps the obvious structure, not a pixel copy of the PDF.
+ * Coordinates are in the page's reading frame: points, origin bottom-left, y up, text along +x
+ * (extract.ts turns rotated pages and rotated text into this frame first).
  */
 
 export interface TextItem {
@@ -21,6 +21,31 @@ export interface TextItem {
   italic: boolean;
   /** OCR words: always separate neighbours with a space (their gaps aren't glyph-accurate). */
   ocr?: boolean;
+  /** Word font name for the PDF font ("Calibri", "Times New Roman"…); empty when unknown. */
+  font?: string;
+  /** Fill colour, "rrggbb". */
+  color?: string;
+  /** Descent below the baseline as a fraction of the size (from the font), for vertical placement. */
+  descent?: number;
+}
+
+/** A straight line drawn on the page (underline, table border, rule under a heading). */
+export interface Rule {
+  x0: number;
+  x1: number;
+  y0: number;
+  y1: number;
+  thickness: number;
+  color: string;
+}
+
+/** A filled rectangle (cell or paragraph shading, a coloured band). */
+export interface Fill {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+  color: string;
 }
 
 export interface PageImage {
@@ -40,6 +65,9 @@ export interface PageInput {
   height: number;
   items: TextItem[];
   images: PageImage[];
+  /** Horizontal and vertical lines (y0 === y1 or x0 === x1 within the thickness). */
+  rules?: Rule[];
+  fills?: Fill[];
 }
 
 export interface Run {
@@ -47,27 +75,115 @@ export interface Run {
   bold: boolean;
   italic: boolean;
   size: number;
+  font?: string;
+  color?: string;
+  underline?: boolean;
+  strike?: boolean;
+  /** A page-number field in a header/footer. */
+  field?: "PAGE" | "NUMPAGES";
 }
 
-export type Align = "left" | "center" | "right";
+export type Align = "left" | "center" | "right" | "justify";
+
+export interface TabStop {
+  pos: number;
+  align: "left" | "right" | "center";
+  /** A fill up to the stop: form blanks (____) and table-of-contents dots (....). */
+  leader?: "underscore" | "dot";
+}
+
+/** How a paragraph sits on the page. Lengths in points, relative to the page margins. */
+export interface ParaFormat {
+  align: Align;
+  indLeft: number;
+  indRight: number;
+  /** First-line offset from indLeft (negative = hanging). */
+  indFirst: number;
+  spaceBefore: number;
+  /** Baseline-to-baseline distance (exact line spacing), or null for single spacing. */
+  line: number | null;
+  tabs: TabStop[];
+  borderBottom?: { thickness: number; color: string; space: number };
+  shading?: string;
+}
+
+export interface CellParagraph {
+  runs: Run[];
+  align: Align;
+  /** Baseline-to-baseline distance inside the cell (exact), or null for single spacing. */
+  line?: number | null;
+}
+
+export interface TableCell {
+  paragraphs: CellParagraph[];
+  shading?: string;
+  /** Grid columns this cell spans. */
+  span: number;
+  vMerge?: "restart" | "continue";
+}
+
+export interface TableRow {
+  height: number;
+  cells: TableCell[];
+}
 
 export type Block =
-  | { kind: "paragraph"; style: "normal" | "h1" | "h2" | "h3"; align: Align; runs: Run[] }
-  | { kind: "list"; ordered: boolean; start: number; listKey: number; runs: Run[] }
-  | { kind: "table"; columns: number[]; rows: Run[][][]; bordered: boolean }
-  | { kind: "image"; image: PageImage; width: number; height: number };
+  | { kind: "paragraph"; style: "normal" | "h1" | "h2" | "h3"; align: Align; runs: Run[]; fmt: ParaFormat }
+  | { kind: "list"; ordered: boolean; start: number; listKey: number; runs: Run[]; bullet: string; label: Run; fmt: ParaFormat }
+  | {
+      kind: "table";
+      columns: number[];
+      rows: TableRow[];
+      bordered: boolean;
+      border: { thickness: number; color: string } | null;
+      indent: number;
+      spaceBefore: number;
+      cellMargin: { left: number; right: number; top: number };
+      /** A table with text beside it stays at its place on the page (top-left, from the page corner). */
+      float?: { x: number; y: number };
+    }
+  | { kind: "image"; image: PageImage; width: number; height: number; fmt: ParaFormat }
+  | { kind: "columns"; gap: number; spaceBefore: number; left: Block[]; right: Block[] };
+
+/** A picture drawn at a fixed place on the page (next to text), not in the flow. */
+export interface FloatingImage {
+  image: PageImage;
+  /** Top-left from the page's top-left corner. */
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
 
 export interface PageLayout {
   width: number;
   height: number;
   margins: { left: number; right: number; top: number; bottom: number };
   blocks: Block[];
+  floating: FloatingImage[];
+  header: CellParagraph[] | null;
+  footer: CellParagraph[] | null;
+  /** Distance from the page edge to the header's top / the footer's bottom. */
+  headerDistance: number;
+  footerDistance: number;
 }
 
 export interface DocumentStats {
   /** The most common text size, weighted by characters — the body size. */
   bodySize: number;
+  /** The most common font (Word name), or "". */
+  bodyFont: string;
+  /** Typical baseline-to-baseline distance ÷ size inside paragraphs. */
+  leading: number;
 }
+
+const r2 = (n: number) => Math.round(n * 2) / 2;
+/** Horizontal lengths keep Word's own precision (1/20 pt): half a point is enough to re-wrap a full line. */
+const tw = (n: number) => Math.round(n * 20) / 20;
+/** How much wider than its longest line the text area is (less than any word, so lines break where they did). */
+const WRAP_SLACK = 0.25;
+const clamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, v));
+const median = (a: number[]) => (a.length ? [...a].sort((p, q) => p - q)[Math.floor(a.length / 2)] : 0);
 
 // ---------------------------------------------------------------------------------------------------
 // Lines
@@ -77,6 +193,8 @@ interface Cell {
   x0: number;
   x1: number;
   runs: Run[];
+  /** A drawn fill (“______”, “......”) that Word writes as a tab leader, not as text. */
+  leader?: "underscore" | "dot";
 }
 
 interface Line {
@@ -86,10 +204,13 @@ interface Line {
   x0: number;
   x1: number;
   size: number;
+  descent: number;
   cells: Cell[];
   runs: Run[];
   text: string;
   bold: boolean;
+  /** Dominant look, used to keep differently styled lines in separate paragraphs. */
+  look: string;
 }
 
 interface ImageEntry {
@@ -101,28 +222,59 @@ interface ImageEntry {
 
 type Entry = Line | ImageEntry;
 
-const r2 = (n: number) => Math.round(n * 2) / 2;
+function sameLook(a: Run, b: Run) {
+  return a.bold === b.bold && a.italic === b.italic && Math.abs(a.size - b.size) < 0.6 && (a.font ?? "") === (b.font ?? "") && (a.color ?? "") === (b.color ?? "") && Boolean(a.underline) === Boolean(b.underline) && Boolean(a.strike) === Boolean(b.strike);
+}
 
-function pushRun(runs: Run[], text: string, item: { bold: boolean; italic: boolean; size: number }) {
+function pushRun(runs: Run[], text: string, item: Omit<Run, "text">) {
   if (!text) return;
   const last = runs[runs.length - 1];
-  const size = r2(item.size);
-  if (last && last.bold === item.bold && last.italic === item.italic && Math.abs(last.size - size) < 0.6) last.text += text;
-  else runs.push({ text, bold: item.bold, italic: item.italic, size });
+  const run: Run = { text, bold: item.bold, italic: item.italic, size: r2(item.size), font: item.font || undefined, color: item.color && item.color !== "000000" ? item.color : undefined, underline: item.underline || undefined, strike: item.strike || undefined };
+  if (last && sameLook(last, run)) last.text += text;
+  else runs.push(run);
 }
 
 /** A gap this wide (in font sizes) between two runs on one line separates table cells / tab stops. */
 const CELL_GAP = 1.6;
 
-function buildLine(items: TextItem[]): Line {
+type Decorated = TextItem & { underline?: boolean; strike?: boolean };
+
+/** "Name ________" → the label and a leader piece that ends where the blank ends. */
+function splitLeaders(items: Decorated[]): (Decorated & { leader?: "underscore" | "dot" })[] {
+  const out: (Decorated & { leader?: "underscore" | "dot" })[] = [];
+  for (const it of items) {
+    const m = /^(.*?)(_{3,}|\.{4,}|·{4,})(\s*)$/.exec(it.str);
+    if (!m) {
+      out.push(it);
+      continue;
+    }
+    const kind = m[2][0] === "_" ? "underscore" : "dot";
+    const label = m[1];
+    // Where the label ends isn't known exactly; the stop only needs where the blank ends.
+    const labelW = label.trim() ? (it.w * label.length) / it.str.length : 0;
+    if (label.trim()) out.push({ ...it, str: label, w: labelW });
+    out.push({ ...it, str: m[2], x: it.x + labelW, w: it.w - labelW, leader: kind });
+  }
+  return out;
+}
+
+function buildLine(input: Decorated[]): Line {
+  const items = splitLeaders(input);
   const sorted = [...items].sort((a, b) => a.x - b.x);
   const size = Math.max(...sorted.map((i) => i.size));
   const cells: Cell[] = [];
   let cell: Cell | null = null;
-  let prev: TextItem | null = null;
+  let prev: Decorated | null = null;
   for (const it of sorted) {
     const gap = prev ? it.x - (prev.x + prev.w) : 0;
-    if (!cell || (prev && gap > CELL_GAP * Math.max(prev.size, it.size))) {
+    if (it.leader) {
+      cells.push({ x0: it.x, x1: it.x + it.w, runs: [], leader: it.leader });
+      cell = null;
+      prev = it;
+      continue;
+    }
+    const bulletGap = prev && cell && cell.runs.length === 1 && /^[•●◦▪■□➢►▶✓✔❖◆◇○‣∙·*–-]$/.test(cell.runs[0].text.trim()) && gap > 0.5 * it.size;
+    if (!cell || (prev && gap > CELL_GAP * Math.max(prev.size, it.size)) || bulletGap) {
       cell = { x0: it.x, x1: it.x + it.w, runs: [] };
       cells.push(cell);
       pushRun(cell.runs, it.str.replace(/^\s+/, ""), it);
@@ -138,22 +290,37 @@ function buildLine(items: TextItem[]): Line {
     if (last) last.text = last.text.replace(/\s+$/, "");
     c.runs = c.runs.filter((r) => r.text.length > 0);
   }
+  const live = cells.filter((c) => c.runs.length || c.leader);
   const runs: Run[] = [];
-  cells.forEach((c, i) => {
-    if (i > 0) pushRun(runs, "\t", c.runs[0] ?? { bold: false, italic: false, size });
+  const base = live.find((c) => c.runs.length)?.runs[0] ?? { bold: false, italic: false, size };
+  live.forEach((c, i) => {
+    if (i > 0) pushRun(runs, "\t", c.runs[0] ?? runs[runs.length - 1] ?? base);
     for (const r of c.runs) pushRun(runs, r.text, r);
   });
   const text = runs.map((r) => r.text).join("");
   const chars = sorted.reduce((n, i) => n + i.str.trim().length, 0);
   const boldChars = sorted.filter((i) => i.bold).reduce((n, i) => n + i.str.trim().length, 0);
-  const y = sorted.reduce((s, i) => s + i.y, 0) / sorted.length;
-  return { kind: "text", y, top: y + size * 0.8, x0: sorted[0].x, x1: Math.max(...sorted.map((i) => i.x + i.w)), size, cells, runs, text, bold: chars > 0 && boldChars / chars > 0.8 };
+  const y = median(sorted.map((i) => i.y));
+  // The look most of the line's characters have.
+  const tally = new Map<string, number>();
+  // OCR sizes are estimated from each word's box and wobble by a point between lines of one paragraph, so
+  // they don't count toward a recognised line's look.
+  const ocr = sorted.some((i) => i.ocr);
+  for (const r of runs) {
+    const k = `${r.bold}|${r.italic}|${ocr ? "" : r.size}|${r.font ?? ""}|${r.color ?? ""}`;
+    tally.set(k, (tally.get(k) ?? 0) + r.text.trim().length);
+  }
+  let look = "";
+  let best = -1;
+  for (const [k, n] of tally) if (n > best) [look, best] = [k, n];
+  const descent = median(sorted.map((i) => i.descent ?? 0.22));
+  return { kind: "text", y, top: y + size * 0.8, x0: sorted[0].x, x1: Math.max(...sorted.map((i) => i.x + i.w)), size, descent, cells: live, runs, text, bold: chars > 0 && boldChars / chars > 0.8, look };
 }
 
 /** Groups items into lines by baseline, top to bottom. */
-function groupLines(items: TextItem[]): Line[] {
+function groupLines(items: Decorated[]): Line[] {
   const sorted = [...items].sort((a, b) => b.y - a.y || a.x - b.x);
-  const groups: { y: number; size: number; items: TextItem[] }[] = [];
+  const groups: { y: number; size: number; items: Decorated[] }[] = [];
   for (const it of sorted) {
     const g = groups.find((g) => Math.abs(g.y - it.y) < 0.45 * Math.max(g.size, it.size));
     if (g) {
@@ -168,6 +335,121 @@ function groupLines(items: TextItem[]): Line[] {
 }
 
 // ---------------------------------------------------------------------------------------------------
+// Decorations: underline / strike-through lines belong to the text above them
+// ---------------------------------------------------------------------------------------------------
+
+function decorate(items: TextItem[], rules: Rule[]): { items: Decorated[]; rules: Rule[] } {
+  // A drawn underline or strike runs along its text: most of its length lies under (or through) glyphs on
+  // one baseline. A table's cell border under a short word doesn't — it spans the whole cell — and must
+  // stay a border (taking it as an underline would also break the table's grid).
+  const along = (r: Rule) => {
+    const spans = items
+      .filter((it) => it.str.trim() && Math.abs(r.y0 - it.y) <= 0.45 * it.size && it.x < r.x1 && it.x + it.w > r.x0)
+      .map((it) => [Math.max(r.x0, it.x), Math.min(r.x1, it.x + it.w)] as const)
+      .sort((a, b) => a[0] - b[0]);
+    let covered = 0;
+    let end = r.x0;
+    for (const [a, b] of spans) {
+      if (b > end) {
+        covered += b - Math.max(a, end);
+        end = b;
+      }
+    }
+    return covered >= (r.x1 - r.x0) * 0.7;
+  };
+  const textRule = new Map<Rule, boolean>();
+  const isTextRule = (r: Rule) => {
+    if (!textRule.has(r)) textRule.set(r, along(r));
+    return textRule.get(r)!;
+  };
+  const used = new Set<Rule>();
+  const out: Decorated[] = items.map((it) => {
+    const d: Decorated = { ...it };
+    if (!it.str.trim()) return d;
+    for (const r of rules) {
+      if (Math.abs(r.y1 - r.y0) > 0.6) continue;
+      if (r.thickness > Math.max(1.6, it.size * 0.12)) continue;
+      const overlap = Math.min(r.x1, it.x + it.w) - Math.max(r.x0, it.x);
+      if (overlap < it.w * 0.8 || r.x1 - r.x0 > it.w * 3 + 20 || !isTextRule(r)) continue;
+      const dy = r.y0 - it.y;
+      if (dy <= 0.05 * it.size && dy >= -0.3 * it.size) {
+        d.underline = true;
+        used.add(r);
+      } else if (dy >= 0.18 * it.size && dy <= 0.45 * it.size) {
+        d.strike = true;
+        used.add(r);
+      }
+    }
+    return d;
+  });
+  return { items: out, rules: rules.filter((r) => !used.has(r)) };
+}
+
+// ---------------------------------------------------------------------------------------------------
+// Ruled tables: a grid of drawn lines
+// ---------------------------------------------------------------------------------------------------
+
+interface Grid {
+  xs: number[];
+  ys: number[]; // top to bottom (descending y)
+  hRules: Rule[];
+  vRules: Rule[];
+  border: { thickness: number; color: string } | null;
+  x0: number;
+  x1: number;
+  y0: number;
+  y1: number;
+  /** Rows drawn with horizontal lines only (no verticals): columns come from the text. */
+  openSides: boolean;
+}
+
+function cluster(values: number[], tol: number): number[] {
+  const sorted = [...values].sort((a, b) => a - b);
+  const out: number[][] = [];
+  for (const v of sorted) {
+    const last = out[out.length - 1];
+    if (last && v - last[last.length - 1] <= tol) last.push(v);
+    else out.push([v]);
+  }
+  return out.map((g) => g.reduce((a, b) => a + b, 0) / g.length);
+}
+
+function findGrids(rules: Rule[]): Grid[] {
+  const h = rules.filter((r) => Math.abs(r.y1 - r.y0) <= 0.6 && r.x1 - r.x0 >= 8);
+  const v = rules.filter((r) => Math.abs(r.x1 - r.x0) <= 0.6 && r.y1 - r.y0 >= 4);
+  // Connected components of lines that touch.
+  const all = [...h, ...v];
+  const parent = all.map((_, i) => i);
+  const find = (i: number): number => (parent[i] === i ? i : (parent[i] = find(parent[i])));
+  const touches = (a: Rule, b: Rule) => a.x0 - 2 <= b.x1 && b.x0 - 2 <= a.x1 && a.y0 - 2 <= b.y1 && b.y0 - 2 <= a.y1;
+  for (let i = 0; i < all.length; i++) for (let j = i + 1; j < all.length; j++) if (touches(all[i], all[j])) parent[find(i)] = find(j);
+  const groups = new Map<number, Rule[]>();
+  all.forEach((r, i) => {
+    const k = find(i);
+    if (!groups.has(k)) groups.set(k, []);
+    groups.get(k)!.push(r);
+  });
+  const grids: Grid[] = [];
+  for (const g of groups.values()) {
+    const hs = g.filter((r) => h.includes(r));
+    const vs = g.filter((r) => v.includes(r));
+    const ys = cluster(hs.map((r) => r.y0), 1.2).sort((a, b) => b - a);
+    const xs = cluster(vs.map((r) => r.x0), 1.2);
+    const x0 = Math.min(...g.map((r) => r.x0));
+    const x1 = Math.max(...g.map((r) => r.x1));
+    const thickness = median(g.map((r) => r.thickness));
+    const color = g[0].color;
+    if (ys.length >= 2 && xs.length >= 2) grids.push({ xs, ys, hRules: hs, vRules: vs, border: { thickness, color }, x0, x1, y0: Math.min(...ys), y1: Math.max(...ys), openSides: false });
+    // Three or more stacked horizontal lines of about the same width: a table ruled by rows only.
+    else if (ys.length >= 3 && xs.length === 0) {
+      const widths = hs.map((r) => r.x1 - r.x0);
+      if (Math.max(...widths) - Math.min(...widths) < 6) grids.push({ xs: [x0, x1], ys, hRules: hs, vRules: [], border: { thickness, color }, x0, x1, y0: Math.min(...ys), y1: Math.max(...ys), openSides: true });
+    }
+  }
+  return grids;
+}
+
+// ---------------------------------------------------------------------------------------------------
 // Columns
 // ---------------------------------------------------------------------------------------------------
 
@@ -176,35 +458,38 @@ function groupLines(items: TextItem[]): Line[] {
  * or null for a single-column page. Tables and key/value forms also have a gap down the middle, so the
  * column test also requires long lines on both sides (running text), not short cells.
  */
-function findGutter(items: TextItem[], left: number, right: number): number | null {
+function findGutter(items: TextItem[], left: number, right: number): { x: number; leftEnd: number; rightStart: number } | null {
   const width = right - left;
   if (width <= 0) return null;
   const total = items.reduce((n, i) => n + i.str.length, 0);
   if (total < 200) return null;
+  // Full-width titles and abstracts above (or below) the columns cross any gutter, so only text inside
+  // the stretch where both columns have text counts against a candidate.
   let best: { x: number; crossing: number } | null = null;
   for (let x = left + width * 0.3; x <= left + width * 0.7; x += 2) {
-    let crossing = 0;
-    let l = 0;
-    let r = 0;
-    for (const it of items) {
-      if (it.x < x - 1 && it.x + it.w > x + 1) crossing += it.str.length;
-      else if (it.x + it.w <= x + 1) l += it.str.length;
-      else r += it.str.length;
-    }
-    if (l < total * 0.25 || r < total * 0.25) continue;
+    const leftI = items.filter((it) => it.x + it.w <= x + 1);
+    const rightI = items.filter((it) => it.x >= x - 1);
+    const chars = (a: TextItem[]) => a.reduce((n, i) => n + i.str.length, 0);
+    if (chars(leftI) < total * 0.15 || chars(rightI) < total * 0.15) continue;
+    const top = Math.min(Math.max(...leftI.map((i) => i.y)), Math.max(...rightI.map((i) => i.y)));
+    const bottom = Math.max(Math.min(...leftI.map((i) => i.y)), Math.min(...rightI.map((i) => i.y)));
+    if (top <= bottom) continue;
+    const zone = items.filter((it) => it.y <= top + 0.5 && it.y >= bottom - 0.5);
+    const crossing = chars(zone.filter((it) => it.x < x - 1 && it.x + it.w > x + 1)) / Math.max(1, chars(zone));
     if (!best || crossing < best.crossing) best = { x, crossing };
   }
-  if (!best || best.crossing > total * 0.06) return null;
+  if (!best || best.crossing > 0.06) return null;
   const gx = best.x;
   const leftLines = groupLines(items.filter((i) => i.x + i.w <= gx + 1));
   const rightLines = groupLines(items.filter((i) => i.x >= gx - 1));
   if (leftLines.length < 5 || rightLines.length < 5) return null;
-  const median = (a: number[]) => [...a].sort((p, q) => p - q)[Math.floor(a.length / 2)];
-  const lw = median(leftLines.map((l) => l.x1 - l.x0));
-  const rw = median(rightLines.map((l) => l.x1 - l.x0));
-  // Running text fills most of its column; table cells and labels don't.
+  // Running text fills its column on many lines (at least a quarter of them); table cells and labels
+  // never do, so a key/value table isn't mistaken for two columns.
+  const p75 = (a: number[]) => [...a].sort((p, q) => p - q)[Math.floor(a.length * 0.75)];
+  const lw = p75(leftLines.map((l) => l.x1 - l.x0));
+  const rw = p75(rightLines.map((l) => l.x1 - l.x0));
   if (lw < (gx - left) * 0.6 || rw < (right - gx) * 0.6) return null;
-  return gx;
+  return { x: gx, leftEnd: Math.max(...leftLines.map((l) => l.x1)), rightStart: Math.min(...rightLines.map((l) => l.x0)) };
 }
 
 // ---------------------------------------------------------------------------------------------------
@@ -212,7 +497,9 @@ function findGutter(items: TextItem[], left: number, right: number): number | nu
 // ---------------------------------------------------------------------------------------------------
 
 const BULLET = /^\s*([•●◦▪▫‣∙·■□➢►▶✓✔❖◆◇○\-–—*])\s+/u;
+const BULLET_ONLY = /^\s*[•●◦▪▫‣∙·■□➢►▶✓✔❖◆◇○\-–—*]\s*$/u;
 const NUMBERED = /^\s*(\d{1,3})[.)]\s+/;
+const NUMBER_ONLY = /^\s*(\d{1,3})[.)]\s*$/;
 
 function stripPrefix(runs: Run[], re: RegExp): Run[] {
   const out = runs.map((r) => ({ ...r }));
@@ -226,7 +513,7 @@ function stripPrefix(runs: Run[], re: RegExp): Run[] {
     r.text = r.text.slice(take);
     cut -= take;
   }
-  return out.filter((r) => r.text.length > 0);
+  return out.filter((r) => r.text.length > 0).map((r, i) => (i === 0 ? { ...r, text: r.text.replace(/^\t+/, "") } : r));
 }
 
 function appendRuns(target: Run[], add: Run[], joiner: string) {
@@ -239,9 +526,81 @@ interface Region {
   right: number;
 }
 
+interface FlowContext {
+  page: PageInput;
+  stats: DocumentStats;
+  listKeys: { next: number };
+  /** Left edge of the text area (the page's left margin), right edge of the text area. */
+  marginLeft: number;
+  marginRight: number;
+  rules: Rule[];
+  fills: Fill[];
+}
+
+/** Top-down vertical extent of a block, for spacing. */
+interface Placed {
+  block: Block;
+  top: number;
+  bottom: number;
+}
+
+function lineBoxTop(l: Line, pitch: number, pageH: number) {
+  // Word puts a fixed line's extra height above the text: the box starts (pitch − descent) above the baseline.
+  return pageH - l.y - (pitch - l.descent * l.size);
+}
+
+function lineBoxBottom(l: Line, pageH: number) {
+  return pageH - l.y + l.descent * l.size;
+}
+
+/**
+ * Lines whose pieces sit in the same columns row after row (an address beside invoice details, label and
+ * value pairs) become a borderless table. Columns are the merged horizontal extents of the cells, so a
+ * right-aligned column (amounts, dates) is recognised by its common right edge.
+ */
+function borderlessTable(rowsLines: Line[], marginLeft: number, pitch: number): Block | null {
+  const spans = rowsLines.flatMap((l) => l.cells.map((c) => ({ x0: c.x0, x1: c.x1 }))).sort((a, b) => a.x0 - b.x0);
+  const cols: { x0: number; x1: number }[] = [];
+  for (const sp of spans) {
+    const last = cols[cols.length - 1];
+    if (last && sp.x0 <= last.x1 + 4) last.x1 = Math.max(last.x1, sp.x1);
+    else cols.push({ ...sp });
+  }
+  if (cols.length < 2 || cols.length > 12) return null;
+  const colOf = (c: Cell) => cols.findIndex((k) => c.x0 >= k.x0 - 0.5 && c.x0 <= k.x1 + 0.5);
+  const rows: TableRow[] = rowsLines.map((l) => {
+    const cells: TableCell[] = cols.map(() => ({ paragraphs: [{ runs: [], align: "left", line: pitch }], span: 1 }));
+    for (const c of l.cells) {
+      const k = Math.max(0, colOf(c));
+      appendRuns(cells[k].paragraphs[0].runs, c.runs, cells[k].paragraphs[0].runs.length ? " " : "");
+    }
+    return { height: pitch, cells };
+  });
+  // Column alignment from where its cells line up.
+  cols.forEach((col, k) => {
+    const members = rowsLines.flatMap((l) => l.cells.filter((c) => colOf(c) === k));
+    if (members.length < 2) return;
+    const x0s = members.map((c) => c.x0);
+    const x1s = members.map((c) => c.x1);
+    const spread = (a: number[]) => Math.max(...a) - Math.min(...a);
+    const align: Align = spread(x0s) > 3 && spread(x1s) <= 2 ? "right" : spread(x0s) > 3 && spread(members.map((c) => (c.x0 + c.x1) / 2)) <= 2 ? "center" : "left";
+    for (const r of rows) r.cells[k].paragraphs[0].align = align;
+  });
+  // Column edges (cells have no padding): a left-aligned column starts exactly at its text; one that
+  // follows a right-aligned column starts where that column's text ends; otherwise halfway across the gap.
+  const alignOfCol = (k: number) => rows[0].cells[k].paragraphs[0].align;
+  const edges = [cols[0].x0];
+  for (let k = 1; k < cols.length; k++) edges.push(alignOfCol(k) === "left" ? cols[k].x0 : alignOfCol(k - 1) === "right" ? cols[k - 1].x1 + 0.5 : (cols[k - 1].x1 + cols[k].x0) / 2);
+  edges.push(cols[cols.length - 1].x1 + 2);
+  const columns = edges.slice(1).map((e, k) => e - edges[k]);
+  return { kind: "table", columns, rows, bordered: false, border: null, indent: tw(edges[0] - marginLeft), spaceBefore: 0, cellMargin: { left: 0, right: 0, top: 0 } };
+}
+
 /** Turns an ordered list of lines and pictures from one text flow into blocks. */
-function blocksFor(entries: Entry[], region: Region, stats: DocumentStats, contentWidth: number, listKeys: { next: number }): Block[] {
-  const blocks: Block[] = [];
+function blocksFor(entries: Entry[], region: Region, ctx: FlowContext): Placed[] {
+  const { stats, page } = ctx;
+  const pageH = page.height;
+  const placed: Placed[] = [];
   const width = Math.max(1, region.right - region.left);
   const center = (region.left + region.right) / 2;
   const lines = entries.filter((e): e is Line => e.kind === "text");
@@ -256,38 +615,141 @@ function blocksFor(entries: Entry[], region: Region, stats: DocumentStats, conte
   const typicalGap = Math.min(1.6, gaps.length ? gaps[Math.floor(gaps.length * 0.25)] : 1.25);
 
   const headingStyle = (l: Line): "h1" | "h2" | "h3" | null => {
-    if (l.text.length > 160) return null;
+    if (l.text.length > 160 || l.cells.length > 1) return null;
     const ratio = l.size / stats.bodySize;
     if (ratio >= 1.75) return "h1";
     if (ratio >= 1.35) return "h2";
     if (ratio >= 1.15) return "h3";
-    if (l.bold && l.cells.length === 1 && l.text.length <= 70 && !/[.,;]$/.test(l.text.trim()) && ratio >= 0.95 && !BULLET.test(l.text) && !NUMBERED.test(l.text)) return "h3";
+    if (l.bold && l.text.length <= 70 && !/[.,;]$/.test(l.text.trim()) && ratio >= 0.95 && !BULLET.test(l.text) && !NUMBERED.test(l.text)) return "h3";
     return null;
   };
   const alignOf = (ls: Line[]): Align => {
     if (ls.every((l) => Math.abs((l.x0 + l.x1) / 2 - center) < width * 0.04 && l.x1 - l.x0 < width * 0.85) && ls.every((l) => l.x0 - region.left > width * 0.08)) return "center";
     if (ls.every((l) => Math.abs(l.x1 - region.right) < width * 0.03 && l.x0 - region.left > width * 0.3)) return "right";
+    if (ls.length >= 2 && ls.slice(0, -1).every((l) => Math.abs(l.x1 - region.right) < 2.5) && ls[ls.length - 1].x1 < region.right - 3) return "justify";
     return "left";
+  };
+  const listMarker = (l: Line): { ordered: boolean; number: number; bullet: string; label: Run; textStart: number; runs: Run[] } | null => {
+    // "•" or "3." as its own cell (drawn apart from the text), or as a prefix of the first cell.
+    if (l.cells.length >= 2) {
+      const first = l.cells[0].runs.map((r) => r.text).join("");
+      if (BULLET_ONLY.test(first) || NUMBER_ONLY.test(first)) {
+        const n = NUMBER_ONLY.exec(first);
+        const runs: Run[] = [];
+        l.cells.slice(1).forEach((c, i) => appendRuns(runs, c.runs, i > 0 ? "\t" : ""));
+        return { ordered: Boolean(n), number: n ? Number(n[1]) : 1, bullet: first.trim(), label: { ...l.cells[0].runs[0], text: first.trim() }, textStart: l.cells[1].x0, runs };
+      }
+    }
+    const b = BULLET.exec(l.text);
+    const n = NUMBERED.exec(l.text);
+    if (!b && !n) return null;
+    const runs = stripPrefix(l.runs, n ? NUMBERED : BULLET);
+    const approxStart = l.x0 + (b ? 1.4 : 1.8) * l.size * 0.55;
+    return { ordered: Boolean(n), number: n ? Number(n[1]) : 1, bullet: b ? b[1] : "", label: { ...l.runs[0], text: b ? b[1] : `${n![1]}.` }, textStart: approxStart, runs };
+  };
+
+  const pitchFor = (group: Line[]) => {
+    if (group.length >= 2) {
+      const ds: number[] = [];
+      for (let k = 1; k < group.length; k++) ds.push(group[k - 1].y - group[k].y);
+      return median(ds);
+    }
+    return group[0].size * stats.leading;
+  };
+
+  /** Paragraph format from where its lines actually are. */
+  const formatFor = (group: Line[], align: Align, opts: { textLeft?: number; hangFrom?: number } = {}): ParaFormat => {
+    const ml = ctx.marginLeft;
+    const mr = ctx.marginRight;
+    const fmt: ParaFormat = { align, indLeft: 0, indRight: 0, indFirst: 0, spaceBefore: 0, line: null, tabs: [] };
+    const first = group[0];
+    const rest = group.slice(1);
+    if (opts.textLeft !== undefined) {
+      fmt.indLeft = opts.textLeft - ml;
+      fmt.indFirst = (opts.hangFrom ?? opts.textLeft) - opts.textLeft;
+    } else if (align === "left" || align === "justify") {
+      const left = rest.length ? Math.min(...rest.map((l) => l.x0)) : first.x0;
+      fmt.indLeft = left - ml;
+      fmt.indFirst = first.x0 - left;
+    } else if (align === "center") {
+      const c = median(group.map((l) => (l.x0 + l.x1) / 2));
+      const shift = ml + mr - 2 * c; // indRight − indLeft that puts the centre at c
+      if (shift >= 0) fmt.indRight = shift;
+      else fmt.indLeft = -shift;
+    } else if (align === "right") {
+      fmt.indRight = mr - Math.max(...group.map((l) => l.x1));
+      fmt.indLeft = 0;
+    }
+    // A paragraph narrower than the text area (an indented abstract) has a right indent — but only when its
+    // own wraps prove it: some line's next word would have fitted in the full width.
+    if ((align === "left" || align === "justify") && group.length >= 2) {
+      const maxX = Math.max(...group.map((l) => l.x1));
+      const bound = wrapBound(group, maxX);
+      if (bound < mr - 0.5) {
+        const edge = align === "justify" ? maxX + WRAP_SLACK : maxX + clamp(bound - maxX - 0.5, Math.min(1.5, bound - maxX - 0.5), 6);
+        fmt.indRight = Math.max(0, mr - edge);
+      }
+    }
+    fmt.indLeft = tw(fmt.indLeft);
+    fmt.indRight = Math.floor(Math.max(0, fmt.indRight) * 20) / 20; // never narrower than measured
+    fmt.indFirst = tw(fmt.indFirst);
+    if (Math.abs(fmt.indLeft) < 0.3) fmt.indLeft = 0;
+    if (Math.abs(fmt.indFirst) < 0.3) fmt.indFirst = 0;
+    fmt.line = Math.round(pitchFor(group) * 20) / 20;
+    // Tab stops where the line's cells start (or end, when the last cell is right-aligned to the edge).
+    const tabLine = group.find((l) => l.cells.length >= 2);
+    if (tabLine) {
+      tabLine.cells.slice(opts.textLeft !== undefined ? 2 : 1).forEach((c, k, arr) => {
+        const last = k === arr.length - 1;
+        // A blank to fill in ends at a right-aligned stop with an underscore (or dot) leader.
+        if (c.leader) fmt.tabs.push({ pos: tw(c.x1 - ml), align: "right", leader: c.leader });
+        else if (last && Math.abs(c.x1 - region.right) < 3) fmt.tabs.push({ pos: tw(c.x1 - ml), align: "right" });
+        else fmt.tabs.push({ pos: tw(c.x0 - ml), align: "left" });
+      });
+      fmt.tabs.sort((a, b) => a.pos - b.pos);
+    }
+    // A line drawn just under the paragraph is its bottom border.
+    const last = group[group.length - 1];
+    const textBottom = last.y - last.descent * last.size;
+    const under = ctx.rules.find((r) => Math.abs(r.y1 - r.y0) <= 0.6 && r.y0 < textBottom && textBottom - r.y0 < last.size * 1.2 && r.x1 - r.x0 > width * 0.6 && r.x0 < first.x0 + 4);
+    if (under) {
+      fmt.borderBottom = { thickness: under.thickness, color: under.color, space: Math.max(0, Math.round(textBottom - under.y0 - under.thickness / 2)) };
+      ctx.rules.splice(ctx.rules.indexOf(under), 1);
+    }
+    // Shading behind the whole paragraph.
+    const top = first.y + first.size * 0.8;
+    const shade = ctx.fills.find((f) => f.x <= first.x0 + 1 && f.x + f.w >= Math.max(...group.map((l) => l.x1)) - 1 && f.y <= textBottom + 1 && f.y + f.h >= top - 1);
+    if (shade) fmt.shading = shade.color;
+    return fmt;
+  };
+
+  const place = (block: Block, group: Line[]) => {
+    const pitch = (block.kind === "paragraph" || block.kind === "list") && block.fmt.line ? block.fmt.line : pitchFor(group);
+    const top = lineBoxTop(group[0], pitch, pageH);
+    let bottom = lineBoxBottom(group[group.length - 1], pageH);
+    if ((block.kind === "paragraph" || block.kind === "list") && block.fmt.borderBottom) bottom += block.fmt.borderBottom.space + block.fmt.borderBottom.thickness;
+    placed.push({ block, top, bottom });
   };
 
   let i = 0;
-  let currentList: { ordered: boolean; key: number; expect: number } | null = null;
+  let currentList: { ordered: boolean; key: number; expect: number; bullet: string } | null = null;
   while (i < entries.length) {
     const e = entries[i];
     if (e.kind === "image") {
-      const scale = Math.min(1, contentWidth / e.image.w);
-      blocks.push({ kind: "image", image: e.image, width: e.image.w * scale, height: e.image.h * scale });
+      const scale = Math.min(1, (region.right - region.left + 2) / e.image.w);
+      const fmt: ParaFormat = { align: "left", indLeft: tw(Math.max(0, e.image.x - ctx.marginLeft)), indRight: 0, indFirst: 0, spaceBefore: 0, line: null, tabs: [] };
+      placed.push({ block: { kind: "image", image: e.image, width: e.image.w * scale, height: e.image.h * scale, fmt }, top: pageH - (e.image.y + e.image.h), bottom: pageH - e.image.y });
       currentList = null;
       i++;
       continue;
     }
 
-    // A table: two or more consecutive lines with 2+ cells whose starts line up in shared columns.
-    if (e.cells.length >= 2) {
+    // A borderless table: two or more consecutive lines with 2+ cells whose starts line up in shared columns.
+    if (e.cells.length >= 2 && !listMarker(e) && !e.cells.some((c) => c.leader)) {
       let j = i;
       while (j < entries.length) {
         const n = entries[j];
-        if (n.kind !== "text" || n.cells.length < 2) break;
+        if (n.kind !== "text" || n.cells.length < 2 || listMarker(n) || n.cells.some((c) => c.leader)) break;
         if (j > i) {
           const p = entries[j - 1] as Line;
           if (p.y - n.y > Math.max(p.size, n.size) * 3.2) break;
@@ -296,28 +758,9 @@ function blocksFor(entries: Entry[], region: Region, stats: DocumentStats, conte
       }
       const rowsLines = entries.slice(i, j) as Line[];
       if (rowsLines.length >= 2) {
-        const anchors: number[] = [];
-        for (const l of rowsLines)
-          for (const c of l.cells) {
-            if (!anchors.some((a) => Math.abs(a - c.x0) < Math.max(10, l.size * 1.2))) anchors.push(c.x0);
-          }
-        anchors.sort((a, b) => a - b);
-        const aligned = rowsLines.filter((l) => l.cells.every((c) => anchors.some((a) => Math.abs(a - c.x0) < Math.max(10, l.size * 1.2)))).length;
-        if (anchors.length >= 2 && anchors.length <= 12 && aligned === rowsLines.length) {
-          const rows = rowsLines.map((l) => {
-            const row: Run[][] = anchors.map(() => []);
-            for (const c of l.cells) {
-              let k = 0;
-              for (let a = 0; a < anchors.length; a++) if (c.x0 >= anchors[a] - Math.max(10, l.size * 1.2)) k = a;
-              appendRuns(row[k], c.runs, row[k].length ? " " : "");
-            }
-            return row;
-          });
-          // The last column has no next column to measure against: give its widest text the cell
-          // padding and a little air, or Word wraps "$36.00" inside it.
-          const lastPad = Math.max(...rowsLines.map((l) => l.size)) * 1.6 + 8;
-          const columns = anchors.map((a, k) => (k + 1 < anchors.length ? anchors[k + 1] - a : Math.max(40, Math.max(...rowsLines.map((l) => l.x1)) - a + lastPad)));
-          blocks.push({ kind: "table", columns, rows, bordered: anchors.length >= 3 });
+        const table = borderlessTable(rowsLines, ctx.marginLeft, pitchFor(rowsLines));
+        if (table) {
+          placed.push({ block: table, top: lineBoxTop(rowsLines[0], pitchFor(rowsLines), pageH), bottom: lineBoxBottom(rowsLines[rowsLines.length - 1], pageH) });
           currentList = null;
           i = j;
           continue;
@@ -331,38 +774,43 @@ function blocksFor(entries: Entry[], region: Region, stats: DocumentStats, conte
       let j = i + 1;
       while (j < entries.length) {
         const n = entries[j];
-        if (n.kind !== "text" || Math.abs(n.size - e.size) > 0.6 || headingStyle(n) !== heading || group[group.length - 1].y - n.y > n.size * 1.6) break;
+        if (n.kind !== "text" || Math.abs(n.size - e.size) > 0.6 || headingStyle(n) !== heading || n.look !== e.look || group[group.length - 1].y - n.y > n.size * 1.6) break;
         group.push(n);
         j++;
       }
       const runs: Run[] = [];
       group.forEach((l, k) => appendRuns(runs, l.runs, k > 0 ? " " : ""));
-      blocks.push({ kind: "paragraph", style: heading, align: alignOf(group), runs });
+      const align = alignOf(group) === "justify" ? "left" : alignOf(group);
+      const block: Block = { kind: "paragraph", style: heading, align, runs, fmt: formatFor(group, align) };
+      place(block, group);
       currentList = null;
       i = j;
       continue;
     }
 
-    const bullet = BULLET.exec(e.text);
-    const numbered = NUMBERED.exec(e.text);
-    if (bullet || numbered) {
-      const ordered = !bullet;
-      const number = numbered ? Number(numbered[1]) : 1;
-      if (!currentList || currentList.ordered !== ordered || (ordered && number !== currentList.expect)) {
-        currentList = { ordered, key: listKeys.next++, expect: number };
+    const marker = listMarker(e);
+    if (marker) {
+      const { ordered, number, bullet } = marker;
+      if (!currentList || currentList.ordered !== ordered || (ordered && number !== currentList.expect) || (!ordered && bullet !== currentList.bullet)) {
+        currentList = { ordered, key: ctx.listKeys.next++, expect: number, bullet };
       }
-      const runs = stripPrefix(e.runs, ordered ? NUMBERED : BULLET);
+      const runs = marker.runs;
+      const group = [e];
       // Continuation lines: indented under the text, no marker of their own, close below.
       let j = i + 1;
       while (j < entries.length) {
         const n = entries[j];
-        if (n.kind !== "text" || BULLET.test(n.text) || NUMBERED.test(n.text) || headingStyle(n)) break;
+        if (n.kind !== "text" || listMarker(n) || headingStyle(n)) break;
         const p = entries[j - 1] as Line;
         if (p.y - n.y > n.size * (typicalGap + 0.35) || n.x0 < e.x0 + n.size * 0.5) break;
         appendRuns(runs, n.runs, " ");
+        group.push(n);
         j++;
       }
-      blocks.push({ kind: "list", ordered, start: ordered ? currentList.expect : 1, listKey: currentList.key, runs });
+      const textStart = group.length > 1 ? Math.min(...group.slice(1).map((l) => l.x0)) : marker.textStart;
+      const fmt = formatFor(group, alignOf(group) === "justify" ? "justify" : "left", { textLeft: textStart, hangFrom: e.x0 });
+      const block: Block = { kind: "list", ordered, start: ordered ? currentList.expect : 1, listKey: currentList.key, runs, bullet: bullet || "•", label: marker.label, fmt };
+      place(block, group);
       currentList.expect += 1;
       i = j;
       continue;
@@ -372,20 +820,28 @@ function blocksFor(entries: Entry[], region: Region, stats: DocumentStats, conte
     // A paragraph: following lines join while they look like the same paragraph.
     const group = [e];
     let j = i + 1;
-    while (j < entries.length) {
-      const n = entries[j];
-      if (n.kind !== "text") break;
-      const p = group[group.length - 1];
-      const gap = (p.y - n.y) / n.size;
-      if (gap > typicalGap * 1.3 || gap <= 0) break;
-      if (Math.abs(n.size - p.size) > Math.max(1, p.size * 0.15)) break;
-      if (headingStyle(n) || BULLET.test(n.text) || NUMBERED.test(n.text) || n.cells.length >= 2) break;
-      if (n.x0 > p.x0 + n.size * 1.2 && group.length >= 1 && alignOf([n]) === "left") break; // first-line indent: new paragraph
-      const shortEnd = p.x1 < region.left + width * 0.72 && /[.!?:"”)]$/.test(p.text.trim());
-      if (shortEnd && alignOf([p]) === "left") break;
-      if (alignOf([p]) !== alignOf([n]) && (alignOf([p]) !== "left" || alignOf([n]) !== "left")) break;
-      group.push(n);
-      j++;
+    if (e.cells.length < 2) {
+      while (j < entries.length) {
+        const n = entries[j];
+        if (n.kind !== "text") break;
+        const p = group[group.length - 1];
+        const gap = (p.y - n.y) / n.size;
+        if (gap > typicalGap * 1.3 || gap <= 0) break;
+        if (Math.abs(n.size - p.size) > Math.max(1, p.size * 0.15)) break;
+        if (headingStyle(n) || listMarker(n) || n.cells.length >= 2) break;
+        if (n.look !== p.look && n.text.length < 90) break; // a differently styled short line is its own paragraph
+        if (n.x0 > p.x0 + n.size * 1.2 && alignOf([n]) === "left") break; // first-line indent: new paragraph
+        if (group.length >= 2 && Math.abs(n.x0 - p.x0) > 2 && alignOf([n]) === "left" && alignOf([p]) === "left") break;
+        // A line that stops well short of the text area ended there on purpose (an address line, a
+        // sentence ending a paragraph): the next line starts a new paragraph.
+        const shortEnd = p.x1 < region.left + width * 0.6 || (p.x1 < region.left + width * 0.72 && /[.!?:"”)]$/.test(p.text.trim()));
+        if (shortEnd && alignOf([p]) === "left") break;
+        const ap = alignOf([p]);
+        const an = alignOf([n]);
+        if (ap !== an && !(ap === "left" && an === "left") && !(ap === "justify" || an === "justify")) break;
+        group.push(n);
+        j++;
+      }
     }
     const runs: Run[] = [];
     group.forEach((l, k) => {
@@ -398,109 +854,437 @@ function blocksFor(entries: Entry[], region: Region, stats: DocumentStats, conte
         appendRuns(runs, l.runs, "");
       } else appendRuns(runs, l.runs, " ");
     });
-    blocks.push({ kind: "paragraph", style: "normal", align: alignOf(group), runs });
+    const align = alignOf(group);
+    const block: Block = { kind: "paragraph", style: "normal", align, runs, fmt: formatFor(group, align) };
+    place(block, group);
     i = j;
   }
-  return blocks;
+  return placed;
 }
 
-/** Document-wide statistics used for heading detection. */
+/** Document-wide statistics used for heading detection and default formatting. */
 export function documentStats(pages: PageInput[]): DocumentStats {
   const weight = new Map<number, number>();
-  for (const p of pages) for (const it of p.items) weight.set(r2(it.size), (weight.get(r2(it.size)) ?? 0) + it.str.trim().length);
+  const fonts = new Map<string, number>();
+  const pitch: number[] = [];
+  for (const p of pages) {
+    for (const it of p.items) {
+      const n = it.str.trim().length;
+      weight.set(r2(it.size), (weight.get(r2(it.size)) ?? 0) + n);
+      if (it.font) fonts.set(it.font, (fonts.get(it.font) ?? 0) + n);
+    }
+    // Baseline-to-baseline distance of consecutive same-size lines, relative to the size.
+    const ys = [...p.items].filter((i) => i.str.trim()).sort((a, b) => b.y - a.y);
+    for (let k = 1; k < ys.length; k++) {
+      const d = ys[k - 1].y - ys[k].y;
+      if (d > ys[k].size * 0.9 && d < ys[k].size * 1.6 && Math.abs(ys[k - 1].size - ys[k].size) < 0.3) pitch.push(d / ys[k].size);
+    }
+  }
   let bodySize = 11;
   let best = -1;
   for (const [size, w] of weight) if (w > best || (w === best && size < bodySize)) [bodySize, best] = [size, w];
-  return { bodySize: Math.max(4, bodySize) };
+  let bodyFont = "";
+  best = -1;
+  for (const [f, w] of fonts) if (w > best) [bodyFont, best] = [f, w];
+  const leading = pitch.length ? median(pitch) : 1.2;
+  return { bodySize: Math.max(4, bodySize), bodyFont, leading: clamp(leading, 1.0, 1.6) };
 }
 
-/** Lays out one page. `listKeys` numbers lists across the whole document. */
-export function layoutPage(page: PageInput, stats: DocumentStats, listKeys: { next: number } = { next: 1 }): PageLayout {
-  const items = page.items.filter((i) => i.str.trim().length > 0 && i.size > 0);
-  const textLeft = items.length ? Math.min(...items.map((i) => i.x)) : page.width * 0.1;
-  const textRight = items.length ? Math.max(...items.map((i) => i.x + i.w)) : page.width * 0.9;
-  const hasText = items.length > 0;
+// ---------------------------------------------------------------------------------------------------
+// Headers and footers: lines at the top/bottom edge that repeat across pages, or page numbers
+// ---------------------------------------------------------------------------------------------------
+
+const PAGE_NUMBER = /^\s*(?:page\s+)?(\d{1,4})(?:\s*(?:of|\/)\s*(\d{1,4}))?\s*$/i;
+
+/** For each page, the items that belong to its header and footer. */
+/** One page's running header and footer items, and where the page sits in the document (for page-number fields). */
+export interface PageBands {
+  header: Set<TextItem>;
+  footer: Set<TextItem>;
+  pageNo?: number;
+  pageCount?: number;
+}
+
+export function findHeadersFooters(pages: PageInput[]): PageBands[] {
+  const out: PageBands[] = pages.map((_, i) => ({ header: new Set<TextItem>(), footer: new Set<TextItem>(), pageNo: i + 1, pageCount: pages.length }));
+  const key = (s: string) => s.replace(/\d+/g, "#").replace(/\s+/g, " ").trim().toLowerCase();
+  const bands = pages.map((p) => {
+    const lines = groupLines(p.items.filter((i) => i.str.trim()));
+    if (!lines.length) return { top: [] as Line[], bottom: [] as Line[] };
+    return { top: lines.filter((l) => l.y > p.height * 0.9), bottom: lines.filter((l) => l.y < p.height * 0.1) };
+  });
+  const count = new Map<string, number>();
+  for (const b of bands) for (const k of new Set([...b.top, ...b.bottom].map((l) => key(l.text)))) count.set(k, (count.get(k) ?? 0) + 1);
+  const repeated = (l: Line) => pages.length >= 2 && (count.get(key(l.text)) ?? 0) >= Math.max(2, Math.ceil(pages.length * 0.5));
+  pages.forEach((p, i) => {
+    const all = groupLines(p.items.filter((it) => it.str.trim()));
+    for (const [band, target] of [
+      [bands[i].top, out[i].header],
+      [bands[i].bottom, out[i].footer],
+    ] as const) {
+      for (const l of band) {
+        // A lone number at the edge is a page number only if it is this page's (an amount at the foot of
+        // a single page is body text).
+        const m = PAGE_NUMBER.exec(l.text);
+        const pageNumber = m !== null && (Number(m[1]) === i + 1 || /page/i.test(l.text));
+        if (!(repeated(l) || pageNumber)) continue;
+        // Only the outermost lines: body text right next to it means it's part of the page, not a header.
+        // (Lines are compared by position: groupLines builds new objects on every call.)
+        const inBand = (o: Line) => band.some((b) => Math.abs(b.y - o.y) < 0.5);
+        const neighbours = all.filter((o) => !inBand(o) && Math.abs(o.y - l.y) < l.size * 2.2);
+        if (neighbours.length) continue;
+        for (const it of p.items) if (Math.abs(it.y - l.y) < 0.45 * Math.max(it.size, l.size) && it.x >= l.x0 - 1 && it.x <= l.x1 + 1) target.add(it);
+      }
+    }
+  });
+  return out;
+}
+
+function bandParagraphs(items: TextItem[], marginLeft: number, marginRight: number, pageNo?: number, pageCount?: number): CellParagraph[] {
+  const lines = groupLines(items);
+  return lines.map((l) => {
+    const c = (l.x0 + l.x1) / 2;
+    const align: Align = Math.abs(c - (marginLeft + marginRight) / 2) < 12 ? "center" : Math.abs(l.x1 - marginRight) < 6 ? "right" : "left";
+    // Page numbers become live fields — only when they are this page's number (and the page count), so a
+    // reference number or an amount in the margin is never replaced by a counter.
+    const m = PAGE_NUMBER.exec(l.text);
+    if (m && Number(m[1]) === pageNo && (!m[2] || Number(m[2]) === pageCount)) {
+      const base = l.runs[0];
+      const runs: Run[] = [];
+      const text = l.text;
+      const numAt = text.indexOf(m[1]);
+      if (numAt > 0) runs.push({ ...base, text: text.slice(0, numAt) });
+      runs.push({ ...base, text: m[1], field: "PAGE" });
+      if (m[2]) {
+        const totalAt = text.lastIndexOf(m[2]);
+        runs.push({ ...base, text: text.slice(numAt + m[1].length, totalAt) });
+        runs.push({ ...base, text: m[2], field: "NUMPAGES" });
+      }
+      return { runs, align };
+    }
+    return { runs: l.runs, align };
+  });
+}
+
+// ---------------------------------------------------------------------------------------------------
+// Pages
+// ---------------------------------------------------------------------------------------------------
+
+function setSpaceBefore(b: Block, v: number) {
+  const s = Math.max(0, Math.round(v * 2) / 2);
+  if (b.kind === "paragraph" || b.kind === "list" || b.kind === "image") b.fmt.spaceBefore = s;
+  else b.spaceBefore = s;
+}
+
+/** Converts absolute positions into "space before" each block, starting from `start`. */
+function spaceOut(placed: Placed[], start: number) {
+  let cursor = start;
+  for (const p of placed) {
+    setSpaceBefore(p.block, p.top - cursor);
+    cursor = Math.max(cursor, p.bottom);
+  }
+}
+
+function gridTable(g: Grid, items: Decorated[], fills: Fill[], page: PageInput, marginLeft: number, leading: number): Placed {
+  const inside = items.filter((it) => it.x >= g.x0 - 2 && it.x <= g.x1 + 2 && it.y <= g.y1 + 1 && it.y >= g.y0 - 1);
+  let xs = g.xs;
+  if (g.openSides) {
+    // Rows ruled by horizontal lines only: take the columns from where the text starts.
+    const starts = cluster(inside.map((i) => i.x), 6);
+    xs = [g.x0, ...starts.filter((x) => x > g.x0 + 6), g.x1];
+  }
+  const cols = xs.slice(1).map((x, k) => x - xs[k]);
+  const rowsY = g.ys;
+  const rows: TableRow[] = [];
+  const hasV = (x: number, yTop: number, yBot: number) => g.openSides || g.vRules.some((r) => Math.abs(r.x0 - x) < 1.5 && r.y0 <= yBot + 1.5 && r.y1 >= yTop - 1.5);
+  const hasH = (y: number, xl: number, xr: number) => g.hRules.some((r) => Math.abs(r.y0 - y) < 1.5 && r.x0 <= xl + 1.5 && r.x1 >= xr - 1.5);
+  const cellMarginsL: number[] = [];
+  const cellTops: number[] = [];
+  // Line pitch inside cells: from cells with several lines, else from the body text's leading.
+  const inner: number[] = [];
+  for (let r = 0; r < rowsY.length - 1; r++) {
+    const ls = groupLines(inside.filter((it) => it.y < rowsY[r] && it.y > rowsY[r + 1]));
+    for (let k = 1; k < ls.length; k++) {
+      const d = ls[k - 1].y - ls[k].y;
+      if (d > ls[k].size * 0.9 && d < ls[k].size * 1.7) inner.push(d / ls[k].size);
+    }
+  }
+  const pitchRatio = inner.length ? median(inner) : leading;
+  // The cell each grid column's vertical merge started in: text drawn in the lower rows of a merged cell
+  // (vertically centred, or wrapping down) belongs to it.
+  const mergeOwner = new Map<number, TableCell>();
+  for (let r = 0; r < rowsY.length - 1; r++) {
+    const yTop = rowsY[r];
+    const yBot = rowsY[r + 1];
+    const cells: TableCell[] = [];
+    for (let c = 0; c < cols.length; c++) {
+      // Merge across a missing vertical line.
+      let span = 1;
+      while (c + span < cols.length && !hasV(xs[c + span], yTop, yBot)) span++;
+      const xl = xs[c];
+      const xr = xs[c + span];
+      const content = inside.filter((it) => it.x + it.w / 2 >= xl && it.x + it.w / 2 <= xr && it.y < yTop && it.y > yBot);
+      const lines = groupLines(content);
+      const paragraphs: CellParagraph[] = lines.length
+        ? lines.map((l) => ({ runs: l.runs, line: Math.round(l.size * pitchRatio * 20) / 20, align: l.x0 - xl > 8 && Math.abs(xr - l.x1 - (l.x0 - xl)) > 4 && xr - l.x1 < l.x0 - xl ? "right" : l.x0 - xl > 8 && Math.abs((l.x0 + l.x1) / 2 - (xl + xr) / 2) < 2 ? "center" : "left" }))
+        : [{ runs: [], align: "left" }];
+      if (lines.length) {
+        cellMarginsL.push(Math.min(...lines.map((l) => l.x0)) - xl);
+        // The first line's box starts (pitch − descent) above its baseline.
+        const l0 = lines[0];
+        cellTops.push(yTop - (l0.y + l0.size * pitchRatio - l0.descent * l0.size));
+      }
+      const shade = fills.find((f) => f.x <= xl + 2 && f.x + f.w >= xr - 2 && f.y <= yBot + 2 && f.y + f.h >= yTop - 2);
+      // A cell continuing from the row above when there's no line between them.
+      const vMerge = r > 0 && !g.openSides && !hasH(yTop, xl, xr) ? "continue" : undefined;
+      const owner = vMerge ? mergeOwner.get(c) : undefined;
+      if (vMerge && lines.length) {
+        if (owner) owner.paragraphs = owner.paragraphs.some((p) => p.runs.length) ? [...owner.paragraphs, ...paragraphs] : paragraphs;
+      }
+      // Without a cell above to merge into, the text stays where it is (never dropped).
+      const keep = vMerge && !owner ? undefined : vMerge;
+      const cell: TableCell = { paragraphs: keep ? [{ runs: [], align: "left" }] : paragraphs, shading: shade?.color, span, vMerge: keep };
+      if (!keep) mergeOwner.set(c, cell);
+      cells.push(cell);
+      c += span - 1;
+    }
+    // The distance between two ruling lines includes a line's thickness, which Word adds again.
+    rows.push({ height: Math.max(4, yTop - yBot - (g.border?.thickness ?? 0)), cells });
+  }
+  // Mark the first cell of each vertical merge.
+  for (let r = 1; r < rows.length; r++) {
+    let col = 0;
+    for (const cell of rows[r].cells) {
+      if (cell.vMerge === "continue") {
+        let c2 = 0;
+        for (const above of rows[r - 1].cells) {
+          if (c2 === col && above.vMerge !== "continue") above.vMerge = "restart";
+          c2 += above.span;
+        }
+      }
+      col += cell.span;
+    }
+  }
+  // Cell padding from left-aligned text only (right-aligned amounts sit far from the left edge).
+  const lefts = cellMarginsL.filter((m) => m >= 0).sort((a, b) => a - b);
+  const left = lefts.length ? clamp(lefts[Math.floor(lefts.length * 0.25)], 0, 12) : 5.4;
+  const top = cellTops.length ? clamp(median(cellTops), 0, 12) : 0;
+  const block: Block = {
+    kind: "table",
+    columns: cols,
+    rows,
+    bordered: !g.openSides,
+    border: g.border,
+    indent: tw(xs[0] - marginLeft),
+    spaceBefore: 0,
+    cellMargin: { left, right: Math.min(left, 5.4), top },
+  };
+  return { block, top: page.height - g.y1, bottom: page.height - g.y0 };
+}
+
+/** The tightest right edge a group of wrapped lines allows: each line ended because its next word didn't fit. */
+function wrapBound(lines: Line[], maxX: number): number {
+  let bound = Infinity;
+  for (let i = 0; i + 1 < lines.length; i++) {
+    const a = lines[i];
+    const b = lines[i + 1];
+    const firstCell = b.cells[0];
+    if (!firstCell) continue;
+    const text = firstCell.runs.map((r) => r.text).join("");
+    const word = text.split(/\s+/)[0] ?? "";
+    if (!word || !text.length) continue;
+    const candidate = a.x1 + a.size * 0.25 + ((firstCell.x1 - firstCell.x0) * word.length) / text.length;
+    if (candidate > maxX + 0.5) bound = Math.min(bound, candidate);
+  }
+  return bound;
+}
+
+/**
+ * Where the text area ends. Every line must still fit (so at least the longest line), and a line that
+ * wrapped must still wrap: its next word didn't fit, which bounds the edge from above. Justified text ends
+ * exactly at the edge. With nothing wrapping, a generous area (mirroring the left margin) is safe and
+ * absorbs small width differences between the PDF's fonts and Word's.
+ */
+function textAreaRight(lines: Line[], contentRight: number, contentLeft: number, pageWidth: number, leading: number): number {
+  const maxX = contentRight;
+  let bound = Infinity;
+  let justified = 0;
+  for (let i = 0; i + 1 < lines.length; i++) {
+    const a = lines[i];
+    const b = lines[i + 1];
+    if (Math.abs(a.x1 - maxX) < 0.6) justified++;
+    const sameParagraph = Math.abs(b.x0 - a.x0) < 2 && a.y - b.y < a.size * leading * 1.12 && a.cells.length === 1 && b.cells.length === 1 && Math.abs(a.size - b.size) < 0.6;
+    if (!sameParagraph || a.x1 > maxX - 0.6) continue;
+    const firstCell = b.cells[0];
+    const text = firstCell.runs.map((r) => r.text).join("");
+    const word = text.split(/\s+/)[0] ?? "";
+    if (!word || !text.length) continue;
+    const wordW = ((firstCell.x1 - firstCell.x0) * word.length) / text.length;
+    const candidate = a.x1 + a.size * 0.25 + wordW;
+    // A bound narrower than the longest line can't be a real wrap (it's a paragraph's last line).
+    if (candidate > maxX + 0.5) bound = Math.min(bound, candidate);
+  }
+  if (justified >= 2) return maxX + WRAP_SLACK;
+  if (bound === Infinity) return Math.max(maxX + WRAP_SLACK, pageWidth - contentLeft);
+  // Ragged text: room for small font-width differences between the PDF's producer and Word (a fraction
+  // of a percent), but never enough for a word that wrapped to fit.
+  return maxX + clamp(bound - maxX - 0.5, Math.min(1.5, bound - maxX - 0.5), 6);
+}
+
+/** Lays out one page. `listKeys` numbers lists across the whole document. `bands` are this page's
+ * header/footer items (see findHeadersFooters). */
+export function layoutPage(page: PageInput, stats: DocumentStats, listKeys: { next: number } = { next: 1 }, bands?: PageBands): PageLayout {
+  const all = page.items.filter((i) => i.str.trim().length > 0 && i.size > 0);
+  const headerItems = all.filter((i) => bands?.header.has(i));
+  const footerItems = all.filter((i) => bands?.footer.has(i));
+  const bodyRaw = all.filter((i) => !bands?.header.has(i) && !bands?.footer.has(i));
+  const hasText = bodyRaw.length > 0;
+  const { items, rules } = decorate(bodyRaw, page.rules ?? []);
+  const fills = [...(page.fills ?? [])];
 
   // Pictures: skip specks, and a full-page background under real text (a searchable scan or a letterhead
   // backdrop) — the text is what an editable document needs.
   const images = page.images.filter((im) => im.w >= 12 && im.h >= 12 && !(hasText && (im.w * im.h) / (page.width * page.height) > 0.85));
 
-  const left = Math.min(textLeft, ...images.map((im) => im.x));
-  const right = Math.max(textRight, ...images.map((im) => im.x + im.w));
-  const margins = {
-    left: clamp(left, 18, 108),
-    right: clamp(page.width - right, 18, 108),
-    top: 54,
-    bottom: 54,
-  };
-  const contentWidth = Math.max(72, page.width - margins.left - margins.right);
+  // Ruled tables take their text out of the flow.
+  const grids = findGrids(rules).filter((g) => items.some((it) => it.x >= g.x0 - 2 && it.x <= g.x1 && it.y <= g.y1 && it.y >= g.y0));
+  const inGrid = (it: { x: number; y: number }, g: Grid) => it.x >= g.x0 - 2 && it.x <= g.x1 + 2 && it.y <= g.y1 + 1 && it.y >= g.y0 - 1;
+  const flowItems = items.filter((it) => !grids.some((g) => inGrid(it, g)));
+  const gridRules = new Set(grids.flatMap((g) => [...g.hRules, ...g.vRules]));
+  const freeRules = rules.filter((r) => !gridRules.has(r));
 
-  const imageEntries: ImageEntry[] = images.map((im) => ({ kind: "image", top: im.y + im.h, y: im.y + im.h, image: im }));
-  const byTop = (a: Entry, b: Entry) => b.top - a.top;
-  const blocks: Block[] = [];
-  const gutter = findGutter(items, textLeft, textRight);
+  const textLeft = items.length ? Math.min(...items.map((i) => i.x)) : page.width * 0.1;
+  const textRight = items.length ? Math.max(...items.map((i) => i.x + i.w)) : page.width * 0.9;
+  const left = Math.min(textLeft, ...images.map((im) => im.x), ...grids.map((g) => g.x0));
+  const right = Math.max(textRight, ...images.map((im) => im.x + im.w), ...grids.map((g) => g.x1));
+  // The text area: its left edge is the leftmost content; its right edge just past the longest line,
+  // so Word wraps each line where the PDF did.
+  const marginLeft = clamp(left, 0, page.width * 0.4);
+  const marginRightEdge = clamp(textAreaRight(groupLines(flowItems), right, left, page.width, stats.leading), page.width * 0.6, page.width);
+  const ctx: FlowContext = { page, stats, listKeys, marginLeft, marginRight: marginRightEdge, rules: freeRules, fills };
+
+  // Pictures beside text (a logo next to an address) keep their place on the page; others flow. On a
+  // two-column page a picture inside one column belongs to that column's flow.
+  const gutter = findGutter(flowItems, textLeft, textRight);
+  const floating: FloatingImage[] = [];
+  const flowImages: PageImage[] = [];
+  for (const im of images) {
+    if (gutter && (im.x + im.w <= gutter.x + 1 || im.x >= gutter.x - 1)) {
+      flowImages.push(im);
+      continue;
+    }
+    const inBand = (y: number) => y > im.y + 2 && y < im.y + im.h - 2;
+    const beside = flowItems.some((it) => inBand(it.y) && (it.x + it.w < im.x - 2 || it.x > im.x + im.w + 2)) || images.some((o) => o !== im && o.y < im.y + im.h - 2 && o.y + o.h > im.y + 2);
+    const insideGrid = grids.some((g) => im.x >= g.x0 - 2 && im.x + im.w <= g.x1 + 2 && im.y >= g.y0 - 2 && im.y + im.h <= g.y1 + 2);
+    if (beside || insideGrid) floating.push({ image: im, x: im.x, y: page.height - im.y - im.h, width: im.w, height: im.h });
+    else flowImages.push(im);
+  }
+
+  const imageEntries: ImageEntry[] = flowImages.map((im) => ({ kind: "image", top: im.y + im.h, y: im.y + im.h, image: im }));
+  const byTop = (a: { top: number }, b: { top: number }) => b.top - a.top;
+  const placed: Placed[] = [];
 
   if (gutter === null) {
-    const entries: Entry[] = [...groupLines(items), ...imageEntries].sort(byTop);
-    // Assume the page's margins are symmetric: a short page of short lines still has its right margin
-    // where the left one mirrors it, so centred titles and paragraph ends are judged against the page.
-    blocks.push(...blocksFor(entries, { left: textLeft, right: Math.max(textRight, page.width - textLeft) }, stats, contentWidth, listKeys));
+    const entries: Entry[] = [...groupLines(flowItems), ...imageEntries].sort(byTop);
+    placed.push(...blocksFor(entries, { left: marginLeft, right: marginRightEdge }, ctx));
   } else {
     // Two columns: lines that cross the gutter (titles, full-width figures) split the page into bands;
-    // within each band the left column is read before the right.
-    const spanning = items.filter((i) => i.x < gutter - 1 && i.x + i.w > gutter + 1);
-    const spanLines = groupLines(spanning);
-    const leftItems = items.filter((i) => !spanning.includes(i) && i.x + i.w <= gutter + 1);
-    const rightItems = items.filter((i) => !spanning.includes(i) && !leftItems.includes(i));
-    const leftEntries: Entry[] = [...groupLines(leftItems), ...imageEntries.filter((e) => e.image.x + e.image.w <= gutter + 1)];
-    const rightEntries: Entry[] = [...groupLines(rightItems), ...imageEntries.filter((e) => e.image.x >= gutter - 1)];
-    const spanEntries: Entry[] = [...spanLines, ...imageEntries.filter((e) => e.image.x < gutter - 1 && e.image.x + e.image.w > gutter + 1)].sort(byTop);
+    // within each band the columns become a real two-column section.
+    const gx = gutter.x;
+    const spanning = new Set(flowItems.filter((i) => i.x < gx - 1 && i.x + i.w > gx + 1));
+    const spanLines = groupLines([...spanning]);
+    const leftItems = flowItems.filter((i) => !spanning.has(i) && i.x + i.w <= gx + 1);
+    const leftSet = new Set(leftItems);
+    const rightItems = flowItems.filter((i) => !spanning.has(i) && !leftSet.has(i));
+    const leftEntries: Entry[] = [...groupLines(leftItems), ...imageEntries.filter((e) => e.image.x + e.image.w <= gx + 1)];
+    const rightEntries: Entry[] = [...groupLines(rightItems), ...imageEntries.filter((e) => e.image.x >= gx - 1)];
+    const spanEntries: Entry[] = [...spanLines, ...imageEntries.filter((e) => e.image.x < gx - 1 && e.image.x + e.image.w > gx + 1)].sort(byTop);
     const cuts = [Infinity, ...spanEntries.map((e) => e.top), -Infinity];
-    // Each column's own edges (not the gutter's middle) — alignment is judged within the column.
-    const edges = (entries: Entry[], fallback: Region): Region => {
-      const lines = entries.filter((e): e is Line => e.kind === "text");
-      return lines.length ? { left: Math.min(...lines.map((l) => l.x0)), right: Math.max(...lines.map((l) => l.x1)) } : fallback;
-    };
-    const leftRegion = edges(leftEntries, { left: textLeft, right: gutter });
-    const rightRegion = edges(rightEntries, { left: gutter, right: textRight });
+    const gap = Math.max(6, gutter.rightStart - gutter.leftEnd);
+    const colWidth = (marginRightEdge - marginLeft - gap) / 2;
     const inBand = (e: Entry, hi: number, lo: number) => e.top <= hi && e.top > lo;
     for (let b = 0; b < cuts.length - 1; b++) {
       const hi = cuts[b];
       const lo = cuts[b + 1];
-      if (b > 0) blocks.push(...blocksFor([spanEntries[b - 1]], { left: textLeft, right: textRight }, stats, contentWidth, listKeys));
+      if (b > 0) placed.push(...blocksFor([spanEntries[b - 1]], { left: marginLeft, right: marginRightEdge }, ctx));
       const leftBand = leftEntries.filter((e) => inBand(e, hi === Infinity ? Infinity : hi - 0.01, lo)).sort(byTop);
       const rightBand = rightEntries.filter((e) => inBand(e, hi === Infinity ? Infinity : hi - 0.01, lo)).sort(byTop);
-      const leftBlocks = blocksFor(leftBand, leftRegion, stats, contentWidth, listKeys);
-      const rightBlocks = blocksFor(rightBand, rightRegion, stats, contentWidth, listKeys);
-      // A paragraph that runs from the bottom of the left column to the top of the right one is one
-      // paragraph: join it when the left part stops mid-sentence.
-      const tail = leftBlocks[leftBlocks.length - 1];
-      const head = rightBlocks[0];
-      if (tail?.kind === "paragraph" && tail.style === "normal" && head?.kind === "paragraph" && head.style === "normal") {
-        const tailText = tail.runs.map((r) => r.text).join("").trim();
-        if (tailText && !/[.!?:"”)]$/.test(tailText)) {
-          appendRuns(tail.runs, head.runs, " ");
-          rightBlocks.shift();
-        }
-      }
-      blocks.push(...leftBlocks, ...rightBlocks);
+      if (!leftBand.length && !rightBand.length) continue;
+      const leftCtx = { ...ctx, marginRight: marginLeft + colWidth };
+      const rightCtx = { ...ctx, marginLeft: marginRightEdge - colWidth, marginRight: marginRightEdge };
+      const lp = blocksFor(leftBand, { left: marginLeft, right: marginLeft + colWidth }, leftCtx);
+      const rp = blocksFor(rightBand, { left: marginRightEdge - colWidth, right: marginRightEdge }, rightCtx);
+      const top = Math.min(lp[0]?.top ?? Infinity, rp[0]?.top ?? Infinity);
+      const bottom = Math.max(lp[lp.length - 1]?.bottom ?? -Infinity, rp[rp.length - 1]?.bottom ?? -Infinity);
+      // Each column starts where its own first block starts.
+      spaceOut(lp, top);
+      spaceOut(rp, top);
+      placed.push({ block: { kind: "columns", gap, spaceBefore: 0, left: lp.map((p) => p.block), right: rp.map((p) => p.block) }, top, bottom });
     }
   }
-  return { width: page.width, height: page.height, margins, blocks };
-}
 
-function clamp(v: number, lo: number, hi: number) {
-  return Math.max(lo, Math.min(hi, v));
+  // Ruled tables, in their place. A table with running text beside it is pinned to the page (Word's
+  // floating table), so the text beside it keeps flowing as it did.
+  for (const g of grids) {
+    const p = gridTable(g, items, fills, page, marginLeft, stats.leading);
+    const beside = flowItems.some((it) => it.y < g.y1 - 1 && it.y > g.y0 + 1 && (it.x + it.w < g.x0 - 2 || it.x > g.x1 + 2));
+    if (beside && p.block.kind === "table") {
+      p.block.float = { x: tw(g.x0), y: tw(page.height - g.y1) };
+      p.bottom = p.top; // takes no room in the flow
+    }
+    placed.push(p);
+  }
+  placed.sort((a, b) => a.top - b.top);
+
+  // Header / footer.
+  const header = headerItems.length ? bandParagraphs(headerItems, marginLeft, marginRightEdge, bands?.pageNo, bands?.pageCount) : null;
+  const footer = footerItems.length ? bandParagraphs(footerItems, marginLeft, marginRightEdge, bands?.pageNo, bands?.pageCount) : null;
+  const headerTop = headerItems.length ? page.height - Math.max(...headerItems.map((i) => i.y + i.size * 0.8)) : 36;
+  const footerBottom = footerItems.length ? Math.min(...footerItems.map((i) => i.y - (i.descent ?? 0.22) * i.size)) : 36;
+
+  const firstTop = placed.length ? placed[0].top : 72;
+  const lastBottom = placed.length ? Math.max(...placed.map((p) => p.bottom)) : page.height - 72;
+  spaceOut(placed, firstTop);
+  const footerTop = footerItems.length ? page.height - Math.max(...footerItems.map((i) => i.y + i.size)) : Infinity;
+  const margins = {
+    // Rounded outwards, so the text area is never narrower than the lines that have to fit in it.
+    left: Math.floor(marginLeft * 20) / 20,
+    right: Math.floor((page.width - marginRightEdge) * 20) / 20,
+    top: Math.round(clamp(firstTop, 0, page.height / 2) * 2) / 2,
+    // Each PDF page is its own section, so nothing flows in after the last line: a modest bottom margin
+    // (never tight against the content) keeps small differences in line height from spilling onto a new page.
+    bottom: Math.round(clamp(Math.min(page.height - lastBottom - 10, 72, footerTop - 4), 0, page.height / 2) * 2) / 2,
+  };
+  return {
+    width: page.width,
+    height: page.height,
+    margins,
+    blocks: placed.map((p) => p.block),
+    floating,
+    header,
+    footer,
+    headerDistance: Math.max(0, Math.round(headerTop * 2) / 2),
+    footerDistance: Math.max(0, Math.round(footerBottom * 2) / 2),
+  };
 }
 
 /** Plain text of a layout, for tests and QA. */
 export function layoutText(pages: PageLayout[]): string {
   const out: string[] = [];
-  for (const p of pages) {
-    for (const b of p.blocks) {
+  const walk = (blocks: Block[]) => {
+    for (const b of blocks) {
       if (b.kind === "paragraph" || b.kind === "list") out.push(b.runs.map((r) => r.text).join(""));
-      else if (b.kind === "table") for (const row of b.rows) out.push(row.map((c) => c.map((r) => r.text).join("")).join("\t"));
+      else if (b.kind === "table") for (const row of b.rows) out.push(row.cells.map((c) => c.paragraphs.map((p) => p.runs.map((r) => r.text).join("")).join(" ")).join("\t"));
+      else if (b.kind === "columns") {
+        walk(b.left);
+        walk(b.right);
+      }
     }
+  };
+  for (const p of pages) {
+    if (p.header) for (const hp of p.header) out.push(hp.runs.map((r) => r.text).join(""));
+    walk(p.blocks);
+    if (p.footer) for (const fp of p.footer) out.push(fp.runs.map((r) => r.text).join(""));
   }
   return out.join("\n");
 }

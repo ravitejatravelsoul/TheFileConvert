@@ -4,22 +4,22 @@
   "test": "A: Word → PDF → compress under 1 MB → download",
   "verdict": "PASS",
   "ok": true,
-  "wordPdf": 3639697,
-  "compressed": 966420,
+  "wordPdf": 3639692,
+  "compressed": 966414,
   "pages": 2,
-  "ms": 13415,
+  "ms": 14583,
   "uploads": [],
   "integrity": [
    {
     "file": "journeyA-1-WORD-15-photos.pdf",
-    "bytes": 3639697,
+    "bytes": 3639692,
     "ok": true,
     "kind": "pdf",
     "pages": 2
    },
    {
     "file": "journeyA-2-WORD-15-photos-compressed.pdf",
-    "bytes": 966420,
+    "bytes": 966414,
     "ok": true,
     "kind": "pdf",
     "pages": 2
@@ -34,12 +34,12 @@
   "recall": 100,
   "order": 100,
   "pages": 1,
-  "ms": 6576,
+  "ms": 6588,
   "uploads": [],
   "integrity": [
    {
     "file": "journeyB-1-PDF-WORD-03-headings.docx",
-    "bytes": 4195,
+    "bytes": 4044,
     "ok": true,
     "kind": "docx",
     "pages": 1,
@@ -49,7 +49,7 @@
    },
    {
     "file": "journeyB-2-journeyB-1-PDF-WORD-03-headings.pdf",
-    "bytes": 16895,
+    "bytes": 16856,
     "ok": true,
     "kind": "pdf",
     "pages": 1
@@ -63,9 +63,9 @@
   "ok": true,
   "imagePdf": 2976470,
   "mergedPages": 3,
-  "merged": 2978160,
+  "merged": 2978159,
   "compressed": 984331,
-  "ms": 20970,
+  "ms": 28522,
   "uploads": [],
   "integrity": [
    {
@@ -77,7 +77,7 @@
    },
    {
     "file": "journeyC-2-merged.pdf",
-    "bytes": 2978160,
+    "bytes": 2978159,
     "ok": true,
     "kind": "pdf",
     "pages": 3
@@ -99,27 +99,27 @@
   "organizedPages": 9,
   "rotation": 90,
   "editedHasText": true,
-  "compressed": 469940,
-  "ms": 16427,
+  "compressed": 469935,
+  "ms": 19715,
   "uploads": [],
   "integrity": [
    {
     "file": "journeyD-1-PDF-H-multipage-text-image-organized.pdf",
-    "bytes": 4805666,
+    "bytes": 4805665,
     "ok": true,
     "kind": "pdf",
     "pages": 9
    },
    {
     "file": "journeyD-2-PDF-H-multipage-text-image-organized-edited.pdf",
-    "bytes": 4806277,
+    "bytes": 4806276,
     "ok": true,
     "kind": "pdf",
     "pages": 9
    },
    {
     "file": "journeyD-3-PDF-H-multipage-text-image-organized-edited-compressed.pdf",
-    "bytes": 469940,
+    "bytes": 469935,
     "ok": true,
     "kind": "pdf",
     "pages": 9
@@ -134,12 +134,12 @@
   "docxValid": true,
   "recall": 100,
   "order": 100,
-  "ms": 7864,
+  "ms": 8933,
   "uploads": [],
   "integrity": [
    {
     "file": "journeyE-PDF-WORD-09-scanned.docx",
-    "bytes": 3998,
+    "bytes": 3850,
     "ok": true,
     "kind": "docx",
     "pages": 1,
@@ -155,9 +155,9 @@
   "verdict": "PASS",
   "ok": true,
   "webp": 1915738,
-  "compressed": 87596,
+  "compressed": 33848,
   "format": "webp",
-  "ms": 16462,
+  "ms": 19159,
   "uploads": [],
   "integrity": [
    {
@@ -171,7 +171,7 @@
    },
    {
     "file": "journeyF-2-IMAGE-G-large-photo-compressed.webp",
-    "bytes": 87596,
+    "bytes": 33848,
     "ok": true,
     "kind": "webp",
     "w": 830,
@@ -194,7 +194,7 @@
   "integrity": [
    {
     "file": "rt1-PDF-WORD-01-PDF-WORD-01-simple-text.docx",
-    "bytes": 4001,
+    "bytes": 3805,
     "ok": true,
     "kind": "docx",
     "pages": 1,
@@ -204,7 +204,7 @@
    },
    {
     "file": "rt1-PDF-WORD-01-rt1-PDF-WORD-01-PDF-WORD-01-simple-text.pdf",
-    "bytes": 14039,
+    "bytes": 14030,
     "ok": true,
     "kind": "pdf",
     "pages": 1
@@ -225,7 +225,7 @@
   "integrity": [
    {
     "file": "rt1-PDF-WORD-03-PDF-WORD-03-headings.docx",
-    "bytes": 4196,
+    "bytes": 4045,
     "ok": true,
     "kind": "docx",
     "pages": 1,
@@ -235,7 +235,7 @@
    },
    {
     "file": "rt1-PDF-WORD-03-rt1-PDF-WORD-03-PDF-WORD-03-headings.pdf",
-    "bytes": 16895,
+    "bytes": 16857,
     "ok": true,
     "kind": "pdf",
     "pages": 1
@@ -256,7 +256,7 @@
   "integrity": [
    {
     "file": "rt1-PDF-WORD-04-PDF-WORD-04-bold-italic.docx",
-    "bytes": 3890,
+    "bytes": 3704,
     "ok": true,
     "kind": "docx",
     "pages": 1,
@@ -266,7 +266,7 @@
    },
    {
     "file": "rt1-PDF-WORD-04-rt1-PDF-WORD-04-PDF-WORD-04-bold-italic.pdf",
-    "bytes": 22754,
+    "bytes": 22760,
     "ok": true,
     "kind": "pdf",
     "pages": 1
@@ -287,7 +287,7 @@
   "integrity": [
    {
     "file": "rt1-PDF-WORD-05-PDF-WORD-05-lists.docx",
-    "bytes": 3960,
+    "bytes": 3997,
     "ok": true,
     "kind": "docx",
     "pages": 1,
@@ -297,7 +297,7 @@
    },
    {
     "file": "rt1-PDF-WORD-05-rt1-PDF-WORD-05-PDF-WORD-05-lists.pdf",
-    "bytes": 15496,
+    "bytes": 15488,
     "ok": true,
     "kind": "pdf",
     "pages": 1
@@ -318,7 +318,7 @@
   "integrity": [
    {
     "file": "rt1-PDF-WORD-06-PDF-WORD-06-table.docx",
-    "bytes": 4151,
+    "bytes": 4042,
     "ok": true,
     "kind": "docx",
     "pages": 1,
@@ -328,7 +328,7 @@
    },
    {
     "file": "rt1-PDF-WORD-06-rt1-PDF-WORD-06-PDF-WORD-06-table.pdf",
-    "bytes": 16057,
+    "bytes": 15946,
     "ok": true,
     "kind": "pdf",
     "pages": 1
@@ -349,7 +349,7 @@
   "integrity": [
    {
     "file": "rt1-PDF-WORD-07-PDF-WORD-07-images.docx",
-    "bytes": 425435,
+    "bytes": 425238,
     "ok": true,
     "kind": "docx",
     "pages": 1,
@@ -359,7 +359,7 @@
    },
    {
     "file": "rt1-PDF-WORD-07-rt1-PDF-WORD-07-PDF-WORD-07-images.pdf",
-    "bytes": 113692,
+    "bytes": 113674,
     "ok": true,
     "kind": "pdf",
     "pages": 1
@@ -380,17 +380,17 @@
   "integrity": [
    {
     "file": "rt1-PDF-WORD-08-PDF-WORD-08-two-column.docx",
-    "bytes": 4176,
+    "bytes": 4049,
     "ok": true,
     "kind": "docx",
-    "pages": 1,
+    "pages": 2,
     "paragraphs": 11,
     "tables": 0,
     "pictures": 0
    },
    {
     "file": "rt1-PDF-WORD-08-rt1-PDF-WORD-08-PDF-WORD-08-two-column.pdf",
-    "bytes": 16787,
+    "bytes": 17038,
     "ok": true,
     "kind": "pdf",
     "pages": 1
@@ -411,7 +411,7 @@
   "integrity": [
    {
     "file": "rt1-PDF-WORD-12-PDF-WORD-12-special-chars.docx",
-    "bytes": 4143,
+    "bytes": 4021,
     "ok": true,
     "kind": "docx",
     "pages": 1,
@@ -421,7 +421,7 @@
    },
    {
     "file": "rt1-PDF-WORD-12-rt1-PDF-WORD-12-PDF-WORD-12-special-chars.pdf",
-    "bytes": 24522,
+    "bytes": 27046,
     "ok": true,
     "kind": "pdf",
     "pages": 1
@@ -442,7 +442,7 @@
   "integrity": [
    {
     "file": "rt1-PDF-WORD-13-PDF-WORD-13-large-24-pages.docx",
-    "bytes": 5095,
+    "bytes": 5403,
     "ok": true,
     "kind": "docx",
     "pages": 24,
@@ -452,7 +452,7 @@
    },
    {
     "file": "rt1-PDF-WORD-13-rt1-PDF-WORD-13-PDF-WORD-13-large-24-pages.pdf",
-    "bytes": 45951,
+    "bytes": 49858,
     "ok": true,
     "kind": "pdf",
     "pages": 24
@@ -475,14 +475,14 @@
   "integrity": [
    {
     "file": "rt2-WORD-02-WORD-02-headings.pdf",
-    "bytes": 17151,
+    "bytes": 17107,
     "ok": true,
     "kind": "pdf",
     "pages": 1
    },
    {
     "file": "rt2-WORD-02-rt2-WORD-02-WORD-02-headings.docx",
-    "bytes": 4050,
+    "bytes": 3927,
     "ok": true,
     "kind": "docx",
     "pages": 1,
@@ -509,14 +509,14 @@
   "integrity": [
    {
     "file": "rt2-WORD-03-WORD-03-formatting.pdf",
-    "bytes": 40926,
+    "bytes": 40908,
     "ok": true,
     "kind": "pdf",
     "pages": 1
    },
    {
     "file": "rt2-WORD-03-rt2-WORD-03-WORD-03-formatting.docx",
-    "bytes": 3994,
+    "bytes": 3896,
     "ok": true,
     "kind": "docx",
     "pages": 1,
@@ -543,14 +543,14 @@
   "integrity": [
    {
     "file": "rt2-WORD-04-WORD-04-lists.pdf",
-    "bytes": 11291,
+    "bytes": 11241,
     "ok": true,
     "kind": "pdf",
     "pages": 1
    },
    {
     "file": "rt2-WORD-04-rt2-WORD-04-WORD-04-lists.docx",
-    "bytes": 3956,
+    "bytes": 3974,
     "ok": true,
     "kind": "docx",
     "pages": 1,
@@ -576,14 +576,14 @@
   "integrity": [
    {
     "file": "rt2-WORD-05-WORD-05-table.pdf",
-    "bytes": 15923,
+    "bytes": 15819,
     "ok": true,
     "kind": "pdf",
     "pages": 1
    },
    {
     "file": "rt2-WORD-05-rt2-WORD-05-WORD-05-table.docx",
-    "bytes": 4141,
+    "bytes": 3956,
     "ok": true,
     "kind": "docx",
     "pages": 1,
@@ -609,14 +609,14 @@
   "integrity": [
    {
     "file": "rt2-WORD-06-WORD-06-images.pdf",
-    "bytes": 126005,
+    "bytes": 125992,
     "ok": true,
     "kind": "pdf",
     "pages": 1
    },
    {
     "file": "rt2-WORD-06-rt2-WORD-06-WORD-06-images.docx",
-    "bytes": 24359,
+    "bytes": 24196,
     "ok": true,
     "kind": "docx",
     "pages": 1,
@@ -640,14 +640,14 @@
   "integrity": [
    {
     "file": "rt2-WORD-08-WORD-08-special-characters.pdf",
-    "bytes": 20825,
+    "bytes": 20807,
     "ok": true,
     "kind": "pdf",
     "pages": 1
    },
    {
     "file": "rt2-WORD-08-rt2-WORD-08-WORD-08-special-characters.docx",
-    "bytes": 4038,
+    "bytes": 3908,
     "ok": true,
     "kind": "docx",
     "pages": 1,
@@ -665,24 +665,24 @@
   "recall": 100,
   "order": 100,
   "checks": {},
-  "paragraphs": 21,
+  "paragraphs": 15,
   "tables": 0,
   "pictures": 0,
   "integrity": [
    {
     "file": "rt2-WORD-10-WORD-10-header-footer.pdf",
-    "bytes": 17531,
+    "bytes": 17422,
     "ok": true,
     "kind": "pdf",
     "pages": 3
    },
    {
     "file": "rt2-WORD-10-rt2-WORD-10-WORD-10-header-footer.docx",
-    "bytes": 4211,
+    "bytes": 5873,
     "ok": true,
     "kind": "docx",
     "pages": 3,
-    "paragraphs": 21,
+    "paragraphs": 15,
     "tables": 0,
     "pictures": 0
    }
@@ -698,24 +698,24 @@
   "checks": {
    "images": true
   },
-  "paragraphs": 21,
+  "paragraphs": 17,
   "tables": 1,
   "pictures": 1,
   "integrity": [
    {
     "file": "rt2-WORD-12-WORD-12-complex.pdf",
-    "bytes": 37732,
+    "bytes": 37659,
     "ok": true,
     "kind": "pdf",
     "pages": 2
    },
    {
     "file": "rt2-WORD-12-rt2-WORD-12-WORD-12-complex.docx",
-    "bytes": 11450,
+    "bytes": 12915,
     "ok": true,
     "kind": "docx",
     "pages": 2,
-    "paragraphs": 21,
+    "paragraphs": 17,
     "tables": 1,
     "pictures": 1
    }

@@ -106,7 +106,7 @@ const after = load("fs-compress-pdf").find((r) => /REAL user scan .* → 1 MB/.t
 const wordRows = [...load("fs-word"), ...load("fs-word-mobile")].filter((r) => r.fixture || r.message);
 const wordSection = `## PDF → Word
 
-Every scenario ran through /pdf-to-word in real Chromium (desktop, then Pixel 7 touch emulation): upload → Convert to Word → download the .docx. Each .docx was then reopened independently three ways: \`qa/validate/docxcheck.py\` (ZIP/OOXML package — required parts, well-formed XML, content types, relationship targets, image decode — plus python-docx), the shared validator gate, and mammoth.js (a second DOCX reader; its HTML renders are in \`qa/review/fresh-launch-polish/pdf-to-word-renders/\`). LibreOffice isn't installed on this machine, so it wasn't used.
+Every scenario ran through /pdf-to-word in real Chromium (desktop, then Pixel 7 touch emulation): upload → Convert to Word → download the .docx. Each .docx was then reopened independently three ways: \`qa/validate/docxcheck.py\` (ZIP/OOXML package — required parts, well-formed XML, content types, relationship targets, image decode — plus python-docx), the shared validator gate, and mammoth.js (a second DOCX reader; its HTML renders are in \`qa/review/fresh-launch-polish/pdf-to-word-renders/\`). Layout and formatting fidelity — rendered by LibreOffice and measured word by word against the source — is in the section *Fidelity* below.
 
 Text accuracy is measured against the fixture's ground truth (\`qa/fresh-scenario-fixtures/word/truth.json\`): **recall** = share of source words present, **order** = longest common word subsequence ÷ source words, **separation** = source paragraphs/headings/list items that land in their own Word paragraph (not merged with a neighbour, not split). For scanned pages the same numbers are the OCR accuracy.
 
@@ -134,7 +134,7 @@ Automated regressions: \`src/lib/processors/pdf-to-word/layout.test.ts\` (paragr
 const docxRows = [...load("fs-docx"), ...load("fs-docx-mobile")].filter((r) => r.fixture);
 const docxSection = `## Word → PDF
 
-Every scenario ran through /word-to-pdf in real Chromium (desktop, then Pixel 7 touch emulation): upload the .docx → Convert to PDF → Download PDF. The fixtures were written by python-docx (\`qa/scripts/fs-docx-fixtures.py\`), not by our code. Each PDF went through the shared validator (qpdf, MuPDF, pdf-lib, pdf.js — every page rendered, blank pages flagged) and then \`qa/validate/pdfstruct.py\` (MuPDF: text, fonts, sizes, bold/italic, colours, pictures, links, vector lines, bookmarks), checked against \`qa/fresh-scenario-fixtures/docx/truth.json\`. **Recall / order** compare the PDF's text with the document's text. For visual review, page 1 of each document is shown next to an independent DOCX renderer (docx-preview) in \`qa/review/fresh-launch-polish/word-to-pdf-renders/\`; LibreOffice isn't installed here.
+Every scenario ran through /word-to-pdf in real Chromium (desktop, then Pixel 7 touch emulation): upload the .docx → Convert to PDF → Download PDF. The fixtures were written by python-docx (\`qa/scripts/fs-docx-fixtures.py\`), not by our code. Each PDF went through the shared validator (qpdf, MuPDF, pdf-lib, pdf.js — every page rendered, blank pages flagged) and then \`qa/validate/pdfstruct.py\` (MuPDF: text, fonts, sizes, bold/italic, colours, pictures, links, vector lines, bookmarks), checked against \`qa/fresh-scenario-fixtures/docx/truth.json\`. **Recall / order** compare the PDF's text with the document's text. For visual review, page 1 of each document is shown next to an independent DOCX renderer (docx-preview) in \`qa/review/fresh-launch-polish/word-to-pdf-renders/\`. Layout and formatting fidelity against LibreOffice's rendering of the same .docx is in the section *Fidelity* below.
 
 | Fixture | Input bytes | Time | PDF bytes | Pages | Pictures | Links | Bookmarks | Recall / order | Checks | Verdict |
 |---|---:|---:|---:|---:|---:|---:|---:|---|---|---|
@@ -150,6 +150,54 @@ ${docxRows
 
 Automated regressions: \`src/lib/processors/word-to-pdf/word-to-pdf.test.ts\` (style chain, list numbering, tables, headers/footers and fields, special characters, error files, line breaking, alignment, page breaks, keep-with-next, footer page numbers, font glyph padding, end-to-end PDFs checked with pdf.js) and \`e2e/word-to-pdf.spec.ts\` (copy, header/footer page numbers, text, pictures, continue-to-compress, error files, no upload; desktop + mobile).
 `;
+
+// Fidelity: layout, formatting and visual comparison against the source (qa/FIDELITY_AUDIT.md has the method).
+const fidAll = load("fid-all-final");
+const FIDSETS = [
+  ["PDF → Word", () => fidAll.filter((r) => r.tool === "PDF → Word fidelity")],
+  ["PDF → Word — mobile", () => load("fid-p2w-m-final")],
+  ["Word → PDF", () => fidAll.filter((r) => r.tool === "Word → PDF fidelity")],
+  ["Word → PDF — mobile", () => load("fid-w2p-m-final")],
+  ["Round trips", () => fidAll.filter((r) => r.tool.startsWith("Round trip"))],
+  ["Other tools (visual)", () => load("fid-tools-all-final")],
+];
+const fidTotals = { scenarios: 0, pass: 0, limited: 0, fail: 0 };
+const fidSummary = [];
+const fidRows = [];
+for (const [title, get] of FIDSETS) {
+  const rows = get().filter((r) => !/console errors|third-party/.test(r.test));
+  const file = title.startsWith("Other") ? "fid-tools" : "fid";
+  if (!rows.length) {
+    fidSummary.push(`| ${title} | — | — | — | — |`);
+    continue;
+  }
+  const c = { pass: 0, limited: 0, fail: 0 };
+  for (const r of rows) c[r.verdict.toLowerCase()]++;
+  fidTotals.scenarios += rows.length;
+  fidTotals.pass += c.pass;
+  fidTotals.limited += c.limited;
+  fidTotals.fail += c.fail;
+  fidSummary.push(`| ${title} | ${rows.length} | ${c.pass} | ${c.limited} | ${c.fail} |`);
+  if (file.startsWith("fid-tools")) continue;
+  for (const r of rows) {
+    const m = r.metrics ?? {};
+    fidRows.push(`| ${esc(r.tool.replace(" fidelity", ""))} | ${esc(r.test)} | ${r.text ?? "—"} | ${r.layout ?? "—"} | ${r.formatting ?? "—"} | ${r.tables ?? "—"} | ${r.images ?? "—"} | ${m.srcPages ?? "?"}/${m.outPages ?? "?"} | ${m.textRecall ?? "—"} | ${m.posMedianPt ?? "—"} | ${m.within12pt ?? "—"} | ${m.lineKept ?? "—"} | **${r.verdict}** |`);
+  }
+}
+const fidSection = `## Fidelity (layout, formatting, visuals)
+
+Text preservation alone isn't the bar: every conversion is also compared with its source for layout and formatting. Method, thresholds and every visual diff: \`qa/FIDELITY_AUDIT.md\` and \`qa/fidelity/\`. PDF ↔ Word documents are rendered by LibreOffice 26.2.6 (portable, QA only — never part of the product) and compared word by word with MuPDF (\`qa/validate/layoutdiff.py\`); the other tools are compared pixel by pixel (\`qa/validate/visdiff.py\`).
+
+| Area | Scenarios | PASS | LIMITED | FAIL |
+|---|---:|---:|---:|---:|
+${fidSummary.join("\n")}
+| **All** | **${fidTotals.scenarios}** | **${fidTotals.pass}** | **${fidTotals.limited}** | **${fidTotals.fail}** |
+
+| Direction | Document | Text | Layout | Formatting | Tables | Images | Pages src/out | Recall % | Median shift pt | Within 12 pt % | Lines kept % | Overall |
+|---|---|---|---|---|---|---|---|---:|---:|---:|---:|---|
+${fidRows.join("\n")}
+`;
+fs.writeFileSync(path.join(EV, "fid-totals.json"), JSON.stringify(fidTotals, null, 1));
 
 const md = `# Full scenario acceptance — fresh launch
 
@@ -189,6 +237,7 @@ PSNR/SSIM compare the output with the original — PDFs as the worst of their fi
 
 ${wordSection}
 ${docxSection}
+${fidSection}
 ## Fixtures
 
 \`qa/fresh-scenario-fixtures/\` (built by \`node qa/scripts/fs-fixtures.mjs\`, described in its README). Plus the user-supplied scan \`TheFileConvert_Scanned_OCR_Test.pdf\` (3,982,736 bytes), read in place; the editor/mobile/privacy scripts also use the first-launch set in \`qa-fixtures/fresh/\`.

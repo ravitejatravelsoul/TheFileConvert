@@ -19,11 +19,11 @@
   "tool": "Compress Image",
   "test": "mobile: custom 300 KB",
   "verdict": "PASS",
-  "output": 245259,
+  "output": 121301,
   "integrity": [
    {
     "file": "m-cimg-FL-IMG-01-large-compressed.jpg",
-    "bytes": 245259,
+    "bytes": 121301,
     "ok": true,
     "kind": "jpeg",
     "w": 1252,
@@ -57,7 +57,7 @@
   "integrity": [
    {
     "file": "m-merge-merged.pdf",
-    "bytes": 3691,
+    "bytes": 3692,
     "ok": true,
     "kind": "pdf",
     "pages": 9

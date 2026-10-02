@@ -1,5 +1,5 @@
 import { PDFDocument } from "pdf-lib";
-import { browserFontLoader, loadFonts, type FontLoader } from "./fonts";
+import { browserFontLoader, loadFonts, substitutedFonts, type FontLoader } from "./fonts";
 import { decoratePages, layoutDocument, type LayoutEnv } from "./layout";
 import { MESSAGES, WordToPdfError, analyzeDocx, parseDocx } from "./parse";
 import { renderPdf, type ImageDecoder } from "./render";
@@ -89,6 +89,11 @@ export async function convertWordToPdf(
 
   const notes: string[] = [];
   if (rendered.unsupportedPictures) notes.push(`${rendered.unsupportedPictures === 1 ? "1 picture is" : `${rendered.unsupportedPictures} pictures are`} in a format that can't be drawn here (such as EMF), so ${rendered.unsupportedPictures === 1 ? "it's" : "they're"} shown as an empty frame.`);
+  const similar = substitutedFonts(model);
+  if (similar.length) {
+    const names = similar.length <= 2 ? similar.join(" and ") : `${similar.slice(0, 2).join(", ")} and ${similar.length - 2} more`;
+    notes.push(`${names} ${similar.length === 1 ? "isn't" : "aren't"} available here, so ${similar.length === 1 ? "it's" : "they're"} drawn with a similar font. Lines may break in slightly different places than in Word.`);
+  }
   if (fonts.missing.size) notes.push(`Some characters (${[...fonts.missing].slice(0, 8).join(" ")}) have no font available here and appear as empty boxes.`);
   if (model.stats.textBoxes) notes.push("Text boxes are placed as ordinary paragraphs next to where they're anchored.");
   if (model.stats.equations) notes.push("Equations are shown as plain text.");

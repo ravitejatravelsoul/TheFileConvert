@@ -1,6 +1,6 @@
 import { buildDocx, verifyDocx } from "./docx";
 import { extractPages, PdfToWordError, type Progress } from "./extract";
-import { documentStats, layoutPage, type PageLayout } from "./layout";
+import { documentStats, findHeadersFooters, layoutPage, type PageLayout } from "./layout";
 
 export { analyzePdf, PdfToWordError, type PdfAnalysis, type Progress } from "./extract";
 
@@ -18,8 +18,9 @@ export async function convertPdfToWord(file: File, options: { ocrLang?: string; 
   const inputs = await extractPages(file, options.ocrLang ?? "eng", options.onProgress ?? (() => {}));
   const stats = documentStats(inputs);
   const listKeys = { next: 1 };
-  const layouts: PageLayout[] = inputs.map((p) => layoutPage(p, stats, listKeys));
-  const bytes = await buildDocx(layouts, { title: file.name.replace(/\.pdf$/i, ""), bodySize: stats.bodySize });
+  const bands = findHeadersFooters(inputs);
+  const layouts: PageLayout[] = inputs.map((p, i) => layoutPage(p, stats, listKeys, bands[i]));
+  const bytes = await buildDocx(layouts, { title: file.name.replace(/\.pdf$/i, ""), bodySize: stats.bodySize, bodyFont: stats.bodyFont });
   // Never hand over a broken document.
   const problems = await verifyDocx(bytes);
   if (problems.length) throw new PdfToWordError("The Word document didn't pass our file check, so it wasn't saved. Please try again.");

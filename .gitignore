@@ -62,3 +62,10 @@ next-env.d.ts
 /qa/evidence/fresh/*.log
 /qa/review/fresh-launch-polish/pdf-to-word-renders/*.html
 /qa/review/fresh-launch-polish/pdf-to-word-renders/REAL*
+# fidelity audit: regenerated work files and corpus (qa/scripts/fid-corpus.py + LibreOffice); renders of the
+# user's own scan never leave this machine
+/qa/fidelity/_work/
+/qa/fidelity/corpus/
+/qa/fidelity/**/_private/
+/.tmp-fid/
+__pycache__/
