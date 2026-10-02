@@ -6,6 +6,8 @@ import { wrapText, lineBaselineY, sanitizeForFont } from "./textLayout";
 import { arrowHead, drawingPdfPoints, lineEndpoints, annotationLineThickness } from "./shapeGeometry";
 import { DESCENT_SHARE } from "./nativeText";
 import { contentFrame } from "./contentFrame";
+import { correctionsInLayer, drawOcrTextLayer, type Rect } from "./searchLayer";
+import type { OcrPageResult } from "@/lib/processors/ocr";
 import { loadPdfForEditing } from "@/lib/pdf/load";
 
 export class EditorExportError extends Error {}
@@ -147,7 +149,11 @@ async function drawObject(
   obj: EditorObject,
   doc: PDFDocument,
   fonts: Fonts,
-  imageCache: Map<string, unknown>
+  imageCache: Map<string, unknown>,
+  /** Corrections whose text is already in the page's OCR text layer (no second searchable run). */
+  inTextLayer: Set<EditorObject> = new Set(),
+  /** Filled with the corrections drawn as visible vector text (already searchable as they are). */
+  drawnAsText: Set<EditorObject> = new Set()
 ): Promise<void> {
   switch (obj.type) {
     case "native-text-replacement": {
@@ -214,6 +220,7 @@ async function drawObject(
           try {
             const at = frame.toPdf(0, 0);
             page.drawText(obj.newText, { x: at.x, y: at.y, size, font, color: toPdfLibColor(obj.textColor), rotate: rot });
+            drawnAsText.add(obj);
           } catch {
             // A character outside Helvetica's supported encoding shouldn't fail the whole
             // export — the region still shows the patch/original scan, just without
@@ -223,12 +230,13 @@ async function drawObject(
       }
 
       // Keep the page searchable after a correction either way: an invisible run with the
-      // *full* corrected word, same technique buildSearchablePdf uses. Positioned/sized from
+      // *full* corrected word — unless the page's OCR text layer already carries it (searchLayer.ts),
+      // which would make the word appear twice in a search. Positioned/sized from
       // searchAnchor (the whole word's own box) rather than (obj.x, obj.y, obj.width,
       // obj.height) — since a micro-edit's visible patch is now tight to just the changed
       // characters, sizing the invisible run to that same tiny box would squeeze the whole
       // word's search text into it instead of the word's actual full span.
-      if (obj.newText.trim()) {
+      if (obj.newText.trim() && !inTextLayer.has(obj) && !drawnAsText.has(obj)) {
         const anchorFrame = contentFrame(obj.searchAnchor ?? obj, obj.rotation);
         try {
           const size = fitOcrReplacementFontSize(fonts.regular, obj.newText, anchorFrame, obj.fontSize);
@@ -354,7 +362,32 @@ async function drawObject(
   void imageCache; // reserved for future de-duplication of repeated images; not needed yet
 }
 
-export async function exportEditorDocument(doc: EditorDocument): Promise<Blob> {
+export interface ExportOptions {
+  /** Recognised text per page id: those pages get an invisible, searchable text layer. */
+  ocrResultsByPage?: Record<string, OcrPageResult | undefined>;
+  /** Where a source page already has real text (PDF space). Defaults to reading it with pdf.js. */
+  nativeTextBoxes?: (file: File, pageIndex: number) => Promise<Rect[]>;
+}
+
+/** The boxes of a page's own (native) text, read with pdf.js; none if the page can't be read. */
+async function pdfjsTextBoxes(file: File, pageIndex: number): Promise<Rect[]> {
+  try {
+    const { loadPdfJsDocument } = await import("@/lib/processors/pdfjs-utils");
+    const page = await (await loadPdfJsDocument(file)).getPage(pageIndex + 1);
+    const content = await page.getTextContent();
+    const boxes: Rect[] = [];
+    for (const it of content.items) {
+      if (!("str" in it) || !it.str.trim()) continue;
+      const [, , c, d, e, f] = it.transform;
+      boxes.push({ x: e, y: f, width: Math.max(1, it.width), height: Math.max(1, Math.hypot(c, d)) });
+    }
+    return boxes;
+  } catch {
+    return [];
+  }
+}
+
+export async function exportEditorDocument(doc: EditorDocument, options: ExportOptions = {}): Promise<Blob> {
   if (doc.pages.length === 0) {
     throw new EditorExportError("There are no pages to export.");
   }
@@ -394,8 +427,18 @@ export async function exportEditorDocument(doc: EditorDocument): Promise<Blob> {
     reconnectFormFields(out, copiedPage, reconnectedFieldRefs);
 
     const objectsForPage = doc.objects.filter((o) => o.pageId === page.id);
+    // A recognised scan: its words become searchable text (corrected words with their new text).
+    const ocr = options.ocrResultsByPage?.[page.id];
+    const corrections = objectsForPage.filter((o): o is Extract<EditorObject, { type: "ocr-text-replacement" }> => o.type === "ocr-text-replacement");
+    const inTextLayer: Set<EditorObject> = ocr ? correctionsInLayer(ocr, corrections) : new Set();
+    const drawnAsText = new Set<EditorObject>();
     for (const obj of objectsForPage) {
-      await drawObject(copiedPage, obj, out, fonts, imageCache);
+      await drawObject(copiedPage, obj, out, fonts, imageCache, inTextLayer, drawnAsText);
+    }
+    if (ocr) {
+      const sourceFile = doc.sourceFiles[page.sourceFileId];
+      const nativeText = sourceFile ? await (options.nativeTextBoxes ?? pdfjsTextBoxes)(sourceFile, page.sourcePageIndex) : [];
+      drawOcrTextLayer(copiedPage, ocr, corrections, fonts.regular, ocr.rotation ?? effectiveRotation(page), drawnAsText as Set<(typeof corrections)[number]>, nativeText);
     }
 
     if (page.cropBox) {

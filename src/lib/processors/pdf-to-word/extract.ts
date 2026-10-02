@@ -81,8 +81,9 @@ export function wordFontName(pdfName: string): string {
     [/^(LiberationSans|Arimo|Arial|Helvetica)/i, "Arial"],
     [/^(LiberationSerif|Tinos|TimesNewRoman|Times)/i, "Times New Roman"],
     [/^(LiberationMono|Cousine|CourierNew|Courier)/i, "Courier New"],
-    [/^Georgia/i, "Georgia"],
-    [/^Verdana/i, "Verdana"],
+    // Open fonts with the same (or near-same) widths as a Word font map back to it.
+    [/^(Gelasio|Georgia)/i, "Georgia"],
+    [/^(DejaVuSans(?!Mono)|Verdana)/i, "Verdana"],
     [/^Tahoma/i, "Tahoma"],
     [/^Garamond/i, "Garamond"],
     [/^Aptos/i, "Aptos"],

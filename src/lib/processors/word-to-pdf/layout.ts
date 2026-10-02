@@ -830,6 +830,9 @@ export function layoutDocument(model: DocModel, env: LayoutEnv): PageOut[] {
     let fnHeight = 0;
     let atTopByOverflow = false;
     let firstPageOfSection = true;
+    // The lowest point any column of this section reached on the current page: where the next continuous
+    // section starts (the last column filled may be shorter than the others).
+    let regionBottom = 0;
 
     const newPage = () => {
       displayNumber = firstPageOfSection && props.pageNumberStart !== null ? props.pageNumberStart : displayNumber + 1;
@@ -847,6 +850,7 @@ export function layoutDocument(model: DocModel, env: LayoutEnv): PageOut[] {
       prevAfter = 0;
       fnHeight = 0;
       firstPageOfSection = false;
+      regionBottom = top;
     };
 
     const nextColumnOrPage = (overflow: boolean) => {
@@ -859,20 +863,26 @@ export function layoutDocument(model: DocModel, env: LayoutEnv): PageOut[] {
       atTopByOverflow = overflow;
     };
 
+    const boxes = blockBoxes(section.blocks, colW, env);
     const continuous = props.start === "continuous" && page !== null && (page as PageOut).width === props.pageWidth && (page as PageOut).height === props.pageHeight;
     if (continuous && page) {
-      // Same page, new column layout from here down.
+      // Same page, new column layout from here down. A continuous break doesn't reset paragraph spacing:
+      // the gap between the last paragraph above and the first one below is still the larger of the two
+      // (after, before), and it lies above the new columns — every column starts below it, and the first
+      // paragraph doesn't add its space-before again.
       firstPageOfSection = false;
       const p = page as PageOut;
       const band = bandHeights(p.firstOfSection, p.number % 2 === 0);
       top = band.top;
       bottom = band.bottom;
-      y = pages.length ? lastY : top;
+      y = pages.length ? lastY + Math.max(lastAfter, boxes[0]?.before ?? 0) : top;
       regionTop = y;
+      regionBottom = y;
       col = 0;
       placedOnPage = 1;
       placedInColumn = 0;
-      prevAfter = lastAfter;
+      prevAfter = 0;
+      atTopByOverflow = true;
     } else newPage();
 
     const noteHeight = (ids: string[]) => {
@@ -884,7 +894,6 @@ export function layoutDocument(model: DocModel, env: LayoutEnv): PageOut[] {
       return h;
     };
 
-    const boxes = blockBoxes(section.blocks, colW, env);
     const colX = (c: number) => props.margins.left + c * (colW + props.columns.space);
 
     const place = (b: Box, before: number) => {
@@ -901,6 +910,7 @@ export function layoutDocument(model: DocModel, env: LayoutEnv): PageOut[] {
         for (const id of b.footnotes) if (!p.footnotes.includes(id)) p.footnotes.push(id);
       }
       y = top0 + b.h;
+      regionBottom = Math.max(regionBottom, y);
       prevAfter = b.after;
       placedOnPage++;
       placedInColumn++;
@@ -985,7 +995,7 @@ export function layoutDocument(model: DocModel, env: LayoutEnv): PageOut[] {
       place(b, before);
       fnHeight += noteH;
     }
-    lastY = y;
+    lastY = Math.max(y, regionBottom);
     lastAfter = prevAfter;
   });
   return pages;

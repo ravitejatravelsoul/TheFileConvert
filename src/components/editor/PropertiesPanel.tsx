@@ -553,7 +553,8 @@ function WholeDocumentTools({ api }: { api: EditorWorkspaceApi }) {
    * session — this is how whole-document operations (which reuse the standalone
    * processors, not movable objects) compose with everything already done in-session. */
   async function bakeThenReload(transform: (file: File) => Promise<Blob>) {
-    const currentBlob = await exportEditorDocument(api.state.doc);
+    // Recognised text goes along as an invisible layer, so the baked file stays searchable.
+    const currentBlob = await exportEditorDocument(api.state.doc, { ocrResultsByPage: api.state.ocrResultsByPage });
     const currentFile = new File([currentBlob], "document.pdf", { type: "application/pdf" });
     const transformed = await transform(currentFile);
     await api.openFile(new File([transformed], "document.pdf", { type: "application/pdf" }));

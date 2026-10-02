@@ -1,7 +1,5 @@
-import { savePdfChecked } from "@/lib/pdf/save";
 import { loadPdfJsDocument, getPageTextContent, PdfRenderError } from "./pdfjs-utils";
 import type { PageViewport } from "pdfjs-dist";
-import { EncryptedPdfError, loadPdfForEditing } from "@/lib/pdf/load";
 
 export class OcrError extends Error {}
 
@@ -82,6 +80,9 @@ export interface OcrPageResult {
    * searchable-PDF text layer — drawing whole lines instead of individual words keeps
    * multi-word phrase search working in the exported PDF. */
   lines: OcrLine[];
+  /** The rotation (degrees) the page was read at — its display rotation then. Text runs that way in the
+   * page's unrotated space, so the hidden text layer is turned the same way (see searchLayer.ts). */
+  rotation?: number;
   meanConfidence: number;
   lowConfidenceWordCount: number;
 }
@@ -269,6 +270,7 @@ export async function createOcrSession(langCode: string): Promise<OcrSession> {
         lines,
         meanConfidence,
         lowConfidenceWordCount,
+        rotation: rotate,
       };
     },
 
@@ -278,62 +280,6 @@ export async function createOcrSession(langCode: string): Promise<OcrSession> {
       await worker.terminate();
     },
   };
-}
-
-// ---------------------------------------------------------------------------
-// Searchable PDF export
-// ---------------------------------------------------------------------------
-
-/** Adds an invisible, positioned text layer over OCR'd pages so the exported PDF becomes
- * searchable/selectable while looking pixel-identical to the original scan. */
-export async function buildSearchablePdf(file: File, results: OcrPageResult[]): Promise<Blob> {
-  const { StandardFonts } = await import("pdf-lib");
-  const bytes = await file.arrayBuffer();
-
-  let doc;
-  try {
-    doc = await loadPdfForEditing(bytes);
-  } catch (e) {
-    if (e instanceof EncryptedPdfError) throw new OcrError(e.message);
-    throw new OcrError("We couldn't read this PDF to add the searchable text layer.");
-  }
-
-  const font = await doc.embedFont(StandardFonts.Helvetica);
-
-  for (const result of results) {
-    if (result.pageIndex >= doc.getPageCount()) continue;
-    const page = doc.getPage(result.pageIndex);
-    for (const line of result.lines) {
-      if (line.pdfBox.height <= 0 || line.pdfBox.width <= 0) continue;
-
-      // Size primarily so the invisible run's width matches the real line's width (helps
-      // drag-to-select hit-testing in PDF readers), clamped against a height-based estimate
-      // so a single short/wide character can't blow up to an absurd size.
-      const heightEstimate = line.pdfBox.height * 0.85;
-      let fontSize = heightEstimate;
-      try {
-        const naturalWidthAtSize1 = font.widthOfTextAtSize(line.text, 1);
-        if (naturalWidthAtSize1 > 0) {
-          const widthEstimate = line.pdfBox.width / naturalWidthAtSize1;
-          fontSize = Math.min(Math.max(widthEstimate, heightEstimate * 0.5), heightEstimate * 2);
-        }
-        page.drawText(line.text, {
-          x: line.pdfBox.x,
-          y: line.pdfBox.y,
-          size: Math.max(1, fontSize),
-          font,
-          opacity: 0,
-        });
-      } catch {
-        // A character outside this font's supported encoding (stray OCR noise, an
-        // unsupported language's glyphs) shouldn't take down the whole export — that one
-        // line just doesn't get a searchable layer.
-      }
-    }
-  }
-
-  const outBytes = await savePdfChecked(doc);
-  return new Blob([outBytes as BlobPart], { type: "application/pdf" });
 }
 
 // ---------------------------------------------------------------------------

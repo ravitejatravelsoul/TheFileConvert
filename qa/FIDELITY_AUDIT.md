@@ -9,9 +9,12 @@ they are not collapsed into a single PASS.
 
 ## Verdict
 
-**PARTIAL.** PDF → Word, the tools that copy or edit pages, compression and the converters now meet the
-fidelity contract for supported cases. Word → PDF meets it on 10 of 12 realistic documents; the other two
-(multi-column documents) still differ noticeably from LibreOffice's rendering — see *Unresolved*.
+**READY FOR FINAL USER REVIEW** (final closure, after commit `c277426`). PDF → Word, Word → PDF, round
+trips, compression, the converters, page tools, the editor and OCR meet the fidelity contract for supported
+cases; the remaining differences are documented as LIMITED with their cause. Exported OCR scans are now
+searchable. No Microsoft Word reference render is available on this machine: "Microsoft Word reference
+unavailable" — the reference throughout is LibreOffice 26.2.6, and where Word and LibreOffice may disagree
+this report says so instead of claiming certainty.
 
 Everything below was measured on the local **production build** (`next build && next start`, Next.js 16.3.8)
 of the final code, desktop and Pixel 7 touch emulation. "Before" is the same harness run against the baseline
@@ -21,8 +24,8 @@ build `f5a76769`.
 |---|---:|---|---|
 | PDF → Word (12 realistic + 13 fixtures) | 25 | 4 / 3 / 18 | **22 / 3 / 0** |
 | PDF → Word — mobile | 25 | — | **22 / 3 / 0** |
-| Word → PDF (12 realistic) | 12 | 4 / 1 / 7 | **10 / 0 / 2** |
-| Word → PDF — mobile | 12 | — | **10 / 0 / 2** |
+| Word → PDF (12 realistic) | 12 | 4 / 1 / 7 | **11 / 1 / 0** |
+| Word → PDF — mobile | 12 | — | **11 / 1 / 0** |
 | Round trips (5 documents × 2 directions) | 10 | 0 / 0 / 10 | **7 / 3 / 0** |
 | Compress PDF | 9 | 9 / 0 / 0 | **9 / 0 / 0** |
 | Compress Image | 8 | 1 / 6 / 1 | **1 / 7 / 0** |
@@ -31,10 +34,9 @@ build `f5a76769`.
 | Images → PDF | 5 | 4 / 1 / 0 | **4 / 1 / 0** |
 | Merge / Split / Organize | 8 | 8 / 0 / 0 | **8 / 0 / 0** |
 | PDF Editor (one operation per export) | 10 | 10 / 0 / 0 | **10 / 0 / 0** |
-| OCR | 4 | 4 / 0 / 0 | **4 / 0 / 0** |
-| **All fidelity scenarios** | **144** | | **122 / 18 / 4** |
-
-(The four FAILs are the two Word → PDF documents below, desktop and mobile.)
+| OCR (recognition) | 4 | 4 / 0 / 0 | **4 / 0 / 0** |
+| OCR searchable export (new) | 6 | — (not searchable) | **6 / 0 / 0** |
+| **All fidelity scenarios** | **150** | | **130 / 20 / 0** |
 
 ### PDF → Word — per document
 
@@ -69,10 +71,31 @@ LIMITED, with the reason:
 | Document | Text | Layout | Formatting | Tables | Images | Overall | Median shift (pt) | Within 12 pt % |
 |---|---|---|---|---|---|---|---:|---:|
 | resume, invoice, letter, bank-statement, application-form, transcript, formatting, long-report, table-report, image-heavy | PASS | PASS | PASS | PASS / n/a | PASS / n/a | **PASS ×10** | 0.6–2.8 | 100 |
-| brochure | PASS | PASS | PASS | **FAIL** | PASS | **FAIL** | 3.0 | 85.1 |
-| report-two-column | PASS | **FAIL** | PASS | n/a | PASS | **FAIL** | 36.0 | 28.8 |
+| report-two-column (Georgia) | PASS | PASS | PASS | n/a | PASS | **PASS** (was FAIL) | 2.4 | 100 |
+| brochure (2 columns, Calibri) | PASS | PASS | PASS | LIMITED | PASS | **LIMITED** (was FAIL) | 2.9 | 100 |
 
 Text is 100 % on every document; every page count matches.
+
+**Georgia two-column report** (`qa/validate/colmeasure.py`, column region only):
+
+| | Before (Liberation Serif) | After (Gelasio + Georgia's line metrics) | Reference |
+|---|---|---|---|
+| Lines that break where the reference breaks — column 1 / column 2 | 21 / 36 · 7 / 16 | **36 / 36 · 16 / 16** | — |
+| Line count — column 1 / column 2 | 36 / 16 | 36 / 16 | 36 / 16 |
+| Column x-range (pt) | 57.6–300.9 · 294.9–554.4 | 57.6–300.9 · 294.9–554.4 | 57.7–300.8 · 294.8–554.3 |
+| Column start (pt from top) | 109.6 | 109.2 | 108.4 |
+| Pages | 1 | 1 | 1 |
+| Median word shift / overall | 36 pt / FAIL | 2.4 pt / PASS | — |
+
+Root cause of the old re-wrap: font metrics only (Liberation Serif is 0.914 of Georgia's width); column
+widths, margins, indents and spacing already matched. Gelasio has Georgia's exact advance widths (measured,
+all four styles), so lines break identically; the remaining ~2 pt is glyph shape/vertical placement.
+
+**Brochure:** column 2 now starts 0.4 pt from the reference (was ~10 pt — our continuous-section spacing,
+fixed: W2P-09) and all 29/29 + 2/2 lines break as in the reference (a kerning measurement bug made one line
+overflow its column — fixed: W2P-08). LIMITED: LibreOffice draws the last table row of column 1 at 13.3 pt while
+its identical rows in column 2 are 20.4 pt, as ours are; nothing in the document shortens that row. Renderer
+behaviour, Microsoft Word reference unavailable.
 
 ### Round trips
 
@@ -103,6 +126,11 @@ Text survives 100 % in every round trip.
   existing text, export without edits: **0.000 % of pixels changed outside the edited area** in every case.
 - **OCR** — 100 % of the ground-truth words recognised on clean, low-resolution, rotated and multi-page scans;
   the exported PDF looks identical to the input (SSIM 1.0).
+- **Searchable OCR export (new)** — clean, low-resolution, rotated (/Rotate 90), mixed native + scanned,
+  3-page and the user's own 2-page scan: 100 % of the recognised words are searchable in the exported PDF, no
+  word appears twice (the mixed page's own text isn't duplicated), a corrected word is found once in its new
+  form and the old form is gone, 0.000 % of pixels changed outside the correction, page counts kept.
+  the exported PDF looks identical to the input (SSIM 1.0).
 
 Visual diffs: `qa/fidelity/pdf-to-word/`, `word-to-pdf/`, `round-trip/` (source | output | overlay, red =
 source only, blue = output only), and `compress-pdf/`, `compress-image/`, `converters/`,
@@ -111,29 +139,23 @@ the baseline build, `final` the current one. Renders of the user's scan stay in 
 
 ## Defects
 
-29 product defects found and fixed during the audit (P2W-01…20, W2P-01…07, IMG-01, SEC-01). Each has a
+33 product defects found and fixed during the audit (P2W-01…20, W2P-01…09, IMG-01, SEC-01, FONT-01, OCR-01). Each has a
 code-review entry in `qa/CODE_REVIEW.md` (root cause, files, risk, tests, validation).
 
 ## Unresolved
 
-1. **Word → PDF, report-two-column — FAIL (font coverage, warned).** Real Georgia is ≈ 10 % wider than the
-   bundled substitute, so lines re-wrap; structure, column split, figure and headings match. The user now sees
-   "Georgia isn't available here, so it's drawn with a similar font…". Fix: bundle metric-compatible open fonts
-   (Gelasio for Georgia, Caladea for Cambria) — a new third-party asset, left for approval.
-2. **Word → PDF, brochure — FAIL (tables metric).** In a continuous two-column section whose second column starts
-   with a table, LibreOffice starts that column 10 pt lower than we do (and indents a picture 9 pt). The DOCX
-   markup gives no indent; which of the two matches Microsoft Word could not be verified here (no Word on this
-   machine), so no renderer-specific change was made.
-3. **OCR export is not searchable.** The editor recognises 100 % of words for correction, but the exported PDF
-   only carries invisible text for *corrected* words; `buildSearchablePdf` exists but is unused. Not promised by
-   the product copy; a gap, not a regression.
+None of the three items left open after `c277426`:
+1. Georgia (and Verdana) re-wrap — fixed with measured, licence-clean stand-ins (FONT-01).
+2. Brochure column start — fixed (W2P-09, W2P-08); one LibreOffice-specific row height documented (LIMITED).
+3. OCR export not searchable — fixed (OCR-01).
 
 ## Known limitations (LIMITED, honest)
 
-Justified text re-wrap in LibreOffice (letter); shaded section bars as paragraphs (application form); a
+Cambria (Caladea, 0.95–0.99 of Cambria's widths), Tahoma (Liberation Sans) and other fonts without an
+exact open match may re-wrap slightly — the user is told; justified text re-wrap in LibreOffice (letter); shaded section bars as paragraphs (application form); a
 picture-layout table as positioned pictures (image-heavy); Compress Image shrinks noisy photos to reach small
 targets (stated in the result); PDF → Word cannot rebuild text effects (shadow, outline) or rotated text inside a
-page; Word → PDF draws fonts without a bundled metric-compatible face with a substitute (now announced).
+page; the brochure's last column-1 table row (LibreOffice-specific, above).
 
 ## Also verified
 

@@ -3,7 +3,7 @@
   "tool": "Privacy",
   "test": "no request carries a body (no uploads) across all 9 tools",
   "verdict": "PASS",
-  "requests": 262,
+  "requests": 263,
   "withBody": []
  },
  {
@@ -46,7 +46,7 @@
    "merge-pdf": 31,
    "split-pdf": 30,
    "organize-pdf": 30,
-   "pdf-editor (OCR + export)": 37
+   "pdf-editor (OCR + export)": 38
   }
  }
 ]

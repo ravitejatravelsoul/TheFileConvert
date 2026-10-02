@@ -160,13 +160,14 @@ const FIDSETS = [
   ["Word → PDF — mobile", () => load("fid-w2p-m-final")],
   ["Round trips", () => fidAll.filter((r) => r.tool.startsWith("Round trip"))],
   ["Other tools (visual)", () => load("fid-tools-all-final")],
+  ["OCR searchable export", () => load("fid-tools-ocrsearch-final")],
 ];
 const fidTotals = { scenarios: 0, pass: 0, limited: 0, fail: 0 };
 const fidSummary = [];
 const fidRows = [];
 for (const [title, get] of FIDSETS) {
   const rows = get().filter((r) => !/console errors|third-party/.test(r.test));
-  const file = title.startsWith("Other") ? "fid-tools" : "fid";
+  const file = title.startsWith("Other") || title.startsWith("OCR") ? "fid-tools" : "fid";
   if (!rows.length) {
     fidSummary.push(`| ${title} | — | — | — | — |`);
     continue;

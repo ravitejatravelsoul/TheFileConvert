@@ -1,0 +1,206 @@
+[
+ {
+  "tool": "OCR searchable export",
+  "test": "clean scan",
+  "verdict": "PASS",
+  "pagesKept": "PASS",
+  "searchable": "PASS",
+  "noDuplicates": "PASS",
+  "correctedFound": "PASS",
+  "oldGone": "PASS",
+  "visual": "PASS",
+  "duplicates": [],
+  "searchablePct": 100,
+  "wordsExpected": 45,
+  "wordsInExport": 45,
+  "edit": {
+   "word": "smith",
+   "to": "Rivera",
+   "newFound": 1,
+   "oldLeft": 0,
+   "oldBefore": 1
+  },
+  "changedOutsidePct": 0,
+  "minSsim": 0.9994,
+  "pages": "1/1",
+  "integrity": [
+   {
+    "file": "fid-ocrsearch-OCR-A-OCR-A-clean-300dpi-edited.pdf",
+    "bytes": 862333,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 1
+   }
+  ]
+ },
+ {
+  "tool": "OCR searchable export",
+  "test": "low-resolution scan",
+  "verdict": "PASS",
+  "pagesKept": "PASS",
+  "searchable": "PASS",
+  "noDuplicates": "PASS",
+  "correctedFound": "PASS",
+  "oldGone": "PASS",
+  "visual": "PASS",
+  "duplicates": [],
+  "searchablePct": 100,
+  "wordsExpected": 45,
+  "wordsInExport": 45,
+  "edit": {
+   "word": "smith",
+   "to": "Rivera",
+   "newFound": 1,
+   "oldLeft": 0,
+   "oldBefore": 1
+  },
+  "changedOutsidePct": 0,
+  "minSsim": 0.9993,
+  "pages": "1/1",
+  "integrity": [
+   {
+    "file": "fid-ocrsearch-OCR-B-OCR-B-low-res-100dpi-edited.pdf",
+    "bytes": 114279,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 1
+   }
+  ]
+ },
+ {
+  "tool": "OCR searchable export",
+  "test": "rotated scan (/Rotate 90)",
+  "verdict": "PASS",
+  "pagesKept": "PASS",
+  "searchable": "PASS",
+  "noDuplicates": "PASS",
+  "correctedFound": "n/a",
+  "oldGone": "n/a",
+  "visual": "PASS",
+  "duplicates": [],
+  "searchablePct": 100,
+  "wordsExpected": 45,
+  "wordsInExport": 45,
+  "edit": null,
+  "changedOutsidePct": 0,
+  "minSsim": 1,
+  "pages": "1/1",
+  "integrity": [
+   {
+    "file": "fid-ocrsearch-OCR-D-OCR-D-rotated-edited.pdf",
+    "bytes": 865408,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 1
+   }
+  ]
+ },
+ {
+  "tool": "OCR searchable export",
+  "test": "mixed native + scanned",
+  "verdict": "PASS",
+  "pagesKept": "PASS",
+  "searchable": "PASS",
+  "noDuplicates": "PASS",
+  "correctedFound": "n/a",
+  "oldGone": "n/a",
+  "visual": "PASS",
+  "duplicates": [],
+  "searchablePct": 100,
+  "wordsExpected": 45,
+  "wordsInExport": 48,
+  "edit": null,
+  "changedOutsidePct": 0,
+  "minSsim": 1,
+  "pages": "1/1",
+  "integrity": [
+   {
+    "file": "fid-ocrsearch-OCR-F-OCR-F-mixed-native-scan-edited.pdf",
+    "bytes": 861251,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 1
+   }
+  ]
+ },
+ {
+  "tool": "OCR searchable export",
+  "test": "multi-page scan",
+  "verdict": "PASS",
+  "pagesKept": "PASS",
+  "searchable": "PASS",
+  "noDuplicates": "PASS",
+  "correctedFound": "PASS",
+  "oldGone": "PASS",
+  "visual": "PASS",
+  "duplicates": [],
+  "searchablePct": 100,
+  "wordsExpected": 64,
+  "wordsInExport": 64,
+  "edit": {
+   "word": "smith",
+   "to": "Rivera",
+   "newFound": 1,
+   "oldLeft": 0,
+   "oldBefore": 1
+  },
+  "changedOutsidePct": 0,
+  "minSsim": 0.9994,
+  "pages": "3/3",
+  "integrity": [
+   {
+    "file": "fid-ocrsearch-OCR-G-OCR-G-multipage-edited.pdf",
+    "bytes": 2435943,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 3
+   }
+  ]
+ },
+ {
+  "tool": "OCR searchable export",
+  "test": "user's real scan",
+  "verdict": "PASS",
+  "pagesKept": "PASS",
+  "searchable": "PASS",
+  "noDuplicates": "PASS",
+  "correctedFound": "PASS",
+  "oldGone": "PASS",
+  "visual": "PASS",
+  "duplicates": [],
+  "searchablePct": 100,
+  "wordsExpected": 91,
+  "wordsInExport": 91,
+  "edit": {
+   "word": "official",
+   "to": "Rivera",
+   "newFound": 1,
+   "oldLeft": 0,
+   "oldBefore": 1
+  },
+  "changedOutsidePct": 0,
+  "minSsim": 0.9974,
+  "pages": "2/2",
+  "integrity": [
+   {
+    "file": "fid-ocrsearch-user-TheFileConvert_Scanned_OCR_Test-edited.pdf",
+    "bytes": 3962283,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 2
+   }
+  ]
+ },
+ {
+  "tool": "Fidelity tools",
+  "test": "no third-party requests",
+  "verdict": "PASS",
+  "leaked": []
+ },
+ {
+  "tool": "Fidelity tools",
+  "test": "console errors (all steps)",
+  "verdict": "PASS",
+  "count": 0
+ }
+]

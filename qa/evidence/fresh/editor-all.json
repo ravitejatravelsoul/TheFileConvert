@@ -45,11 +45,11 @@
    "originalLine11Intact": true,
    "crop": true
   },
-  "output": 657614,
+  "output": 657613,
   "integrity": [
    {
     "file": "editor-native-FL-PDF-07-native-text-edited.pdf",
-    "bytes": 657614,
+    "bytes": 657613,
     "ok": true,
     "kind": "pdf",
     "pages": 2
@@ -58,7 +58,7 @@
  },
  {
   "tool": "PDF Editor",
-  "test": "scanned session (condensed): OCR 4.5s, 12/20/2026→12/20/2028, Jordan→Morgan, Consultation→Consultations, add text, highlight, draw, signature, export, reopen",
+  "test": "scanned session (condensed): OCR 6.0s, 12/20/2026→12/20/2028, Jordan→Morgan, Consultation→Consultations, add text, highlight, draw, signature, export, reopen",
   "verdict": "PASS",
   "edits": [
    {
@@ -83,13 +83,13 @@
     "forced": false
    }
   ],
-  "textLayer": "12/20/2028  Morgan  Consultations  Checked on device",
+  "textLayer": "Checked on device  Name: Morgan Smith  Date: 12/20/2028  Service: Consultations  Amount: 1250.00  Thank you for your visit. Reference number 4410. Thank you for your visit. Reference number 4413. Than",
   "changedPct": 1.19,
   "pages": "1/1",
   "integrity": [
    {
     "file": "editor-scan-condensed-FL-PDF-08b-scanned-condensed-edited.pdf",
-    "bytes": 728683,
+    "bytes": 729246,
     "ok": true,
     "kind": "pdf",
     "pages": 1
@@ -98,7 +98,7 @@
  },
  {
   "tool": "PDF Editor",
-  "test": "scanned session (fixture): OCR 6.1s, 12/20/2026→12/20/2028, Jordan→Morgan, Consultation→Consultations, add text, highlight, draw, signature, export, reopen",
+  "test": "scanned session (fixture): OCR 7.6s, 12/20/2026→12/20/2028, Jordan→Morgan, Consultation→Consultations, add text, highlight, draw, signature, export, reopen",
   "verdict": "PASS",
   "edits": [
    {
@@ -123,13 +123,13 @@
     "forced": false
    }
   ],
-  "textLayer": "12/20/2028  Morgan  Consultations  Checked on device",
+  "textLayer": "Checked on device  Name: Morgan Smith  Date: 12/20/2028  Service: Consultations  Amount: 1250.00  Thank you for your visit. Reference number 4410. Thank you for your visit. Reference number 4413. Than",
   "changedPct": 1.27,
   "pages": "1/1",
   "integrity": [
    {
     "file": "editor-scan-fixture-FL-PDF-08-scanned-text-edited.pdf",
-    "bytes": 765238,
+    "bytes": 765809,
     "ok": true,
     "kind": "pdf",
     "pages": 1
@@ -138,7 +138,7 @@
  },
  {
   "tool": "PDF Editor",
-  "test": "scanned session (user-supplied): OCR 5.0s, 12/20/2026→12/20/2028, add text, highlight, draw, signature, export, reopen",
+  "test": "scanned session (user-supplied): OCR 5.6s, 12/20/2026→12/20/2028, add text, highlight, draw, signature, export, reopen",
   "verdict": "PASS",
   "edits": [
    {
@@ -149,13 +149,13 @@
     "forced": false
    }
   ],
-  "textLayer": "12/20/2028  Checked on device",
-  "changedPct": 0.96,
+  "textLayer": "Checked on device  OFFICIAL RECORD - SCANNED COPY  Student Information  Name: John Smith  This certifies that the requirements for the award of the degree  VALID FROM 02/08/2026 UNTIL 12/20/2028  Acco",
+  "changedPct": 1.02,
   "pages": "2/2",
   "integrity": [
    {
     "file": "editor-scan-user-supplied-TheFileConvert_Scanned_OCR_Test-edited.pdf",
-    "bytes": 3959980,
+    "bytes": 3963324,
     "ok": true,
     "kind": "pdf",
     "pages": 2

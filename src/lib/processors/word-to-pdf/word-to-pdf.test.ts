@@ -7,7 +7,7 @@ import fontkit from "@pdf-lib/fontkit";
 import { PDFDocument } from "pdf-lib";
 import * as pdfjs from "pdfjs-dist/legacy/build/pdf.mjs";
 import { convertWordToPdf, WordToPdfError } from "./index";
-import { parseDocx } from "./parse";
+import { familyFor, parseDocx } from "./parse";
 import { padGlyphs, substitutedFonts, verticalMetrics, type FaceKey, type FontApi } from "./fonts";
 import { decoratePages, layoutDocument } from "./layout";
 import type { Block, Border, Cell, DocModel, Paragraph, Row, RunStyle, Table } from "./model";
@@ -207,7 +207,8 @@ describe("layout (fake metrics: every character 0.5 em wide)", () => {
       return { ...para(text), inlines: [{ kind: "text", text, style: s }], markStyle: s };
     };
     expect(substitutedFonts(model([run("Calibri", "a".repeat(400)), run("Arial", "b".repeat(100))]))).toEqual([]);
-    expect(substitutedFonts(model([run("Georgia", "a".repeat(400)), run("Cambria", "b".repeat(100)), run("Calibri", "c".repeat(100))]))).toEqual(["Georgia", "Cambria"]);
+    // Georgia is drawn with Gelasio (identical widths): no notice. Cambria's closest open match isn't exact.
+    expect(substitutedFonts(model([run("Georgia", "a".repeat(400)), run("Cambria", "b".repeat(100)), run("Tahoma", "c".repeat(300))]))).toEqual(["Tahoma", "Cambria"]);
     // A font on a sliver of the text (a symbol, a logo word) isn't worth a notice; symbol fonts never are.
     expect(substitutedFonts(model([run("Calibri", "a".repeat(990)), run("Garamond", "b".repeat(10)), run("Wingdings", "c".repeat(200))]))).toEqual([]);
   });
@@ -234,6 +235,33 @@ describe("layout (fake metrics: every character 0.5 em wide)", () => {
     expect(new Set(pages.flat().filter((t) => /^l\d+$/.test(t.text)).map((t) => t.text)).size).toBe(14);
   });
 
+  it("starts both columns of a continuous section below the spacing between the sections, side by side", () => {
+    const above = para("above", { spaceAfter: 8 });
+    const first = para("left", { spaceBefore: 10 });
+    const second = para("");
+    second.inlines = [{ kind: "break", type: "column", style }, { kind: "text", text: "right", style }];
+    const m = model([above]);
+    const base = m.sections[0].props;
+    m.sections.push({ blocks: [first, second], props: { ...base, start: "continuous", columns: { count: 2, space: 20 } } });
+    const [page] = texts(m);
+    const y = (t: string) => page.find((o) => o.text === t)!.y;
+    expect(y("left") - y("above")).toBeCloseTo(12 + 10, 5); // a line, then max(8 after, 10 before) — not 8 + 10
+    expect(y("right")).toBeCloseTo(y("left"), 5); // column 2 starts level with column 1
+  });
+
+  it("starts the next section below the longest column, not the last one filled", () => {
+    const m = model([]);
+    const base = m.sections[0].props;
+    const long = Array.from({ length: 4 }, (_, i) => para(`L${i}`));
+    const short = para("");
+    short.inlines = [{ kind: "break", type: "column", style }, { kind: "text", text: "R0", style }];
+    m.sections[0] = { blocks: [...long, short], props: { ...base, columns: { count: 2, space: 20 } } };
+    m.sections.push({ blocks: [para("after")], props: { ...base, start: "continuous" } });
+    const [page] = texts(m);
+    const y = (t: string) => page.find((o) => o.text === t)!.y;
+    expect(y("after")).toBeGreaterThan(y("L3"));
+  });
+
   it("prints real page numbers in footers", () => {
     const m = model([para("one"), para("two", { pageBreakBefore: true })]);
     const footer = para("Page ");
@@ -248,6 +276,47 @@ describe("layout (fake metrics: every character 0.5 em wide)", () => {
         .join(""),
     );
     expect(footerText).toEqual(["Page 1 of 2", "Page 2 of 2"]);
+  });
+});
+
+describe("font mapping", () => {
+  it("draws each common Word font with its measured stand-in, and every family is bundled in four styles", () => {
+    const map = Object.fromEntries(["Georgia", "Cambria", "Times New Roman", "Arial", "Calibri", "Courier New", "Verdana", "Tahoma", "Cambria Math", "Calibri Light"].map((f) => [f, familyFor(f)]));
+    expect(map).toEqual({
+      Georgia: "gelasio",
+      Cambria: "caladea",
+      "Times New Roman": "serif",
+      Arial: "sans",
+      Calibri: "carlito",
+      "Courier New": "mono",
+      Verdana: "dejavu",
+      Tahoma: "sans",
+      "Cambria Math": "serif", // not Caladea: it has no math glyphs
+      "Calibri Light": "carlito",
+    });
+    for (const family of new Set(Object.values(map))) for (const v of ["r", "b", "i", "bi"]) expect(fs.existsSync(path.join("public/fonts/word", `${family}-${v}.ttf`)), `${family}-${v}`).toBe(true);
+  });
+});
+
+describe("measuring matches drawing", () => {
+  it("a line is measured exactly as wide as pdf-lib draws it (no kerning on one side only)", async () => {
+    const { loadFonts } = await import("./fonts");
+    // A document with a run in each face, so exactly those faces load (as for a real document).
+    const runStyle = (family: RunStyle["family"], bold: boolean): RunStyle => ({ family, fontName: family, size: 10.5, bold, italic: false, underline: false, strike: false, color: null, highlight: null, vert: null, caps: false, hidden: false });
+    const para = (st: RunStyle): Paragraph => ({ kind: "p", inlines: [{ kind: "text", text: "x", style: st }], markStyle: st, label: null, floats: [], props: { align: "left", indLeft: 0, indRight: 0, indFirst: 0, spaceBefore: 0, spaceAfter: 0, line: { rule: "auto", value: 1 }, keepNext: false, keepLines: false, pageBreakBefore: false, contextualSpacing: false, widowControl: false, tabs: [], borders: {}, shading: null, styleId: "Normal", outline: null } });
+    const sectionProps = { pageWidth: 612, pageHeight: 792, margins: { top: 72, bottom: 72, left: 72, right: 72, header: 36, footer: 36 }, headers: {}, footers: {}, titlePage: false, start: "nextPage" as const, columns: { count: 1, space: 36 }, pageNumberStart: null, pageNumberFormat: "decimal" };
+    const doc: DocModel = { sections: [{ props: sectionProps, blocks: [para(runStyle("carlito", false)), para(runStyle("gelasio", false)), para(runStyle("caladea", true))] }], footnotes: new Map(), media: new Map(), evenAndOddHeaders: false, defaultTab: 36, title: null, stats: { paragraphs: 0, tables: 0, images: 0, textBoxes: 0, equations: 0, rtl: false } };
+    const fonts = await loadFonts(doc, fontLoader);
+    const pdf = await PDFDocument.create();
+    pdf.registerFontkit(fontkit);
+    const text = "The committee agreed to publish the revised travel policy. AVATAR Yo, To Ty";
+    for (const key of ["carlito-r", "gelasio-r", "caladea-b"] as const) {
+      const bytes = await fontLoader(key);
+      const embedded = await pdf.embedFont(bytes, { subset: true });
+      const family = key.split("-")[0] as "carlito" | "gelasio" | "caladea";
+      const measured = fonts.measure(text, { family, bold: key.endsWith("-b"), italic: false, size: 10.5 });
+      expect(measured, key).toBeCloseTo(embedded.widthOfTextAtSize(text, 10.5), 3);
+    }
   });
 });
 

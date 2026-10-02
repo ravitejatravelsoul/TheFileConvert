@@ -1,6 +1,6 @@
 {
- "scenarios": 144,
- "pass": 122,
- "limited": 18,
- "fail": 4
+ "scenarios": 150,
+ "pass": 130,
+ "limited": 20,
+ "fail": 0
 }

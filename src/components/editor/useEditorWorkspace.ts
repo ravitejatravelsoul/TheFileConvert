@@ -22,6 +22,7 @@ import { generateUuidV4 } from "@/lib/id";
 import { classifyPdfPages, createOcrSession, type OcrPageResult, type OcrSession, type PageClassification } from "@/lib/processors/ocr";
 import type { EditorDocument, EditorObject, EditorPage } from "@/lib/editor/types";
 import { effectiveRotation } from "@/lib/editor/types";
+import { applyCorrections } from "@/lib/editor/searchLayer";
 import { validateFileForTool } from "@/lib/security/validators";
 import { getTool } from "@/lib/tools/registry";
 
@@ -493,7 +494,7 @@ export function useEditorWorkspace() {
     setExporting(true);
     setExportError(null);
     try {
-      const blob = await exportEditorDocument(state.doc);
+      const blob = await exportEditorDocument(state.doc, { ocrResultsByPage: state.ocrResultsByPage });
       return blob;
     } catch (e) {
       setExportError(e instanceof EditorExportError || (e instanceof Error && e.name === "OutputIntegrityError") ? e.message : "We couldn't export this PDF.");
@@ -501,7 +502,7 @@ export function useEditorWorkspace() {
     } finally {
       setExporting(false);
     }
-  }, [state.doc]);
+  }, [state.doc, state.ocrResultsByPage]);
 
   // -------------------------------------------------------------- search
 
@@ -514,14 +515,8 @@ export function useEditorWorkspace() {
       // covers, and text added in the editor is searchable too.
       const pageObjects = state.doc.objects.filter((o) => o.pageId === page.id);
       const replacements = pageObjects.filter((o): o is Extract<typeof o, { type: "native-text-replacement" | "ocr-text-replacement" }> => o.type === "native-text-replacement" || o.type === "ocr-text-replacement");
-      const currentText = (text: string, box: { x: number; y: number; width: number; height: number }) => {
-        let out = text;
-        for (const r of replacements) {
-          const overlaps = r.x < box.x + box.width && r.x + r.width > box.x && r.y < box.y + box.height && r.y + r.height > box.y;
-          if (overlaps && r.originalText && out.includes(r.originalText)) out = out.replace(r.originalText, r.newText);
-        }
-        return out;
-      };
+      // The same rule the exported PDF's searchable text layer uses (searchLayer.ts).
+      const currentText = (text: string, box: { x: number; y: number; width: number; height: number }) => applyCorrections(text, box, replacements).text;
       for (const region of state.nativeRegionsByPage[page.id] ?? []) {
         const text = currentText(region.text, region.pdfBox);
         if (text.toLowerCase().includes(q)) matches.push({ pageId: page.id, text, pdfBox: region.pdfBox });

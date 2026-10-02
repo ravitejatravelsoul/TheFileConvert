@@ -4,7 +4,7 @@
   "test": "application-form",
   "verdict": "LIMITED",
   "source": "LibreOffice PDF of the realistic .docx",
-  "ms": 4556,
+  "ms": 2866,
   "text": "PASS",
   "layout": "PASS",
   "formatting": "PASS",
@@ -70,7 +70,7 @@
   "test": "bank-statement",
   "verdict": "PASS",
   "source": "LibreOffice PDF of the realistic .docx",
-  "ms": 2597,
+  "ms": 2177,
   "text": "PASS",
   "layout": "PASS",
   "formatting": "PASS",
@@ -136,7 +136,7 @@
   "test": "brochure",
   "verdict": "PASS",
   "source": "LibreOffice PDF of the realistic .docx",
-  "ms": 2571,
+  "ms": 2823,
   "text": "PASS",
   "layout": "PASS",
   "formatting": "PASS",
@@ -202,7 +202,7 @@
   "test": "formatting",
   "verdict": "PASS",
   "source": "LibreOffice PDF of the realistic .docx",
-  "ms": 3003,
+  "ms": 2803,
   "text": "PASS",
   "layout": "PASS",
   "formatting": "PASS",
@@ -253,7 +253,7 @@
   "integrity": [
    {
     "file": "fid-formatting-final-formatting.docx",
-    "bytes": 6391,
+    "bytes": 6389,
     "ok": true,
     "kind": "docx",
     "pages": 2,
@@ -268,7 +268,7 @@
   "test": "image-heavy",
   "verdict": "LIMITED",
   "source": "LibreOffice PDF of the realistic .docx",
-  "ms": 2724,
+  "ms": 2532,
   "text": "PASS",
   "layout": "PASS",
   "formatting": "PASS",
@@ -319,7 +319,7 @@
   "integrity": [
    {
     "file": "fid-image-heavy-final-image-heavy.docx",
-    "bytes": 34040,
+    "bytes": 34039,
     "ok": true,
     "kind": "docx",
     "pages": 2,
@@ -334,7 +334,7 @@
   "test": "invoice",
   "verdict": "PASS",
   "source": "LibreOffice PDF of the realistic .docx",
-  "ms": 2594,
+  "ms": 2161,
   "text": "PASS",
   "layout": "PASS",
   "formatting": "PASS",
@@ -385,7 +385,7 @@
   "integrity": [
    {
     "file": "fid-invoice-final-invoice.docx",
-    "bytes": 12311,
+    "bytes": 12310,
     "ok": true,
     "kind": "docx",
     "pages": 1,
@@ -400,7 +400,7 @@
   "test": "letter",
   "verdict": "LIMITED",
   "source": "LibreOffice PDF of the realistic .docx",
-  "ms": 2979,
+  "ms": 2952,
   "text": "PASS",
   "layout": "LIMITED",
   "formatting": "PASS",
@@ -466,7 +466,7 @@
   "test": "long-report",
   "verdict": "PASS",
   "source": "LibreOffice PDF of the realistic .docx",
-  "ms": 3146,
+  "ms": 2629,
   "text": "PASS",
   "layout": "PASS",
   "formatting": "PASS",
@@ -517,7 +517,7 @@
   "integrity": [
    {
     "file": "fid-long-report-final-long-report.docx",
-    "bytes": 11502,
+    "bytes": 11501,
     "ok": true,
     "kind": "docx",
     "pages": 11,
@@ -532,7 +532,7 @@
   "test": "report-two-column",
   "verdict": "PASS",
   "source": "LibreOffice PDF of the realistic .docx",
-  "ms": 2597,
+  "ms": 2380,
   "text": "PASS",
   "layout": "PASS",
   "formatting": "PASS",
@@ -598,7 +598,7 @@
   "test": "resume",
   "verdict": "PASS",
   "source": "LibreOffice PDF of the realistic .docx",
-  "ms": 2966,
+  "ms": 2985,
   "text": "PASS",
   "layout": "PASS",
   "formatting": "PASS",
@@ -664,7 +664,7 @@
   "test": "table-report",
   "verdict": "PASS",
   "source": "LibreOffice PDF of the realistic .docx",
-  "ms": 2951,
+  "ms": 2432,
   "text": "PASS",
   "layout": "PASS",
   "formatting": "PASS",
@@ -730,7 +730,7 @@
   "test": "transcript",
   "verdict": "PASS",
   "source": "LibreOffice PDF of the realistic .docx",
-  "ms": 2953,
+  "ms": 3035,
   "text": "PASS",
   "layout": "PASS",
   "formatting": "PASS",
@@ -781,7 +781,7 @@
   "integrity": [
    {
     "file": "fid-transcript-final-transcript.docx",
-    "bytes": 5207,
+    "bytes": 5206,
     "ok": true,
     "kind": "docx",
     "pages": 1,
@@ -796,7 +796,7 @@
   "test": "PDF-WORD-01-simple-text",
   "verdict": "PASS",
   "source": "Chromium-printed / scanned fixture",
-  "ms": 3017,
+  "ms": 2979,
   "text": "PASS",
   "layout": "PASS",
   "formatting": "PASS",
@@ -843,7 +843,7 @@
   "integrity": [
    {
     "file": "fid-PDF-WORD-01-simple-text-final-PDF-WORD-01-simple-text.docx",
-    "bytes": 3805,
+    "bytes": 3804,
     "ok": true,
     "kind": "docx",
     "pages": 1,
@@ -858,7 +858,7 @@
   "test": "PDF-WORD-02-multipage",
   "verdict": "PASS",
   "source": "Chromium-printed / scanned fixture",
-  "ms": 2561,
+  "ms": 2477,
   "text": "PASS",
   "layout": "PASS",
   "formatting": "PASS",
@@ -905,7 +905,7 @@
   "integrity": [
    {
     "file": "fid-PDF-WORD-02-multipage-final-PDF-WORD-02-multipage.docx",
-    "bytes": 4085,
+    "bytes": 4086,
     "ok": true,
     "kind": "docx",
     "pages": 4,
@@ -920,7 +920,7 @@
   "test": "PDF-WORD-03-headings",
   "verdict": "PASS",
   "source": "Chromium-printed / scanned fixture",
-  "ms": 2995,
+  "ms": 2355,
   "text": "PASS",
   "layout": "PASS",
   "formatting": "PASS",
@@ -967,7 +967,7 @@
   "integrity": [
    {
     "file": "fid-PDF-WORD-03-headings-final-PDF-WORD-03-headings.docx",
-    "bytes": 4045,
+    "bytes": 4044,
     "ok": true,
     "kind": "docx",
     "pages": 1,
@@ -982,7 +982,7 @@
   "test": "PDF-WORD-04-bold-italic",
   "verdict": "PASS",
   "source": "Chromium-printed / scanned fixture",
-  "ms": 2383,
+  "ms": 3102,
   "text": "PASS",
   "layout": "PASS",
   "formatting": "PASS",
@@ -1044,7 +1044,7 @@
   "test": "PDF-WORD-05-lists",
   "verdict": "PASS",
   "source": "Chromium-printed / scanned fixture",
-  "ms": 3008,
+  "ms": 2956,
   "text": "PASS",
   "layout": "PASS",
   "formatting": "PASS",
@@ -1091,7 +1091,7 @@
   "integrity": [
    {
     "file": "fid-PDF-WORD-05-lists-final-PDF-WORD-05-lists.docx",
-    "bytes": 3997,
+    "bytes": 3996,
     "ok": true,
     "kind": "docx",
     "pages": 1,
@@ -1106,7 +1106,7 @@
   "test": "PDF-WORD-06-table",
   "verdict": "PASS",
   "source": "Chromium-printed / scanned fixture",
-  "ms": 2948,
+  "ms": 3032,
   "text": "PASS",
   "layout": "PASS",
   "formatting": "PASS",
@@ -1153,7 +1153,7 @@
   "integrity": [
    {
     "file": "fid-PDF-WORD-06-table-final-PDF-WORD-06-table.docx",
-    "bytes": 4043,
+    "bytes": 4042,
     "ok": true,
     "kind": "docx",
     "pages": 1,
@@ -1168,7 +1168,7 @@
   "test": "PDF-WORD-07-images",
   "verdict": "PASS",
   "source": "Chromium-printed / scanned fixture",
-  "ms": 2623,
+  "ms": 2730,
   "text": "PASS",
   "layout": "PASS",
   "formatting": "PASS",
@@ -1230,7 +1230,7 @@
   "test": "PDF-WORD-08-two-column",
   "verdict": "PASS",
   "source": "Chromium-printed / scanned fixture",
-  "ms": 2890,
+  "ms": 2994,
   "text": "PASS",
   "layout": "PASS",
   "formatting": "PASS",
@@ -1277,7 +1277,7 @@
   "integrity": [
    {
     "file": "fid-PDF-WORD-08-two-column-final-PDF-WORD-08-two-column.docx",
-    "bytes": 4050,
+    "bytes": 4049,
     "ok": true,
     "kind": "docx",
     "pages": 2,
@@ -1292,7 +1292,7 @@
   "test": "PDF-WORD-09-scanned",
   "verdict": "PASS",
   "source": "Chromium-printed / scanned fixture",
-  "ms": 7674,
+  "ms": 6617,
   "text": "PASS",
   "layout": "n/a",
   "formatting": "n/a",
@@ -1341,7 +1341,7 @@
   "integrity": [
    {
     "file": "fid-PDF-WORD-09-scanned-final-PDF-WORD-09-scanned.docx",
-    "bytes": 3851,
+    "bytes": 3849,
     "ok": true,
     "kind": "docx",
     "pages": 1,
@@ -1356,7 +1356,7 @@
   "test": "PDF-WORD-10-mixed",
   "verdict": "PASS",
   "source": "Chromium-printed / scanned fixture",
-  "ms": 6539,
+  "ms": 5994,
   "text": "PASS",
   "layout": "PASS",
   "formatting": "PASS",
@@ -1418,7 +1418,7 @@
   "test": "PDF-WORD-11-rotated",
   "verdict": "PASS",
   "source": "Chromium-printed / scanned fixture",
-  "ms": 2548,
+  "ms": 3038,
   "text": "PASS",
   "layout": "PASS",
   "formatting": "PASS",
@@ -1465,7 +1465,7 @@
   "integrity": [
    {
     "file": "fid-PDF-WORD-11-rotated-final-PDF-WORD-11-rotated.docx",
-    "bytes": 4099,
+    "bytes": 4098,
     "ok": true,
     "kind": "docx",
     "pages": 2,
@@ -1480,7 +1480,7 @@
   "test": "PDF-WORD-12-special-chars",
   "verdict": "PASS",
   "source": "Chromium-printed / scanned fixture",
-  "ms": 3012,
+  "ms": 2465,
   "text": "PASS",
   "layout": "PASS",
   "formatting": "PASS",
@@ -1527,7 +1527,7 @@
   "integrity": [
    {
     "file": "fid-PDF-WORD-12-special-chars-final-PDF-WORD-12-special-chars.docx",
-    "bytes": 4021,
+    "bytes": 4020,
     "ok": true,
     "kind": "docx",
     "pages": 1,
@@ -1542,7 +1542,7 @@
   "test": "PDF-WORD-13-large-24-pages",
   "verdict": "PASS",
   "source": "Chromium-printed / scanned fixture",
-  "ms": 3266,
+  "ms": 2760,
   "text": "PASS",
   "layout": "PASS",
   "formatting": "PASS",
@@ -1589,7 +1589,7 @@
   "integrity": [
    {
     "file": "fid-PDF-WORD-13-large-24-pages-final-PDF-WORD-13-large-24-pages.docx",
-    "bytes": 5403,
+    "bytes": 5402,
     "ok": true,
     "kind": "docx",
     "pages": 24,
@@ -1603,7 +1603,7 @@
   "tool": "Word → PDF fidelity",
   "test": "application-form",
   "verdict": "PASS",
-  "ms": 4450,
+  "ms": 4335,
   "text": "PASS",
   "layout": "PASS",
   "formatting": "PASS",
@@ -1621,7 +1621,7 @@
    "extraWords": 0,
    "samePage": 100,
    "posMedianPt": 0.9,
-   "posP90Pt": 2.6,
+   "posP90Pt": 2.5,
    "within12pt": 100,
    "within36pt": 100,
    "lineKept": 100,
@@ -1647,7 +1647,7 @@
   "integrity": [
    {
     "file": "fid-application-form-final-application-form.pdf",
-    "bytes": 27545,
+    "bytes": 27535,
     "ok": true,
     "kind": "pdf",
     "pages": 1
@@ -1658,7 +1658,7 @@
   "tool": "Word → PDF fidelity",
   "test": "bank-statement",
   "verdict": "PASS",
-  "ms": 4025,
+  "ms": 3804,
   "text": "PASS",
   "layout": "PASS",
   "formatting": "PASS",
@@ -1702,7 +1702,7 @@
   "integrity": [
    {
     "file": "fid-bank-statement-final-bank-statement.pdf",
-    "bytes": 37892,
+    "bytes": 37857,
     "ok": true,
     "kind": "pdf",
     "pages": 2
@@ -1712,14 +1712,14 @@
  {
   "tool": "Word → PDF fidelity",
   "test": "brochure",
-  "verdict": "FAIL",
-  "ms": 3769,
+  "verdict": "LIMITED",
+  "ms": 3581,
   "text": "PASS",
   "layout": "PASS",
   "formatting": "PASS",
   "images": "PASS",
-  "tables": "FAIL",
-  "overall": "FAIL",
+  "tables": "LIMITED",
+  "overall": "LIMITED",
   "metrics": {
    "srcPages": 1,
    "outPages": 1,
@@ -1730,11 +1730,11 @@
    "readingOrder": 100,
    "extraWords": 0,
    "samePage": 100,
-   "posMedianPt": 3,
-   "posP90Pt": 31.5,
-   "within12pt": 85.1,
-   "within36pt": 93.6,
-   "lineKept": 97.4,
+   "posMedianPt": 2.9,
+   "posP90Pt": 3.5,
+   "within12pt": 100,
+   "within36pt": 100,
+   "lineKept": 100,
    "sizeScale": 1,
    "sizeKept": 100,
    "sizeAbsKept": 100,
@@ -1746,8 +1746,8 @@
    "imagesOut": 1,
    "imageIoU": 0.919,
    "rulesSrc": 1280,
-   "rulesKept": 27.3,
-   "pageSSIM": 0.828
+   "rulesKept": 81.9,
+   "pageSSIM": 0.846
   },
   "lines": {
    "ref": 11,
@@ -1757,7 +1757,7 @@
   "integrity": [
    {
     "file": "fid-brochure-final-brochure.pdf",
-    "bytes": 40487,
+    "bytes": 40495,
     "ok": true,
     "kind": "pdf",
     "pages": 1
@@ -1768,7 +1768,7 @@
   "tool": "Word → PDF fidelity",
   "test": "formatting",
   "verdict": "PASS",
-  "ms": 3952,
+  "ms": 4013,
   "text": "PASS",
   "layout": "PASS",
   "formatting": "PASS",
@@ -1801,7 +1801,7 @@
    "imagesOut": 0,
    "imageIoU": null,
    "rulesSrc": 49,
-   "rulesKept": 99.3,
+   "rulesKept": 99.9,
    "pageSSIM": 0.977
   },
   "lines": {
@@ -1812,7 +1812,7 @@
   "integrity": [
    {
     "file": "fid-formatting-final-formatting.pdf",
-    "bytes": 49175,
+    "bytes": 52741,
     "ok": true,
     "kind": "pdf",
     "pages": 2
@@ -1823,7 +1823,7 @@
   "tool": "Word → PDF fidelity",
   "test": "image-heavy",
   "verdict": "PASS",
-  "ms": 4149,
+  "ms": 3841,
   "text": "PASS",
   "layout": "PASS",
   "formatting": "PASS",
@@ -1840,7 +1840,7 @@
    "readingOrder": 100,
    "extraWords": 0,
    "samePage": 100,
-   "posMedianPt": 2.8,
+   "posMedianPt": 2.7,
    "posP90Pt": 4.7,
    "within12pt": 100,
    "within36pt": 100,
@@ -1867,7 +1867,7 @@
   "integrity": [
    {
     "file": "fid-image-heavy-final-image-heavy.pdf",
-    "bytes": 98252,
+    "bytes": 98251,
     "ok": true,
     "kind": "pdf",
     "pages": 2
@@ -1878,7 +1878,7 @@
   "tool": "Word → PDF fidelity",
   "test": "invoice",
   "verdict": "PASS",
-  "ms": 3750,
+  "ms": 3357,
   "text": "PASS",
   "layout": "PASS",
   "formatting": "PASS",
@@ -1922,7 +1922,7 @@
   "integrity": [
    {
     "file": "fid-invoice-final-invoice.pdf",
-    "bytes": 30403,
+    "bytes": 30390,
     "ok": true,
     "kind": "pdf",
     "pages": 1
@@ -1933,7 +1933,7 @@
   "tool": "Word → PDF fidelity",
   "test": "letter",
   "verdict": "PASS",
-  "ms": 3511,
+  "ms": 3378,
   "text": "PASS",
   "layout": "PASS",
   "formatting": "PASS",
@@ -1967,7 +1967,7 @@
    "imageIoU": 0.867,
    "rulesSrc": 468,
    "rulesKept": 100,
-   "pageSSIM": 0.887
+   "pageSSIM": 0.888
   },
   "lines": {
    "ref": 2,
@@ -1977,7 +1977,7 @@
   "integrity": [
    {
     "file": "fid-letter-final-letter.pdf",
-    "bytes": 36724,
+    "bytes": 36796,
     "ok": true,
     "kind": "pdf",
     "pages": 1
@@ -1988,7 +1988,7 @@
   "tool": "Word → PDF fidelity",
   "test": "long-report",
   "verdict": "PASS",
-  "ms": 4998,
+  "ms": 4589,
   "text": "PASS",
   "layout": "PASS",
   "formatting": "PASS",
@@ -2032,7 +2032,7 @@
   "integrity": [
    {
     "file": "fid-long-report-final-long-report.pdf",
-    "bytes": 42568,
+    "bytes": 42502,
     "ok": true,
     "kind": "pdf",
     "pages": 11
@@ -2042,14 +2042,14 @@
  {
   "tool": "Word → PDF fidelity",
   "test": "report-two-column",
-  "verdict": "FAIL",
-  "ms": 2858,
+  "verdict": "PASS",
+  "ms": 3574,
   "text": "PASS",
-  "layout": "FAIL",
+  "layout": "PASS",
   "formatting": "PASS",
   "images": "PASS",
   "tables": "n/a",
-  "overall": "FAIL",
+  "overall": "PASS",
   "metrics": {
    "srcPages": 1,
    "outPages": 1,
@@ -2060,11 +2060,11 @@
    "readingOrder": 99.7,
    "extraWords": 0,
    "samePage": 100,
-   "posMedianPt": 36,
-   "posP90Pt": 174,
-   "within12pt": 28.8,
-   "within36pt": 50.4,
-   "lineKept": 91.7,
+   "posMedianPt": 2.4,
+   "posP90Pt": 3.1,
+   "within12pt": 100,
+   "within36pt": 100,
+   "lineKept": 100,
    "sizeScale": 1,
    "sizeKept": 100,
    "sizeAbsKept": 100,
@@ -2074,10 +2074,10 @@
    "colorKept": 100,
    "imagesSrc": 1,
    "imagesOut": 1,
-   "imageIoU": 0.795,
+   "imageIoU": 0.921,
    "rulesSrc": 0,
    "rulesKept": null,
-   "pageSSIM": 0.661
+   "pageSSIM": 0.795
   },
   "lines": {
    "ref": 0,
@@ -2087,7 +2087,7 @@
   "integrity": [
    {
     "file": "fid-report-two-column-final-report-two-column.pdf",
-    "bytes": 40668,
+    "bytes": 42889,
     "ok": true,
     "kind": "pdf",
     "pages": 1
@@ -2098,7 +2098,7 @@
   "tool": "Word → PDF fidelity",
   "test": "resume",
   "verdict": "PASS",
-  "ms": 3691,
+  "ms": 3409,
   "text": "PASS",
   "layout": "PASS",
   "formatting": "PASS",
@@ -2142,7 +2142,7 @@
   "integrity": [
    {
     "file": "fid-resume-final-resume.pdf",
-    "bytes": 31319,
+    "bytes": 31320,
     "ok": true,
     "kind": "pdf",
     "pages": 1
@@ -2153,7 +2153,7 @@
   "tool": "Word → PDF fidelity",
   "test": "table-report",
   "verdict": "PASS",
-  "ms": 3512,
+  "ms": 3379,
   "text": "PASS",
   "layout": "PASS",
   "formatting": "PASS",
@@ -2197,7 +2197,7 @@
   "integrity": [
    {
     "file": "fid-table-report-final-table-report.pdf",
-    "bytes": 25455,
+    "bytes": 25454,
     "ok": true,
     "kind": "pdf",
     "pages": 1
@@ -2208,7 +2208,7 @@
   "tool": "Word → PDF fidelity",
   "test": "transcript",
   "verdict": "PASS",
-  "ms": 3492,
+  "ms": 3408,
   "text": "PASS",
   "layout": "PASS",
   "formatting": "PASS",
@@ -2225,8 +2225,8 @@
    "readingOrder": 96.9,
    "extraWords": 0,
    "samePage": 100,
-   "posMedianPt": 0.9,
-   "posP90Pt": 6,
+   "posMedianPt": 1.6,
+   "posP90Pt": 4.3,
    "within12pt": 100,
    "within36pt": 100,
    "lineKept": 100,
@@ -2241,8 +2241,8 @@
    "imagesOut": 0,
    "imageIoU": null,
    "rulesSrc": 10245,
-   "rulesKept": 99.9,
-   "pageSSIM": 0.873
+   "rulesKept": 100,
+   "pageSSIM": 0.906
   },
   "lines": {
    "ref": 57,
@@ -2252,7 +2252,7 @@
   "integrity": [
    {
     "file": "fid-transcript-final-transcript.pdf",
-    "bytes": 32467,
+    "bytes": 28297,
     "ok": true,
     "kind": "pdf",
     "pages": 1
@@ -2311,7 +2311,7 @@
    },
    {
     "file": "fid-rt1-resume-final-fid-rt1-resume-final-resume.pdf",
-    "bytes": 31533,
+    "bytes": 31532,
     "ok": true,
     "kind": "pdf",
     "pages": 1
@@ -2371,14 +2371,14 @@
   "integrity": [
    {
     "file": "fid-rt2-resume-final-resume.pdf",
-    "bytes": 31319,
+    "bytes": 31320,
     "ok": true,
     "kind": "pdf",
     "pages": 1
    },
    {
     "file": "fid-rt2-resume-final-fid-rt2-resume-final-resume.docx",
-    "bytes": 5155,
+    "bytes": 5153,
     "ok": true,
     "kind": "docx",
     "pages": 1,
@@ -2425,7 +2425,7 @@
    "imageIoU": 1,
    "rulesSrc": 4819,
    "rulesKept": 26.1,
-   "pageSSIM": 0.788
+   "pageSSIM": 0.789
   },
   "integrity": [
    {
@@ -2440,7 +2440,7 @@
    },
    {
     "file": "fid-rt1-invoice-final-fid-rt1-invoice-final-invoice.pdf",
-    "bytes": 31241,
+    "bytes": 31234,
     "ok": true,
     "kind": "pdf",
     "pages": 1
@@ -2500,7 +2500,7 @@
   "integrity": [
    {
     "file": "fid-rt2-invoice-final-invoice.pdf",
-    "bytes": 30403,
+    "bytes": 30390,
     "ok": true,
     "kind": "pdf",
     "pages": 1
@@ -2538,7 +2538,7 @@
    "extraWords": 0,
    "samePage": 100,
    "posMedianPt": 14.4,
-   "posP90Pt": 20.2,
+   "posP90Pt": 20.1,
    "within12pt": 1.5,
    "within36pt": 97.1,
    "lineKept": 99.2,
@@ -2569,7 +2569,7 @@
    },
    {
     "file": "fid-rt1-letter-final-fid-rt1-letter-final-letter.pdf",
-    "bytes": 37206,
+    "bytes": 37228,
     "ok": true,
     "kind": "pdf",
     "pages": 1
@@ -2629,7 +2629,7 @@
   "integrity": [
    {
     "file": "fid-rt2-letter-final-letter.pdf",
-    "bytes": 36725,
+    "bytes": 36796,
     "ok": true,
     "kind": "pdf",
     "pages": 1
@@ -2688,7 +2688,7 @@
   "integrity": [
    {
     "file": "fid-rt1-table-report-final-table-report.docx",
-    "bytes": 4904,
+    "bytes": 4903,
     "ok": true,
     "kind": "docx",
     "pages": 1,
@@ -2698,7 +2698,7 @@
    },
    {
     "file": "fid-rt1-table-report-final-fid-rt1-table-report-final-table-report.pdf",
-    "bytes": 25543,
+    "bytes": 25542,
     "ok": true,
     "kind": "pdf",
     "pages": 1
@@ -2758,14 +2758,14 @@
   "integrity": [
    {
     "file": "fid-rt2-table-report-final-table-report.pdf",
-    "bytes": 25453,
+    "bytes": 25454,
     "ok": true,
     "kind": "pdf",
     "pages": 1
    },
    {
     "file": "fid-rt2-table-report-final-fid-rt2-table-report-final-table-report.docx",
-    "bytes": 4839,
+    "bytes": 4838,
     "ok": true,
     "kind": "docx",
     "pages": 1,
@@ -2795,8 +2795,8 @@
    "readingOrder": 100,
    "extraWords": 0,
    "samePage": 100,
-   "posMedianPt": 3.2,
-   "posP90Pt": 31.5,
+   "posMedianPt": 3.1,
+   "posP90Pt": 31.6,
    "within12pt": 87,
    "within36pt": 100,
    "lineKept": 100,
@@ -2812,12 +2812,12 @@
    "imageIoU": 0.999,
    "rulesSrc": 0,
    "rulesKept": null,
-   "pageSSIM": 0.97
+   "pageSSIM": 0.971
   },
   "integrity": [
    {
     "file": "fid-rt1-image-heavy-final-image-heavy.docx",
-    "bytes": 34039,
+    "bytes": 34040,
     "ok": true,
     "kind": "docx",
     "pages": 2,
@@ -2827,7 +2827,7 @@
    },
    {
     "file": "fid-rt1-image-heavy-final-fid-rt1-image-heavy-final-image-heavy.pdf",
-    "bytes": 87046,
+    "bytes": 87047,
     "ok": true,
     "kind": "pdf",
     "pages": 2
@@ -2854,8 +2854,8 @@
    "readingOrder": 100,
    "extraWords": 0,
    "samePage": 100,
-   "posMedianPt": 2.7,
-   "posP90Pt": 31.5,
+   "posMedianPt": 2.8,
+   "posP90Pt": 31.3,
    "within12pt": 87,
    "within36pt": 100,
    "lineKept": 100,
@@ -2887,7 +2887,7 @@
   "integrity": [
    {
     "file": "fid-rt2-image-heavy-final-image-heavy.pdf",
-    "bytes": 98251,
+    "bytes": 98250,
     "ok": true,
     "kind": "pdf",
     "pages": 2

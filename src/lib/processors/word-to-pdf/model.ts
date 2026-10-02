@@ -4,7 +4,8 @@
  * points (1/72 inch), so layout never has to look at Word XML.
  */
 
-export type Family = "carlito" | "sans" | "serif" | "mono";
+/** Bundled font families (public/fonts/word/README.md says which Word fonts each stands in for). */
+export type Family = "carlito" | "sans" | "serif" | "mono" | "gelasio" | "caladea" | "dejavu";
 
 export interface RunStyle {
   family: Family;

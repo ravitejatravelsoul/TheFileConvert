@@ -12,7 +12,7 @@
   "progress": [
    "Building your Word document…"
   ],
-  "ms": 436,
+  "ms": 423,
   "output": 3804,
   "docxValid": true,
   "problems": [],
@@ -61,10 +61,10 @@
   "meta": "45 KB · 4 pages · Text PDF",
   "ocrNote": false,
   "progress": [
-   "Reading page 3 of 4…"
+   "Reading page 4 of 4…"
   ],
-  "ms": 924,
-  "output": 4084,
+  "ms": 397,
+  "output": 4086,
   "docxValid": true,
   "problems": [],
   "paragraphs": 24,
@@ -91,7 +91,7 @@
   "integrity": [
    {
     "file": "word-PDFWORD02-PDF-WORD-02-multipage.docx",
-    "bytes": 4084,
+    "bytes": 4086,
     "ok": true,
     "kind": "docx",
     "pages": 4,
@@ -114,7 +114,7 @@
   "progress": [
    "Building your Word document…"
   ],
-  "ms": 385,
+  "ms": 404,
   "output": 4044,
   "docxValid": true,
   "problems": [],
@@ -163,11 +163,9 @@
   "input": 54759,
   "meta": "55 KB · 1 page · Text PDF",
   "ocrNote": false,
-  "progress": [
-   "Building your Word document…"
-  ],
-  "ms": 407,
-  "output": 3703,
+  "progress": [],
+  "ms": 391,
+  "output": 3704,
   "docxValid": true,
   "problems": [],
   "paragraphs": 5,
@@ -195,7 +193,7 @@
   "integrity": [
    {
     "file": "word-PDFWORD04-PDF-WORD-04-bold-italic.docx",
-    "bytes": 3703,
+    "bytes": 3704,
     "ok": true,
     "kind": "docx",
     "pages": 1,
@@ -215,10 +213,8 @@
   "input": 40493,
   "meta": "40 KB · 1 page · Text PDF",
   "ocrNote": false,
-  "progress": [
-   "Building your Word document…"
-  ],
-  "ms": 404,
+  "progress": [],
+  "ms": 395,
   "output": 3996,
   "docxValid": true,
   "problems": [],
@@ -267,11 +263,9 @@
   "input": 39069,
   "meta": "39 KB · 1 page · Text PDF",
   "ocrNote": false,
-  "progress": [
-   "Building your Word document…"
-  ],
-  "ms": 416,
-  "output": 4042,
+  "progress": [],
+  "ms": 419,
+  "output": 4043,
   "docxValid": true,
   "problems": [],
   "paragraphs": 3,
@@ -298,7 +292,7 @@
   "integrity": [
    {
     "file": "word-PDFWORD06-PDF-WORD-06-table.docx",
-    "bytes": 4042,
+    "bytes": 4043,
     "ok": true,
     "kind": "docx",
     "pages": 1,
@@ -321,7 +315,7 @@
   "progress": [
    "Reading page 1 of 1…"
   ],
-  "ms": 923,
+  "ms": 924,
   "output": 425239,
   "docxValid": true,
   "problems": [],
@@ -369,10 +363,8 @@
   "input": 40941,
   "meta": "41 KB · 1 page · Text PDF",
   "ocrNote": false,
-  "progress": [
-   "Building your Word document…"
-  ],
-  "ms": 401,
+  "progress": [],
+  "ms": 421,
   "output": 4049,
   "docxValid": true,
   "problems": [],
@@ -424,7 +416,7 @@
    "Reading page 1 of 1…",
    "Recognizing page 1 of 1…"
   ],
-  "ms": 6065,
+  "ms": 4989,
   "output": 3850,
   "docxValid": true,
   "problems": [],
@@ -477,8 +469,8 @@
    "Reading page 3 of 3…",
    "Recognizing page 1 of 1…"
   ],
-  "ms": 3996,
-  "output": 4121,
+  "ms": 3976,
+  "output": 4122,
   "docxValid": true,
   "problems": [],
   "paragraphs": 15,
@@ -505,7 +497,7 @@
   "integrity": [
    {
     "file": "word-PDFWORD10-PDF-WORD-10-mixed.docx",
-    "bytes": 4121,
+    "bytes": 4122,
     "ok": true,
     "kind": "docx",
     "pages": 3,
@@ -526,10 +518,10 @@
   "meta": "40 KB · 2 pages · Text PDF",
   "ocrNote": false,
   "progress": [
-   "Reading page 2 of 2…"
+   "Building your Word document…"
   ],
-  "ms": 905,
-  "output": 4099,
+  "ms": 386,
+  "output": 4098,
   "docxValid": true,
   "problems": [],
   "paragraphs": 20,
@@ -555,7 +547,7 @@
   "integrity": [
    {
     "file": "word-PDFWORD11-PDF-WORD-11-rotated.docx",
-    "bytes": 4099,
+    "bytes": 4098,
     "ok": true,
     "kind": "docx",
     "pages": 2,
@@ -578,8 +570,8 @@
   "progress": [
    "Building your Word document…"
   ],
-  "ms": 416,
-  "output": 4020,
+  "ms": 383,
+  "output": 4021,
   "docxValid": true,
   "problems": [],
   "paragraphs": 7,
@@ -606,7 +598,7 @@
   "integrity": [
    {
     "file": "word-PDFWORD12-PDF-WORD-12-special-chars.docx",
-    "bytes": 4020,
+    "bytes": 4021,
     "ok": true,
     "kind": "docx",
     "pages": 1,
@@ -627,10 +619,10 @@
   "meta": "101 KB · 24 pages · Text PDF",
   "ocrNote": false,
   "progress": [
-   "Reading page 3 of 24…",
+   "Reading page 5 of 24…",
    "Building your Word document…"
   ],
-  "ms": 907,
+  "ms": 892,
   "output": 5403,
   "docxValid": true,
   "problems": [],
@@ -691,7 +683,7 @@
    "Recognizing page 1 of 2…",
    "Recognizing page 2 of 2…"
   ],
-  "ms": 11620,
+  "ms": 10083,
   "output": 4688,
   "docxValid": true,
   "problems": [],

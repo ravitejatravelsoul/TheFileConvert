@@ -1,7 +1,7 @@
 // Visual fidelity for every tool other than PDF ↔ Word, through the real UI. Each output is compared with
 // its source by qa/validate/visdiff.py (SSIM / PSNR / changed pixels / text on the page) against the
 // tool's own thresholds below; source | output | difference images go to qa/fidelity/<tool>/.
-//   BASE=http://localhost:3000 node qa/scripts/fid-tools.mjs [cpdf|cimg|convert|p2i|i2p|merge|split|organize|editor|ocr|all] [--tag=x]
+//   BASE=http://localhost:3000 node qa/scripts/fid-tools.mjs [cpdf|cimg|convert|p2i|i2p|merge|split|organize|editor|ocr|ocrsearch|all] [--tag=x]
 import { execFileSync } from "node:child_process";
 import { launch, open, addPaths, download, size, rec, save, sx, fx, REAL_SCAN, records, fs, path, OUT, zipEntries } from "./fl-lib.mjs";
 
@@ -458,6 +458,110 @@ if (run("ocr")) {
       // The exported scan must look exactly like the input (OCR adds nothing visible).
       const look = worst(band(d.minSsim, ...T.identity.ssim), d.maxChangedPct <= T.identity.changed[0] ? "PASS" : d.maxChangedPct <= T.identity.changed[1] ? "LIMITED" : "FAIL");
       rec("OCR", t.name, worst(look, band(accuracy, 95, 85)), { look, recognitionAccuracy: accuracy, exportSearchable: searchable, ...pageSummary(d) });
+    });
+  }
+}
+
+// ================================================================== OCR — searchable export
+// Recognise, (optionally) correct a word, export, reopen: every recognised word must be searchable, the
+// corrected word found once in its new form and the old form gone, pixels unchanged outside the correction.
+if (run("ocrsearch")) {
+  const truth = JSON.parse(fs.readFileSync(path.join(path.dirname(sx("x")), "ocr-truth.json"), "utf8"));
+  const norm = (w) => w.normalize("NFC").toLowerCase().replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu, "");
+  const tokens = (file) => JSON.parse(execFileSync("python", ["-c", `import pymupdf,json;print(json.dumps([w[4] for p in pymupdf.open(r"${file}") for w in p.get_text("words")]))`], { encoding: "utf8" })).map(norm).filter(Boolean);
+  const share = (want, have) => {
+    const pool = new Map();
+    for (const w of have) pool.set(w, (pool.get(w) ?? 0) + 1);
+    let hit = 0;
+    for (const w of want) if ((pool.get(w) ?? 0) > 0) { pool.set(w, pool.get(w) - 1); hit++; }
+    return +((hit / Math.max(1, want.length)) * 100).toFixed(1);
+  };
+  const CASES = [
+    ["OCR-A-clean-300dpi.pdf", "clean scan", "Smith"],
+    ["OCR-B-low-res-100dpi.pdf", "low-resolution scan", "Smith"],
+    ["OCR-D-rotated.pdf", "rotated scan (/Rotate 90)", null],
+    ["OCR-F-mixed-native-scan.pdf", "mixed native + scanned", null],
+    ["OCR-G-multipage.pdf", "multi-page scan", "Smith"],
+    [REAL_SCAN, "user's real scan", "auto"],
+  ];
+  for (const [fixture, what, editWord] of CASES) {
+    const input = fixture.includes("/") ? fixture : sx(fixture);
+    const isUser = fixture.includes("/");
+    await step("OCR searchable export", what, async () => {
+      await open(page, "/pdf-editor");
+      await addPaths(page, [input]);
+      await page.getByTestId("page-surface").first().waitFor({ timeout: 60_000 });
+      await page.getByRole("button", { name: "Fit page" }).click();
+      await page.getByRole("button", { name: "Recognize text" }).click();
+      await page.getByRole("button", { name: /^Edit recognized word: / }).first().waitFor({ timeout: 300_000 });
+      await page.getByRole("button", { name: "Cancel" }).waitFor({ state: "hidden", timeout: 300_000 }).catch(() => {});
+      const pages = await page.getByRole("button", { name: /^Go to page \d+$/ }).count();
+      const recognised = [];
+      for (let p = Math.max(1, pages); p >= 1; p--) {
+        if (pages > 1) {
+          await page.getByRole("button", { name: `Go to page ${p}`, exact: true }).click();
+          await page.waitForTimeout(600);
+        }
+        recognised.push(...(await page.getByRole("button", { name: /^Edit recognized word: / }).evaluateAll((els) => els.map((e) => e.getAttribute("aria-label").replace(/^Edit recognized word: /, "")))));
+      }
+      // Now on page 1. Correct a word (not on a rotated page: the editor doesn't offer it there).
+      let edit = null;
+      if (editWord) {
+        const counts = new Map();
+        for (const w of recognised) counts.set(w, (counts.get(w) ?? 0) + 1);
+        // Page 1's own recognised words (labels as shown, punctuation included).
+        const onPage1 = await page.getByRole("button", { name: /^Edit recognized word: / }).evaluateAll((els) => els.map((e) => e.getAttribute("aria-label").replace(/^Edit recognized word: /, "")));
+        const label = editWord === "auto" ? onPage1.find((w) => /^[A-Za-z]{5,}$/.test(w) && counts.get(w) === 1) : onPage1.find((w) => norm(w) === norm(editWord));
+        if (!label) throw new Error(`no word to correct on page 1 (${editWord})`);
+        const word = norm(label);
+        const replacement = "Rivera";
+        const btn = page.getByRole("button", { name: `Edit recognized word: ${label}`, exact: true }).first();
+        const b = await btn.boundingBox();
+        const surf = await page.getByTestId("page-surface").first().boundingBox();
+        const widthPts = JSON.parse(execFileSync("python", ["-c", `import pymupdf;print(pymupdf.open(r"${input}")[0].rect.width)`], { encoding: "utf8" }));
+        const k = surf.width / widthPts;
+        const boxPts = [(b.x - surf.x) / k - 6, (b.y - surf.y) / k - 6, (b.x + b.width - surf.x) / k + 6, (b.y + b.height - surf.y) / k + 6];
+        await btn.click();
+        const dlg = page.getByRole("dialog", { name: "Edit text" });
+        await dlg.waitFor();
+        await dlg.locator("input[type=text]").fill(replacement);
+        if ((await dlg.getByText(/can.t be replaced automatically/).count()) > 0) await dlg.getByRole("checkbox").first().check();
+        await dlg.getByRole("button", { name: "Save correction" }).click();
+        await dlg.waitFor({ state: "hidden" });
+        edit = { word, replacement, boxPts, before: recognised.filter((w) => norm(w) === norm(word)).length };
+      }
+      const out = await download(page, page.getByRole("button", { name: "Export PDF" }), `fid-ocrsearch-${isUser ? "user" : fixture.slice(0, 5)}`);
+      const args = ["--dir", dirOf(isUser ? "ocr/_private" : "ocr"), "--name", `${tag}-searchable-${isUser ? "user-scan" : fixture.replace(/\.pdf$/, "")}`, "--max-images", "1"];
+      if (edit) args.push("--mask", `1:${edit.boxPts.map((v) => v.toFixed(1)).join(",")}`);
+      const d = visdiff("pdf", input, out, args);
+      const have = tokens(out);
+      const t = truth.find((x) => x.name === fixture);
+      const want = t ? (Array.isArray(t.truth) ? t.truth.join(" ") : t.truth).split(/\s+/).map(norm).filter(Boolean) : recognised.map(norm).filter(Boolean);
+      // Searchable: the words the page says (ground truth, or what was recognised for the user's scan),
+      // after the correction.
+      const expected = edit ? want.map((w) => (w === norm(edit.word) ? norm(edit.replacement) : w)) : want;
+      const searchable = share(expected, have);
+      const newFound = edit ? have.filter((w) => w === norm(edit.replacement)).length : null;
+      const oldLeft = edit ? have.filter((w) => w === norm(edit.word)).length : null;
+      // No word twice: nothing may appear more often than the page says it (recognised + the page's own text).
+      const allowed = new Map();
+      for (const w of [...expected, ...tokens(input)]) allowed.set(w, (allowed.get(w) ?? 0) + 1);
+      const seen = new Map();
+      for (const w of have) seen.set(w, (seen.get(w) ?? 0) + 1);
+      const duplicates = [...seen].filter(([w, n]) => n > (allowed.get(w) ?? 0)).map(([w, n]) => `${w}×${n}`);
+      const p1 = d.pages[0];
+      const outside = edit ? p1.changedOutsidePct : p1.changedPct;
+      const others = d.pages.slice(1).every((p) => p.changedPct <= 0.05);
+      const visual = outside <= 0.05 && others ? "PASS" : outside <= 0.5 && others ? "LIMITED" : "FAIL";
+      const checks = {
+        pagesKept: d.pagesOut === d.pagesSrc ? "PASS" : "FAIL",
+        searchable: searchable >= 95 ? "PASS" : searchable >= 85 ? "LIMITED" : "FAIL",
+        noDuplicates: duplicates.length ? "FAIL" : "PASS",
+        correctedFound: edit ? (newFound === 1 ? "PASS" : "FAIL") : "n/a",
+        oldGone: edit ? (oldLeft === edit.before - 1 ? "PASS" : "FAIL") : "n/a",
+        visual,
+      };
+      rec("OCR searchable export", what, worst(...Object.values(checks).filter((v) => v !== "n/a")), { ...checks, duplicates, searchablePct: searchable, wordsExpected: expected.length, wordsInExport: have.length, edit: edit && { word: edit.word, to: edit.replacement, newFound, oldLeft, oldBefore: edit.before }, changedOutsidePct: outside, minSsim: d.minSsim, pages: `${d.pagesOut}/${d.pagesSrc}` });
     });
   }
 }

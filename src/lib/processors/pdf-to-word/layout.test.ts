@@ -255,3 +255,19 @@ describe("scanned text", () => {
     expect(paras).toContain("The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline.");
   });
 });
+
+describe("PDF font names → Word font names", () => {
+  it("maps the open stand-ins back to the Word fonts they match, and keeps unknown names readable", async () => {
+    const { wordFontName } = await import("./extract");
+    expect(["ABCDEF+Gelasio-Bold", "Carlito", "Caladea-Italic", "LiberationSerif", "DejaVuSans-Bold", "DejaVuSansMono", "BCDEFG+SourceSansPro-Regular", "Symbol"].map(wordFontName)).toEqual([
+      "Georgia",
+      "Calibri",
+      "Cambria",
+      "Times New Roman",
+      "Verdana",
+      "Deja Vu Sans Mono",
+      "Source Sans Pro",
+      "",
+    ]);
+  });
+});

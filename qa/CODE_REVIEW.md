@@ -13,7 +13,11 @@ improved or held on every document, and nothing else regressed (348/348 unit tes
 Files changed (product): `src/lib/processors/pdf-to-word/{extract,layout,docx,index}.ts`,
 `src/lib/processors/word-to-pdf/{layout,fonts,index}.ts`, `src/lib/processors/image.ts`,
 `package.json`/`package-lock.json` (Next.js security patch).
-Tests: `pdf-to-word/{layout,docx}.test.ts`, `word-to-pdf/word-to-pdf.test.ts`.
+Final closure (after c277426): `src/lib/processors/word-to-pdf/{model,parse,fonts,layout}.ts`,
+`public/fonts/word/` (Gelasio, Caladea, DejaVu Sans Oblique/Bold Oblique + licences),
+`src/lib/editor/{searchLayer,export}.ts`, `src/lib/processors/ocr.ts`,
+`src/components/editor/{useEditorWorkspace.ts,PropertiesPanel.tsx}`, `src/lib/processors/pdf-to-word/extract.ts`.
+Tests: `pdf-to-word/{layout,docx}.test.ts`, `word-to-pdf/word-to-pdf.test.ts`, `editor/searchLayer.test.ts`.
 
 ---
 
@@ -215,6 +219,107 @@ pages broke in different places, a 40 pt jump after page breaks).
 
 ---
 
+## Final fidelity closure (after commit c277426)
+
+### FONT-01 · Georgia, Cambria and Verdana drawn with fonts of the wrong widths
+- **Defect:** the Georgia two-column report re-wrapped (61 % / 54 % of lines broke where Word's do; median
+  shift 36 pt; FAIL). Georgia and Cambria were drawn with Liberation Serif (0.914 / 0.946 of their widths) and
+  Verdana with Liberation Sans (0.869 — 13 % narrow).
+- **Root cause:** the family mapping (`parse.ts` `familyFor`) only knew four open families; it sent every serif
+  to Liberation Serif and every unknown sans to Liberation Sans, whatever their widths.
+- **How the stand-ins were chosen (not by name):** advance widths of each candidate were measured against the
+  Microsoft font installed on Windows 11 over 3,743 characters of English text in all four styles.
+  Gelasio = Georgia exactly (1.000 ×4). Caladea, documented as Cambria-compatible, measures 0.953–0.987
+  against today's Cambria 6.99 — closer than Liberation Serif in 3 of 4 styles, so bundled but *not* claimed
+  as exact (the substitution notice stays for Cambria). DejaVu Sans (already shipped as the symbol fallback)
+  measures 0.991–1.002 against Verdana. Tahoma stays on Liberation Sans (0.995 / 0.938, the closest).
+- **Files:** `public/fonts/word/{gelasio,caladea}-{r,b,i,bi}.ttf`, `dejavu-{i,bi}.ttf` (new, unmodified
+  upstream files), `LICENSE-{Gelasio,Caladea}-OFL.txt`, `README.md`; `model.ts` (`Family` + gelasio, caladea,
+  dejavu), `parse.ts` (`familyFor` — exact names first, exported for tests), `fonts.ts` (`METRIC_COMPATIBLE`,
+  Cambria's measured vertical metrics 1946/455, comments), `pdf-to-word/extract.ts` (`wordFontName`: Gelasio →
+  Georgia, DejaVu Sans → Verdana, so PDFs made with the stand-ins ask Word for the right font);
+  `qa/THIRD_PARTY_LICENSES.md`.
+- **Font loading architecture:** unchanged — faces are fetched from `/fonts/word/<family>-<variant>.ttf` only
+  when the document uses them (`collectStyles`), subset-embedded by pdf-lib; no CDN. A Georgia document now
+  downloads ~620 KB of Gelasio instead of Liberation Serif.
+- **Licences:** SIL OFL 1.1 (Gelasio, Caladea), Bitstream Vera/DejaVu (DejaVu); `fsType` 0; no Reserved Font
+  Names; licence texts shipped beside the files. PASS.
+- **Risk:** low (new families only for the named fonts; others unchanged). **What could break:** a Georgia
+  document now uses Georgia's own line height with Gelasio's glyphs (Gelasio's ascent/descent are taller; the
+  `VERTICAL` entry keeps Word's spacing).
+- **Tests:** `word-to-pdf.test.ts` "draws each common Word font with its measured stand-in, and every family
+  is bundled in four styles"; "names the fonts…" (Georgia no longer named, Cambria/Tahoma still are);
+  `layout.test.ts` "maps the open stand-ins back to the Word fonts they match".
+- **Validation:** Georgia report: 36/36 and 16/16 lines break where the reference breaks (was 61 % / 54 %),
+  median shift 2.4 pt, PASS; Gelasio embedded.
+- **Review result:** APPROVED.
+
+### W2P-08 · Lines measured narrower than they are drawn (kerning on one side only)
+- **Defect:** in the brochure, a 245.5 pt line was laid into a 244.8 pt column ("…revised travel policy"),
+  overflowing by 0.7 pt and breaking every following line differently from Word/LibreOffice.
+- **Root cause:** `fonts.ts` measured text with fontkit's default layout (kerning applied) while pdf-lib draws
+  glyphs at their plain advances (no kerning). Word also leaves kerning off for body text by default.
+- **Fix:** measure with `layout(text, { kern: false })` — measured width now equals drawn width exactly.
+- **Risk:** low (lines can only get slightly shorter → wrap a word earlier where they used to overflow).
+- **Tests:** "a line is measured exactly as wide as pdf-lib draws it" (Carlito, Gelasio, Caladea Bold; fails
+  without the fix — mutation-checked). **Validation:** brochure 25/29 → 29/29 lines break identically.
+- **Review result:** APPROVED.
+
+### W2P-09 · Columns of a continuous section started at different heights; previous spacing lost
+- **Defect:** in a continuous two-column section, column 2 started ~10 pt above column 1's first line (brochure,
+  two-column report). Investigated directly in the layout math, not assumed to be LibreOffice's fault.
+- **Root cause (ours):** at a continuous break the section's region began at the previous line's bottom; column
+  1's first paragraph then added only its own space-before (`beforeOf` ignores `prevAfter` at a column top),
+  and column 2 restarted at the region top with no spacing at all. The previous paragraph's space-after was
+  dropped whenever it was the larger of the two. Also, the next section started at the bottom of the *last
+  column filled*, which could overlap a longer first column.
+- **Fix:** `layoutDocument` — a continuous section's region starts at the previous bottom + max(previous
+  after, first before) (Word collapses adjacent paragraph spacing; a continuous break doesn't reset it); every
+  column starts there and the first paragraph doesn't add its space-before again (`atTopByOverflow`). The
+  section's end is the lowest point any column reached (`regionBottom`).
+- **Risk:** medium (every continuous section). Single-column continuous sections now also collapse spacing
+  correctly. **Tests:** "starts both columns of a continuous section below the spacing…", "starts the next
+  section below the longest column…" (both fail on the old code — mutation-checked).
+- **Validation:** brochure column 2 start 10 pt → 0.4 pt from the reference; report-two-column both columns
+  within 0.8 pt.
+- **Remaining difference (renderer-specific, LIMITED):** the brochure's last table row in column 1 is 13.3 pt
+  tall in LibreOffice and 20.4 pt in ours. LibreOffice's own identical rows in column 2 are 20.4 pt (text 13.8
+  + 6 pt paragraph spacing + 0.5 pt border), the row fits above the margin with 8.8 pt to spare, and nothing
+  in the markup shortens it — LibreOffice shortens only the row that ends a column. Ours is consistent with
+  every other row. Microsoft Word reference unavailable, so this stays LIMITED rather than PASS.
+- **Review result:** APPROVED.
+
+### OCR-01 · Exported scans weren't searchable
+- **Defect:** OCR recognised 100 % of words, but the exported PDF only carried text for *corrected* words.
+- **Root cause:** the export never received the recognition results (`ocrResultsByPage` lives in editor state);
+  `buildSearchablePdf` existed but was unused — and reviewed as unsafe to reuse: it drew every line along the
+  page's unrotated x-axis (wrong on pages shown rotated), dropped a whole line on one unencodable character,
+  and knew nothing of corrections (old and new words would both be searchable).
+- **Fix:** new `src/lib/editor/searchLayer.ts`: `applyCorrections` (the corrected word nearest the correction's
+  position, only within its own line — now shared with the editor's search), `correctionsInLayer` (decided
+  before drawing), `drawOcrTextLayer` (each line as fully transparent text in the line's own frame via
+  `contentFrame` and the rotation the page was *read* at, sized to span the line; unencodable characters →
+  "?"; lines lying over the page's own text are skipped). `export.ts` takes `ocrResultsByPage` (and a
+  native-text lookup, pdf.js by default) and draws the layer; a correction contributes searchable text exactly
+  once — in the layer if it's a raster patch, as its visible text otherwise (this also removes an old
+  duplicate: the visible fallback text plus its own hidden run). `ocr.ts` records the read rotation;
+  `buildSearchablePdf` removed. Callers: the editor's Export and the bake-then-reload used by watermark/page
+  numbers (which used to drop recognised text). Fixed a stale-closure bug found by ESLint: the export callback
+  didn't depend on `ocrResultsByPage`.
+- **Rotation handling:** OCR reads a page as displayed (`effectiveRotation`); the layer text is turned by that
+  rotation in the page's own space, so it reads along the scan in every viewer whatever /Rotate says.
+- **Risk:** medium (export pipeline). Pixels: the text is drawn with opacity 0 — measured 0.000 % changed.
+- **Tests:** `searchLayer.test.ts` (6): nearest-occurrence correction; recognised lines searchable with the
+  corrected word in its new form, the old absent and the new found once; visible-text corrections found once;
+  mixed page — no duplicate of native text; no OCR → no layer; rotated page — text runs along the scan.
+- **Manual / output validation:** `qa/scripts/fid-tools.mjs ocrsearch` through the real editor: clean,
+  low-resolution, rotated (/Rotate 90), mixed native + scanned, 3-page and the user's scan — 100 % of words
+  searchable, no duplicates, corrected word found once / old gone, 0.000 % pixels changed outside the
+  correction, page counts kept.
+- **Review result:** APPROVED.
+
+---
+
 ## Investigated, not product defects (kept for the record)
 
 | Symptom | Finding |
@@ -272,7 +377,7 @@ Organize copy pages without re-encoding: pixel-identical.
 (`fl-lib.mjs` `rec()`); PDF → Word verifies its own package (`verifyDocx`) and Word → PDF reopens its PDF and
 checks the page count before offering a download. Consistent.
 
-**Silent fallbacks.** Found and fixed: font substitution (W2P-07). Remaining, all disclosed to the user:
+**Silent fallbacks.** Found and fixed: font substitution (W2P-07); recognised text silently dropped from exports and from baked whole-document operations (OCR-01). Remaining, all disclosed to the user:
 pictures in EMF/WMF (empty frame + note), characters without a glyph (note), text boxes and equations (note),
 right-to-left text (note). Compress Image states any resize. Not disclosed: PDF → Word cannot reproduce
 text effects such as shadows, outlines or rotated text inside a page (rare; listed as a limitation).
@@ -281,10 +386,9 @@ text effects such as shadows, outlines or rotated text inside a page (rare; list
 compatibility mode 15, the empty section-break paragraph, the brochure's column-2 start) the code follows
 Word and the difference is documented. The harness uses LibreOffice only as an independent QA renderer.
 
-**Dead code.** `buildSearchablePdf` in `src/lib/processors/ocr.ts` is not called anywhere since the OCR tool
-page was folded into the editor; the editor's export only adds invisible text for *corrected* words. Not
-removed in this change (outside the fidelity scope); flagged in `qa/FIDELITY_AUDIT.md` as a product gap
-("exported scans are not searchable").
+**Dead code.** `buildSearchablePdf` in `src/lib/processors/ocr.ts` was unused and, on review, unsafe to reuse
+(rotation, unencodable characters, corrections). It has been removed; the searchable layer now lives in
+`src/lib/editor/searchLayer.ts`, used by the editor's export (OCR-01).
 
 **Performance notes.** `findGrids` is O(n²) in the number of rules and `findGutter` scans ~100 candidate
 x positions × items; both measured fine on the corpus (24-page document converts in a few seconds) but a page

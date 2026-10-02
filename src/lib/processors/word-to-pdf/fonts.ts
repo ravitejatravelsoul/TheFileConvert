@@ -4,8 +4,9 @@ import type { Block, DocModel, Family, Inline, RunStyle } from "./model";
 
 /**
  * Fonts for layout and embedding. Word's fonts are drawn with open fonts that share their character
- * widths (Carlito = Calibri, Liberation = Arial / Times New Roman / Courier New), so lines break where
- * Word breaks them. Characters those fonts lack (₹, ✓, arrows…) fall back to DejaVu Sans.
+ * widths (Carlito = Calibri, Liberation = Arial / Times New Roman / Courier New, Gelasio = Georgia), so
+ * lines break where Word breaks them; Cambria (Caladea) and Verdana (DejaVu Sans) are the closest open
+ * matches. Characters those fonts lack (₹, ✓, arrows…) fall back to DejaVu Sans.
  */
 
 export type Variant = "r" | "b" | "i" | "bi";
@@ -23,10 +24,12 @@ export interface FaceStyle {
 /**
  * Ascent and descent (em) of common Word fonts that are drawn with a substitute whose line height differs.
  * Word spaces lines by the requested font, so a paragraph's height follows these, not the substitute's.
- * (Calibri, Arial, Times New Roman and Courier New have metric-compatible substitutes and aren't listed.)
+ * Values measured from the Microsoft fonts (OS/2 win ascent/descent). Calibri, Arial, Times New Roman and
+ * Courier New have substitutes with identical metrics and aren't listed; Gelasio matches Georgia's widths but
+ * not its line height, so Georgia is.
  */
 const VERTICAL: [RegExp, { ascent: number; descent: number }][] = [
-  [/^cambria$/i, { ascent: 1900 / 2048, descent: 500 / 2048 }],
+  [/^cambria$/i, { ascent: 1946 / 2048, descent: 455 / 2048 }],
   [/^georgia$/i, { ascent: 1878 / 2048, descent: 449 / 2048 }],
   [/^verdana$/i, { ascent: 2059 / 2048, descent: 430 / 2048 }],
   [/^tahoma$/i, { ascent: 2049 / 2048, descent: 423 / 2048 }],
@@ -117,7 +120,7 @@ function collectText(model: DocModel): Map<FaceKey, Set<string>> {
 }
 
 /** Fonts drawn with a font of the same widths: lines break exactly where Word breaks them. */
-const METRIC_COMPATIBLE = /^(calibri|calibri light|carlito|arial|helvetica|liberation sans|arimo|times new roman|times|liberation serif|tinos|courier new|courier|liberation mono|cousine)$/i;
+const METRIC_COMPATIBLE = /^(calibri|calibri light|carlito|arial|helvetica|liberation sans|arimo|times new roman|times|liberation serif|tinos|courier new|courier|liberation mono|cousine|georgia|gelasio|caladea|dejavu sans)$/i;
 
 /**
  * The document's fonts that are drawn with a similar but not identical font (so lines may break in
@@ -275,7 +278,10 @@ export async function loadFonts(model: DocModel, loader: FontLoader): Promise<Fo
   function width(face: Face, text: string): number {
     let w = face.widths.get(text);
     if (w === undefined) {
-      const run = face.font.layout(text);
+      // Without kerning: pdf-lib draws glyphs at their plain advance widths (and Word leaves kerning off for
+      // body text by default). A kerned measurement is narrower than the drawn line, so a line that "fits"
+      // would overflow its column.
+      const run = face.font.layout(text, { kern: false });
       w = run.positions.reduce((n, p) => n + p.xAdvance, 0) / face.font.unitsPerEm;
       face.widths.set(text, w);
     }

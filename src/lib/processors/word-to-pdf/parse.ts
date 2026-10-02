@@ -687,8 +687,12 @@ function nextLabel(ctx: Ctx, numId: string, ilvl: number): { level: Level; text:
 
 // ------------------------------------------------------------------ run style
 
-function familyFor(name: string | undefined): Family {
-  const n = (name ?? "").toLowerCase();
+export function familyFor(name: string | undefined): Family {
+  const n = (name ?? "").toLowerCase().trim();
+  // Exact stand-ins first, each chosen by measuring widths against the Microsoft font (see the fonts README).
+  if (/^(georgia|gelasio)$/.test(n)) return "gelasio"; // identical character widths in all four styles
+  if (/^(cambria|caladea)$/.test(n)) return "caladea"; // the closest open match (≈ 0.95–0.99 of Cambria's widths)
+  if (/^(verdana|dejavu sans)$/.test(n)) return "dejavu"; // 0.99–1.00 of Verdana's widths (Liberation Sans is 0.84–0.87)
   if (/calibri|carlito|candara|corbel|segoe|constantia/.test(n)) return "carlito";
   if (/courier|consolas|mono|lucida console|menlo|monaco|cousine|source code/.test(n)) return "mono";
   if (/times|serif|georgia|garamond|cambria|caladea|book antiqua|palatino|bookman|century schoolbook|baskerville|tinos|minion|charter|didot|bodoni/.test(n) && !/sans/.test(n)) return "serif";
