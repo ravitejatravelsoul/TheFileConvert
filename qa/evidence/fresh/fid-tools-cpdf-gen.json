@@ -1,0 +1,275 @@
+[
+ {
+  "tool": "Compress PDF",
+  "test": "PDF-A (text) → 200 KB",
+  "verdict": "PASS",
+  "visual": "PASS",
+  "text": "PASS",
+  "structure": "PASS",
+  "targetMet": true,
+  "input": 290011,
+  "output": 45258,
+  "reduction": "84%",
+  "headline": "Done — 45 KB",
+  "pages": "28/28",
+  "minSsim": 1,
+  "meanSsim": 1,
+  "minPsnr": 99,
+  "maxChangedPct": 0,
+  "sizesKept": true,
+  "minTextRecall": 100,
+  "integrity": [
+   {
+    "file": "fid-cpdf-PDF-A-PDF-A-text-heavy-300k-compressed.pdf",
+    "bytes": 45258,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 28
+   }
+  ]
+ },
+ {
+  "tool": "Compress PDF",
+  "test": "PDF-B (mixed) → 400 KB",
+  "verdict": "PASS",
+  "visual": "PASS",
+  "text": "PASS",
+  "structure": "PASS",
+  "targetMet": true,
+  "input": 751881,
+  "output": 351297,
+  "reduction": "53%",
+  "headline": "Done — 351 KB",
+  "pages": "6/6",
+  "minSsim": 0.9709,
+  "meanSsim": 0.9736,
+  "minPsnr": 38.45,
+  "maxChangedPct": 0.121,
+  "sizesKept": true,
+  "minTextRecall": 100,
+  "integrity": [
+   {
+    "file": "fid-cpdf-PDF-B-PDF-B-mixed-800k-compressed.pdf",
+    "bytes": 351297,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 6
+   }
+  ]
+ },
+ {
+  "tool": "Compress PDF",
+  "test": "PDF-D (photo) → 2000 KB",
+  "verdict": "PASS",
+  "visual": "PASS",
+  "text": "PASS",
+  "structure": "PASS",
+  "targetMet": true,
+  "input": 4942531,
+  "output": 1860364,
+  "reduction": "62%",
+  "headline": "Done — 1.86 MB",
+  "pages": "5/5",
+  "minSsim": 0.967,
+  "meanSsim": 0.9677,
+  "minPsnr": 40.9,
+  "maxChangedPct": 0.001,
+  "sizesKept": true,
+  "minTextRecall": 100,
+  "integrity": [
+   {
+    "file": "fid-cpdf-PDF-D-PDF-D-photo-heavy-5mb-compressed.pdf",
+    "bytes": 1860364,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 5
+   }
+  ]
+ },
+ {
+  "tool": "Compress PDF",
+  "test": "PDF-H (mixed) → 1000 KB",
+  "verdict": "PASS",
+  "visual": "PASS",
+  "text": "PASS",
+  "structure": "PASS",
+  "targetMet": true,
+  "input": 5315233,
+  "output": 921883,
+  "reduction": "83%",
+  "headline": "Done — 922 KB",
+  "pages": "10/10",
+  "minSsim": 0.9922,
+  "meanSsim": 0.9929,
+  "minPsnr": 47.28,
+  "maxChangedPct": 0,
+  "sizesKept": true,
+  "minTextRecall": 100,
+  "integrity": [
+   {
+    "file": "fid-cpdf-PDF-H-PDF-H-multipage-text-image-compressed.pdf",
+    "bytes": 921883,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 10
+   }
+  ]
+ },
+ {
+  "tool": "Compress PDF",
+  "test": "PDF-I (text) → 300 KB",
+  "verdict": "PASS",
+  "visual": "PASS",
+  "text": "PASS",
+  "structure": "PASS",
+  "targetMet": true,
+  "input": 646007,
+  "output": 297772,
+  "reduction": "54%",
+  "headline": "Done — 298 KB",
+  "pages": "4/4",
+  "minSsim": 0.985,
+  "meanSsim": 0.9854,
+  "minPsnr": 42.42,
+  "maxChangedPct": 0,
+  "sizesKept": true,
+  "minTextRecall": 100,
+  "integrity": [
+   {
+    "file": "fid-cpdf-PDF-I-PDF-I-rotated-compressed.pdf",
+    "bytes": 297772,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 4
+   }
+  ]
+ },
+ {
+  "tool": "Compress PDF",
+  "test": "PDF-J (text) → 100 KB",
+  "verdict": "PASS",
+  "visual": "PASS",
+  "text": "PASS",
+  "structure": "PASS",
+  "targetMet": true,
+  "input": 2515,
+  "output": 2515,
+  "reduction": "0%",
+  "headline": "Already under your target",
+  "pages": "6/6",
+  "minSsim": 1,
+  "meanSsim": 1,
+  "minPsnr": 99,
+  "maxChangedPct": 0,
+  "sizesKept": true,
+  "minTextRecall": 100,
+  "integrity": [
+   {
+    "file": "fid-cpdf-PDF-J-PDF-J-mixed-page-sizes.pdf",
+    "bytes": 2515,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 6
+   }
+  ]
+ },
+ {
+  "tool": "Compress PDF",
+  "test": "PDF-M (text) → 100 KB",
+  "verdict": "PASS",
+  "visual": "PASS",
+  "text": "PASS",
+  "structure": "PASS",
+  "targetMet": true,
+  "input": 4798,
+  "output": 4798,
+  "reduction": "0%",
+  "headline": "Already under your target",
+  "pages": "1/1",
+  "minSsim": 1,
+  "meanSsim": 1,
+  "minPsnr": 99,
+  "maxChangedPct": 0,
+  "sizesKept": true,
+  "minTextRecall": 100,
+  "integrity": [
+   {
+    "file": "fid-cpdf-PDF-M-PDF-M-acroform.pdf",
+    "bytes": 4798,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 1
+   }
+  ]
+ },
+ {
+  "tool": "Compress PDF",
+  "test": "PDF-C (scan) → 1000 KB",
+  "verdict": "PASS",
+  "visual": "PASS",
+  "text": "n/a",
+  "structure": "PASS",
+  "targetMet": true,
+  "input": 3624648,
+  "output": 887121,
+  "reduction": "76%",
+  "headline": "Done — 887 KB",
+  "pages": "2/2",
+  "minSsim": 0.9711,
+  "meanSsim": 0.9711,
+  "minPsnr": 36.32,
+  "maxChangedPct": 0.102,
+  "sizesKept": true,
+  "minTextRecall": null,
+  "integrity": [
+   {
+    "file": "fid-cpdf-PDF-C-PDF-C-scan-38mb-incremental-compressed.pdf",
+    "bytes": 887121,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 2
+   }
+  ]
+ },
+ {
+  "tool": "Compress PDF",
+  "test": "REAL-user-scan (scan) → 1000 KB",
+  "verdict": "PASS",
+  "visual": "PASS",
+  "text": "n/a",
+  "structure": "PASS",
+  "targetMet": true,
+  "input": 3982736,
+  "output": 928322,
+  "reduction": "77%",
+  "headline": "Done — 928 KB",
+  "pages": "2/2",
+  "minSsim": 0.9971,
+  "meanSsim": 0.9972,
+  "minPsnr": 49.99,
+  "maxChangedPct": 0,
+  "sizesKept": true,
+  "minTextRecall": null,
+  "integrity": [
+   {
+    "file": "fid-cpdf-REAL-user-scan-TheFileConvert_Scanned_OCR_Test-compressed.pdf",
+    "bytes": 928322,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 2
+   }
+  ]
+ },
+ {
+  "tool": "Fidelity tools",
+  "test": "no third-party requests",
+  "verdict": "PASS",
+  "leaked": []
+ },
+ {
+  "tool": "Fidelity tools",
+  "test": "console errors (all steps)",
+  "verdict": "PASS",
+  "count": 0
+ }
+]

@@ -222,3 +222,17 @@ describe("buildDocx — scanned-form structure", () => {
     expect(xml).toContain('mc:Ignorable="w14"');
   });
 });
+
+describe("buildDocx — two columns", () => {
+  it("starts the right column as far down as it was: its own spacing plus the section's", async () => {
+    const para = (t: string, sb = 0): Block => ({ kind: "paragraph", style: "normal", align: "left", runs: [run(t)], fmt: fmt({ spaceBefore: sb }) });
+    const p = pageOf([para("Title"), { kind: "columns", gap: 24, spaceBefore: 9, left: [para("Left column text")], right: [para("Right column text", 25)] }]);
+    const zip = await JSZip.loadAsync(await buildDocx([p], { title: "t", bodySize: 11, bodyFont: "" }));
+    const xml = await zip.file("word/document.xml")!.async("string");
+    // The column break sits in a paragraph of its own (else its space-before would stay in the left column)…
+    expect(xml).toMatch(/<w:p><w:pPr><w:spacing w:before="0" w:after="0" w:line="20" w:lineRule="exact"\/><\/w:pPr><w:r><w:br w:type="column"\/><\/w:r><\/w:p>/);
+    // …and the right column's first paragraph carries 25 + 9 − 1 pt.
+    const right = xml.slice(xml.indexOf('w:type="column"'));
+    expect(right).toMatch(/<w:spacing w:before="660"/);
+  });
+});

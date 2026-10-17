@@ -14,6 +14,7 @@ const opt = (k) => process.argv.find((a) => a.startsWith(`--${k}=`))?.slice(k.le
 const DIR = path.resolve(opt("out") ?? "qa/fidelity/user-scan");
 const NAME = opt("name") ?? "word";
 const REF = opt("ref");
+const EXPECT = opt("expect");
 fs.mkdirSync(DIR, { recursive: true });
 const suffix = `${mobile ? "-mobile" : ""}${tag ? "-" + tag : ""}`;
 
@@ -41,7 +42,7 @@ try {
   fs.copyFileSync(got, docx);
   execFileSync("python", ["qa/validate/lo.py", "pdf", DIR, docx], { stdio: "pipe", timeout: 600_000 });
   const pdf = docx.replace(/\.docx$/, ".pdf");
-  const report = JSON.parse(execFileSync("python", ["qa/validate/scanform.py", input, pdf, docx, "--dir", DIR, `--suffix=${suffix}`, ...(REF ? ["--ref", REF] : []), ...(input === REAL_SCAN && fs.existsSync(path.join(DIR, "expect.json")) ? ["--expect", path.join(DIR, "expect.json")] : [])], { encoding: "utf8", maxBuffer: 32 << 20 }).trim().split("\n").pop());
+  const report = JSON.parse(execFileSync("python", ["qa/validate/scanform.py", input, pdf, docx, "--dir", DIR, `--suffix=${suffix}`, ...(REF ? ["--ref", REF] : []), ...(EXPECT && fs.existsSync(EXPECT) ? ["--expect", EXPECT] : input === REAL_SCAN && fs.existsSync(path.join(DIR, "expect.json")) ? ["--expect", path.join(DIR, "expect.json")] : [])], { encoding: "utf8", maxBuffer: 32 << 20 }).trim().split("\n").pop());
   const origin = new URL(page.url()).origin;
   const uploads = requests.filter((q) => q.post > 0 || !(q.url.startsWith(origin) || /^(blob|data):/.test(q.url)));
   rec(REF ? "Scan → Word" : "User scan → Word", `${path.basename(input)}${mobile ? " [mobile]" : ""}`, uploads.length ? "FAIL" : report.overall, { ms, stages, uploads: uploads.length, ...report });

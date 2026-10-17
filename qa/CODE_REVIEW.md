@@ -443,6 +443,82 @@ transparent text — all 7 fail on the old code, and the scan suite fails to loa
 
 ---
 
+## Scanned PDF → Word generalisation pass (after commit 519ce0d)
+
+Goal: the three classes that still failed (form, invoice, two-column report) fixed **generically**, checked on
+ten new variants made for this pass (SCAN-WORD-10 … 19: simple / check-box / mixed forms; simple / both-sides /
+dense invoices; text / chart / column-heading / spanning-heading two-column reports), without regressing the
+user's scan or the fixtures that passed. Result (production build, real `/pdf-to-word`, LibreOffice render,
+`qa/evidence/fresh/fid-scans.json`): **17 PASS · 1 LIMITED · 0 FAIL** of 18 (was 2 / 3 / 3 of 8). User scan:
+17/17 structure checks, desktop and mobile, 0 uploads. **Microsoft Word: not automated (installed but
+unlicensed; COM automation hangs) — manual review package in `qa/manual-word-review/`.**
+
+### Defects found and fixed (each with a test that fails on 519ce0d unless marked *guard*)
+| # | Defect (class) | Fix (where) |
+|---|---|---|
+| G-01 | Fill-in lines after labels became stacked rule paragraphs (forms) | `layout.ts` `fillInBlanks`: a rule that starts just after text on its baseline, with no text over it, is a leader piece → a Word tab stop where it started (`leadGap`) and a right tab with an underscore leader where it ended |
+| G-02 | Check boxes read as "[J" or dropped (forms) | `scan.ts` `checkBoxes` (two straight sides of equal height joined by straight top and bottom, square corners, a thin stroke under ⅕ of the side, ink inside = checked) and `eraseCheckboxes` before OCR; `scanPage.ts` places ☐ / ☑ on the label's baseline at its size; `layout.ts` a box starts its own tab-stop cell (`optionStart`, `afterBox`) |
+| G-03 | Section bars were paragraph shading one line high (forms) | `scan.ts`: a standalone band gets its four edges in its own colour → a one-cell shaded table of the band's height |
+| G-04 | Side-by-side blocks on different baselines interleaved and stacked (invoices) | `layout.ts` `sideBySide`: a run of same-size lines split by a ≥ 3 em gutter that no text crosses, whose sides don't pair row by row where both have text → a borderless 1 × 2 table, each cell with its own pitch and alignment |
+| G-05 | A recogniser line's baseline belonged to the other block read in the same line | `scanPage.ts`: a row uses that baseline only when it lies in the bottom 35 % of most of its words' boxes, else the median of its lettered words (symbols such as "*" float) |
+| G-06 | Rows ruled by horizontal lines only were never tables (dense invoice) | `layout.ts` `findGrids`: 3+ lone lines of one extent, evenly stacked → a rows-only grid; its columns from merged text extents, pieces that no row shares merged (a header over right-aligned amounts), edges aligned to the column's text |
+| G-07 | A dark band over such rows became a separate box | `scan.ts`: a band on a stack of row lines of its width gives its top and bottom edges to the rows (the header row) |
+| G-08 | Bold Georgia headings read as regular, ~19 % too large (two-column) | `scanPage.ts`: x-height (cap height for capitals) measured from the ink, pooled per family × size class; bold when the bold widths' size fits it within 5 % and the regular widths' misses it by > 10 % (margin ≥ 7 points). Font x- and cap-heights come from the bundled fonts' OS/2 tables (`HEIGHTS`, generated) |
+| G-09 | A column section's right column started high by the section's own spacing | `docx.ts`: the section's space-before is added to the right column's first block; a spaced first block gets its column break in a 1 pt paragraph of its own (a paragraph that starts with a break takes its space-before in the column it leaves) |
+| G-10 | Chart axes left as rules beside the chart picture | `scanPage.ts`: a graphic's crop takes in lines touching it (up to 1.5 × its size) |
+| G-11 | Column edges exactly at the longest line wrapped last words | `layout.ts`: each column's edge chosen inside its own range — past its longest line, short of its wrap bound (justified text: at the line); the right column's edge moves the page's text edge when needed |
+| G-12 | A rule across the gutter didn't separate column stretches | `layout.ts`: such rules are band cuts (the cut list carries its spanning entry, if any) |
+| G-13 | Low-confidence rows, words and unread display text lost or garbled (all) | `ocr.ts` `refine`: rows averaging < 70 re-read as one line (kept when clearly better and no fewer words); unread text-shaped ink re-read (kept at ≥ 80); single words < 60 re-read (kept when of similar length). Measured: "Tact" → "Issue"; the caption "figure. siuyey counts by aie" → "Figure 1. Survey counts by site."; the "INVOICE" title recovered |
+| G-14 | OCR "&#124;" for a capital I; lone symbols; 2-letter specks | `scanPage.ts`: a "&#124;" as tall as the capitals beside it at the start or end of a word run → "I"; symbols kept only between words; 2-letter words need ≥ 40 confidence |
+| G-15 | A borderless table's rows all one height (a heading row followed by more space) | `layout.ts`: each row as tall as its baseline gap to the next |
+| G-16 | Cambria sized ~5 % large | Caladea is not width-compatible with the Cambria that Word ships (6.4 % / 3.9 % narrower, measured); `gen-font-widths.py` scales its table by the measured ratio (one number per style; no Cambria data copied) |
+| G-17 | A cell of several lines used the table's pitch (a shaded panel) | `layout.ts` `gridTable`: a multi-line cell keeps its own baseline gap |
+| G-18 | A value's fill-in underline went to the label's cell | `layout.ts` `underlineCells`: the column the line mostly lies under |
+| G-19 | A header set at the left over right-aligned amounts was aligned right with them (rows-only tables) | `layout.ts` `gridTable`: a right-aligned column after a left-aligned one starts at its leftmost text (its header) when that is nearer than the middle of the gap |
+| — | *guards*: a line under a value stays its underline; rows that pair stay an ordinary borderless table | pass before and after (no over-reach) |
+
+QA-harness fixes (they mis-graded the product; none loosens a bar): a word's original extent is measured on
+the text line that best overlaps the rendered word (the padded box caught the next line's ascenders and
+inflated heights); 1–2 character words are judged by centre distance (a few-pixel box loses its IoU to a 1 px
+offset); light-on-dark text is measured as light pixels; text recall is measured on the render (list numbers
+and page-number fields aren't XML text runs); leader underscores are never words; grades are per dimension
+(TEXT, LAYOUT, TABLES, BORDERS/RULES, FORMS, IMAGES, TYPOGRAPHY, READING ORDER) and any FAIL fails the fixture.
+
+### Review for generality
+- **Fixture-specific constants:** none. No coordinate, page size, text or fixture name appears in product
+  code; every new rule was checked on at least two fixtures of its class and on the user's scan.
+- **Magic pixel thresholds / DPI:** distances are points × `pxPerPt` (pixels) or em of the text's own size
+  (layout): check box 5–18 pt, band ≥ 60 × 8 pt, gutter ≥ 3 em, baseline snap 0.75 em, x-band −½ px for
+  anti-aliasing. The only raw pixel constants are in `ocr.ts` (unread text 20–150 px), tied to `OCR_SCALE`
+  (3 px/pt, ≈ 7–50 pt). Ratios (⅕ stroke, 35 % density, 5 % / 10 % fits) are scale-free.
+- **Quadratic loops:** `findGrids` (rules²) and the new lone-line stacking (lone lines²): tens of rules per
+  page. `sideBySide` scans each line's gaps once per start line (lines × gaps). The symbol / "I" checks scan
+  the words per symbol (few symbols). `checkBoxes` and `unreadText` are flood fills, linear in pixels / cells,
+  with an early exit for pieces larger than a box. No pass is quadratic in pixels.
+- **Duplicated grouping logic:** visual rows (words < 3 em apart within a recogniser line) are computed in
+  `ocr.ts` (re-read) and in `scanPage.ts` (baselines): the same rule on different data (pixels vs page
+  points), kept separate on purpose so the OCR module stays independent of PDF → Word.
+- **False-positive columns:** a gutter still needs running text on both sides; the column edge now comes from
+  each column's own lines; a justified paragraph's word gaps never form a gutter (words are joined into runs).
+- **False-positive lines and boxes:** a check box needs square corners and a thin stroke (the "Q" of "Quay" was
+  rejected only by the stroke test — measured); no false box on any fixture or on the user's scan.
+- **Fallback quality:** the contract is unchanged — a region read badly stays a picture (stamp, signature,
+  chart); text is recovered from it only when read at ≥ 80 confidence.
+- **Memory / performance:** extra per page: one luminance copy (`textLum`) and a cell grid. Measured on the
+  production build (`fid-scanperf.json`): 2 pages 6.6 s, 5 pages 32.5 s, 10 pages 51.4 s (3.3–6.5 s per page;
+  the re-read adds at most 60 reads per page). The longest main-thread task was 0.6 s (one page's pixel
+  analysis) and progress updates every page — no freeze. Moving pixel analysis to a Web Worker would remove
+  the 0.3–0.6 s pauses; not done in this pass.
+
+### Remaining limitations (honest)
+- Transcript (LIMITED): bold term headings with digits ("Autumn 2024") are measured as regular and come out
+  2–3 pt large; a recognised "I" may sit a few points right of the original.
+- Bold by stroke weight still marks a few short regular words bold (a table cell): the ratios overlap (real
+  labels 1.26–1.48 × the page's reference, false ones 1.37–1.46).
+- Pixel analysis runs on the main thread (pauses of up to 0.6 s per page).
+
+---
+
 ## Investigated, not product defects (kept for the record)
 
 | Symptom | Finding |

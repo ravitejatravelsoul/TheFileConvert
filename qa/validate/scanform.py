@@ -84,28 +84,54 @@ def rule_cover(src, out, tol=4.0):
 def tokens(text):
     """Comparable words: letters and digits only, lower case (OCR punctuation varies)."""
     out = []
-    for t in text.split():
+    # Underscores are blanks drawn as text (a leader rendered as "name______"), never part of a word.
+    for t in text.replace("_", " ").split():
+        # A blank written as underscores ("Name ______") is a line to fill in, drawn by the Word document as a
+        # leader or border, not a word.
+        if re.fullmatch(r"_+", t):
+            continue
         t = re.sub(r"[^\w]", "", t, flags=re.UNICODE).lower()
         if t:
             out.append(t)
     return out
 
 
-def text_recall(ref_pdf, out_docx):
-    """Share of the original's words (as a multiset) found in the Word document's text."""
+def text_recall(ref_pdf, out_docx, out_pdf=None):
+    """Share of the original's words (as a multiset) found in the Word document as a reader sees it: the
+    independent render's text when there is one (list numbers and page-number fields are not in the XML's
+    text runs), else the document's text runs."""
     import collections
     import zipfile
     ref = collections.Counter(tokens(" ".join(p.get_text() for p in pymupdf.open(ref_pdf))))
-    xml = zipfile.ZipFile(out_docx).read("word/document.xml").decode("utf8")
-    xml = re.sub(r"<w:tab/>|</w:p>", " ", xml)
-    got = collections.Counter(tokens(html.unescape(" ".join(re.findall(r"<w:t(?: [^>]*)?>([^<]*)</w:t>|(?<=>) (?=<)", xml)))))
+    if out_pdf:
+        got = collections.Counter(tokens(" ".join(p.get_text() for p in pymupdf.open(out_pdf))))
+    else:
+        xml = zipfile.ZipFile(out_docx).read("word/document.xml").decode("utf8")
+        xml = re.sub(r"<w:tab/>|</w:p>", " ", xml)
+        got = collections.Counter(tokens(html.unescape(" ".join(re.findall(r"<w:t(?: [^>]*)?>([^<]*)</w:t>|(?<=>) (?=<)", xml)))))
     total = sum(ref.values())
     hit = sum(min(n, got[w]) for w, n in ref.items())
     return round(hit / max(1, total) * 100, 1)
 
 
 def words_of(page):
-    return [(w[0], w[1], w[2], w[3], w[4]) for w in page.get_text("words") if re.sub(r"\W+", "", w[4])]
+    """Words of a rendered page; a tab leader's underscores are a line (a blank to fill in), not letters, so
+    they are cut off a word and don't widen its box."""
+    out = []
+    for blk in page.get_text("rawdict")["blocks"]:
+        for ln in blk.get("lines", []):
+            for sp in ln["spans"]:
+                cur = []
+                for ch in sp["chars"] + [{"c": " ", "bbox": (0, 0, 0, 0)}]:
+                    if ch["c"].isspace() or ch["c"] == "_":
+                        if cur:
+                            x0 = min(c["bbox"][0] for c in cur); y0 = min(c["bbox"][1] for c in cur)
+                            x1 = max(c["bbox"][2] for c in cur); y1 = max(c["bbox"][3] for c in cur)
+                            out.append((x0, y0, x1, y1, "".join(c["c"] for c in cur)))
+                        cur = []
+                    else:
+                        cur.append(ch)
+    return [w for w in out if re.sub(r"\W+", "", w[4])]
 
 
 def strip_rules(mask):
@@ -128,26 +154,55 @@ def strip_rules(mask):
 
 
 def in_place(word, src_ink, out_ink):
-    """The original has ink where this word is, of about the word's extent."""
+    """The original has ink where this word is, of about the word's extent.
+
+    Around the rendered word (grown by 3 pt) the original's ink is split into text lines — runs of inked rows
+    separated by blank rows — and the line overlapping the word most stands for it: a neighbouring line's
+    ascenders or descenders inside the grown box mustn't inflate the original's extent."""
     x0, y0, x1, y1 = [int(round(v * K)) for v in word[:4]]
     pad = int(3 * K)
     X0, Y0, X1, Y1 = max(0, x0 - pad), max(0, y0 - pad), min(src_ink.shape[1], x1 + pad), min(src_ink.shape[0], y1 + pad)
     region = src_ink[Y0:Y1, X0:X1]
     if region.size == 0 or region.mean() < 0.02:
         return False, 0.0, None
-    ys, xs = np.where(region)
-    sb = (xs.min() + X0, ys.min() + Y0, xs.max() + X0, ys.max() + Y0)
+    # Light text on a dark band: the original's "ink" there is the band; its text is the light pixels.
+    if region.mean() > 0.5:
+        src_ink = ~src_ink
+        region = src_ink[Y0:Y1, X0:X1]
+        if region.mean() < 0.02:
+            return False, 0.0, None
+    rows = region.any(axis=1)
+    bands, start = [], None
+    for i, on in enumerate(list(rows) + [False]):
+        if on and start is None:
+            start = i
+        elif not on and start is not None:
+            bands.append((start + Y0, i - 1 + Y0))
+            start = None
+    if not bands:
+        return False, 0.0, None
+    ov = lambda b: max(0, min(y1, b[1]) - max(y0, b[0]) + 1)
+    by0, by1 = max(bands, key=lambda b: (ov(b), -(abs((b[0] + b[1]) / 2 - (y0 + y1) / 2))))
+    band = src_ink[by0 : by1 + 1, X0:X1]
+    ys, xs = np.where(band)
+    sb = (xs.min() + X0, ys.min() + by0, xs.max() + X0, ys.max() + by0)
     ix = max(0, min(x1, sb[2]) - max(x0, sb[0]))
     iy = max(0, min(y1, sb[3]) - max(y0, sb[1]))
     inter = ix * iy
     union = (x1 - x0) * (y1 - y0) + (sb[2] - sb[0]) * (sb[3] - sb[1]) - inter
     iou = inter / union if union > 0 else 0
-    # glyph-height agreement: ink height of the original vs the rendered word's own ink height
+    # glyph-height agreement: the original's line height of ink vs the rendered word's own ink height
     oy, ox = np.where(out_ink[max(0, y0):y1, max(0, x0):x1])
     out_h = (oy.max() - oy.min() + 1) if oy.size else None
     src_h = sb[3] - sb[1] + 1
     ratio = (out_h / src_h) if out_h else None
-    return iou >= 0.35, round(iou, 3), ratio
+    ok = iou >= 0.35
+    # One or two characters: a box a few pixels wide loses most of its overlap to a 1-2 px offset; such a
+    # word is in place when its centre is within ~half its height of the original's.
+    if not ok and len(re.sub(r"\W", "", word[4])) <= 2 and iou >= 0.15:
+        h = max(1, y1 - y0)
+        ok = abs((x0 + x1) / 2 - (sb[0] + sb[2]) / 2) <= 0.6 * h and abs((y0 + y1) / 2 - (sb[1] + sb[3]) / 2) <= 0.6 * h
+    return ok, round(iou, 3), ratio
 
 
 def overlay(a, b, path):
@@ -164,7 +219,7 @@ def overlay(a, b, path):
     Image.fromarray(img).save(path)
 
 
-def check_expect(exp, doc, out_doc_pdf):
+def check_expect(exp, doc, out_doc_pdf, docx_path=None):
     """Document-specific structure checks (see module doc)."""
     import docx as pydocx
 
@@ -172,9 +227,25 @@ def check_expect(exp, doc, out_doc_pdf):
     pages = [words_of(p) for p in out_doc_pdf]
     norm = lambda s: re.sub(r"[^\w$/.,:-]+", "", s.lower())
 
+    def find_all(phrase, page_no):
+        """Every place a phrase occurs on a page (boxes)."""
+        toks = [norm(t) for t in phrase.split() if re.sub(r"\W+", "", t)]
+        if not toks:
+            return []
+        ws = pages[page_no - 1] if page_no - 1 < len(pages) else []
+        keys = [norm(w[4]) for w in ws]
+        out = []
+        for i in range(len(keys) - len(toks) + 1):
+            if keys[i : i + len(toks)] == toks:
+                sel = ws[i : i + len(toks)]
+                out.append((min(w[0] for w in sel), min(w[1] for w in sel), max(w[2] for w in sel), max(w[3] for w in sel)))
+        return out
+
     def find(phrase, page_no):
         # Punctuation-only tokens ("-") aren't words on either side.
         toks = [norm(t) for t in phrase.split() if re.sub(r"\W+", "", t)]
+        if not toks:
+            return None
         ws = pages[page_no - 1] if page_no - 1 < len(pages) else []
         keys = [norm(w[4]) for w in ws]
         for i in range(len(keys) - len(toks) + 1):
@@ -214,13 +285,29 @@ def check_expect(exp, doc, out_doc_pdf):
         if kind == "present":
             box = find(c["phrase"], pg)
             ok, detail = box is not None, str(box)
+            # Optional position bounds (page points from the top-left): which column / which part of the page.
+            if box is not None:
+                for key, test in (("x_min", lambda v: box[0] >= v), ("x_max", lambda v: box[0] <= v), ("y_min", lambda v: box[1] >= v), ("y_max", lambda v: box[1] <= v)):
+                    if key in c and not test(c[key]):
+                        ok = False
+                        detail += f" fails {key}={c[key]}"
         elif kind == "same_line":
-            boxes = [find(p, pg) for p in c["phrases"]]
-            if all(boxes):
-                mids = [(b[1] + b[3]) / 2 for b in boxes]
-                xs = [b[0] for b in boxes]
-                ok = max(mids) - min(mids) <= c.get("tol", 6) and xs == sorted(xs)
-                detail = f"mid-y {[round(m, 1) for m in mids]} x {[round(x, 1) for x in xs]}"
+            # Any set of occurrences, one per phrase, on one line and in order (a word like "Date" may occur
+            # elsewhere on the page too).
+            import itertools
+            cands = [find_all(p, pg) for p in c["phrases"]]
+            if all(cands):
+                best = None
+                for boxes in itertools.islice(itertools.product(*cands), 5000):
+                    mids = [(b[1] + b[3]) / 2 for b in boxes]
+                    xs = [b[0] for b in boxes]
+                    spread = max(mids) - min(mids)
+                    if xs == sorted(xs) and (best is None or spread < best[0]):
+                        best = (spread, mids, xs)
+                if best is None:
+                    best = (999, [0], [0])
+                ok = best[0] <= c.get("tol", 6)
+                detail = f"mid-y {[round(m, 1) for m in best[1]]} x {[round(x, 1) for x in best[2]]}"
             else:
                 detail = f"missing {[p for p, b in zip(c['phrases'], boxes) if not b]}"
         elif kind == "boxed":
@@ -240,6 +327,32 @@ def check_expect(exp, doc, out_doc_pdf):
             match = [t for t in tables if len(t) == len(want) and all(len(r) >= len(w) for r, w in zip(t, want)) and all(norm(" ".join(r[: len(w)])) == norm(" ".join(w)) for r, w in zip(t, want))]
             ok = bool(match)
             detail = f"tables in docx: {[f'{len(t)}x{len(t[0]) if t else 0}' for t in tables]}"
+        elif kind in ("leaders", "checkboxes", "pictures", "ntables", "docorder"):
+            import zipfile
+            xml = zipfile.ZipFile(docx_path).read("word/document.xml").decode("utf8")
+            text = html.unescape(" ".join(re.findall(r"<w:t(?: [^>]*)?>([^<]*)</w:t>", re.sub(r"<w:tab/>", "<w:t> </w:t>", xml))))
+            if kind == "leaders":
+                n = len(re.findall(r'w:leader="underscore"', xml)) + len(re.findall(r"<w:tcBorders><w:bottom ", xml))
+                ok, detail = n >= c["min"], f"{n} blanks (tab leaders + cell underlines), want >= {c['min']}"
+            elif kind == "checkboxes":
+                boxes, ticked = text.count("☐") + text.count("☑"), text.count("☑")
+                ok, detail = boxes == c["total"] and ticked == c["checked"], f"{boxes} boxes, {ticked} checked (want {c['total']}, {c['checked']})"
+            elif kind == "pictures":
+                n = xml.count("<w:drawing")
+                ok, detail = c.get("min", 0) <= n <= c.get("max", 99), f"{n} pictures"
+            elif kind == "ntables":
+                n = len(doc.tables)
+                ok, detail = n >= c["min"], f"{n} tables"
+            else:
+                pos, last = [], -1
+                flat = re.sub(r"\s+", " ", text)
+                for ph in c["phrases"]:
+                    k2 = flat.find(ph, last + 1)
+                    pos.append(k2)
+                    if k2 < 0:
+                        break
+                    last = k2
+                ok, detail = len(pos) == len(c["phrases"]) and all(v >= 0 for v in pos), f"positions {pos}"
         elif kind == "near_top":
             box = find(c["phrase"], pg)
             first = min((w[1] for w in pages[pg - 1]), default=None) if pg - 1 < len(pages) else None
@@ -317,9 +430,9 @@ def main():
     res["tables"] = [f"{len(t.rows)}x{len(t.columns)}" for t in doc.tables]
     if a.expect:
         exp = json.load(open(a.expect, encoding="utf8"))
-        res["checks"] = check_expect(exp, doc, O)
+        res["checks"] = check_expect(exp, doc, O, a.out_docx)
     if a.ref:
-        res["textRecallPct"] = text_recall(a.ref, a.out_docx)
+        res["textRecallPct"] = text_recall(a.ref, a.out_docx, a.out_pdf)
     # Grades
     band = lambda v, p, l: "n/a" if v is None else "PASS" if v >= p else "LIMITED" if v >= l else "FAIL"
     res["layout"] = band(res["wordsInPlacePct"], 95, 80) if res["pagesOut"] == res["pagesSrc"] else "FAIL"
@@ -332,7 +445,18 @@ def main():
         failed = [c["id"] for c in res["checks"] if not c["ok"]]
         res["checksFailed"] = failed
         res["structure"] = "PASS" if not failed else "FAIL"
-    grades = [res[k] for k in ("text", "layout", "rules", "typography", "garbage", "structure") if k in res and res[k] != "n/a"]
+    # Separate dimensions, none hiding another: TEXT, LAYOUT, TABLES, BORDERS/RULES, FORMS, IMAGES,
+    # TYPOGRAPHY, READING ORDER. A check belongs to the dimension named by its id prefix ("tables:", "forms:",
+    # "images:", "order:"); other checks count toward LAYOUT.
+    dims = {"TEXT": res.get("text", "n/a"), "LAYOUT": res["layout"], "TABLES": "n/a", "BORDERS_RULES": res["rules"], "FORMS": "n/a", "IMAGES": "n/a", "TYPOGRAPHY": res["typography"], "READING_ORDER": "n/a"}
+    for ck in res.get("checks", []):
+        key = {"tables": "TABLES", "forms": "FORMS", "images": "IMAGES", "order": "READING_ORDER"}.get(ck["id"].split(":")[0], "LAYOUT")
+        cur = dims[key]
+        dims[key] = "FAIL" if (not ck["ok"] or cur == "FAIL") else ("LIMITED" if cur == "LIMITED" else "PASS")
+    if res["garbage"] != "PASS":
+        dims["TEXT"] = res["garbage"] if dims["TEXT"] in ("PASS", "n/a") else dims["TEXT"]
+    res["dimensions"] = dims
+    grades = [v for v in dims.values() if v != "n/a"]
     res["overall"] = "FAIL" if "FAIL" in grades else "LIMITED" if "LIMITED" in grades else "PASS"
     print(json.dumps(res))
 

@@ -225,6 +225,8 @@ interface Cell {
   runs: Run[];
   /** A drawn fill (“______”, “......”) that Word writes as a tab leader, not as text. */
   leader?: "underscore" | "dot";
+  /** The fill starts clearly after the text before it: a plain tab stop first, where it starts. */
+  leadGap?: boolean;
 }
 
 interface Line {
@@ -241,6 +243,8 @@ interface Line {
   bold: boolean;
   /** Dominant look, used to keep differently styled lines in separate paragraphs. */
   look: string;
+  /** The pieces of text the line was built from. */
+  items: Decorated[];
 }
 
 interface ImageEntry {
@@ -298,13 +302,17 @@ function buildLine(input: Decorated[]): Line {
   for (const it of sorted) {
     const gap = prev ? it.x - (prev.x + prev.w) : 0;
     if (it.leader) {
-      cells.push({ x0: it.x, x1: it.x + it.w, runs: [], leader: it.leader });
+      cells.push({ x0: it.x, x1: it.x + it.w, runs: [], leader: it.leader, leadGap: Boolean(prev && gap > 0.4 * it.size) });
       cell = null;
       prev = it;
       continue;
     }
     const bulletGap = prev && cell && cell.runs.length === 1 && /^[•●◦▪■□➢►▶✓✔❖◆◇○‣∙·*–-]$/.test(cell.runs[0].text.trim()) && gap > 0.5 * it.size;
-    if (!cell || (prev && gap > CELL_GAP * Math.max(prev.size, it.size)) || bulletGap) {
+    // A check box's label starts at its own stop when set apart from the box.
+    const afterBox = prev && cell && cell.runs.length === 1 && /^[☐☑☒]$/.test(cell.runs[0].text.trim()) && gap > 0.3 * it.size;
+    // A check box after a gap starts the next option of a choice row ("☐ Yes   ☐ No"): its own tab stop.
+    const optionStart = prev && /^[☐☑☒]$/.test(it.str.trim()) && gap > 0.5 * it.size;
+    if (!cell || (prev && gap > CELL_GAP * Math.max(prev.size, it.size)) || bulletGap || optionStart || afterBox) {
       cell = { x0: it.x, x1: it.x + it.w, runs: [] };
       cells.push(cell);
       pushRun(cell.runs, it.str.replace(/^\s+/, ""), it);
@@ -324,7 +332,7 @@ function buildLine(input: Decorated[]): Line {
   const runs: Run[] = [];
   const base = live.find((c) => c.runs.length)?.runs[0] ?? { bold: false, italic: false, size };
   live.forEach((c, i) => {
-    if (i > 0) pushRun(runs, "\t", c.runs[0] ?? runs[runs.length - 1] ?? base);
+    if (i > 0) pushRun(runs, c.leader && c.leadGap ? "\t\t" : "\t", c.runs[0] ?? runs[runs.length - 1] ?? base);
     for (const r of c.runs) pushRun(runs, r.text, r);
   });
   const text = runs.map((r) => r.text).join("");
@@ -344,7 +352,7 @@ function buildLine(input: Decorated[]): Line {
   let best = -1;
   for (const [k, n] of tally) if (n > best) [look, best] = [k, n];
   const descent = median(sorted.map((i) => i.descent ?? 0.22));
-  return { kind: "text", y, top: y + size * 0.8, x0: sorted[0].x, x1: Math.max(...sorted.map((i) => i.x + i.w)), size, descent, cells: live, runs, text, bold: chars > 0 && boldChars / chars > 0.8, look };
+  return { kind: "text", y, top: y + size * 0.8, x0: sorted[0].x, x1: Math.max(...sorted.map((i) => i.x + i.w)), size, descent, cells: live, runs, text, bold: chars > 0 && boldChars / chars > 0.8, look, items: input };
 }
 
 /** Groups items into lines by baseline, top to bottom. */
@@ -459,6 +467,30 @@ function findGrids(rules: Rule[]): Grid[] {
     if (!groups.has(k)) groups.set(k, []);
     groups.get(k)!.push(r);
   });
+  // Lines that touch nothing (rows of a table ruled by horizontal lines only, 20 pt apart): a stack of 3+
+  // of the same extent, evenly spaced, is one rows-only table.
+  const lone = [...groups.entries()].filter(([, g]) => g.length === 1 && h.includes(g[0])).map(([k, g]) => ({ k, r: g[0] }));
+  lone.sort((a, b) => b.r.y0 - a.r.y0);
+  const used = new Set<number>();
+  for (let i = 0; i < lone.length; i++) {
+    if (used.has(lone[i].k)) continue;
+    const base = lone[i].r;
+    const stack = [lone[i]];
+    for (let j = i + 1; j < lone.length; j++) {
+      const r = lone[j].r;
+      if (used.has(lone[j].k) || Math.abs(r.x0 - base.x0) > 4 || Math.abs(r.x1 - base.x1) > 4) continue;
+      const last = stack[stack.length - 1].r;
+      const gap = last.y0 - r.y0;
+      const first = stack.length >= 2 ? stack[0].r.y0 - stack[1].r.y0 : gap;
+      if (gap < 6 || gap > 60 || gap > first * 1.8 + 2) break;
+      stack.push(lone[j]);
+    }
+    if (stack.length < 3) continue;
+    for (const e of stack) used.add(e.k);
+    const merged = stack.flatMap((e) => groups.get(e.k)!);
+    groups.set(stack[0].k, merged);
+    for (const e of stack.slice(1)) groups.delete(e.k);
+  }
   const grids: Grid[] = [];
   for (const g of groups.values()) {
     const hs = g.filter((r) => h.includes(r));
@@ -602,13 +634,16 @@ function borderlessTable(rowsLines: Line[], marginLeft: number, pitch: number, r
   }
   if (cols.length < 2 || cols.length > 12) return null;
   const colOf = (c: Cell) => cols.findIndex((k) => c.x0 >= k.x0 - 0.5 && c.x0 <= k.x1 + 0.5);
-  const rows: TableRow[] = rowsLines.map((l) => {
+  // Each row as tall as the gap to the next row's baseline (a heading row is often followed by more space
+  // than the rows below it); the last row, the usual pitch.
+  const rows: TableRow[] = rowsLines.map((l, k) => {
     const cells: TableCell[] = cols.map(() => ({ paragraphs: [{ runs: [], align: "left", line: pitch }], span: 1 }));
     for (const c of l.cells) {
       const k = Math.max(0, colOf(c));
       appendRuns(cells[k].paragraphs[0].runs, c.runs, cells[k].paragraphs[0].runs.length ? " " : "");
     }
-    return { height: pitch, cells };
+    const next = rowsLines[k + 1];
+    return { height: next ? Math.max(pitch, l.y - next.y) : pitch, cells };
   });
   // A real table fills its columns; lines whose parts merely sit at different places (label/value pairs at
   // different tab positions) leave most cells empty — those stay paragraphs with their own tab stops.
@@ -653,8 +688,15 @@ function underlineCells(table: Extract<Block, { kind: "table" }>, rowsLines: Lin
     const bottom = l.y - l.descent * l.size;
     for (const rule of [...ctx.rules]) {
       if (Math.abs(rule.y1 - rule.y0) > 0.6 || rule.y0 >= bottom + 1 || bottom - rule.y0 > l.size * 1.2) continue;
-      const k = starts.findIndex((s, i) => rule.x0 >= s - 8 && rule.x0 < s + table.columns[i] - 4);
-      if (k < 0) continue;
+      // The column the line mostly lies under (a fill-in line starts a little before its value, in the
+      // label's column).
+      let k = -1;
+      let best = 0;
+      starts.forEach((s, i) => {
+        const o = Math.min(rule.x1, s + table.columns[i]) - Math.max(rule.x0, s);
+        if (o > best) [k, best] = [i, o];
+      });
+      if (k < 0 || best < 0.5 * Math.min(rule.x1 - rule.x0, table.columns[k])) continue;
       const cell = table.rows[r].cells[k];
       if (!cell?.paragraphs[0]?.runs.length) continue;
       const end = starts[k] + table.columns[k];
@@ -664,6 +706,88 @@ function underlineCells(table: Extract<Block, { kind: "table" }>, rowsLines: Lin
       ctx.rules.splice(ctx.rules.indexOf(rule), 1);
     }
   });
+}
+
+/**
+ * Two blocks of text side by side — a sender's address beside invoice details, a name beside a date column —
+ * set in different sizes and line pitches, so their lines don't pair up row by row (pairing them into one
+ * table interleaves and stacks them). Found as a run of consecutive lines split by one gutter at least 3 em
+ * wide that no text crosses, with 2+ lines on each side. When each side's lines do pair with the other's
+ * (same count, same baselines) it is an ordinary borderless table and is left to that. Otherwise: a
+ * borderless 1 × 2 table, each cell holding its own block's lines at their own pitch and alignment.
+ */
+function sideBySide(entries: Entry[], i: number, region: Region, marginLeft: number, leading: number, pageH: number): { placed: Placed; end: number } | null {
+  const lineAt = (k: number) => (entries[k]?.kind === "text" ? (entries[k] as Line) : null);
+  const seed = [lineAt(i), lineAt(i + 1)].find((l) => l && l.cells.length >= 2);
+  if (!seed || !lineAt(i)) return null;
+  const gaps = seed.cells
+    .slice(1)
+    .map((c, k) => ({ a: seed.cells[k].x1, b: c.x0 }))
+    .filter((g) => g.b - g.a >= 3 * seed.size)
+    .sort((p, q) => q.b - q.a - (p.b - p.a));
+  for (const gap of gaps) {
+    const gx = (gap.a + gap.b) / 2;
+    const run: Line[] = [];
+    let j = i;
+    for (; j < entries.length; j++) {
+      const l = lineAt(j);
+      // (Text of about the block's size only: a title above isn't part of the address beside the details.)
+      if (!l || l.cells.some((c) => c.x0 < gx - 1 && c.x1 > gx + 1) || l.cells.some((c) => c.leader) || BULLET.test(l.text) || NUMBERED.test(l.text) || Math.abs(l.size - seed.size) > 0.3 * seed.size) break;
+      const prev = run[run.length - 1];
+      if (prev && prev.y - l.y > 2.2 * Math.max(prev.size, l.size)) break;
+      run.push(l);
+    }
+    if (run.length < 3) continue;
+    const items = run.flatMap((l) => l.items);
+    const leftLines = groupLines(items.filter((it) => it.x + it.w <= gx));
+    const rightLines = groupLines(items.filter((it) => it.x >= gx));
+    if (leftLines.length < 2 || rightLines.length < 2) continue;
+    // Pairing is judged where both sides have text (a heading under a two-column header row belongs to
+    // neither): rows that pair there are an ordinary borderless table.
+    const hi = Math.min(leftLines[0].y, rightLines[0].y) + 0.3 * seed.size;
+    const lo = Math.max(leftLines[leftLines.length - 1].y, rightLines[rightLines.length - 1].y) - 0.3 * seed.size;
+    const inL = leftLines.filter((l) => l.y <= hi && l.y >= lo);
+    const inR = rightLines.filter((l) => l.y <= hi && l.y >= lo);
+    const paired = inL.length === inR.length && inL.every((l, k) => Math.abs(l.y - inR[k].y) <= 0.15 * Math.max(l.size, inR[k].size));
+    if (paired) return null;
+    // Each side: its lines at its own pitch; the first line's box placed where it was.
+    const pitchOf = (ls: Line[]) => (ls.length >= 2 ? (ls[0].y - ls[ls.length - 1].y) / (ls.length - 1) : ls[0].size * leading);
+    const boxTop = (ls: Line[]) => ls[0].y + pitchOf(ls) - ls[0].descent * ls[0].size;
+    const top = Math.max(boxTop(leftLines), boxTop(rightLines));
+    const bottom = Math.min(...[leftLines, rightLines].map((ls) => ls[ls.length - 1].y - ls[ls.length - 1].descent * ls[ls.length - 1].size));
+    const x0 = Math.min(...leftLines.map((l) => l.x0));
+    const rx0 = Math.min(...rightLines.map((l) => l.x0));
+    const rx1 = Math.max(...rightLines.map((l) => l.x1));
+    const spread = (v: number[]) => Math.max(...v) - Math.min(...v);
+    const rightAligned = spread(rightLines.map((l) => l.x1)) <= 2.5 && spread(rightLines.map((l) => l.x0)) > 3;
+    const split = rightAligned ? gx : rx0;
+    const end = rightAligned ? rx1 + 1 : Math.max(rx1 + 2, region.right);
+    const cellOf = (ls: Line[], left: number, align: Align): TableCell => {
+      const pitch = Math.round(pitchOf(ls) * 20) / 20;
+      return {
+        span: 1,
+        paragraphs: ls.map((l, k) => ({
+          runs: l.runs,
+          align,
+          line: pitch,
+          tabs: l.cells.length >= 2 ? l.cells.slice(1).map((c) => ({ pos: tw(c.x0 - left), align: "left" as const })) : undefined,
+          spaceBefore: k === 0 ? tw(Math.max(0, top - boxTop(ls))) : undefined,
+        })),
+      };
+    };
+    const block: Block = {
+      kind: "table",
+      columns: [split - x0, end - split],
+      rows: [{ height: Math.max(4, top - bottom), cells: [cellOf(leftLines, x0, "left"), cellOf(rightLines, split, rightAligned ? "right" : "left")] }],
+      bordered: false,
+      border: null,
+      indent: tw(x0 - marginLeft),
+      spaceBefore: 0,
+      cellMargin: { left: 0, right: 0, top: 0 },
+    };
+    return { placed: { block, top: pageH - top, bottom: pageH - bottom }, end: j };
+  }
+  return null;
 }
 
 /** Turns an ordered list of lines and pictures from one text flow into blocks. */
@@ -776,6 +900,7 @@ function blocksFor(entries: Entry[], region: Region, ctx: FlowContext): Placed[]
       tabLine.cells.slice(opts.textLeft !== undefined ? 2 : 1).forEach((c, k, arr) => {
         const last = k === arr.length - 1;
         // A blank to fill in ends at a right-aligned stop with an underscore (or dot) leader.
+        if (c.leader && c.leadGap) fmt.tabs.push({ pos: tw(c.x0 - ml), align: "left" });
         if (c.leader) fmt.tabs.push({ pos: tw(c.x1 - ml), align: "right", leader: c.leader });
         else if (last && Math.abs(c.x1 - region.right) < 3) fmt.tabs.push({ pos: tw(c.x1 - ml), align: "right" });
         else fmt.tabs.push({ pos: tw(c.x0 - ml), align: "left" });
@@ -826,6 +951,15 @@ function blocksFor(entries: Entry[], region: Region, ctx: FlowContext): Placed[]
       placed.push({ block: { kind: "image", image: e.image, width: e.image.w * scale, height: e.image.h * scale, fmt }, top: pageH - (e.image.y + e.image.h), bottom: pageH - e.image.y });
       currentList = null;
       i++;
+      continue;
+    }
+
+    // Two blocks side by side (an address beside invoice details) whose lines don't pair up row by row.
+    const pair = sideBySide(entries, i, region, ctx.marginLeft, stats.leading, pageH);
+    if (pair) {
+      placed.push(pair.placed);
+      currentList = null;
+      i = pair.end;
       continue;
     }
 
@@ -1075,9 +1209,45 @@ function gridTable(g: Grid, items: Decorated[], fills: Fill[], page: PageInput, 
   const inside = items.filter((it) => it.x >= g.x0 - 2 && it.x <= g.x1 + 2 && it.y <= g.y1 + 1 && it.y >= g.y0 - 1);
   let xs = g.xs;
   if (g.openSides) {
-    // Rows ruled by horizontal lines only: take the columns from where the text starts.
-    const starts = cluster(inside.map((i) => i.x), 6);
-    xs = [g.x0, ...starts.filter((x) => x > g.x0 + 6), g.x1];
+    // Rows ruled by horizontal lines only: columns are where the text sits — the merged horizontal extents of
+    // the cells across all rows (right-aligned amounts of different widths overlap into one column). A column
+    // whose text lines up on the left starts at it; one whose text lines up on the right ends at it.
+    const rowLines = groupLines(inside);
+    const spans = rowLines
+      .flatMap((l, row) => l.cells.map((c) => ({ x0: c.x0, x1: c.x1, row })))
+      .sort((a, b) => a.x0 - b.x0);
+    let cols: { x0: number; x1: number; starts: number[]; ends: number[]; rows: Set<number> }[] = [];
+    for (const sp of spans) {
+      const last = cols[cols.length - 1];
+      if (last && sp.x0 <= last.x1 + 4) {
+        last.x1 = Math.max(last.x1, sp.x1);
+        last.starts.push(sp.x0);
+        last.ends.push(sp.x1);
+        last.rows.add(sp.row);
+      } else cols.push({ x0: sp.x0, x1: sp.x1, starts: [sp.x0], ends: [sp.x1], rows: new Set([sp.row]) });
+    }
+    // Neighbouring pieces no row has text in both of are one column (a header set at the left over amounts
+    // set at the right). Alignment comes from the column's body.
+    const merged: typeof cols = [];
+    for (const c of cols) {
+      const last = merged[merged.length - 1];
+      if (last && ![...c.rows].some((r) => last.rows.has(r))) {
+        const body = (x: typeof c) => x.rows.size;
+        const [main] = body(last) >= body(c) ? [last, c] : [c, last];
+        merged[merged.length - 1] = { x0: Math.min(last.x0, c.x0), x1: Math.max(last.x1, c.x1), starts: main.starts, ends: main.ends, rows: new Set([...last.rows, ...c.rows]) };
+      } else merged.push(c);
+    }
+    cols = merged;
+    const spread = (v: number[]) => Math.max(...v) - Math.min(...v);
+    const rightAligned = (c: (typeof cols)[number]) => spread(c.starts) > 3 && spread(c.ends) <= 2.5;
+    xs = [g.x0];
+    for (let k = 1; k < cols.length; k++) {
+      // (A right-aligned column after a left-aligned one starts at its leftmost text — often its header, set
+      // at the left — or midway in the gap, whichever is nearer.)
+      const edge = !rightAligned(cols[k]) ? cols[k].x0 - 4 : rightAligned(cols[k - 1]) ? cols[k - 1].x1 + 4 : Math.max((cols[k - 1].x1 + cols[k].x0) / 2, cols[k].x0 - 4);
+      if (edge > xs[xs.length - 1] + 6 && edge < g.x1 - 6) xs.push(edge);
+    }
+    xs.push(g.x1);
   }
   const cols = xs.slice(1).map((x, k) => x - xs[k]);
   const rowsY = g.ys;
@@ -1111,14 +1281,18 @@ function gridTable(g: Grid, items: Decorated[], fills: Fill[], page: PageInput, 
       const xr = xs[c + span];
       const content = inside.filter((it) => it.x + it.w / 2 >= xl && it.x + it.w / 2 <= xr && it.y < yTop && it.y > yBot);
       const lines = groupLines(content);
+      // A cell of several lines keeps the gap those lines have (a panel set at double spacing), whatever the
+      // table's usual pitch is.
+      const ownGap = lines.length >= 2 ? (lines[0].y - lines[lines.length - 1].y) / (lines.length - 1) : null;
+      const pitchOf = (l: Line) => (ownGap !== null && ownGap > l.size * 0.9 && ownGap < l.size * 3 ? ownGap : l.size * pitchRatio);
       const paragraphs: CellParagraph[] = lines.length
-        ? lines.map((l) => ({ runs: l.runs, line: Math.round(l.size * pitchRatio * 20) / 20, tabs: l.cells.length >= 2 ? l.cells.slice(1).map((c) => ({ pos: c.x0 - xl, align: "left" as const })) : undefined, align: l.x0 - xl > 8 && Math.abs(xr - l.x1 - (l.x0 - xl)) > 4 && xr - l.x1 < l.x0 - xl ? "right" : l.x0 - xl > 8 && Math.abs((l.x0 + l.x1) / 2 - (xl + xr) / 2) < 2 ? "center" : "left" }))
+        ? lines.map((l) => ({ runs: l.runs, line: Math.round(pitchOf(l) * 20) / 20, tabs: l.cells.length >= 2 ? l.cells.slice(1).map((c) => ({ pos: c.x0 - xl, align: "left" as const })) : undefined, align: l.x0 - xl > 8 && Math.abs(xr - l.x1 - (l.x0 - xl)) > 4 && xr - l.x1 < l.x0 - xl ? "right" : l.x0 - xl > 8 && Math.abs((l.x0 + l.x1) / 2 - (xl + xr) / 2) < 2 ? "center" : "left" }))
         : [{ runs: [], align: "left" }];
       if (lines.length) {
         cellMarginsL.push(Math.min(...lines.map((l) => l.x0)) - xl);
         // The first line's box starts (pitch − descent) above its baseline.
         const l0 = lines[0];
-        cellTops.push(yTop - (l0.y + l0.size * pitchRatio - l0.descent * l0.size));
+        cellTops.push(yTop - (l0.y + pitchOf(l0) - l0.descent * l0.size));
       }
       const shade = fills.find((f) => f.x <= xl + 2 && f.x + f.w >= xr - 2 && f.y <= yBot + 2 && f.y + f.h >= yTop - 2);
       // A cell continuing from the row above when there's no line between them.
@@ -1250,6 +1424,31 @@ function pageFrame(rules: Rule[], page: PageInput): { rules: Rule[]; border: Pag
   };
 }
 
+/**
+ * Fill-in lines: a horizontal rule that starts just after a piece of text, on that text's baseline, with no
+ * text above it, is the blank of a form field ("Name ______", "Signature ____  Date ____"), not a separator.
+ * It becomes a leader piece of that line, which Word writes as a tab with an underline leader ending where
+ * the line ended — an editable blank, not a drawing. Distances are in the text's own size (scale-free).
+ */
+function fillInBlanks(items: Decorated[], rules: Rule[]): { items: Decorated[]; used: Set<Rule> } {
+  const out: Decorated[] = [];
+  const used = new Set<Rule>();
+  for (const r of rules) {
+    if (Math.abs(r.y1 - r.y0) > 0.6) continue;
+    const y = (r.y0 + r.y1) / 2;
+    // The label: on the rule's line (the rule sits at or a little under its baseline), ending just before it.
+    const label = items
+      .filter((it) => y <= it.y + 0.2 * it.size && y >= it.y - 0.45 * it.size && it.x + it.w <= r.x0 + 2 && r.x0 - (it.x + it.w) < 4 * it.size)
+      .sort((a, b) => b.x + b.w - (a.x + a.w))[0];
+    if (!label || r.x1 - r.x0 < 2 * label.size) continue;
+    // Nothing written over the blank (a line under a value is that value's underline, not a blank).
+    if (items.some((it) => it.x < r.x1 - 1 && it.x + it.w > r.x0 + 1 && it.y >= y - 0.5 * it.size && it.y - y < 1.6 * it.size)) continue;
+    used.add(r);
+    out.push({ ...label, str: "____", x: r.x0, w: r.x1 - r.x0, underline: false, strike: false });
+  }
+  return { items: out, used };
+}
+
 /** Lays out one page. `listKeys` numbers lists across the whole document. `bands` are this page's
  * header/footer items (see findHeadersFooters). */
 export function layoutPage(page: PageInput, stats: DocumentStats, listKeys: { next: number } = { next: 1 }, bands?: PageBands): PageLayout {
@@ -1271,9 +1470,13 @@ export function layoutPage(page: PageInput, stats: DocumentStats, listKeys: { ne
   if (frame) rules.splice(0, rules.length, ...rules.filter((r) => !frame.rules.includes(r)));
   const grids = findGrids(rules).filter((g) => items.some((it) => it.x >= g.x0 - 2 && it.x <= g.x1 && it.y <= g.y1 && it.y >= g.y0));
   const inGrid = (it: { x: number; y: number }, g: Grid) => it.x >= g.x0 - 2 && it.x <= g.x1 + 2 && it.y <= g.y1 + 1 && it.y >= g.y0 - 1;
-  const flowItems = items.filter((it) => !grids.some((g) => inGrid(it, g)));
+  const flowItems: Decorated[] = items.filter((it) => !grids.some((g) => inGrid(it, g)));
   const gridRules = new Set(grids.flatMap((g) => [...g.hRules, ...g.vRules]));
-  const freeRules = rules.filter((r) => !gridRules.has(r));
+  let freeRules = rules.filter((r) => !gridRules.has(r));
+  // Blanks to fill in ("Name ______"): written as Word tab leaders, like a typed form.
+  const blanks = fillInBlanks(flowItems, freeRules);
+  flowItems.push(...blanks.items);
+  freeRules = freeRules.filter((r) => !blanks.used.has(r));
 
   const textLeft = items.length ? Math.min(...items.map((i) => i.x)) : page.width * 0.1;
   const textRight = items.length ? Math.max(...items.map((i) => i.x + i.w)) : page.width * 0.9;
@@ -1282,7 +1485,7 @@ export function layoutPage(page: PageInput, stats: DocumentStats, listKeys: { ne
   // The text area: its left edge is the leftmost content; its right edge just past the longest line,
   // so Word wraps each line where the PDF did.
   const marginLeft = clamp(left, 0, page.width * 0.4);
-  const marginRightEdge = clamp(textAreaRight(groupLines(flowItems), right, left, page.width, stats.leading), page.width * 0.6, page.width);
+  let marginRightEdge = clamp(textAreaRight(groupLines(flowItems), right, left, page.width, stats.leading), page.width * 0.6, page.width);
   const ctx: FlowContext = { page, stats, listKeys, marginLeft, marginRight: marginRightEdge, rules: freeRules, fills };
 
   // Pictures beside text (a logo next to an address) keep their place on the page; others flow. On a
@@ -1323,14 +1526,49 @@ export function layoutPage(page: PageInput, stats: DocumentStats, listKeys: { ne
     const leftEntries: Entry[] = [...groupLines(leftItems), ...imageEntries.filter((e) => e.image.x + e.image.w <= gx + 1)];
     const rightEntries: Entry[] = [...groupLines(rightItems), ...imageEntries.filter((e) => e.image.x >= gx - 1)];
     const spanEntries: Entry[] = [...spanLines, ...imageEntries.filter((e) => e.image.x < gx - 1 && e.image.x + e.image.w > gx + 1)].sort(byTop);
-    const cuts = [Infinity, ...spanEntries.map((e) => e.top), -Infinity];
-    const gap = Math.max(6, gutter.rightStart - gutter.leftEnd);
-    const colWidth = (marginRightEdge - marginLeft - gap) / 2;
+    // A rule drawn across the gutter also ends one stretch of columns and starts the next.
+    const spanRules = ctx.rules.filter((r) => Math.abs(r.y1 - r.y0) <= 0.6 && r.x0 < gx - 1 && r.x1 > gx + 1).map((r) => (r.y0 + r.y1) / 2);
+    const cutList: { y: number; entry?: Entry }[] = [...spanEntries.map((e) => ({ y: e.top, entry: e })), ...spanRules.map((y) => ({ y }))].sort((a, b) => b.y - a.y);
+    const cuts = [Infinity, ...cutList.map((c) => c.y), -Infinity];
+    // Word's columns are equal. Each column's lines bound where its edge may be: past its longest line, and
+    // short of where a wrapped line's next word would have fitted (justified text: at its longest line). The
+    // right column ends at the page's text edge, which is moved into the right column's range if needed; the
+    // column width is chosen inside the left column's range and wide enough for the right column to start at
+    // or before its text (its paragraphs are indented from there).
+    const range = (items: Decorated[], start: number) => {
+      const ls = groupLines(items.filter((i) => !spanning.has(i)));
+      if (!ls.length) return { lo: 0, hi: Infinity };
+      const maxX = Math.max(...ls.map((l) => l.x1));
+      const ends = ls.slice(0, -1).filter((l) => maxX - l.x1 < 1).length;
+      const justified = ls.length >= 4 && ends >= 0.6 * (ls.length - 1);
+      const bound = wrapBound(ls, maxX);
+      return { lo: maxX - start, hi: (justified ? maxX + 1.5 : bound) - start, justified };
+    };
+    const rightIt = flowItems.filter((i) => !spanning.has(i) && i.x >= gx - 1);
+    const leftIt = flowItems.filter((i) => !spanning.has(i) && i.x + i.w <= gx + 1);
+    const R = range(rightIt, 0);
+    // (Ragged text gets 1.5 pt past its longest line: OCR boxes and Word's widths each differ by a little.)
+    const rightEdgeOk = (e: number) => e >= R.lo + (R.justified ? 0.25 : 1) && e < Math.min(R.hi - 0.25, R.lo + 2);
+    if (!rightEdgeOk(marginRightEdge)) {
+      const target = R.justified ? R.lo + 0.25 : R.lo + clamp((Math.min(R.hi, R.lo + 12) - R.lo) * 0.2, 1, 1.5);
+      if (Number.isFinite(target) && target <= page.width) marginRightEdge = target;
+    }
+    ctx.marginRight = marginRightEdge;
+    const L = range(leftIt, marginLeft);
+    const minForRight = marginRightEdge - gutter.rightStart;
+    const lower = Math.max(L.lo + 0.25, minForRight);
+    const upper = L.hi - 0.25;
+    // (Nearer the longest line than the wrap bound: Word's widths run a little narrower than a scan's.)
+    // (Close to the longest line: where a line wrapped is only known to a couple of points.)
+    let colWidth = L.justified ? Math.max(L.lo + 0.25, minForRight) : lower <= upper ? lower + clamp((Math.min(upper, lower + 12) - lower) * 0.2, 0.5, 1) : lower;
+    if (marginRightEdge - marginLeft - 2 * colWidth < 6) colWidth = (marginRightEdge - marginLeft - 6) / 2;
+    const gap = marginRightEdge - marginLeft - 2 * colWidth;
     const inBand = (e: Entry, hi: number, lo: number) => e.top <= hi && e.top > lo;
     for (let b = 0; b < cuts.length - 1; b++) {
       const hi = cuts[b];
       const lo = cuts[b + 1];
-      if (b > 0) placed.push(...blocksFor([spanEntries[b - 1]], { left: marginLeft, right: marginRightEdge }, ctx));
+      const across = b > 0 ? cutList[b - 1].entry : undefined;
+      if (across) placed.push(...blocksFor([across], { left: marginLeft, right: marginRightEdge }, ctx));
       const leftBand = leftEntries.filter((e) => inBand(e, hi === Infinity ? Infinity : hi - 0.01, lo)).sort(byTop);
       const rightBand = rightEntries.filter((e) => inBand(e, hi === Infinity ? Infinity : hi - 0.01, lo)).sort(byTop);
       if (!leftBand.length && !rightBand.length) continue;

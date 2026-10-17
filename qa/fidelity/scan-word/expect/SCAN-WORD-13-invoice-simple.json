@@ -1,0 +1,49 @@
+{
+ "checks": [
+  {
+   "id": "tables:count",
+   "kind": "ntables",
+   "min": 1
+  },
+  {
+   "id": "total",
+   "kind": "same_line",
+   "page": 1,
+   "phrases": [
+    "Total",
+    "£1,400.00"
+   ],
+   "tol": 8
+  },
+  {
+   "id": "row-1",
+   "kind": "same_line",
+   "page": 1,
+   "phrases": [
+    "Brand identity workshop",
+    "2",
+    "£450.00",
+    "£900.00"
+   ],
+   "tol": 8
+  },
+  {
+   "id": "layout:meta-right",
+   "kind": "present",
+   "page": 1,
+   "phrase": "Invoice no.",
+   "x_min": 300
+  },
+  {
+   "id": "order:zones",
+   "kind": "docorder",
+   "phrases": [
+    "INVOICE",
+    "Billed to",
+    "Description",
+    "Total",
+    "Payment due"
+   ]
+  }
+ ]
+}

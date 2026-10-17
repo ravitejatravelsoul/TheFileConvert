@@ -77,3 +77,10 @@ __pycache__/
 /qa/fidelity/scan-word/out/**/*.docx
 /qa/fidelity/scan-word/out/**/original-page-*.png
 /qa/fidelity/scan-word/out/**/word-page-*.png
+
+# Local debug replays (never committed)
+/src/**/zz-*.test.ts
+/qa/fidelity/scan-word/perf/
+# The user's own scan and its conversions: local review only, never committed
+/qa/fidelity/final-scan-review/user-scan/
+/qa/manual-word-review/user-scan.docx

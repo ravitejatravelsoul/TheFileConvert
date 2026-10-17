@@ -1,0 +1,74 @@
+[
+ {
+  "tool": "Scan → Word performance",
+  "test": "TheFileConvert_Scanned_OCR_Test.pdf",
+  "verdict": "PASS",
+  "ms": 6614,
+  "pages": 2,
+  "perPageMs": 3307,
+  "longTasks": 3,
+  "longestTaskMs": 302,
+  "over500ms": 0,
+  "stages": [
+   "Analyzing document — page 1 of 2…",
+   "Analyzing document — page 2 of 2…",
+   "Recognizing page 1 of 2…",
+   "Recognizing page 2 of 2…",
+   "Building Word document…",
+   "Your Word document is ready"
+  ]
+ },
+ {
+  "tool": "Scan → Word performance",
+  "test": "scan-5-pages.pdf",
+  "verdict": "PASS",
+  "ms": 32509,
+  "pages": 5,
+  "perPageMs": 6502,
+  "longTasks": 6,
+  "longestTaskMs": 484,
+  "over500ms": 0,
+  "stages": [
+   "Analyzing document — page 1 of 5…",
+   "Analyzing document — page 2 of 5…",
+   "Analyzing document — page 5 of 5…",
+   "Recognizing page 1 of 5…",
+   "Recognizing page 2 of 5…",
+   "Recognizing page 3 of 5…",
+   "Recognizing page 4 of 5…",
+   "Recognizing page 5 of 5…",
+   "Building Word document…"
+  ]
+ },
+ {
+  "tool": "Scan → Word performance",
+  "test": "scan-10-pages.pdf",
+  "verdict": "PASS",
+  "ms": 51373,
+  "pages": 10,
+  "perPageMs": 5137,
+  "longTasks": 18,
+  "longestTaskMs": 593,
+  "over500ms": 3,
+  "stages": [
+   "Analyzing document — page 1 of 10…",
+   "Analyzing document — page 2 of 10…",
+   "Analyzing document — page 4 of 10…",
+   "Analyzing document — page 6 of 10…",
+   "Analyzing document — page 7 of 10…",
+   "Analyzing document — page 9 of 10…",
+   "Analyzing document — page 10 of 10…",
+   "Recognizing page 1 of 10…",
+   "Recognizing page 2 of 10…",
+   "Recognizing page 3 of 10…",
+   "Recognizing page 4 of 10…",
+   "Recognizing page 5 of 10…",
+   "Recognizing page 6 of 10…",
+   "Recognizing page 7 of 10…",
+   "Recognizing page 8 of 10…",
+   "Recognizing page 9 of 10…",
+   "Recognizing page 10 of 10…",
+   "Building Word document…"
+  ]
+ }
+]

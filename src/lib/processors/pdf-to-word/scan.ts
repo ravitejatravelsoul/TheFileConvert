@@ -59,6 +59,14 @@ export interface ScanAnalysis {
   fills: PxFill[];
   /** Solid dark bands with light text (also in `fills`, as shading). */
   bars: PxBar[];
+  /** Check boxes: the square, and whether something is marked inside. */
+  checkboxes: PxCheckbox[];
+}
+
+export interface PxCheckbox extends PxBox {
+  checked: boolean;
+  /** Everything the box's ink covers (a tick may reach outside the square). */
+  ink: PxBox;
 }
 
 const hex = (n: number) => Math.max(0, Math.min(255, Math.round(n))).toString(16).padStart(2, "0");
@@ -259,6 +267,18 @@ export function snapCorners(rules: PxRule[], tol: number): PxRule[] {
     }
   }
   return out;
+}
+
+/** Paints check boxes (with their marks) over with the background: the recogniser reads them as "[J", "Ml". */
+export function eraseCheckboxes(r: Raster, boxes: PxCheckbox[], background: [number, number, number]): void {
+  for (const b of boxes)
+    for (let y = Math.max(0, b.ink.y - 1); y <= Math.min(r.height - 1, b.ink.y + b.ink.h); y++)
+      for (let x = Math.max(0, b.ink.x - 1); x <= Math.min(r.width - 1, b.ink.x + b.ink.w); x++) {
+        const p = (y * r.width + x) * 4;
+        r.data[p] = background[0];
+        r.data[p + 1] = background[1];
+        r.data[p + 2] = background[2];
+      }
 }
 
 /** Paints the rules over with the background, so OCR reads the text between them, not the lines. */
@@ -505,6 +525,124 @@ export function flattenFills(r: Raster, fills: PxFill[], paper: [number, number,
   }
 }
 
+/**
+ * Check boxes: small hollow squares (5–18 pt a side). Each connected piece of ink of about that size is
+ * tested for a square: its two longest vertical strokes (the sides) of about equal height and as far apart as
+ * they are tall, joined by straight top and bottom edges. A box is checked when its inside holds ink (a tick
+ * or a cross, which may reach outside the square and is part of the same piece). Letters fail the test: an
+ * "H" has no top and bottom edges, an "O" no straight sides, a "[" one side.
+ */
+export function checkBoxes(r: Raster, lum: Uint8Array, background: number, pxPerPt: number): PxCheckbox[] {
+  const W = r.width;
+  const H = r.height;
+  const t = inkThreshold(background);
+  const min = 5 * pxPerPt;
+  const max = 18 * pxPerPt;
+  const seen = new Uint8Array(W * H);
+  const out: PxCheckbox[] = [];
+  const stack: number[] = [];
+  for (let start = 0; start < W * H; start++) {
+    if (seen[start] || lum[start] >= t) continue;
+    // Flood the piece, giving up early once it is clearly bigger than a box.
+    let x0 = W;
+    let y0 = H;
+    let x1 = 0;
+    let y1 = 0;
+    let big = false;
+    stack.length = 0;
+    stack.push(start);
+    seen[start] = 1;
+    while (stack.length) {
+      const p = stack.pop()!;
+      const x = p % W;
+      const y = (p - x) / W;
+      if (x < x0) x0 = x;
+      if (x > x1) x1 = x;
+      if (y < y0) y0 = y;
+      if (y > y1) y1 = y;
+      if (x1 - x0 > max * 1.6 || y1 - y0 > max * 1.6) big = true;
+      for (const q of [p - 1, p + 1, p - W, p + W]) {
+        if (q < 0 || q >= W * H || seen[q] || lum[q] >= t) continue;
+        if ((q === p - 1 && x === 0) || (q === p + 1 && x === W - 1)) continue;
+        seen[q] = 1;
+        stack.push(q);
+      }
+    }
+    if (big || x1 - x0 < min * 0.9 || y1 - y0 < min * 0.9) continue;
+    // Sides: columns with the longest vertical ink runs.
+    const colRun = (x: number) => {
+      let best = 0;
+      let bestEnd = 0;
+      let run = 0;
+      for (let y = y0; y <= y1; y++) {
+        if (lum[y * W + x] < t) run++;
+        else run = 0;
+        if (run > best) [best, bestEnd] = [run, y];
+      }
+      return { len: best, top: bestEnd - best + 1, bottom: bestEnd };
+    };
+    const cols = [];
+    for (let x = x0; x <= x1; x++) cols.push({ x, ...colRun(x) });
+    const left = cols.slice(0, Math.ceil(cols.length / 2)).sort((a, b) => b.len - a.len)[0];
+    const right = cols.slice(Math.floor(cols.length / 2)).sort((a, b) => b.len - a.len)[0];
+    if (!left || !right) continue;
+    const side = right.x - left.x;
+    const tall = Math.min(left.len, right.len);
+    if (side < min || side > max || tall < min || Math.abs(left.len - right.len) > 0.2 * tall || Math.abs(side - tall) > 0.25 * tall) continue;
+    const top = Math.max(left.top, right.top);
+    const bottom = Math.min(left.bottom, right.bottom);
+    // Straight top and bottom edges joining the sides (within 2 px of the sides' ends).
+    const rowCover = (yc: number) => {
+      let best = 0;
+      for (let y = yc - 2; y <= yc + 2; y++) {
+        if (y < 0 || y >= H) continue;
+        let n = 0;
+        for (let x = left.x; x <= right.x; x++) if (lum[y * W + x] < t) n++;
+        best = Math.max(best, n / (side + 1));
+      }
+      return best;
+    };
+    if (rowCover(top) < 0.85 || rowCover(bottom) < 0.85) continue;
+    // Square corners (a round letter — O, Q, 0 — has straight-ish sides at small sizes, but no corners).
+    const corner = (cx: number, cy: number) => {
+      for (let y = cy - 2; y <= cy + 2; y++) for (let x = cx - 2; x <= cx + 2; x++) if (x >= 0 && y >= 0 && x < W && y < H && lum[y * W + x] < t) return true;
+      return false;
+    };
+    if (!corner(left.x, top) || !corner(right.x, top) || !corner(left.x, bottom) || !corner(right.x, bottom)) continue;
+    // The corner pixel itself must be ink, not just near it, on at least three corners.
+    const exact = [[left.x, top], [right.x, top], [left.x, bottom], [right.x, bottom]].filter(([x, y]) => {
+      for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) if (lum[(y + dy) * W + x + dx] < t) return true;
+      return false;
+    }).length;
+    if (exact < 3) continue;
+    // Drawn with a thin line: a box's sides are under ~1/5 of its width; a letter's ring (O, Q, D) ~1/4 or more.
+    // (Measured at three heights, the thinnest counting: a tick may cross a side.)
+    const thickness = (from: number, dir: number) =>
+      Math.min(
+        ...[0.25, 0.5, 0.75].map((f) => {
+          const y = Math.round(top + (bottom - top) * f);
+          let n = 0;
+          for (let x = from; n < side && x >= 0 && x < W && lum[y * W + x] < t; x += dir) n++;
+          let m = 0;
+          for (let x = from - dir; m < side && x >= 0 && x < W && lum[y * W + x] < t; x -= dir) m++;
+          return n + m;
+        }),
+      );
+    if (Math.max(thickness(left.x, 1), thickness(right.x, -1)) > Math.max(2, 0.22 * side)) continue;
+    // Inside, away from the edges: a mark makes it a checked box.
+    const pad = Math.max(2, Math.round(side * 0.2));
+    let ink = 0;
+    let all = 0;
+    for (let y = top + pad; y <= bottom - pad; y++)
+      for (let x = left.x + pad; x <= right.x - pad; x++) {
+        all++;
+        if (lum[y * W + x] < t) ink++;
+      }
+    out.push({ x: left.x, y: top, w: side, h: bottom - top, checked: all > 0 && ink / all > 0.06, ink: { x: x0, y: y0, w: x1 - x0 + 1, h: y1 - y0 + 1 } });
+  }
+  return out;
+}
+
 /** Runs the analysis on a page raster: rules (with corners closed), enclosed tinted areas, solid bands. */
 export function analyzeScan(r: Raster, pxPerPt: number): ScanAnalysis {
   const lum = luminance(r);
@@ -523,12 +661,32 @@ export function analyzeScan(r: Raster, pxPerPt: number): ScanAnalysis {
   // lines there (drawn in the band's colour, so they disappear into its shading).
   for (const b of bars) {
     const crossing = rules.filter((q) => q.x0 === q.x1 && q.x0 >= b.x - tol && q.x0 <= b.x + b.w + tol && q.y0 <= b.y + tol && q.y1 >= b.y + b.h - tol);
-    if (crossing.length < 2) continue;
+    // A band on top of a stack of row lines of its own width is that table's header row: its top and bottom
+    // edges join the rows (the table has no verticals to cross it).
+    const rowsBelow = rules.filter((q) => q.y0 === q.y1 && q.y0 > b.y + b.h - tol && q.y0 < b.y + b.h + 80 * pxPerPt && Math.abs(q.x0 - b.x) <= tol * 2 && Math.abs(q.x1 - (b.x + b.w)) <= tol * 2);
+    if (crossing.length < 2 && rowsBelow.length >= 2) {
+      for (const y of [b.y, b.y + b.h]) {
+        if (rules.some((q) => q.y0 === q.y1 && Math.abs(q.y0 - y) <= tol && q.x0 <= b.x + tol && q.x1 >= b.x + b.w - tol)) continue;
+        rules.push({ x0: b.x, x1: b.x + b.w, y0: y, y1: y, thickness: 1, weight: 1, color: b.color });
+      }
+      continue;
+    }
+    if (crossing.length < 2) {
+      // A band on its own (a section heading bar) is a box of its own colour: a one-cell table with exactly
+      // its height, shaded — not a paragraph whose shading only covers its line.
+      const edge = (x0: number, y0: number, x1: number, y1: number) => rules.push({ x0, x1, y0, y1, thickness: 1, weight: 1, color: b.color });
+      edge(b.x, b.y, b.x + b.w, b.y);
+      edge(b.x, b.y + b.h, b.x + b.w, b.y + b.h);
+      edge(b.x, b.y, b.x, b.y + b.h);
+      edge(b.x + b.w, b.y, b.x + b.w, b.y + b.h);
+      continue;
+    }
     for (const y of [b.y, b.y + b.h]) {
       if (rules.some((q) => q.y0 === q.y1 && Math.abs(q.y0 - y) <= tol && q.x0 <= b.x + tol && q.x1 >= b.x + b.w - tol)) continue;
       rules.push({ x0: b.x, x1: b.x + b.w, y0: y, y1: y, thickness: 1, weight: 1, color: b.color });
     }
   }
   const fills = [...enclosedFills(r, lum, rules, bg).filter((f) => !bars.some((b) => f.x >= b.x - tol && f.x + f.w <= b.x + b.w + tol && f.y >= b.y - tol && f.y + f.h <= b.y + b.h + tol)), ...bars.map(({ x, y, w, h, color }) => ({ x, y, w, h, color }))];
-  return { background: level, backgroundColor: `${hex(bg[0])}${hex(bg[1])}${hex(bg[2])}`, rules, fills, bars };
+  const checkboxes = checkBoxes(r, lum, level, pxPerPt);
+  return { background: level, backgroundColor: `${hex(bg[0])}${hex(bg[1])}${hex(bg[2])}`, rules, fills, bars, checkboxes };
 }

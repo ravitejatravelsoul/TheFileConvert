@@ -1,0 +1,42 @@
+{
+  "counts": {
+    "PASS": 1
+  },
+  "rows": [
+    {
+      "fixture": "SCAN-WORD-15-invoice-dense",
+      "verdict": "PASS",
+      "ms": 4493,
+      "uploads": 0,
+      "pagesSrc": 1,
+      "pagesOut": 1,
+      "textRecallPct": 100,
+      "wordsInPlacePct": 95.9,
+      "rulesKeptPct": null,
+      "typographyPct": 98.9,
+      "wordsWithoutInk": 0,
+      "tables": [
+        "12x5",
+        "3x2"
+      ],
+      "dimensions": {
+        "TEXT": "PASS",
+        "LAYOUT": "PASS",
+        "TABLES": "PASS",
+        "BORDERS_RULES": "n/a",
+        "FORMS": "n/a",
+        "IMAGES": "n/a",
+        "TYPOGRAPHY": "PASS",
+        "READING_ORDER": "PASS"
+      },
+      "text": "PASS",
+      "layout": "PASS",
+      "rules": "n/a",
+      "typography": "PASS",
+      "garbage": "PASS",
+      "structure": "PASS",
+      "checksFailed": [],
+      "consoleErrors": 0
+    }
+  ]
+}

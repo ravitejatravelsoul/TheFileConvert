@@ -163,10 +163,49 @@ measured. ² the only rule is the chart's axis, kept inside the chart picture.
 The user's scan at 69c8a27 (same harness): words in place 80.6 %, 14 garbage words, rules 0 %, typography
 80 %, one 2 × 3 table, 6 structure checks failed → FAIL. Desktop and mobile (Pixel 7) both PASS now; 0 uploads.
 
-Known causes of the remaining FAIL/LIMITED: side-by-side text blocks on slightly different baselines are
+At 519ce0d, the known causes of the remaining FAIL/LIMITED (fixed since — see below): side-by-side text blocks on slightly different baselines are
 stacked (invoice header); fill-in lines after a label and check boxes on forms are not rebuilt as leader tabs /
 symbols; bold Georgia headings are measured as regular and set ~19 % too large (two-column); the stamp's
 picture is placed in the flow rather than floating.
+
+### Generalisation pass (after commit 519ce0d) — current results
+
+The three classes that failed above (form, invoice, two-column) were fixed generically and checked on ten
+new variants drawn for this pass (`qa/scripts/scan-variants.py`, SCAN-WORD-10 … 19). Each fixture has its own
+structure checks (`qa/fidelity/scan-word/expect/`). Each dimension is graded separately, and any FAIL fails
+the fixture. Production build, real `/pdf-to-word`, LibreOffice render (`qa/evidence/fresh/fid-scans.json`):
+
+| Fixture | Text recall | Words in place | Typography | Garbage | Dimensions failing | Verdict |
+|---|---:|---:|---:|---:|---|---|
+| 01 form | 100 % | 95.3 % | 98.8 % | 0 | — | PASS |
+| 02 invoice | 99.4 % | 98.1 % | 99.4 % | 0 | — | PASS |
+| 03 transcript | 96.9 % | 94.5 % | 97.5 % | 3 | TEXT, LAYOUT limited | LIMITED |
+| 04 table-heavy | 100 % | 96.3 % | 99.0 % | 0 | — | PASS |
+| 05 two-column | 100 % | 99.2 % | 95.2 % | 0 | — | PASS |
+| 06 letter + stamp + signature | 98.2 % | 99.6 % | 94.0 % | 0 | — | PASS |
+| 07 mixed rules | 100 % | 100 % | 98.1 % | 0 | — | PASS |
+| 10 form, simple fill-ins | 100 % | 100 % | 100 % | 0 | — | PASS |
+| 11 form, check boxes | 100 % | 100 % | 100 % | 0 | — | PASS |
+| 12 form, fill-ins + table + box | 100 % | 100 % | 95.7 % | 0 | — | PASS |
+| 13 invoice, simple | 100 % | 100 % | 100 % | 0 | — | PASS |
+| 14 invoice, metadata both sides | 98.1 % | 100 % | 100 % | 0 | — | PASS |
+| 15 invoice, dense banded table | 100 % | 95.9 % | 98.9 % | 0 | — | PASS |
+| 16 two-column text | 100 % | 97.0 % | 92.8 % | 0 | — | PASS |
+| 17 two-column + chart | 100 % | 97.0 % | 92.3 % | 0 | — | PASS |
+| 18 headings in one column | 100 % | 95.5 % | 94.5 % | 0 | — | PASS |
+| 19 heading + rule across columns | 100 % | 96.5 % | 93.7 % | 0 | — | PASS |
+| 08 the user's scan (2 pages) | — | 100 % | 97.0 % | 0 | — (17/17 structure checks) | PASS |
+
+**17 PASS · 1 LIMITED · 0 FAIL.** The user's scan also passes on mobile (Pixel 7): 17/17, 2 pages, 0 uploads.
+The transcript stays LIMITED: bold term headings that contain digits ("Autumn 2024") come out regular and 2–3 pt
+large, and three "I"s sit a few points right. The document is complete and its tables are intact.
+
+Microsoft Word: **manual review required** (installed but unlicensed; automation hangs). The DOCX files and a
+checklist are in `qa/manual-word-review/`. Side-by-side images (original / LibreOffice render / diff) are in
+`qa/fidelity/final-scan-review/`. The user's scan has its own local, git-ignored subfolder there.
+
+Performance on the production build (`fid-scanperf.json`): 2-page scan 6.6 s, 5 pages 32.5 s, 10 pages 51.4 s.
+The longest main-thread task was 0.6 s, and progress updates every page.
 
 ## Defects
 

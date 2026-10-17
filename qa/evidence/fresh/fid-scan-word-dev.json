@@ -1,0 +1,102 @@
+[
+ {
+  "tool": "Scan → Word",
+  "test": "SCAN-WORD-15-invoice-dense.pdf",
+  "verdict": "PASS",
+  "ms": 4493,
+  "stages": [
+   "Analyzing document — page 1 of 1…\n\nEverything happens in this tab. Nothing is uploaded.",
+   "Recognizing page 1 of 1…\n\nScanned pages are read with OCR on this device — the first run downloads a small recognition model.",
+   "Building Word document…\n\nEverything happens in this tab. Nothing is uploaded.",
+   "Your Word document is ready"
+  ],
+  "uploads": 0,
+  "pagesSrc": 1,
+  "pagesOut": 1,
+  "pages": [
+   {
+    "page": 1,
+    "wordsOut": 98,
+    "wordsInPlacePct": 95.9,
+    "wordsWithoutInk": [],
+    "rulesH": {
+     "src": 0,
+     "out": 11,
+     "keptPct": null
+    },
+    "rulesV": {
+     "src": 0,
+     "out": 6,
+     "keptPct": null
+    }
+   }
+  ],
+  "wordsInPlacePct": 95.9,
+  "wordsWithoutInk": 0,
+  "rulesKeptPct": null,
+  "typographyPct": 98.9,
+  "tables": [
+   "12x5",
+   "3x2"
+  ],
+  "checks": [
+   {
+    "id": "tables:count",
+    "ok": true,
+    "detail": "2 tables"
+   },
+   {
+    "id": "total",
+    "ok": true,
+    "detail": "mid-y [414.7, 414.7] x [400.1, 518.9]"
+   },
+   {
+    "id": "last-row",
+    "ok": true,
+    "detail": "mid-y [350.5, 350.5, 350.9, 350.5, 350.5] x [55.0, 134.9, 388.6, 441.4, 530.8]"
+   },
+   {
+    "id": "order:zones",
+    "ok": true,
+    "detail": "positions [0, 71, 104, 484, 528, 561]"
+   }
+  ],
+  "textRecallPct": 100,
+  "layout": "PASS",
+  "rules": "n/a",
+  "typography": "PASS",
+  "text": "PASS",
+  "garbage": "PASS",
+  "checksFailed": [],
+  "structure": "PASS",
+  "dimensions": {
+   "TEXT": "PASS",
+   "LAYOUT": "PASS",
+   "TABLES": "PASS",
+   "BORDERS_RULES": "n/a",
+   "FORMS": "n/a",
+   "IMAGES": "n/a",
+   "TYPOGRAPHY": "PASS",
+   "READING_ORDER": "PASS"
+  },
+  "overall": "PASS",
+  "integrity": [
+   {
+    "file": "userscan-dev-SCAN-WORD-15-invoice-dense.docx",
+    "bytes": 4664,
+    "ok": true,
+    "kind": "docx",
+    "pages": 1,
+    "paragraphs": 2,
+    "tables": 2,
+    "pictures": 0
+   }
+  ]
+ },
+ {
+  "tool": "User scan → Word",
+  "test": "console errors",
+  "verdict": "PASS",
+  "errors": []
+ }
+]

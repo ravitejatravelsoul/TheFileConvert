@@ -328,3 +328,95 @@ describe("layoutPage — rules and frames (scanned forms)", () => {
     expect(p.spaceBefore ?? 0).toBeGreaterThan(0);
   });
 });
+
+describe("layoutPage — forms, side-by-side blocks, rows-only tables (scanned generalisation)", () => {
+  const it0 = (str: string, x: number, y: number, size = 11, extra: Partial<TextItem> = {}): TextItem => ({ str, x, y, w: str.length * size * 0.5, size, bold: false, italic: false, ...extra });
+  const line = (x0: number, x1: number, y: number, thickness = 0.8): Rule => ({ x0, y0: y, x1, y1: y, thickness, color: "333333" });
+
+  it("writes a blank after a label as a tab leader from where the line started to where it ended", () => {
+    const items = [it0("Organisation name", 72, 700), it0("Telephone", 72, 670)];
+    const rules = [line(72 + 17 * 5.5 + 8, 540, 697), line(72 + 9 * 5.5 + 8, 540, 667)];
+    const blocks = lay({ ...page(items), rules }).blocks;
+    const p = blocks.find((b) => textOf(b).startsWith("Organisation name"));
+    expect(p?.kind).toBe("paragraph");
+    if (p?.kind !== "paragraph") return;
+    expect(textOf(p)).toBe("Organisation name\t\t");
+    const leader = p.fmt.tabs.find((t) => t.leader === "underscore");
+    expect(leader?.align).toBe("right");
+    expect(leader!.pos + 72).toBeCloseTo(540, 0);
+    expect(p.fmt.tabs.some((t) => !t.leader && Math.abs(t.pos + 72 - (72 + 17 * 5.5 + 8)) < 1)).toBe(true);
+    // Not also drawn as separate rule paragraphs.
+    expect(blocks.some((b) => b.kind === "rule")).toBe(false);
+  });
+
+  it("keeps a line under a value as that value's line, not a blank", () => {
+    const items = [it0("Name:", 72, 700), it0("John Smith", 150, 700, 12)];
+    const blocks = lay({ ...page(items), rules: [line(140, 400, 695)] }).blocks;
+    expect(blocks.some((b) => (b.kind === "paragraph" ? b.fmt.tabs : []).some((t) => t.leader))).toBe(false);
+  });
+
+  it("keeps two side-by-side blocks with different line pitches apart, each with its own pitch", () => {
+    // An address (9 pt, 11 pt apart) beside invoice details (9.5 pt, 12 pt apart, right-aligned).
+    const left = ["Brightline Supplies Ltd.", "48 Harbour Road, Unit 5", "Bristol BS1 4QA", "VAT: GB 123 4567 89"].map((t, k) => it0(t, 60, 683 - k * 11, 9));
+    const right = ["Invoice no. INV-2026-0418", "Issue date 28 September 2026", "Due date 28 October 2026"].map((t, k) => {
+      const w = t.length * 9.5 * 0.5;
+      return { ...it0(t, 552 - w, 691 - k * 12, 9.5), w };
+    });
+    const blocks = lay(page([...left, ...right])).blocks;
+    const t = blocks.find((b) => b.kind === "table");
+    expect(t?.kind).toBe("table");
+    if (t?.kind !== "table") return;
+    expect(t.rows).toHaveLength(1);
+    const [l, r] = t.rows[0].cells;
+    expect(l.paragraphs.map((p) => p.runs.map((x) => x.text).join(""))).toEqual(["Brightline Supplies Ltd.", "48 Harbour Road, Unit 5", "Bristol BS1 4QA", "VAT: GB 123 4567 89"]);
+    expect(r.paragraphs).toHaveLength(3);
+    expect(l.paragraphs[0].line).toBeCloseTo(11, 1);
+    expect(r.paragraphs[0].line).toBeCloseTo(12, 1);
+    expect(r.paragraphs[0].align).toBe("right");
+  });
+
+  it("leaves label/value rows that pair up line by line to the ordinary borderless table", () => {
+    const items = [0, 1, 2].flatMap((k) => [it0(["Student", "Programme", "Year"][k], 60, 700 - k * 15), it0(["Maria", "B.Sc.", "2"][k], 150, 700 - k * 15), it0(["Student ID", "Date issued", "Status"][k], 330, 700 - k * 15), it0(["W2023", "28 Sep", "Active"][k], 430, 700 - k * 15)]);
+    const t = lay(page(items)).blocks.find((b) => b.kind === "table");
+    expect(t?.kind === "table" && t.rows.length).toBe(3);
+  });
+
+  it("rebuilds a table ruled by rows only, with headers over right-aligned amounts in one column", () => {
+    const ys = [600, 580, 560, 540];
+    const rules = ys.map((y) => line(50, 560, y, 0.5));
+    const right = (t: string, x1: number, y: number) => ({ ...it0(t, x1 - t.length * 5, y, 10), w: t.length * 5 });
+    const items = [
+      it0("Date", 54, 586, 10), it0("Description", 134, 586, 10), it0("Qty", 334, 586, 10), it0("Amount", 474, 586, 10),
+      it0("01 Sep", 54, 566, 10), it0("Consulting", 134, 566, 10), right("6", 394, 566), right("570.00", 556, 566),
+      it0("03 Sep", 54, 546, 10), it0("Travel", 134, 546, 10), right("12", 394, 546), right("1,140.00", 556, 546),
+    ];
+    const t = lay({ ...page(items), rules }).blocks.find((b) => b.kind === "table");
+    expect(t?.kind).toBe("table");
+    if (t?.kind !== "table") return;
+    expect(t.columns).toHaveLength(4);
+    expect(t.rows.map((r) => r.cells.map((c) => c.paragraphs.map((p) => p.runs.map((x) => x.text).join("")).join("")))).toEqual([
+      ["Date", "Description", "Qty", "Amount"],
+      ["01 Sep", "Consulting", "6", "570.00"],
+      ["03 Sep", "Travel", "12", "1,140.00"],
+    ]);
+    // The header stays at the left of its column; the amounts under it align right.
+    expect(t.rows[0].cells[2].paragraphs[0].align).toBe("left");
+    expect(t.rows[1].cells[2].paragraphs[0].align).toBe("right");
+  });
+
+  it("gives a borderless table's rows their own heights (a heading row followed by more space)", () => {
+    const items = [it0("BILL TO", 60, 700, 9, { bold: true }), it0("SHIP TO", 312, 700, 9, { bold: true }), ...[0, 1, 2].flatMap((k) => [it0(`Line ${k}`, 60, 681 - k * 12, 10), it0(`Dock ${k}`, 312, 681 - k * 12, 10)])];
+    const t = lay(page(items)).blocks.find((b) => b.kind === "table");
+    expect(t?.kind).toBe("table");
+    if (t?.kind !== "table") return;
+    expect(t.rows[0].height).toBeCloseTo(19, 0);
+    expect(t.rows[1].height).toBeCloseTo(12, 0);
+  });
+
+  it("starts a new stretch of columns at a rule drawn across the gutter", () => {
+    const para = (x: number, y0: number, n: number) => Array.from({ length: n }, (_, k) => ({ ...it0("running text of a column that fills its width nicely", x, y0 - k * 12, 10), w: 228 }));
+    const items = [...para(60, 700, 8), ...para(320, 700, 8), ...para(60, 560, 8), ...para(320, 560, 8)];
+    const blocks = lay({ ...page(items), rules: [line(60, 552, 590)] }).blocks;
+    expect(blocks.map((b) => b.kind)).toEqual(["columns", "rule", "columns"]);
+  });
+});

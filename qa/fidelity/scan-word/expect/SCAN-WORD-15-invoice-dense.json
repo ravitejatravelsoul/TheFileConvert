@@ -1,0 +1,44 @@
+{
+ "checks": [
+  {
+   "id": "tables:count",
+   "kind": "ntables",
+   "min": 1
+  },
+  {
+   "id": "total",
+   "kind": "same_line",
+   "page": 1,
+   "phrases": [
+    "Total due",
+    "5,640.60"
+   ],
+   "tol": 8
+  },
+  {
+   "id": "last-row",
+   "kind": "same_line",
+   "page": 1,
+   "phrases": [
+    "29 Sep",
+    "Consulting – handover",
+    "3",
+    "95.00",
+    "285.00"
+   ],
+   "tol": 8
+  },
+  {
+   "id": "order:zones",
+   "kind": "docorder",
+   "phrases": [
+    "Statement of Charges",
+    "Date",
+    "01 Sep",
+    "29 Sep",
+    "Subtotal",
+    "Total due"
+   ]
+  }
+ ]
+}

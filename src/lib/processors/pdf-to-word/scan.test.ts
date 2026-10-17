@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import JSZip from "jszip";
-import { analyzeScan, detectRules, backgroundLevel, invertBars, luminance, solidBars, type PxBox, type Raster } from "./scan";
+import { analyzeScan, checkBoxes, detectRules, backgroundLevel, invertBars, luminance, solidBars, type PxBox, type Raster } from "./scan";
 import { scannedPageInput, type OcrWordIn } from "./scanPage";
 import { documentStats, findHeadersFooters, layoutPage, type Block } from "./layout";
 import { buildDocx, verifyDocx } from "./docx";
@@ -380,5 +380,124 @@ describe("scanned text runs", () => {
     expect(input.items.filter((it) => Math.abs(it.y - input.items[0].y) < 1)).toHaveLength(1);
     const layout = layoutPage(input, documentStats([input]), { next: 1 }, findHeadersFooters([input])[0]);
     expect(layout.blocks.some((b) => b.kind === "columns")).toBe(false);
+  });
+});
+
+describe("forms from pixels — check boxes and section bands", () => {
+  /** A drawn check box `size` pt square at (x, top), 1 px border; checked with a tick inside. */
+  function drawBox(r: Raster, x: number, top: number, size: number, checked: boolean) {
+    for (let k = 0; k < size * K; k++) {
+      px(r, x * K + k, top * K, 40);
+      px(r, x * K + k, (top + size) * K, 40);
+      px(r, x * K, top * K + k, 40);
+      px(r, (x + size) * K, top * K + k, 40);
+    }
+    if (checked) for (let k = 0; k < size * K * 0.6; k++) for (let t = 0; t < 2; t++) px(r, x * K + 4 + k, (top + size) * K - 4 - Math.round(k * 0.9) + t, 40);
+  }
+  /** A round letter (an "O") of about the same size, drawn with a thick stroke. */
+  function drawRing(r: Raster, cx: number, cy: number, rad: number) {
+    for (let y = -rad * K; y <= rad * K; y++)
+      for (let x = -rad * K; x <= rad * K; x++) {
+        const d = Math.hypot(x, y) / K;
+        if (d <= rad && d >= rad * 0.72) px(r, cx * K + x, cy * K + y, 40);
+      }
+  }
+
+  it("finds drawn check boxes, checked or not, and not round letters beside them", () => {
+    const r = blank();
+    drawBox(r, 72, 100, 9, false);
+    drawBox(r, 160, 100, 9, true);
+    drawBox(r, 72, 130, 12, true);
+    drawRing(r, 250, 105, 5);
+    const lum = luminance(r);
+    const boxes = checkBoxes(r, lum, backgroundLevel(lum), K).sort((a, b) => a.y - b.y || a.x - b.x);
+    expect(boxes.map((b) => [Math.round(b.x / K), Math.round(b.y / K), b.checked])).toEqual([
+      [72, 100, false],
+      [160, 100, true],
+      [72, 130, true],
+    ]);
+  });
+
+  it("puts a check box on its label's line as a ballot-box symbol, and drops what OCR made of it", async () => {
+    const r = blank();
+    drawBox(r, 72, 96, 9, true);
+    inkWord(r, { x: 88, top: 95, w: 40, h: 10 });
+    drawBox(r, 140, 96, 9, false);
+    inkWord(r, { x: 156, top: 95, w: 30, h: 10 });
+    const words: OcrWordIn[] = [
+      { text: "[J", confidence: 40, pdfBox: { x: 72, y: H - 106, width: 9, height: 10 } },
+      { text: "Health", confidence: 95, pdfBox: { x: 88, y: H - 105, width: 40, height: 10 } },
+      { text: "Other", confidence: 95, pdfBox: { x: 156, y: H - 105, width: 30, height: 10 } },
+    ];
+    const { input } = await scannedPageInput({
+      words,
+      lines: [{ text: "[J Health Other", pdfBox: { x: 72, y: H - 106, width: 114, height: 11 } }],
+      analysis: analyzeScan(r, K),
+      raster: r,
+      toPdf: (x, y) => [x / K, H - y / K],
+      toPx: (x, y) => [x * K, (H - y) * K],
+      frame: { width: W, height: H, point: (x, y) => ({ x, y }) },
+      encode: async () => null,
+    });
+    const strs = input.items.sort((a, b) => a.x - b.x).map((i) => i.str);
+    expect(strs).toEqual(["☑", "Health", "☐", "Other"]);
+    const tick = input.items.find((i) => i.str === "☑")!;
+    expect(Math.abs(tick.y - input.items.find((i) => i.str === "Health")!.y)).toBeLessThan(0.5);
+  });
+
+  it("makes a section band a box of its own height, and a band over a stack of row lines that table's header", () => {
+    const r = blank();
+    const fill = (x0: number, y0: number, x1: number, y1: number) => {
+      for (let y = y0 * K; y < y1 * K; y++)
+        for (let x = x0 * K; x < x1 * K; x++) {
+          const p = (y * r.width + x) * 4;
+          [r.data[p], r.data[p + 1], r.data[p + 2]] = [120, 70, 160];
+        }
+    };
+    fill(60, 100, 540, 120); // a section heading bar
+    fill(60, 300, 540, 320); // a table's header band
+    for (const y of [340, 360, 380]) hline(r, 60, 540, y);
+    const { rules, bars } = analyzeScan(r, K);
+    expect(bars).toHaveLength(2);
+    const v = (y0: number, y1: number) => rules.filter((q) => q.x0 === q.x1 && q.y0 / K >= y0 - 2 && q.y1 / K <= y1 + 2);
+    const h = (y: number) => rules.filter((q) => q.y0 === q.y1 && Math.abs(q.y0 / K - y) <= 2);
+    // The section bar: four edges.
+    expect(v(100, 120)).toHaveLength(2);
+    expect(h(100)).toHaveLength(1);
+    expect(h(120)).toHaveLength(1);
+    // The table header: its top and bottom edges join the rows; no sides.
+    expect(v(300, 320)).toHaveLength(0);
+    expect(h(300)).toHaveLength(1);
+    expect(h(320)).toHaveLength(1);
+  });
+});
+
+describe("OCR clean-up on scanned pages", () => {
+  const page = async (words: OcrWordIn[]) => {
+    const r = blank();
+    for (const w of words) inkWord(r, { x: w.pdfBox.x, top: H - w.pdfBox.y - w.pdfBox.height, w: w.pdfBox.width, h: w.pdfBox.height });
+    return scannedPageInput({
+      words,
+      lines: [],
+      analysis: analyzeScan(r, K),
+      raster: r,
+      toPdf: (x, y) => [x / K, H - y / K],
+      toPx: (x, y) => [x * K, (H - y) * K],
+      frame: { width: W, height: H, point: (x, y) => ({ x, y }) },
+      encode: async () => null,
+    });
+  };
+  const w = (text: string, x: number, width: number, confidence = 95, height = 10, y = 600): OcrWordIn => ({ text, confidence, pdfBox: { x, y, width, height } });
+
+  it("keeps a symbol between words and drops a lone speck", async () => {
+    const { input } = await page([w("GPA:", 300, 24), w("3.62", 328, 20), w("•", 354, 4, 60), w("Credits", 364, 34), w(":", 120, 3, 59, 6, 650)]);
+    const strs = input.items.map((i) => i.str).join(" ");
+    expect(strs).toContain("•");
+    expect(strs).not.toMatch(/(^|\s):(\s|$)/);
+  });
+
+  it("reads a stroke after a word as a capital I (\"General Chemistry I\")", async () => {
+    const { input } = await page([w("General", 100, 38), w("Chemistry", 142, 46), w("|", 186, 3, 90, 12, 599)]);
+    expect(input.items.map((i) => i.str).join(" ")).toMatch(/Chemistry I$/);
   });
 });

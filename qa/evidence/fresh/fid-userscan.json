@@ -3,12 +3,13 @@
     "tool": "User scan → Word",
     "test": "TheFileConvert_Scanned_OCR_Test.pdf",
     "verdict": "PASS",
-    "ms": 9658,
+    "ms": 6997,
     "stages": [
       "Analyzing document — page 1 of 2…\n\nEverything happens in this tab. Nothing is uploaded.",
       "Analyzing document — page 2 of 2…\n\nEverything happens in this tab. Nothing is uploaded.",
       "Recognizing page 1 of 2…\n\nScanned pages are read with OCR on this device — the first run downloads a small recognition model.",
       "Recognizing page 2 of 2…\n\nScanned pages are read with OCR on this device — the first run downloads a small recognition model.",
+      "Building Word document…\n\nEverything happens in this tab. Nothing is uploaded.",
       "Your Word document is ready"
     ],
     "uploads": 0,
@@ -51,7 +52,7 @@
     "wordsInPlacePct": 100,
     "wordsWithoutInk": 0,
     "rulesKeptPct": 99.8,
-    "typographyPct": 100,
+    "typographyPct": 97,
     "tables": [
       "1x1",
       "2x2",
@@ -65,7 +66,7 @@
         "detail": "(44.099998474121094, 38.207489013671875, 362.70501708984375, 57.579986572265625)"
       },
       {
-        "id": "p1-order",
+        "id": "order:p1-order",
         "ok": true,
         "detail": "[38.2, 79.4, 112.2, 163.1, 223.0, 279.1, 312.8, 383.3, 409.9, 436.2, 462.7, 546.8, 599.7]"
       },
@@ -100,7 +101,7 @@
         "detail": "mid-y [318.6, 317.6] x [43.4, 173.0]"
       },
       {
-        "id": "p1-table",
+        "id": "tables:p1-table",
         "ok": true,
         "detail": "tables in docx: ['1x1', '2x2', '4x3', '1x1']"
       },
@@ -115,7 +116,7 @@
         "detail": "(63.400001525878906, 52.32551193237305, 370.7979736328125, 73.9120101928711)"
       },
       {
-        "id": "p2-order",
+        "id": "order:p2-order",
         "ok": true,
         "detail": "[52.3, 103.2, 136.6, 182.4, 213.3, 268.9, 328.6, 369.9, 450.9, 575.8]"
       },
@@ -151,6 +152,16 @@
     "garbage": "PASS",
     "checksFailed": [],
     "structure": "PASS",
+    "dimensions": {
+      "TEXT": "n/a",
+      "LAYOUT": "PASS",
+      "TABLES": "PASS",
+      "BORDERS_RULES": "PASS",
+      "FORMS": "n/a",
+      "IMAGES": "n/a",
+      "TYPOGRAPHY": "PASS",
+      "READING_ORDER": "PASS"
+    },
     "overall": "PASS",
     "integrity": [
       {
@@ -168,7 +179,9 @@
   {
     "tool": "User scan → Word",
     "test": "console errors",
-    "verdict": "PASS",
-    "errors": []
+    "verdict": "FAIL",
+    "errors": [
+      "Estimating resolution as 341"
+    ]
   }
 ]

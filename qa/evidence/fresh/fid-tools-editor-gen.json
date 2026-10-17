@@ -1,0 +1,260 @@
+[
+ {
+  "tool": "PDF Editor",
+  "test": "export with no edits",
+  "verdict": "PASS",
+  "pages": "1/1",
+  "minSsim": 1,
+  "meanSsim": 1,
+  "minPsnr": 99,
+  "maxChangedPct": 0,
+  "sizesKept": true,
+  "minTextRecall": 100,
+  "integrity": [
+   {
+    "file": "fid-edit-export-with-no-edits-FL-PDF-07-native-text-edited.pdf",
+    "bytes": 1526,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 1
+   }
+  ]
+ },
+ {
+  "tool": "PDF Editor",
+  "test": "add text",
+  "verdict": "PASS",
+  "changedOutsidePct": 0,
+  "maxDiffOutside": 0,
+  "changedInsidePct": 7.66,
+  "otherPagesUnchanged": "PASS",
+  "area": [
+   50,
+   540,
+   260,
+   575
+  ],
+  "textRecallP1": 100,
+  "integrity": [
+   {
+    "file": "fid-edit-add-text-FL-PDF-07-native-text-edited.pdf",
+    "bytes": 1920,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 1
+   }
+  ]
+ },
+ {
+  "tool": "PDF Editor",
+  "test": "highlight",
+  "verdict": "PASS",
+  "changedOutsidePct": 0,
+  "maxDiffOutside": 0,
+  "changedInsidePct": 7.82,
+  "otherPagesUnchanged": "PASS",
+  "area": [
+   55,
+   298,
+   305,
+   320
+  ],
+  "textRecallP1": 100,
+  "integrity": [
+   {
+    "file": "fid-edit-highlight-FL-PDF-07-native-text-edited.pdf",
+    "bytes": 1935,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 1
+   }
+  ]
+ },
+ {
+  "tool": "PDF Editor",
+  "test": "underline",
+  "verdict": "PASS",
+  "changedOutsidePct": 0,
+  "maxDiffOutside": 0,
+  "changedInsidePct": 7.28,
+  "otherPagesUnchanged": "PASS",
+  "area": [
+   55,
+   298,
+   305,
+   322
+  ],
+  "textRecallP1": 100,
+  "integrity": [
+   {
+    "file": "fid-edit-underline-FL-PDF-07-native-text-edited.pdf",
+    "bytes": 1872,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 1
+   }
+  ]
+ },
+ {
+  "tool": "PDF Editor",
+  "test": "strikethrough",
+  "verdict": "PASS",
+  "changedOutsidePct": 0,
+  "maxDiffOutside": 0,
+  "changedInsidePct": 4.38,
+  "otherPagesUnchanged": "PASS",
+  "area": [
+   55,
+   298,
+   305,
+   320
+  ],
+  "textRecallP1": 100,
+  "integrity": [
+   {
+    "file": "fid-edit-strikethrough-FL-PDF-07-native-text-edited.pdf",
+    "bytes": 1871,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 1
+   }
+  ]
+ },
+ {
+  "tool": "PDF Editor",
+  "test": "draw",
+  "verdict": "PASS",
+  "changedOutsidePct": 0,
+  "maxDiffOutside": 0,
+  "changedInsidePct": 3.95,
+  "otherPagesUnchanged": "PASS",
+  "area": [
+   350,
+   590,
+   530,
+   650
+  ],
+  "textRecallP1": 100,
+  "integrity": [
+   {
+    "file": "fid-edit-draw-FL-PDF-07-native-text-edited.pdf",
+    "bytes": 3184,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 1
+   }
+  ]
+ },
+ {
+  "tool": "PDF Editor",
+  "test": "rectangle",
+  "verdict": "PASS",
+  "changedOutsidePct": 0,
+  "maxDiffOutside": 0,
+  "changedInsidePct": 9.41,
+  "otherPagesUnchanged": "PASS",
+  "area": [
+   54,
+   634,
+   206,
+   706
+  ],
+  "textRecallP1": 100,
+  "integrity": [
+   {
+    "file": "fid-edit-rectangle-FL-PDF-07-native-text-edited.pdf",
+    "bytes": 1901,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 1
+   }
+  ]
+ },
+ {
+  "tool": "PDF Editor",
+  "test": "arrow",
+  "verdict": "PASS",
+  "changedOutsidePct": 0,
+  "maxDiffOutside": 0,
+  "changedInsidePct": 4.73,
+  "otherPagesUnchanged": "PASS",
+  "area": [
+   222,
+   712,
+   338,
+   778
+  ],
+  "textRecallP1": 100,
+  "integrity": [
+   {
+    "file": "fid-edit-arrow-FL-PDF-07-native-text-edited.pdf",
+    "bytes": 1933,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 1
+   }
+  ]
+ },
+ {
+  "tool": "PDF Editor",
+  "test": "whiteout",
+  "verdict": "PASS",
+  "changedOutsidePct": 0,
+  "maxDiffOutside": 0,
+  "changedInsidePct": 10.93,
+  "otherPagesUnchanged": "PASS",
+  "area": [
+   52,
+   497,
+   473,
+   518
+  ],
+  "textRecallP1": 100,
+  "integrity": [
+   {
+    "file": "fid-edit-whiteout-FL-PDF-07-native-text-edited.pdf",
+    "bytes": 1899,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 1
+   }
+  ]
+ },
+ {
+  "tool": "PDF Editor",
+  "test": "edit existing text",
+  "verdict": "PASS",
+  "changedOutsidePct": 0,
+  "maxDiffOutside": 0,
+  "changedInsidePct": 5.61,
+  "otherPagesUnchanged": "PASS",
+  "area": [
+   196,
+   112.94999694824219,
+   322.4739685058594,
+   140.18600463867188
+  ],
+  "textRecallP1": 100,
+  "integrity": [
+   {
+    "file": "fid-edit-edit-existing-text-FL-PDF-07-native-text-edited.pdf",
+    "bytes": 1947,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 1
+   }
+  ]
+ },
+ {
+  "tool": "Fidelity tools",
+  "test": "no third-party requests",
+  "verdict": "PASS",
+  "leaked": []
+ },
+ {
+  "tool": "Fidelity tools",
+  "test": "console errors (all steps)",
+  "verdict": "PASS",
+  "count": 0
+ }
+]

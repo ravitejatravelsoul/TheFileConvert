@@ -50,6 +50,13 @@ export interface DocxOptions {
   bodyFont?: string;
 }
 
+/** A copy of a block with another space-before. */
+function withSpaceBefore(b: Block, pt: number): Block {
+  if (b.kind === "paragraph" || b.kind === "list" || b.kind === "image") return { ...b, fmt: { ...b.fmt, spaceBefore: pt } };
+  if (b.kind === "table" || b.kind === "rule" || b.kind === "columns") return { ...b, spaceBefore: pt };
+  return b;
+}
+
 export async function buildDocx(pages: PageLayout[], options: DocxOptions): Promise<Uint8Array> {
   const media: Media[] = [];
   const bodySize = options.bodySize;
@@ -258,8 +265,16 @@ export async function buildDocx(pages: PageLayout[], options: DocxOptions): Prom
         const right = seg.right ?? [];
         right.forEach((b, j) => {
           const brk = j === 0 ? '<w:r><w:br w:type="column"/></w:r>' : "";
-          if (brk && b.kind === "table") out.push(`<w:p><w:pPr><w:spacing w:before="0" w:after="0" w:line="20" w:lineRule="exact"/></w:pPr>${brk}</w:p>${blockXml(b)}`);
-          else out.push(blockXml(b, brk));
+          // A paragraph that starts with a column break gets its space-before in the column it leaves: when the
+          // right column's first block is spaced down, the break goes in a 1 pt paragraph of its own (taken off
+          // that spacing).
+          // The section's own space-before is a spacer in the left column only: the right column needs it too.
+          const own = b.kind === "paragraph" || b.kind === "list" || b.kind === "image" ? b.fmt.spaceBefore : b.kind === "columns" ? b.spaceBefore : b.kind === "table" || b.kind === "rule" ? b.spaceBefore : 0;
+          const before = own + (j === 0 ? Math.max(0, seg.spaceBefore ?? 0) : 0);
+          if (brk && (b.kind === "table" || before > 1)) {
+            out.push(`<w:p><w:pPr><w:spacing w:before="0" w:after="0" w:line="20" w:lineRule="exact"/></w:pPr>${brk}</w:p>`);
+            out.push(blockXml(withSpaceBefore(b, Math.max(0, before - 1))));
+          } else out.push(blockXml(before !== own ? withSpaceBefore(b, before) : b, brk));
         });
       } else seg.blocks.forEach((b) => out.push(blockXml(b, lead())));
       if (pinned) out.unshift(`<w:p><w:pPr><w:spacing w:before="0" w:after="0" w:line="20" w:lineRule="exact"/></w:pPr>${lead()}</w:p>`);

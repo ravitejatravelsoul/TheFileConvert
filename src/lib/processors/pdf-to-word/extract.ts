@@ -1,6 +1,6 @@
 import type { PDFDocumentProxy, PDFPageProxy } from "pdfjs-dist";
 import type { Fill, PageImage, PageInput, Rule, TextItem } from "./layout";
-import { analyzeScan, eraseRules, flattenFills, invertBars, type Raster, type ScanAnalysis } from "./scan";
+import { analyzeScan, eraseCheckboxes, eraseRules, flattenFills, invertBars, type Raster, type ScanAnalysis } from "./scan";
 import { scannedPageInput, type ScanReport } from "./scanPage";
 
 /**
@@ -495,6 +495,7 @@ export async function extractPages(file: File, ocrLang: string, onProgress: (p: 
         const read = reads[idx];
         const result = await session.recognizePage(file, idx + 1, {
           scale: OCR_SCALE,
+          refine: true,
           rotate: (((read.rotate % 360) + 360) % 360) as 0 | 90 | 180 | 270,
           onProgress: (fraction) => onProgress({ stage: "ocr", index: n + 1, total: scannedIdx.length, fraction }),
           // Layout from the pixels first (rules, boxes, tables, shading), then the lines are erased so the
@@ -508,6 +509,7 @@ export async function extractPages(file: File, ocrLang: string, onProgress: (p: 
             invertBars(image, analysis.bars, bg);
             flattenFills(image, analysis.fills.filter((f) => !analysis.bars.some((b) => b.x === f.x && b.y === f.y)), bg);
             eraseRules(image, analysis.rules, bg);
+            eraseCheckboxes(image, analysis.checkboxes, bg);
             onProgress({ stage: "ocr", index: n + 1, total: scannedIdx.length, fraction: 0 });
             return { analysis, original, map } satisfies Prepared;
           },

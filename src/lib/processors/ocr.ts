@@ -110,6 +110,13 @@ export interface OcrSession {
       enhance?: boolean;
       onProgress?: (fraction: number) => void;
       /**
+       * Second look at words read with little confidence: each is cropped and read again on its own, as a
+       * single word. A page read as a whole gets a word wrong when its neighbours' layout confuses the line
+       * model ("Issue" read as "Tact"); alone, the same pixels read right. A better reading (clearly higher
+       * confidence) replaces the first. Used by PDF → Word.
+       */
+      refine?: boolean;
+      /**
        * Layout analysis on the rendered page before recognition: gets the pixels (RGBA, may be changed —
        * e.g. lines erased so OCR reads the text between them) and pixel ↔ PDF mappers; its return value comes
        * back as `prepared`. Used by PDF → Word; the editor doesn't pass it.
@@ -196,6 +203,187 @@ function mapLinesToPdfSpace(
     });
 }
 
+/** Rows or words below this confidence get a second look (see `refine`); at most REFINE_MAX reads a page. */
+const REFINE_BELOW = 60;
+const REFINE_ROW_BELOW = 70;
+const REFINE_MAX = 60;
+
+type RawWord = { text: string; confidence: number; bbox: Bbox; symbols: { text: string; bbox: Bbox }[]; line?: number };
+type RefineWorker = {
+  setParameters(p: Record<string, string>): Promise<unknown>;
+  recognize(image: HTMLCanvasElement, options: object, output: object): Promise<{ data: { text: string; confidence: number; blocks?: { paragraphs: { lines: { words: { text: string; confidence: number; bbox: Bbox }[] }[] }[] }[] | null } }>;
+};
+
+/**
+ * Second look, in place, never throwing (a failed second look keeps the first):
+ * 1. rows — words of one line set close together (a line as read can hold a left and a right block) — whose
+ *    words average under REFINE_ROW_BELOW are read again as one line; the new reading replaces the row when
+ *    clearly more confident and not fewer words (an italic caption: "figure. siuyey counts by aie" →
+ *    "Figure 1. Survey counts by site.");
+ * 2. ink no word covers but shaped like a line of text (a display heading the page segmentation took for a
+ *    picture) is read as one line, and kept when read with clear confidence;
+ * 3. words still under REFINE_BELOW are read again alone ("Tact" → "Issue").
+ */
+async function refineLowConfidence(worker: RefineWorker, canvas: HTMLCanvasElement, words: RawWord[], lines: { text: string; bbox: Bbox; baseline?: Bbox & { has_baseline?: boolean } }[]): Promise<void> {
+  let reads = 0;
+  const crop = (b: Bbox) => {
+    const pad = 6;
+    const left = Math.max(0, b.x0 - pad);
+    const top = Math.max(0, b.y0 - pad);
+    return { left, top, width: Math.min(canvas.width - left, b.x1 - b.x0 + 2 * pad), height: Math.min(canvas.height - top, b.y1 - b.y0 + 2 * pad) };
+  };
+  try {
+    // 1. rows
+    await worker.setParameters({ tessedit_pageseg_mode: "7" }); // PSM.SINGLE_LINE
+    const byLine = new Map<number, RawWord[]>();
+    for (const w of words) {
+      if (w.line === undefined) continue;
+      if (!byLine.has(w.line)) byLine.set(w.line, []);
+      byLine.get(w.line)!.push(w);
+    }
+    for (const [line, ws] of byLine) {
+      ws.sort((p, q) => p.bbox.x0 - q.bbox.x0);
+      const rows: RawWord[][] = [];
+      for (const w of ws) {
+        const row = rows[rows.length - 1];
+        const prev = row?.[row.length - 1];
+        if (prev && w.bbox.x0 - prev.bbox.x1 < 3 * (prev.bbox.y1 - prev.bbox.y0)) row.push(w);
+        else rows.push([w]);
+      }
+      for (const row of rows) {
+        const mean = row.reduce((n, w) => n + w.confidence, 0) / row.length;
+        if (row.length < 2 || mean >= REFINE_ROW_BELOW || reads >= REFINE_MAX) continue;
+        const box = { x0: Math.min(...row.map((w) => w.bbox.x0)), y0: Math.min(...row.map((w) => w.bbox.y0)), x1: Math.max(...row.map((w) => w.bbox.x1)), y1: Math.max(...row.map((w) => w.bbox.y1)) };
+        const r = await worker.recognize(canvas, { rectangle: crop(box) }, { text: true, blocks: true });
+        reads++;
+        const fresh: RawWord[] = [];
+        for (const b of r.data.blocks ?? []) for (const p of b.paragraphs) for (const l of p.lines) for (const w of l.words) if (w.text.trim()) fresh.push({ text: w.text, confidence: w.confidence, bbox: w.bbox, symbols: [], line });
+        const freshMean = fresh.length ? fresh.reduce((n, w) => n + w.confidence, 0) / fresh.length : 0;
+        if (fresh.length >= row.length && freshMean >= mean + 15 && freshMean >= REFINE_ROW_BELOW) {
+          const at = words.indexOf(row[0]);
+          for (const w of row) words.splice(words.indexOf(w), 1);
+          words.splice(at, 0, ...fresh);
+        }
+      }
+    }
+    // 2. ink no word covers but shaped like a line of text — a large display
+    // heading the page segmentation took for a picture ("INVOICE"): read as one line, kept only when read
+    // with clear confidence (a chart, a stamp or a signature reads badly and stays a picture).
+    for (const box of unreadText(canvas, words)) {
+      if (reads >= REFINE_MAX) break;
+      const r = await worker.recognize(canvas, { rectangle: crop(box) }, { text: true, blocks: true });
+      reads++;
+      const fresh: RawWord[] = [];
+      const index = lines.filter((l) => l.text.trim()).length;
+      for (const b of r.data.blocks ?? []) for (const p of b.paragraphs) for (const l of p.lines) for (const w of l.words) if (w.text.trim()) fresh.push({ text: w.text, confidence: w.confidence, bbox: w.bbox, symbols: [], line: index });
+      const mean = fresh.length ? fresh.reduce((n, w) => n + w.confidence, 0) / fresh.length : 0;
+      const letters = fresh.map((w) => w.text).join("").match(/\p{L}/gu)?.length ?? 0;
+      if (fresh.length && mean >= 80 && letters >= 2) {
+        words.push(...fresh);
+        const text = fresh.map((w) => w.text).join(" ");
+        const bbox = { x0: Math.min(...fresh.map((w) => w.bbox.x0)), y0: Math.min(...fresh.map((w) => w.bbox.y0)), x1: Math.max(...fresh.map((w) => w.bbox.x1)), y1: Math.max(...fresh.map((w) => w.bbox.y1)) };
+        lines.push({ text, bbox });
+      }
+    }
+    // 3. words
+    await worker.setParameters({ tessedit_pageseg_mode: "8" }); // PSM.SINGLE_WORD
+    for (const w of words) {
+      if (w.confidence >= REFINE_BELOW || !/[\p{L}\p{N}]/u.test(w.text) || reads >= REFINE_MAX) continue;
+      const c = crop(w.bbox);
+      if (c.width < 8 || c.height < 8) continue;
+      const r = await worker.recognize(canvas, { rectangle: c }, { text: true });
+      reads++;
+      const text = r.data.text.trim();
+      // (Same length, about: a crop reaching into a neighbouring word mustn't turn "6" into "695.00".)
+      const similar = Math.abs(text.length - w.text.length) <= Math.max(1, w.text.length / 2);
+      if (text && !/\s/.test(text) && similar && r.data.confidence >= w.confidence + 15 && r.data.confidence >= 60) {
+        w.text = text;
+        w.confidence = r.data.confidence;
+        w.symbols = [];
+      }
+    }
+  } catch {
+    // keep the first reading
+  } finally {
+    try {
+      await worker.setParameters({ tessedit_pageseg_mode: "3" }); // PSM.AUTO
+    } catch {
+      /* the worker is gone */
+    }
+  }
+}
+
+/**
+ * Pieces of ink no recognised word covers that are shaped like a line of text: on a 4 px grid, dark cells
+ * outside the words (grown by a few pixels), joined across letter and word gaps; a piece 20–150 px tall
+ * (≈ 7–50 pt at the scale PDF → Word reads), at least twice as wide, and not solid (a bar or a photo is).
+ */
+function unreadText(canvas: HTMLCanvasElement, words: RawWord[]): Bbox[] {
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return [];
+  const { width: W, height: H } = canvas;
+  const data = ctx.getImageData(0, 0, W, H).data;
+  const C = 4;
+  const cw = Math.floor(W / C);
+  const ch = Math.floor(H / C);
+  const lum = (x: number, y: number) => {
+    const p = (y * W + x) * 4;
+    return (data[p] * 299 + data[p + 1] * 587 + data[p + 2] * 114) / 1000;
+  };
+  // Paper level: the most common bright value, sampled.
+  const hist = new Uint32Array(256);
+  for (let y = 0; y < H; y += 7) for (let x = 0; x < W; x += 7) hist[Math.round(lum(x, y))]++;
+  let paper = 255;
+  for (let v = 96, best = -1; v < 256; v++) if (hist[v] > best) [paper, best] = [v, hist[v]];
+  const dark = paper - 70;
+  const covered = new Uint8Array(cw * ch);
+  for (const w of words) {
+    const pad = 4;
+    for (let y = Math.max(0, Math.floor((w.bbox.y0 - pad) / C)); y <= Math.min(ch - 1, (w.bbox.y1 + pad) / C); y++)
+      for (let x = Math.max(0, Math.floor((w.bbox.x0 - pad) / C)); x <= Math.min(cw - 1, (w.bbox.x1 + pad) / C); x++) covered[y * cw + x] = 1;
+  }
+  const cell = new Uint8Array(cw * ch);
+  for (let cy = 0; cy < ch; cy++)
+    for (let cx = 0; cx < cw; cx++) {
+      if (covered[cy * cw + cx]) continue;
+      let n = 0;
+      for (let y = cy * C; y < cy * C + C; y++) for (let x = cx * C; x < cx * C + C; x++) if (lum(x, y) < dark) n++;
+      if (n >= 2) cell[cy * cw + cx] = 1;
+    }
+  const seen = new Uint8Array(cw * ch);
+  const out: Bbox[] = [];
+  for (let i = 0; i < cell.length; i++) {
+    if (!cell[i] || seen[i]) continue;
+    const stack = [i];
+    seen[i] = 1;
+    let x0 = cw, y0 = ch, x1 = 0, y1 = 0, n = 0;
+    while (stack.length) {
+      const k = stack.pop()!;
+      const x = k % cw;
+      const y = (k - x) / cw;
+      n++;
+      x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); y1 = Math.max(y1, y);
+      // Letters and words join across up to 3 cells sideways, 1 up or down.
+      for (let dy = -1; dy <= 1; dy++)
+        for (let dx = -3; dx <= 3; dx++) {
+          const nx = x + dx;
+          const ny = y + dy;
+          if (nx < 0 || ny < 0 || nx >= cw || ny >= ch) continue;
+          const m = ny * cw + nx;
+          if (cell[m] && !seen[m]) {
+            seen[m] = 1;
+            stack.push(m);
+          }
+        }
+    }
+    const h = (y1 - y0 + 1) * C;
+    const w = (x1 - x0 + 1) * C;
+    const fill = n / ((x1 - x0 + 1) * (y1 - y0 + 1));
+    if (h >= 20 && h <= 150 && w >= 2 * h && fill < 0.75) out.push({ x0: x0 * C, y0: y0 * C, x1: (x1 + 1) * C, y1: (y1 + 1) * C });
+  }
+  return out.slice(0, 12);
+}
+
 export async function createOcrSession(langCode: string): Promise<OcrSession> {
   const { createWorker, OEM } = await import("tesseract.js");
 
@@ -269,7 +457,7 @@ export async function createOcrSession(langCode: string): Promise<OcrSession> {
         options.onProgress?.(1);
       }
 
-      const rawWords: { text: string; confidence: number; bbox: Bbox; symbols: { text: string; bbox: Bbox }[]; line?: number }[] = [];
+      const rawWords: RawWord[] = [];
       const rawLines: { text: string; bbox: Bbox; baseline?: Bbox & { has_baseline?: boolean } }[] = [];
       for (const block of result.data.blocks ?? []) {
         for (const paragraph of block.paragraphs) {
@@ -289,6 +477,8 @@ export async function createOcrSession(langCode: string): Promise<OcrSession> {
           }
         }
       }
+
+      if (options.refine) await refineLowConfidence(worker, canvas, rawWords, rawLines);
 
       const words = mapWordsToPdfSpace(rawWords, viewport);
       const lines = mapLinesToPdfSpace(rawLines, viewport);

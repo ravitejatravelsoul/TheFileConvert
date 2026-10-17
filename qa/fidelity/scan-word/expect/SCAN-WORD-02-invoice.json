@@ -1,0 +1,82 @@
+{
+ "checks": [
+  {
+   "id": "near-top",
+   "kind": "near_top",
+   "page": 1,
+   "phrase": "INVOICE"
+  },
+  {
+   "id": "tables:count",
+   "kind": "ntables",
+   "min": 4
+  },
+  {
+   "id": "meta-issue",
+   "kind": "same_line",
+   "page": 1,
+   "phrases": [
+    "Issue date",
+    "28 September 2026"
+   ],
+   "tol": 8
+  },
+  {
+   "id": "totals-total",
+   "kind": "same_line",
+   "page": 1,
+   "phrases": [
+    "Total due",
+    "£1,301.52"
+   ],
+   "tol": 8
+  },
+  {
+   "id": "totals-subtotal",
+   "kind": "same_line",
+   "page": 1,
+   "phrases": [
+    "Subtotal",
+    "£1,084.60"
+   ],
+   "tol": 8
+  },
+  {
+   "id": "item-row-1",
+   "kind": "same_line",
+   "page": 1,
+   "phrases": [
+    "DX-200",
+    "Nitrile examination gloves, box of 200",
+    "£276.00"
+   ],
+   "tol": 8
+  },
+  {
+   "id": "layout:meta-right-of-seller",
+   "kind": "present",
+   "page": 1,
+   "phrase": "Issue date",
+   "x_min": 300
+  },
+  {
+   "id": "layout:seller-left",
+   "kind": "present",
+   "page": 1,
+   "phrase": "Brightline Supplies Ltd.",
+   "x_max": 120
+  },
+  {
+   "id": "order:zones",
+   "kind": "docorder",
+   "phrases": [
+    "Brightline Supplies Ltd.",
+    "BILL TO",
+    "Item",
+    "DX-200",
+    "Subtotal",
+    "Payment terms"
+   ]
+  }
+ ]
+}

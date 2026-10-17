@@ -1,0 +1,79 @@
+{
+ "checks": [
+  {
+   "id": "near-top",
+   "kind": "near_top",
+   "page": 1,
+   "phrase": "Community Grant Application"
+  },
+  {
+   "id": "forms:blanks",
+   "kind": "leaders",
+   "min": 8
+  },
+  {
+   "id": "forms:checkboxes",
+   "kind": "checkboxes",
+   "total": 5,
+   "checked": 1
+  },
+  {
+   "id": "forms:signature-date",
+   "kind": "same_line",
+   "page": 1,
+   "phrases": [
+    "Signature",
+    "Date"
+   ],
+   "tol": 8
+  },
+  {
+   "id": "tables:budget",
+   "kind": "table",
+   "page": 1,
+   "cells": [
+    [
+     "Budget line",
+     "Amount requested",
+     "Match funding"
+    ],
+    [
+     "Staff costs"
+    ],
+    [
+     "Equipment"
+    ],
+    [
+     "Venue hire"
+    ]
+   ]
+  },
+  {
+   "id": "choices-one-row",
+   "kind": "same_line",
+   "page": 1,
+   "phrases": [
+    "Education",
+    "Health",
+    "Environment",
+    "Arts and culture",
+    "Other"
+   ],
+   "tol": 8
+  },
+  {
+   "id": "order:sections",
+   "kind": "docorder",
+   "phrases": [
+    "Community Grant Application",
+    "Section A",
+    "Organisation name",
+    "Section B",
+    "Project title",
+    "Budget line",
+    "Section C",
+    "Signature"
+   ]
+  }
+ ]
+}

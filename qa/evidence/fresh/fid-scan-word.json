@@ -1,70 +1,88 @@
 [
- {
-  "tool": "Scan → Word",
-  "test": "SCAN-WORD-07-mixed-rules.pdf",
-  "verdict": "PASS",
-  "ms": 5525,
-  "stages": [
-   "Analyzing document — page 1 of 1…\n\nEverything happens in this tab. Nothing is uploaded.",
-   "Recognizing page 1 of 1…\n\nScanned pages are read with OCR on this device — the first run downloads a small recognition model.",
-   "Validating result…\n\nEverything happens in this tab. Nothing is uploaded.",
-   "Your Word document is ready"
-  ],
-  "uploads": 0,
-  "pagesSrc": 1,
-  "pagesOut": 1,
-  "pages": [
-   {
-    "page": 1,
-    "wordsOut": 52,
-    "wordsInPlacePct": 96.2,
-    "wordsWithoutInk": [],
-    "rulesH": {
-     "src": 14,
-     "out": 14,
-     "keptPct": 92.1
+  {
+    "tool": "Scan → Word",
+    "test": "SCAN-WORD-19-twocol-heading-span.pdf",
+    "verdict": "PASS",
+    "ms": 15087,
+    "stages": [
+      "Analyzing document — page 1 of 1…\n\nEverything happens in this tab. Nothing is uploaded.",
+      "Recognizing page 1 of 1…\n\nScanned pages are read with OCR on this device — the first run downloads a small recognition model.",
+      "Your Word document is ready"
+    ],
+    "uploads": 0,
+    "pagesSrc": 1,
+    "pagesOut": 1,
+    "pages": [
+      {
+        "page": 1,
+        "wordsOut": 457,
+        "wordsInPlacePct": 96.5,
+        "wordsWithoutInk": 0,
+        "rulesH": {
+          "src": 1,
+          "out": 1,
+          "keptPct": 100
+        },
+        "rulesV": {
+          "src": 0,
+          "out": 0,
+          "keptPct": null
+        }
+      }
+    ],
+    "wordsInPlacePct": 96.5,
+    "wordsWithoutInk": 0,
+    "rulesKeptPct": 100,
+    "typographyPct": 93.7,
+    "tables": [],
+    "checks": [
+      {
+        "id": "layout:summary-left",
+        "ok": true,
+        "detail": "(60.400001525878906, 427.5260009765625, 286.20599365234375, 443.02398681640625)"
+      },
+      {
+        "id": "order:spans",
+        "ok": true,
+        "detail": "positions [0, 1488]"
+      }
+    ],
+    "textRecallPct": 100,
+    "layout": "PASS",
+    "rules": "PASS",
+    "typography": "PASS",
+    "text": "PASS",
+    "garbage": "PASS",
+    "checksFailed": [],
+    "structure": "PASS",
+    "dimensions": {
+      "TEXT": "PASS",
+      "LAYOUT": "PASS",
+      "TABLES": "n/a",
+      "BORDERS_RULES": "PASS",
+      "FORMS": "n/a",
+      "IMAGES": "n/a",
+      "TYPOGRAPHY": "PASS",
+      "READING_ORDER": "PASS"
     },
-    "rulesV": {
-     "src": 11,
-     "out": 15,
-     "keptPct": 97.2
-    }
-   }
-  ],
-  "wordsInPlacePct": 96.2,
-  "wordsWithoutInk": 0,
-  "rulesKeptPct": 94.7,
-  "typographyPct": 100,
-  "tables": [
-   "2x2",
-   "1x1",
-   "1x1",
-   "4x3"
-  ],
-  "textRecallPct": 100,
-  "layout": "PASS",
-  "rules": "PASS",
-  "typography": "PASS",
-  "text": "PASS",
-  "garbage": "PASS",
-  "overall": "PASS",
-  "integrity": [
-   {
-    "file": "userscan-SCAN-WORD-07-mixed-rules.docx",
-    "bytes": 4732,
-    "ok": true,
-    "kind": "docx",
-    "pages": 1,
-    "paragraphs": 3,
-    "tables": 4,
-    "pictures": 0
-   }
-  ]
- },
- {
-  "tool": "User scan → Word",
-  "test": "console errors",
-  "verdict": "PASS",
-  "errors": []
- }
+    "overall": "PASS",
+    "integrity": [
+      {
+        "file": "userscan-SCAN-WORD-19-twocol-heading-span.docx",
+        "bytes": 4220,
+        "ok": true,
+        "kind": "docx",
+        "pages": 4,
+        "paragraphs": 7,
+        "tables": 0,
+        "pictures": 0
+      }
+    ]
+  },
+  {
+    "tool": "User scan → Word",
+    "test": "console errors",
+    "verdict": "PASS",
+    "errors": []
+  }
 ]

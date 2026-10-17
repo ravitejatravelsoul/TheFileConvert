@@ -1,0 +1,49 @@
+{
+ "checks": [
+  {
+   "id": "near-top",
+   "kind": "near_top",
+   "page": 1,
+   "phrase": "Membership Registration"
+  },
+  {
+   "id": "forms:blanks",
+   "kind": "leaders",
+   "min": 9
+  },
+  {
+   "id": "forms:signature-date",
+   "kind": "same_line",
+   "page": 1,
+   "phrases": [
+    "Signature",
+    "Date"
+   ],
+   "tol": 8
+  },
+  {
+   "id": "forms:city-row",
+   "kind": "same_line",
+   "page": 1,
+   "phrases": [
+    "City",
+    "State",
+    "Postal code"
+   ],
+   "tol": 8
+  },
+  {
+   "id": "order:fields",
+   "kind": "docorder",
+   "phrases": [
+    "Membership Registration",
+    "Full name",
+    "Street address",
+    "Telephone",
+    "Email",
+    "City",
+    "Signature"
+   ]
+  }
+ ]
+}
