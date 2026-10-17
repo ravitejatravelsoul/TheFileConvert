@@ -1,80 +1,43 @@
-# Manual Microsoft Word review — scanned PDF → Word
+# Manual Microsoft Word review
 
-**MANUAL WORD REVIEW REQUIRED.** Microsoft Word is installed on this machine but runs as an unlicensed
-product, and its automation (`qa/validate/wordrender.ps1`) hangs. Every automated render in this branch is
-LibreOffice 26.2.6. Nothing here has been checked in Word yet. Please open each file in Word (desktop) and
-check the points below. If Word opens a file in Protected View, choose **Enable Editing** before judging the
-layout.
+**MANUAL WORD REVIEW REQUIRED.** Microsoft Word is installed on the development machine but runs as an
+unlicensed product, and its automation (`qa/validate/wordrender.ps1`) hangs. Every automated render in this branch
+is LibreOffice 26.2.6, so **nothing here has been checked in Word itself**. Please open each file in Word (desktop)
+and check the points below. If Word opens a file in Protected View, choose **Enable Editing** before judging.
 
-The DOCX files were downloaded from the real `/pdf-to-word` page (production build of this branch). The
-originals and LibreOffice renders, side by side, are in `qa/fidelity/final-scan-review/<name>/`
-(`original.png`, `word-render.png`, `diff.png`: red = only in the original, blue = only in the Word render,
-black = both).
+The files were downloaded from the real `/pdf-to-word` and `/image-to-word` pages (production build of this branch)
+from the fake documents in `qa/real-user-fixtures/`. Side-by-side images (source | LibreOffice render | difference)
+are in `qa/fidelity/real-user/`; the measured results are in `qa/REAL_USER_PRODUCT_AUDIT.md`.
+`user-scan.docx` is made from your own scan: it exists on this machine only (git-ignored), never committed.
 
-`user-scan.docx` and `qa/fidelity/final-scan-review/user-scan/` are your own document. They are on this
-machine only (git-ignored), never committed.
+This package replaces the earlier one (made when scanned pages were rebuilt as editable text). Scanned pages are now
+kept as they look — see `qa/CONVERSION_SEMANTICS.md`.
 
-## What to check in every file
-- One page in Word for each page of the original, with the same page size.
-- No stray characters, fragments or symbols ("[J", "|", "ER CC CS TR").
-- Text you can select and edit (pictures are used only for stamps, signatures and charts).
+## Scanned documents kept as they look
+`DOCUMENT-01-passport-scan`, `-02-filled-application`, `-03-certificate`, `-04-invoice`, `-05-bank-statement`
+(2 pages), `-08-signed-contract` (2 pages), `user-scan` (2 pages).
+- One Word page per original page, **same page size** (Letter portrait; the certificate is landscape).
+- The page looks like the original: photo, handwriting, stamp, signature, check boxes, borders, table lines.
+- The picture fills the page edge to edge, sits **behind** an empty paragraph, and does not shift when you click in
+  the page, press Enter or change zoom. Clicking selects the picture (it is a movable, resizable picture on purpose).
+- No stray text, and no second page appearing after each page.
+- Readable at normal zoom (about 180–200 dpi); file size about 0.4–1 MB per page.
 
-## user-scan.docx — your scan (2 pages)
-- **Page 1**
-  - OFFICIAL RECORD - SCANNED COPY at the top, with the rule under it.
-  - "Student Information" under it.
-  - *Name:* and *John Smith* on one line, the line under the name kept.
-  - The sentence with its rule.
-  - VALID FROM · 02/08/2026 · UNTIL · 12/20/2026 on one row inside a box with four sides.
-  - Account Number and Invoice Total rows aligned.
-  - A real 4 × 3 table (Item / Status / Value) with borders.
-  - Registrar line.
-- **Page 2**
-  - Double page border.
-  - CERTIFICATE OF COMPLETION.
-  - Robert Johnson.
-  - The Award Date line with its rule.
-  - Classification and Score rows.
-  - The verification code inside its box.
+## Native PDFs made editable
+`DOCUMENT-06-resume-native`, `-04b-invoice-native`, `-12-table-report`, `-13-brochure`.
+- Text is real and editable; headings use Heading styles; lists are real lists; tables are real tables.
+- 06: the dark name band is only as wide as its text (known LIMITED); the skills table has horizontal lines only.
+- 13: grey bars above the three columns and the full-height title band are not reproduced (known LIMITED); check
+  the page stays one page.
+- 12: the data table and the chart picture are in place.
 
-## form.docx — application form
-- Purple section bars ("Section A — Applicant" …) as full-width shaded boxes with white text.
-- Fill-in lines after Organisation name, Registered charity number, Contact person, Email address, Telephone,
-  Project title, Signature and Date. They are underline tab leaders: click after a label and type, and the
-  text should sit on the line.
-- Check boxes ☐ Education ☑ Health ☐ Environment ☐ Arts and culture ☐ Other on one row, Health ticked.
-- The Budget table: 4 rows × 3 columns, shaded header row.
+## A plain scanned letter (hybrid)
+`DOCUMENT-07-scanned-letter` — chosen as editable text because the on-device reading was reliable. Compare the
+wording with the original; the paper grain is gone by design.
 
-## invoice.docx — invoice
-- Seller address (left) and invoice number / issue date / due date (right) side by side, each block with its
-  own line spacing, and the right block aligned right.
-- BILL TO / SHIP TO in two columns.
-- The item table: a dark blue header row with white text, 6 rows of items (alternate rows lightly tinted)
-  and amounts aligned right.
-- Subtotal / VAT / Total due aligned with the amounts.
-- The logo, kept as a picture.
+## Images
+`image-filled-form` — one page, the picture is the page (proportions of the PNG, no margins); no text.
 
-## two-column.docx — two-column report
-- Title and authors across the page, the abstract, then two columns.
-- Headings "1. Introduction", "2. Method", "3. Results", "4. Discussion" in **bold** Georgia, about 13 pt, the
-  same size as each other.
-- The chart (bars and axes) at the top of the right column, with its caption under it, and "4. Discussion"
-  under the caption.
-- Lines in both columns break where the original's do.
-
-## transcript.docx — transcript (LIMITED in the automated check)
-- The header table (Student / Student ID / Programme / Date issued).
-- Three course tables with grey grids and shaded header rows.
-- Known limitation: the term headings ("Autumn 2024" …) come out regular and 2–3 pt too large where the
-  original is bold. "General Chemistry I" may show the "I" a few points to the right.
-
-## table-heavy.docx — table report
-- "Regional performance": blue header row with white text, the Total row tinted, amounts aligned right.
-- "Staffing plan": merged "Warehouse" cell spanning two rows.
-- "Top issues" table.
-
-## letter.docx — letter with stamp and signature
-- Letterhead, the rule under the address, the date, the recipient's address and the body paragraphs.
-- The handwritten signature and the round stamp kept as pictures in their places, not turned into text.
-- The signed name under the signature is part of the signature picture (it was written over by the
-  signature).
+## In every file
+- No stray characters or symbols; page count as stated above.
+- Report anything that surprises you — that is the test applied to every tool.

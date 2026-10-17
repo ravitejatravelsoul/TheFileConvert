@@ -169,7 +169,9 @@ export async function buildDocx(pages: PageLayout[], options: DocxOptions): Prom
         return `<w:p>${pPrXml(b.fmt)}${lead}${inlineImage(b.image, b.width, b.height)}</w:p>`;
       case "table": {
         const border = b.border ? `w:val="single" w:sz="${borderSz(b.border.thickness)}" w:space="0" w:color="${b.border.color.toUpperCase()}"` : 'w:val="nil"';
-        const borders = `<w:tblBorders><w:top ${border}/><w:left ${border}/><w:bottom ${border}/><w:right ${border}/><w:insideH ${border}/><w:insideV ${border}/></w:tblBorders>`;
+        const none = 'w:val="nil"';
+        const side = b.rowsOnly ? none : border;
+        const borders = `<w:tblBorders><w:top ${border}/><w:left ${side}/><w:bottom ${border}/><w:right ${side}/><w:insideH ${border}/><w:insideV ${side}/></w:tblBorders>`;
         const grid = b.columns.map((c) => `<w:gridCol w:w="${twips(c)}"/>`).join("");
         const total = b.columns.reduce((s, c) => s + c, 0);
         const rows = b.rows
@@ -290,6 +292,9 @@ export async function buildDocx(pages: PageLayout[], options: DocxOptions): Prom
   const documentXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<w:document ${W_NS}><w:body>${body.join("")}${finalSect}</w:body></w:document>`;
 
   // ------------------------------------------------------------------ styles and numbering
+  // These parts don't declare the w14 namespace, so no run in them may carry w14 markup: the per-page
+  // "transparent text" flag (left set by the last page) must be off here.
+  transparent = false;
   const half = Math.round(bodySize * 2);
   const font = xmlText(bodyFont);
   const heading = (n: number) =>

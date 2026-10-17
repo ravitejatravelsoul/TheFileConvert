@@ -68,7 +68,10 @@ export interface NativeTextReplacementObject extends BaseObject {
   originalText: string;
   newText: string;
   fontSize: number;
+  /** The text colour: the original line's, read from the page, so white-on-dark stays white-on-dark. */
   color: RgbColor;
+  /** What covers the old text: the page's own colour behind it (white when unset, as for older sessions). */
+  backgroundColor?: RgbColor;
 }
 
 export interface OcrTextReplacementObject extends BaseObject {

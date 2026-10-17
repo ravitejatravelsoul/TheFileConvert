@@ -157,7 +157,7 @@ async function drawObject(
 ): Promise<void> {
   switch (obj.type) {
     case "native-text-replacement": {
-      drawWhiteoutRect(page, obj.x, obj.y, obj.width, obj.height);
+      page.drawRectangle({ x: obj.x, y: obj.y, width: obj.width, height: obj.height, color: toPdfLibColor(obj.backgroundColor ?? { r: 1, g: 1, b: 1 }) });
       if (!obj.newText.trim()) break;
       const font = fonts.regular;
       const size = fitFontSize(font, obj.newText, obj, obj.fontSize);
@@ -165,7 +165,7 @@ async function drawObject(
         // Real (visible) text, so the correction is already searchable and copyable — a second
         // invisible copy would make every search/copy of this text appear twice.
         // Same baseline as the text it replaces (the region box extends below it for descenders).
-        page.drawText(obj.newText, { x: obj.x + 0.5, y: obj.y + obj.height * DESCENT_SHARE, size, font, color: rgb(0, 0, 0) });
+        page.drawText(obj.newText, { x: obj.x + 0.5, y: obj.y + obj.height * DESCENT_SHARE, size, font, color: toPdfLibColor(obj.color) });
       } catch {
         // A character outside Helvetica's supported encoding shouldn't fail the whole
         // export — the region is still whited out, just without replacement text drawn.

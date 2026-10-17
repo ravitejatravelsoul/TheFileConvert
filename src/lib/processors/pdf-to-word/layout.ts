@@ -73,7 +73,7 @@ export interface PageInput {
   /** Visual fallback: the page image, kept behind the (then invisible) recognised text. */
   background?: PageImage;
   /** How the page is rebuilt (see scanPage.ts); native text pages leave it out. */
-  strategy?: "native" | "structured-scan" | "hybrid" | "visual-fallback";
+  strategy?: "native" | "structured-scan" | "hybrid" | "visual-fallback" | "visual-preserved";
 }
 
 export interface Run {
@@ -148,6 +148,8 @@ export type Block =
       rows: TableRow[];
       bordered: boolean;
       border: { thickness: number; color: string } | null;
+      /** Ruled by horizontal lines only (a table with no vertical lines): the border is drawn on the rows, not the sides or between columns. */
+      rowsOnly?: boolean;
       indent: number;
       spaceBefore: number;
       cellMargin: { left: number; right: number; top: number };
@@ -479,6 +481,8 @@ function findGrids(rules: Rule[]): Grid[] {
     for (let j = i + 1; j < lone.length; j++) {
       const r = lone[j].r;
       if (used.has(lone[j].k) || Math.abs(r.x0 - base.x0) > 4 || Math.abs(r.x1 - base.x1) > 4) continue;
+      // Rows of one table are ruled alike: a dark heading underline above light row lines is not part of it.
+      if (r.color !== base.color || Math.abs(r.thickness - base.thickness) > 0.2) break;
       const last = stack[stack.length - 1].r;
       const gap = last.y0 - r.y0;
       const first = stack.length >= 2 ? stack[0].r.y0 - stack[1].r.y0 : gap;
@@ -1340,6 +1344,7 @@ function gridTable(g: Grid, items: Decorated[], fills: Fill[], page: PageInput, 
     rows,
     bordered: !g.openSides,
     border: g.border,
+    rowsOnly: g.openSides,
     indent: tw(xs[0] - marginLeft),
     spaceBefore: 0,
     cellMargin: { left, right: Math.min(left, 5.4), top: 0 },
@@ -1623,8 +1628,9 @@ export function layoutPage(page: PageInput, stats: DocumentStats, listKeys: { ne
     right: Math.floor((page.width - marginRightEdge) * 20) / 20,
     top: Math.round(clamp(firstTop, 0, page.height / 2) * 2) / 2,
     // Each PDF page is its own section, so nothing flows in after the last line: a modest bottom margin
-    // (never tight against the content) keeps small differences in line height from spilling onto a new page.
-    bottom: Math.round(clamp(Math.min(page.height - lastBottom - 10, 72, footerTop - 4), 0, page.height / 2) * 2) / 2,
+    // (never tight against the content: a shaded block or a few points of line-height drift must not spill onto
+    // a new page) keeps the page one page.
+    bottom: Math.round(clamp(Math.min(page.height - lastBottom - 20, 72, footerTop - 4), 0, page.height / 2) * 2) / 2,
   };
   return {
     width: page.width,

@@ -13,7 +13,7 @@ import { HEIGHTS, WIDTH_CHARS, WIDTHS } from "./fontWidths";
  *   recognised text (which is made invisible), so the document still looks exactly like the scan.
  */
 
-export type Strategy = "native" | "structured-scan" | "hybrid" | "visual-fallback";
+export type Strategy = "native" | "structured-scan" | "hybrid" | "visual-fallback" | "visual-preserved";
 
 export interface OcrWordIn {
   text: string;

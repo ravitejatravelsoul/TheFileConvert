@@ -7,6 +7,14 @@ browser UI, its output reopened independently, and compared with its source for 
 formatting, tables, images** (PDF ↔ Word) or **pixels** (every other tool). Each aspect is graded on its own;
 they are not collapsed into a single PASS.
 
+> **Superseded for scanned PDF → Word.** The scanned-PDF sections below measured how well a scan could be *rebuilt
+> as editable text* (tables, rules, boxes, typography from OCR). That is not what a normal user expects of a
+> conversion. Since the conversion-semantics pass a scanned page is kept as it looks (the page goes into Word as a
+> picture); OCR only judges plain scanned letters. The contract is `qa/CONVERSION_SEMANTICS.md`, the evidence
+> `qa/REAL_USER_PRODUCT_AUDIT.md`. The scanned-reconstruction pipeline and its suites (`fid-scans.mjs`) still exist
+> for the hybrid path but no longer describe the default output. Everything else in this report (native PDF → Word,
+> Word → PDF, compression, converters, page tools, editor, OCR) stands.
+
 ## Verdict
 
 **READY FOR FINAL USER REVIEW** (final closure, after commit `c277426`). PDF → Word, Word → PDF, round

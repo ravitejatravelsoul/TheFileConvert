@@ -519,6 +519,51 @@ and page-number fields aren't XML text runs); leader underscores are never words
 
 ---
 
+## Conversion semantics pass — conversion is not OCR (after commit 89d9271)
+
+**The mistake being corrected.** The previous two passes made scanned PDF → Word *better at rebuilding text*
+(tables, rules, boxes, typography from OCR). For a passport, an application, a certificate, an invoice, a
+statement or a signed contract that is the wrong goal: a normal person expects the page to look like their page.
+The default for a scanned page is now **visual preservation** (the page itself goes into Word as a picture at the
+source size); OCR may only *judge* a plain scanned letter, and hybrid editable text is accepted only when the
+reading is extremely reliable. Product contract: `qa/CONVERSION_SEMANTICS.md`; evidence:
+`qa/REAL_USER_PRODUCT_AUDIT.md`.
+
+### Every conversion path, reviewed for the five questions
+
+| Path | OCR called automatically where it shouldn't be? | Extraction replacing visual conversion? | Unnecessary rasterization / recompression? | Desktop vs mobile | Unexpected fallbacks |
+|---|---|---|---|---|---|
+| PDF → Word, native/mixed page (`extract.ts`, `layout.ts`, `docx.ts`) | No — never reaches OCR | By design (native text is the content), verified text recall 100 % | None: pictures kept as their own bytes | Same code, same strategies (audit: mobile = desktop) | A page that can't be rendered fails with a message; no silent downgrade |
+| PDF → Word, scanned page | **Only** for class `SCANNED_TEXT` (plain running text) to decide hybrid vs visual; forms, IDs, certificates, tables, photos never reach it (audit: 0 OCR requests) | **Fixed** (was the defect): default is the picture; OCR text is shown only after `hybridDecision` passes for the whole document | The page is rendered once (≤ 200 dpi, ≤ 5000 px side) and encoded JPEG q92; **fixed:** PNG is used only when smaller than the JPEG (a faint-noise scan was written as a 3 MB PNG, 3.4 MB DOCX for an 856 KB PDF → 0.85 MB) | Same | If OCR itself can't load, the page stays visual (the safe default) |
+| Image → Word (`image-to-word.ts`) | No OCR code path | No — image is the content | JPEG/PNG bytes untouched (`prepareImageForPdf`: only sideways JPEGs redrawn, WebP → JPEG/PNG) | Same | Unreadable image → named error, no partial file |
+| Image → PDF (`pdf.ts`) | No | No | JPEG byte-for-byte, PNG lossless | Same | — |
+| PDF → Image | No | No — a render | One render at the requested scale | Same | — |
+| Word → PDF (`word-to-pdf/*`) | No | **Not extraction:** our own layout engine renders the .docx XML to vector text + pictures; not Word's engine (documented) | None | Same | Font substitution and unsupported pictures are reported in notes |
+| Compress PDF / Image, Merge, Split, Organize | No | No | Compress re-encodes images by design; the others copy pages untouched | Same | Compress states a missed target |
+| PDF Editor — Recognize text | **Only when the user presses it**; export adds an invisible layer | n/a (explicit feature) | Pages untouched | Same | — |
+
+OCR call sites (complete list, `grep createOcrSession|recognizePage`): `pdf-to-word/extract.ts` (judging
+`SCANNED_TEXT` pages only) and the editor (`useEditorWorkspace`/`PageSurface`, on user action).
+
+### Defects found by the real-user audit and fixed (each with a regression test or audit check)
+
+1. **Scanned pages became text by default** (the whole point of this pass) — `classify.ts` + `extract.ts`; `classify.test.ts` (24), `docx.test.ts` (picture-only pages), e2e `pdf-to-word-ocr.spec.ts`.
+2. **PNG chosen for a "few-colour" scan** (colour test is coarse; faint scanner noise makes the PNG huge) — `encodePagePicture` now keeps the smaller of the two; audit check `weight` (≤ 1.2 MB/page). Signed contract DOCX 3.39 MB → 0.85 MB; the user's scan 3.89 MB → 0.33 MB.
+3. **Native page overflowed onto a second page** (brochure: a shaded call-out near the bottom edge plus a few points of line-height drift) — bottom-margin slack 10 pt → 20 pt in `layout.ts`; audit check `pagesKept`.
+4. **Tesseract printed "Estimating resolution as N" to the console** on some scans — `ocr.ts` now passes the real render density (`user_defined_dpi`); audit: 0 console errors; OCR accuracy unchanged on the OCR suites.
+5. **Editor corrected native text as black-on-white** even on a dark band (résumé header: a white box with black text over white-on-dark-grey) — colours are now read from the page (`regionColor.ts` `legibleOn`, `PageSurface.tsx`, `export.ts`, `ObjectView.tsx`); `regionColor.test.ts`; audit check `cover differs from the background by ≤ 30/255`.
+6. **A poster-size scan could request a canvas beyond browser limits** — page picture capped at 5000 px on the long side.
+7. **A table swallowed the heading underlines above it, and was drawn with sides** (native résumé: the EDUCATION line and the SKILLS heading ended up inside the skills table, which got full gridlines although the source only has light row lines) — rows-only table detection now requires the stacked rules to look alike (same stroke), and such tables are written with horizontal lines only (`rowsOnly`); tests in `layout.test.ts` and `docx.test.ts`; audit checks `readingOrder`, `fillsKept` (page tone).
+8. **Stale e2e expectations** (`pdf-to-word.spec.ts` copy, OCR spec asserting recognised text) — rewritten to the new contract; `readDocx` counts anchored pictures and page sizes.
+
+### Review for generality / risks
+
+- The class decision uses measured signals, not file names or fixture shapes. Thresholds are in one place (`classify.ts`), each with a test.
+- `quickSignals` runs before rendering, so a 100-page native PDF never rasterises a page.
+- Hybrid is all-or-nothing per document to avoid a Word file where page 1 is text and page 2 a picture of the same kind of page.
+- Known cost: a plain scanned letter runs OCR once to be judged (≈ 10 s per page); a 2-page letter-like contract took 22 s. Forms/IDs/tables are instant (~1.2 s).
+- Not verified in Microsoft Word (cannot be automated here): the picture-only pages use a full-page anchored picture behind an empty paragraph; manual review checklist in `qa/manual-word-review/README.md`.
+
 ## Investigated, not product defects (kept for the record)
 
 | Symptom | Finding |

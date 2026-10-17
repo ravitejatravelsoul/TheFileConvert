@@ -11,7 +11,6 @@ import { getTool } from "@/lib/tools/registry";
 import { triggerDownload } from "@/lib/download";
 import { withExtension } from "@/lib/format";
 import { formatSize } from "@/lib/size";
-import { SUPPORTED_OCR_LANGUAGES } from "@/lib/processors/ocr-languages";
 import type { PdfAnalysis, Progress } from "@/lib/processors/pdf-to-word";
 
 const tool = getTool("pdf-to-word");
@@ -19,14 +18,13 @@ const tool = getTool("pdf-to-word");
 type Phase =
   | { name: "ready" }
   | { name: "working"; progress: Progress | null }
-  | { name: "done"; output: File; pages: number; images: number; scannedPages: number; ms: number }
+  | { name: "done"; output: File; pages: number; images: number; visualPages: number; editablePages: number; classes: string; strategies: string; ms: number }
   | { name: "error"; message: string };
 
 export function PdfToWordTool() {
   const [file, setFile] = useState<File | null>(null);
   const [analysis, setAnalysis] = useState<{ file: File; result: PdfAnalysis | null; error: string | null } | null>(null);
   const [phase, setPhase] = useState<Phase>({ name: "ready" });
-  const [lang, setLang] = useState("eng");
   const resultRef = useRef<HTMLDivElement>(null);
   const { intake, rejections } = useFileIntake(tool, (files) => {
     setFile(files[0]);
@@ -65,9 +63,9 @@ export function PdfToWordTool() {
     setPhase({ name: "working", progress: null });
     try {
       const { convertPdfToWord, DOCX_MIME } = await import("@/lib/processors/pdf-to-word");
-      const result = await convertPdfToWord(file, { ocrLang: lang, onProgress: (progress) => setPhase({ name: "working", progress }) });
+      const result = await convertPdfToWord(file, { onProgress: (progress) => setPhase({ name: "working", progress }) });
       const output = new File([result.blob], withExtension(file.name, "docx"), { type: DOCX_MIME });
-      setPhase({ name: "done", output, pages: result.pages, images: result.images, scannedPages: result.scannedPages, ms: performance.now() - started });
+      setPhase({ name: "done", output, pages: result.pages, images: result.images, visualPages: result.visualPages, editablePages: result.editablePages, classes: result.pageReports.map((r) => r.cls).join(","), strategies: result.pageReports.map((r) => r.strategy).join(","), ms: performance.now() - started });
     } catch (e) {
       setPhase({ name: "error", message: e instanceof Error && e.message ? e.message : "This PDF couldn't be converted." });
     }
@@ -99,24 +97,26 @@ export function PdfToWordTool() {
       ? "Opening your PDF…"
       : p.stage === "reading"
         ? `Analyzing document — page ${p.page} of ${p.total}…`
-        : p.stage === "layout"
-          ? `Detecting layout — page ${p.index} of ${p.total}…`
-          : p.stage === "ocr"
-            ? `Recognizing page ${p.index} of ${p.total}…`
-            : p.stage === "validating"
-              ? "Validating result…"
-              : "Building Word document…";
-    const fraction = !p ? null : p.stage === "reading" ? (p.page - 1) / p.total : p.stage === "ocr" ? (p.index - 1 + p.fraction) / p.total : p.stage === "layout" ? (p.index - 1) / p.total : null;
+        : p.stage === "preserve"
+          ? `Preserving page ${p.index} of ${p.total}…`
+          : p.stage === "layout"
+            ? `Detecting layout — page ${p.index} of ${p.total}…`
+            : p.stage === "ocr"
+              ? `Recognizing page ${p.index} of ${p.total}…`
+              : p.stage === "validating"
+                ? "Validating result…"
+                : "Building Word document…";
+    const fraction = !p ? null : p.stage === "reading" ? (p.page - 1) / p.total : p.stage === "preserve" ? (p.index - 1) / p.total : p.stage === "ocr" ? (p.index - 1 + p.fraction) / p.total : p.stage === "layout" ? (p.index - 1) / p.total : null;
     return (
       <div className="mx-auto max-w-3xl">
-        <Working label={label} fraction={fraction} detail={p?.stage === "ocr" || p?.stage === "layout" ? "Scanned pages are read with OCR on this device — the first run downloads a small recognition model." : "Everything happens in this tab. Nothing is uploaded."} />
+        <Working label={label} fraction={fraction} detail={p?.stage === "ocr" || p?.stage === "layout" ? "Checking a plain scan on this device — the first run downloads a small recognition model." : "Everything happens in this tab. Nothing is uploaded."} />
       </div>
     );
   }
 
   if (phase.name === "done") {
     return (
-      <div ref={resultRef} className="mx-auto max-w-3xl scroll-mt-24 space-y-6" data-testid="result">
+      <div ref={resultRef} className="mx-auto max-w-3xl scroll-mt-24 space-y-6" data-testid="result" data-page-classes={phase.classes} data-page-strategies={phase.strategies}>
         <div className="card overflow-hidden">
           <div className="relative overflow-hidden bg-[linear-gradient(135deg,var(--success-soft),#f1faf5)] px-5 py-6 sm:px-7">
             <span aria-hidden="true" className="mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-[var(--success)] text-white shadow-[var(--shadow-2)]">
@@ -125,7 +125,11 @@ export function PdfToWordTool() {
             <p role="status" className="text-2xl font-semibold tracking-[-0.03em] sm:text-[1.75rem]">
               Your Word document is ready
             </p>
-            <p className="mt-1 text-[var(--ink-2)]">Open it in Word, Google Docs, Pages or LibreOffice and check the layout — complex pages may need small touch-ups.</p>
+            <p className="mt-1 text-[var(--ink-2)]">
+              {phase.visualPages
+                ? "Scanned pages keep the look of the original. Open it in Word, Google Docs, Pages or LibreOffice and check it against your PDF."
+                : "Open it in Word, Google Docs, Pages or LibreOffice and check the layout — complex pages may need small touch-ups."}
+            </p>
           </div>
           <div className="space-y-5 p-5 sm:p-7">
             <div className="flex items-center gap-4 rounded-[var(--radius-md)] border border-[var(--line)] bg-[var(--band)] p-3">
@@ -136,8 +140,8 @@ export function PdfToWordTool() {
                 <p className="truncate font-semibold tracking-[-0.01em]">{phase.output.name}</p>
                 <p className="tabular text-sm text-[var(--ink-2)]" data-testid="docx-size">
                   {formatSize(phase.output.size)} · {phase.pages} {phase.pages === 1 ? "page" : "pages"}
-                  {phase.images ? ` · ${phase.images} ${phase.images === 1 ? "picture" : "pictures"}` : ""}
-                  {phase.scannedPages ? ` · ${phase.scannedPages} recognized with OCR` : ""} · {(phase.ms / 1000).toFixed(1)} s
+                  {phase.visualPages ? ` · ${phase.visualPages} kept as ${phase.visualPages === 1 ? "an image" : "images"} of the original` : ""}
+                  {phase.editablePages && phase.visualPages ? ` · ${phase.editablePages} editable` : ""} · {(phase.ms / 1000).toFixed(1)} s
                 </p>
               </div>
             </div>
@@ -164,6 +168,7 @@ export function PdfToWordTool() {
 
   const label = info?.result?.label;
   const hasScans = Boolean(info?.result && info.result.kinds.includes("scanned"));
+  const hasText = Boolean(info?.result && info.result.kinds.includes("text"));
   const meta = info?.result ? `${info.result.pages} ${info.result.pages === 1 ? "page" : "pages"} · ${label}` : undefined;
   const openError = info?.error ?? null;
 
@@ -175,34 +180,32 @@ export function PdfToWordTool() {
       {!info && <Working label="Opening your PDF…" />}
       {info?.result && (
         <div className="card p-5 sm:p-7">
-          <p className="text-[1.35rem] font-semibold tracking-[-0.025em]">Convert to an editable Word document</p>
+          <p className="text-[1.35rem] font-semibold tracking-[-0.025em]">Convert to Word, keeping the document&rsquo;s appearance</p>
           <ul className="mt-4 space-y-2.5 text-[0.9375rem] leading-relaxed text-[var(--ink-2)]">
-            <li className="flex gap-2.5">
-              <IconInfo className="mt-1 h-4 w-4 shrink-0 text-[var(--ink)]" />
-              <span>We preserve text, headings, paragraphs, images and common layout where possible. Complex PDFs may require small formatting adjustments.</span>
-            </li>
+            {hasText && (
+              <li className="flex gap-2.5">
+                <IconInfo className="mt-1 h-4 w-4 shrink-0 text-[var(--ink)]" />
+                <span>Pages with real text become editable Word content — text, headings, lists, tables and pictures, in the same layout where possible. Complex pages may need small formatting adjustments.</span>
+              </li>
+            )}
             {hasScans && (
-              <li className="flex gap-2.5" data-testid="ocr-note">
+              <li className="flex gap-2.5" data-testid="scan-note">
                 <IconScan className="mt-1 h-4 w-4 shrink-0 text-[var(--ink)]" />
                 <span>
-                  Scanned pages will be recognized with OCR before creating the Word document
-                  {label === "Mixed PDF" ? " — pages that already have text are used as they are." : "."}
+                  Scanned pages, forms, IDs and certificates keep their original look: each page is placed in the Word file as an image, so signatures, stamps, photos, handwriting and filled-in values stay exactly as they are
+                  {label === "Mixed PDF" ? " — pages that already have text are made editable." : "."}
+                </span>
+              </li>
+            )}
+            {hasScans && (
+              <li className="flex gap-2.5">
+                <IconInfo className="mt-1 h-4 w-4 shrink-0 text-[var(--ink)]" />
+                <span>
+                  Want the text of a scan to be searchable or editable? Use <Link href="/pdf-editor" className="font-medium text-[var(--ink)] underline decoration-[var(--line-strong)] underline-offset-4 hover:decoration-[var(--ink)]">Recognize text in the PDF Editor</Link>.
                 </span>
               </li>
             )}
           </ul>
-          {hasScans && (
-            <label className="mt-5 flex max-w-xs flex-col gap-1.5 text-sm font-medium">
-              Language of the scanned text
-              <select value={lang} onChange={(e) => setLang(e.target.value)} className="field">
-                {SUPPORTED_OCR_LANGUAGES.map((l) => (
-                  <option key={l.code} value={l.code}>
-                    {l.label}
-                  </option>
-                ))}
-              </select>
-            </label>
-          )}
           <button type="button" onClick={run} className="btn btn-primary btn-lg mt-6">
             Convert to Word
           </button>

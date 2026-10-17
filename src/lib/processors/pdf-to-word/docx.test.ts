@@ -171,6 +171,18 @@ describe("buildDocx", () => {
     expect(attr(q("trHeight")[0], "hRule")).toBe("atLeast");
   });
 
+  it("draws a table ruled by rows only with horizontal lines — no sides, no lines between columns", async () => {
+    const t = table([{ cells: [cell("SQL"), cell("Python")], height: 20 } as TableRow], { rowsOnly: true, bordered: false });
+    const zip = await JSZip.loadAsync(await buildDocx([pageOf([t])], { title: "t", bodySize: 11, bodyFont: "Arial" }));
+    const xml = await zip.file("word/document.xml")!.async("string");
+    const borders = xml.match(/<w:tblBorders>.*?<\/w:tblBorders>/)![0];
+    expect(borders).toMatch(/<w:top w:val="single"/);
+    expect(borders).toMatch(/<w:insideH w:val="single"/);
+    expect(borders).toMatch(/<w:left w:val="nil"\/>/);
+    expect(borders).toMatch(/<w:right w:val="nil"\/>/);
+    expect(borders).toMatch(/<w:insideV w:val="nil"\/>/);
+  });
+
   it("the verifier rejects a broken package", async () => {
     const zip = await JSZip.loadAsync(await buildDocx(pages, { title: "test", bodySize: 11, bodyFont: "Calibri" }));
     zip.file("word/document.xml", "<w:document><unclosed>");
@@ -234,5 +246,19 @@ describe("buildDocx — two columns", () => {
     // …and the right column's first paragraph carries 25 + 9 − 1 pt.
     const right = xml.slice(xml.indexOf('w:type="column"'));
     expect(right).toMatch(/<w:spacing w:before="660"/);
+  });
+});
+
+describe("buildDocx — pages kept as pictures", () => {
+  it("keeps numbering.xml well-formed when a list page is followed by a page kept as an image", async () => {
+    const list: Block = { kind: "list", ordered: true, start: 1, listKey: 1, runs: [run("First point")], bullet: "%1.", label: run("1.", { bold: true }), fmt: fmt({ indLeft: 18, indFirst: -18 }) };
+    const bg = { x: 0, y: 0, w: 612, h: 792, bytes: PNG, mime: "image/png" as const, pxWidth: 1, pxHeight: 1 };
+    const kept = pageOf([], { floating: [{ image: bg, x: 0, y: 0, width: 612, height: 792, behind: true }], transparentText: true });
+    const zip = await JSZip.loadAsync(await buildDocx([pageOf([list]), kept], { title: "t", bodySize: 11, bodyFont: "" }));
+    for (const part of ["word/numbering.xml", "word/styles.xml", "word/document.xml"]) {
+      const xml = await zip.file(part)!.async("string");
+      expect(new DOMParser().parseFromString(xml, "application/xml").querySelector("parsererror"), part).toBeNull();
+    }
+    expect(await verifyDocx(await buildDocx([pageOf([list]), kept], { title: "t", bodySize: 11, bodyFont: "" }))).toEqual([]);
   });
 });

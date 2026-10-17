@@ -130,6 +130,7 @@ function actionLabel(id: ReturnType<typeof suggestionsFor>[number], count: numbe
     "compress-image": "Compress",
     "convert-image": count > 1 ? `Convert ${count} images` : "Convert format",
     "image-to-pdf": count > 1 ? `Combine ${count} into a PDF` : "Make a PDF",
+    "image-to-word": count > 1 ? `Put ${count} into Word` : "Put it in Word",
   };
   return labels[id];
 }

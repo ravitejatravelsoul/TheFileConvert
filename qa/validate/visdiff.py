@@ -65,8 +65,35 @@ def fit(b, shape):
     return np.asarray(Image.fromarray(b.astype(np.uint8)).resize((shape[1], shape[0]), Image.BILINEAR), dtype=np.float64)
 
 
-def compare(a, b, mask=None):
+def align(a, b, tol=1):
+    """b shifted by up to ±tol pixels to best match a (a renderer may place a full-page picture a hair off)."""
+    best = (ssim(a, b), 0, 0)
+    for dy in range(-tol, tol + 1):
+        for dx in range(-tol, tol + 1):
+            if dx == 0 and dy == 0:
+                continue
+            shifted = np.full_like(b, 255.0)
+            ys, yd = (slice(dy, None), slice(0, b.shape[0] - dy)) if dy >= 0 else (slice(0, b.shape[0] + dy), slice(-dy, None))
+            xs, xd = (slice(dx, None), slice(0, b.shape[1] - dx)) if dx >= 0 else (slice(0, b.shape[1] + dx), slice(-dx, None))
+            shifted[yd, xd] = b[ys, xs]
+            sc = ssim(a, shifted)
+            if sc > best[0]:
+                best = (sc, dx, dy)
+    if best[1] == 0 and best[2] == 0:
+        return b, (0, 0)
+    dx, dy = best[1], best[2]
+    shifted = np.full_like(b, 255.0)
+    ys, yd = (slice(dy, None), slice(0, b.shape[0] - dy)) if dy >= 0 else (slice(0, b.shape[0] + dy), slice(-dy, None))
+    xs, xd = (slice(dx, None), slice(0, b.shape[1] - dx)) if dx >= 0 else (slice(0, b.shape[1] + dx), slice(-dx, None))
+    shifted[yd, xd] = b[ys, xs]
+    return shifted, (dx, dy)
+
+
+def compare(a, b, mask=None, tol=0):
     b = fit(b, a.shape)
+    shift = (0, 0)
+    if tol:
+        b, shift = align(a, b, tol)
     d = np.abs(a - b)
     mse = float((d**2).mean())
     r = {
@@ -75,6 +102,8 @@ def compare(a, b, mask=None):
         "meanDiff": round(float(d.mean()), 2),
         "changedPct": round(float((d > 24).mean()) * 100, 3),
     }
+    if tol:
+        r["alignedBy"] = list(shift)
     if mask is not None:
         outside = ~mask
         r["changedOutsidePct"] = round(float((d[outside] > 24).mean()) * 100, 4) if outside.any() else 0.0
@@ -155,7 +184,7 @@ def cmd_pdf(a):
             sc = DPI / 72
             for x0, y0, x1, y1 in masks[oi]:
                 mask[max(0, int(y0 * sc) - 2) : int(y1 * sc) + 3, max(0, int(x0 * sc) - 2) : int(x1 * sc) + 3] = True
-        r, Bf, d = compare(A, B, mask)
+        r, Bf, d = compare(A, B, mask, a.align)
         r.update({"out": oi + 1, "src": si + 1, "sizeSrc": shown_size(sp), "sizeOut": shown_size(op), "sizeKept": expect_size == shown_size(op)})
         r["rotationSrc"], r["rotationOut"] = sp.rotation, op.rotation
         sw = words(sp)
@@ -290,6 +319,7 @@ def main():
     ap.add_argument("--mask", action="append")
     ap.add_argument("--offset", type=int, default=0, help="output page (0-based) the comparison starts at")
     ap.add_argument("--rot", help="per compared page: clockwise turn (degrees) the tool should have applied")
+    ap.add_argument("--align", type=int, default=0, help="pdf mode: forgive a renderer shifting the page by up to N px (reported as alignedBy)")
     ap.add_argument("--page", type=int, default=1)
     ap.add_argument("--dir")
     ap.add_argument("--name", default="diff")

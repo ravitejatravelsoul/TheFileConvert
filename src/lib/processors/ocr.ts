@@ -449,6 +449,8 @@ export async function createOcrSession(langCode: string): Promise<OcrSession> {
 
       let result;
       try {
+        // The canvas carries no resolution; say what it is rather than letting Tesseract guess (and print its guess).
+        await worker.setParameters({ user_defined_dpi: String(Math.round(scale * 72)) });
         result = await worker.recognize(canvas, {}, { text: true, blocks: true });
       } catch {
         throw new OcrError(`Recognition failed on page ${pageNumber}.`);

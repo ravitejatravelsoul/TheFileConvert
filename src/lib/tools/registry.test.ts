@@ -3,7 +3,7 @@ import { TOOLS, entryKindFor, entryKindForAll, getTool, suggestionsFor, toolsInC
 
 describe("tool registry", () => {
   it("has exactly the first-launch tools, each with a matching route and FAQ", () => {
-    expect(TOOLS.map((t) => t.id)).toEqual(["compress-pdf", "compress-image", "pdf-to-word", "word-to-pdf", "pdf-to-image", "image-to-pdf", "convert-image", "merge-pdf", "split-pdf", "organize-pdf", "pdf-editor"]);
+    expect(TOOLS.map((t) => t.id)).toEqual(["compress-pdf", "compress-image", "pdf-to-word", "word-to-pdf", "pdf-to-image", "image-to-pdf", "image-to-word", "convert-image", "merge-pdf", "split-pdf", "organize-pdf", "pdf-editor"]);
     for (const t of TOOLS) {
       expect(t.href).toBe(`/${t.id}`);
       expect(t.faq.length).toBeGreaterThanOrEqual(2);
@@ -13,7 +13,7 @@ describe("tool registry", () => {
 
   it("names conversions one way: “X to Y”, and every conversion has its reverse", () => {
     const convert = toolsInCategory("convert").map((t) => t.name);
-    expect(convert).toEqual(["PDF to Word", "Word to PDF", "PDF to Image", "Image to PDF", "Image Converter"]);
+    expect(convert).toEqual(["PDF to Word", "Word to PDF", "PDF to Image", "Image to PDF", "Image to Word", "Image Converter"]);
     expect(new Set(TOOLS.map((t) => t.seoTitle)).size).toBe(TOOLS.length);
   });
 
@@ -51,8 +51,8 @@ describe("smart file entry", () => {
     expect(suggestionsFor("pdf", 1)).toContain("pdf-editor");
     expect(suggestionsFor("pdf", 1)).toContain("pdf-to-word");
     expect(suggestionsFor("pdf", 3)).toEqual(["merge-pdf"]);
-    expect(suggestionsFor("image", 1)).toEqual(["compress-image", "convert-image", "image-to-pdf"]);
-    expect(suggestionsFor("image", 2)).toEqual(["image-to-pdf", "convert-image"]);
+    expect(suggestionsFor("image", 1)).toEqual(["compress-image", "convert-image", "image-to-pdf", "image-to-word"]);
+    expect(suggestionsFor("image", 2)).toEqual(["image-to-pdf", "image-to-word", "convert-image"]);
     expect(suggestionsFor("svg", 1)).toEqual(["convert-image"]);
     expect(suggestionsFor("word", 1)).toEqual(["word-to-pdf"]);
     expect(suggestionsFor("word", 2)).toEqual([]);

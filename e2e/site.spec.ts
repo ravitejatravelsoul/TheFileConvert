@@ -8,6 +8,7 @@ const TOOLS = [
   ["/word-to-pdf", "Word to PDF"],
   ["/pdf-to-image", "PDF to Image"],
   ["/image-to-pdf", "Image to PDF"],
+  ["/image-to-word", "Image to Word"],
   ["/convert-image", "Image Converter"],
   ["/merge-pdf", "Merge PDF"],
   ["/split-pdf", "Split PDF"],

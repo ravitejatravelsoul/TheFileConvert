@@ -3,17 +3,17 @@ import { fx, trackPageErrors, expectNoHorizontalOverflow } from "./helpers/tool"
 import { convertToWord, readDocx } from "./helpers/docx";
 
 // PDF → Word through the real page, each .docx reopened independently (helpers/docx.ts). Scanned and
-// mixed PDFs (real OCR) are in pdf-to-word-ocr.spec.ts.
+// mixed PDFs (kept as they look; OCR only judges plain text scans) are in pdf-to-word-ocr.spec.ts.
 
 test.describe("PDF to Word", () => {
   test("native PDF: headings, paragraphs, a valid .docx named after the PDF", async ({ page }) => {
     const errors = trackPageErrors(page);
     await page.goto("/pdf-to-word");
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("PDF to Word");
-    await expect(page.getByText("Convert your PDF into an editable Word document.")).toBeVisible();
+    await expect(page.getByText("Convert PDFs to Word while preserving the document’s appearance.")).toBeVisible();
     await page.getByTestId("file-input").first().setInputFiles(fx("word", "PDF-WORD-03-headings.pdf"));
     await expect(page.getByTestId("original-size")).toContainText("1 page · Text PDF");
-    await expect(page.getByText(/We preserve text, headings, paragraphs, images and common layout where possible/)).toBeVisible();
+    await expect(page.getByText(/Pages with real text become editable Word content/)).toBeVisible();
     await expectNoHorizontalOverflow(page);
     const { bytes, name } = await convertToWord(page, fx("word", "PDF-WORD-03-headings.pdf"));
     expect(name).toBe("PDF-WORD-03-headings.docx");

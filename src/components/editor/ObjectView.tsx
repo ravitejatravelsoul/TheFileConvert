@@ -139,10 +139,10 @@ function ObjectContent({ object, spec, width, height, editing, onStopEdit, onTex
       const natural = measureHelvetica(object.newText, fontPx);
       if (natural > width - pxPerPt && natural > 0) fontPx = Math.max(4 * pxPerPt, fontPx * ((width - pxPerPt) / natural));
       return (
-        <div className="relative h-full w-full overflow-visible bg-white" title={`Edited: ${object.newText}`}>
+        <div className="relative h-full w-full overflow-visible" style={{ backgroundColor: rgbToCss(object.backgroundColor ?? { r: 1, g: 1, b: 1 }) }} title={`Edited: ${object.newText}`}>
           <span
-            className="absolute whitespace-nowrap text-black"
-            style={{ left: 0.5 * pxPerPt, bottom: height * DESCENT_SHARE - fontPx * HELVETICA_DESCENT, fontSize: fontPx, lineHeight: 1, fontFamily: "Helvetica, Arial, sans-serif" }}
+            className="absolute whitespace-nowrap"
+            style={{ color: rgbToCss(object.color), left: 0.5 * pxPerPt, bottom: height * DESCENT_SHARE - fontPx * HELVETICA_DESCENT, fontSize: fontPx, lineHeight: 1, fontFamily: "Helvetica, Arial, sans-serif" }}
           >
             {object.newText}
           </span>

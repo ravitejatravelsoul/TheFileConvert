@@ -52,6 +52,14 @@ const GLYPHS: Record<ToolId, React.ReactNode> = {
       <path d="M12 9.5h5l3 3V20a1 1 0 0 1-1 1h-7a1 1 0 0 1-1-1v-9.5a1 1 0 0 1 1-1Z" fill="var(--glyph-fill, #fff)" />
     </>
   ),
+  "image-to-word": (
+    <>
+      <rect x="3.5" y="3.5" width="9.5" height="9" rx="1.8" />
+      <path d="m4.5 11 2.6-2.4 1.8 1.6 1.4-1.2 1.7 1.5" strokeWidth={1.6} />
+      <rect x="10.5" y="9.5" width="10" height="11" rx="1.8" fill="var(--glyph-fill, #fff)" />
+      <path d="m12.8 12.6 1 5 1.7-3.4 1.7 3.4 1-5" strokeWidth={1.7} />
+    </>
+  ),
   "merge-pdf": (
     <>
       <rect x="3" y="3.5" width="7.5" height="10" rx="1.5" />

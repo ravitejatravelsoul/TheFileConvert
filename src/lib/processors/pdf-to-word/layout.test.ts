@@ -420,3 +420,23 @@ describe("layoutPage — forms, side-by-side blocks, rows-only tables (scanned g
     expect(blocks.map((b) => b.kind)).toEqual(["columns", "rule", "columns"]);
   });
 });
+
+describe("rows-only tables", () => {
+  it("does not swallow the dark heading underlines above a table of light row lines", () => {
+    // A résumé: section headings underlined in dark 0.8 pt, then a skills table ruled by light 0.5 pt row lines.
+    const dark = (y: number): Rule => ({ ...rule(50, y, 562, y), thickness: 0.8, color: "2b3d59" });
+    const light = (y: number): Rule => ({ ...rule(50, y, 562, y), thickness: 0.5, color: "b3b3b3" });
+    const t = (str: string, x: number, y: number): TextItem => ({ str, x, y, w: str.length * 5, size: 9, bold: false, italic: false });
+    const items = [t("EDUCATION", 50, 470), t("B.Sc. Statistics", 50, 440), t("SKILLS", 50, 418), t("SQL", 55, 383), t("Python", 230, 383), t("Power BI", 400, 383), t("Forecasting", 55, 361), t("A/B testing", 230, 361), t("Data modelling", 400, 361)];
+    const rules = [dark(462), dark(416), light(398), light(376), light(354)];
+    const blocks = lay({ ...page(items), rules }).blocks;
+    const tables = blocks.filter((b) => b.kind === "table");
+    expect(tables).toHaveLength(1);
+    const cellText = (b: Block) => (b.kind === "table" ? b.rows.flatMap((r) => r.cells.flatMap((c) => c.paragraphs.flatMap((p) => p.runs.map((x) => x.text)))).join("|") : "");
+    expect(cellText(tables[0])).toContain("Python");
+    expect(cellText(tables[0])).not.toContain("Statistics");
+    expect(cellText(tables[0])).not.toContain("SKILLS");
+    // No vertical lines in the source, so none are drawn.
+    expect(tables[0].kind === "table" && tables[0].rowsOnly).toBe(true);
+  });
+});

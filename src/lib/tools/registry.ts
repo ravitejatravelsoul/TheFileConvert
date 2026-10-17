@@ -13,6 +13,7 @@ export type ToolId =
   | "pdf-to-word"
   | "word-to-pdf"
   | "image-to-pdf"
+  | "image-to-word"
   | "merge-pdf"
   | "split-pdf"
   | "organize-pdf"
@@ -118,10 +119,10 @@ export const TOOLS: Tool[] = [
     id: "pdf-to-word",
     href: "/pdf-to-word",
     name: "PDF to Word",
-    short: "Turn a PDF into an editable Word document (.docx) — scans included.",
+    short: "Convert PDFs to Word while preserving the document’s appearance. Native PDFs become editable where possible; scanned forms and image-based pages keep their visual layout.",
     seoTitle: "PDF to Word (DOCX) converter",
     seoDescription:
-      "Convert a PDF into an editable Word .docx in your browser. Text, headings, lists and pictures come across; scanned pages are read with on-device OCR. No upload.",
+      "Convert a PDF to Word (.docx) in your browser while keeping its appearance. Text PDFs become editable Word text, headings, lists, tables and pictures; scanned forms, IDs and image-based pages keep their original look. No upload.",
     category: "convert",
     inputNoun: "PDF",
     accept: ".pdf,application/pdf",
@@ -135,12 +136,16 @@ export const TOOLS: Tool[] = [
         a: "Close, but not identical. We keep the text, headings, paragraphs, lists, simple tables and pictures in reading order, and start each PDF page on a new Word page. Complex layouts may need small formatting touch-ups.",
       },
       {
-        q: "What about scanned PDFs?",
-        a: "Scanned pages are recognised with OCR on your device, so the text in the Word document is editable. Check names, dates and numbers against the original — OCR can misread poor scans.",
+        q: "What about scanned PDFs, forms and passports?",
+        a: "A scanned page is kept as it looks: the page goes into Word as a picture at the same size, so borders, handwriting, stamps, signatures, photos and check boxes are exactly as scanned. It is not retyped, so it isn't editable text. A plain scanned letter may become editable text only when the on-device reading is extremely reliable. To search or edit the words of a scan, use Recognize text in the PDF Editor.",
+      },
+      {
+        q: "Which PDFs become editable?",
+        a: "PDFs made on a computer — with real text — become editable Word content: paragraphs, headings, lists, tables and pictures. Pages that are pictures of paper (scans, photos of documents) keep their appearance instead. A PDF with both gets each page treated on its own.",
       },
       {
         q: "Is my PDF uploaded?",
-        a: "No. Reading the PDF, OCR and building the .docx all happen in your browser. Nothing is sent to a server.",
+        a: "No. Reading the PDF and building the .docx happen in your browser. Nothing is sent to a server.",
       },
       {
         q: "Does it work with password-protected PDFs?",
@@ -229,6 +234,39 @@ export const TOOLS: Tool[] = [
       {
         q: "Can I change the order?",
         a: "Yes — drag the cards, or use the arrow buttons on each one.",
+      },
+    ],
+  },
+  {
+    id: "image-to-word",
+    href: "/image-to-word",
+    name: "Image to Word",
+    short: "Put a photo, scan or screenshot into a Word document — looking exactly as it does now.",
+    seoTitle: "Image to Word — JPG, PNG or WebP to DOCX",
+    seoDescription: "Place JPG, PNG or WebP images into a Word .docx, one per page, exactly as they look — no text recognition, no upload.",
+    category: "convert",
+    inputNoun: "images",
+    accept: ".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp",
+    acceptedExtensions: RASTER_EXT,
+    acceptedMimeTypes: RASTER_MIME,
+    multiple: true,
+    maxRecommendedSizeMb: 60,
+    faq: [
+      {
+        q: "Does it turn the picture into editable text?",
+        a: "No — and that's on purpose. The image goes into the Word document exactly as it is, so a filled-in form, an ID, a receipt or a signed page looks just like the original. To make the text of a scan searchable or editable, use Recognize text in the PDF Editor.",
+      },
+      {
+        q: "What size are the pages?",
+        a: "By default each page is the shape of its image, up to Letter size, so nothing is cropped, stretched or padded. You can also place every image on an A4 or Letter page with a small margin.",
+      },
+      {
+        q: "Is the picture changed?",
+        a: "JPG and PNG images go into the document byte for byte. Phone photos stored sideways are turned upright, and WebP images are saved as JPG or PNG because Word can't hold WebP.",
+      },
+      {
+        q: "Are my images uploaded?",
+        a: "No. The Word file is built inside this browser tab; nothing is sent to a server.",
       },
     ],
   },
@@ -411,7 +449,7 @@ export function suggestionsFor(kind: EntryKind, count: number): ToolId[] {
     case "word":
       return count > 1 ? [] : ["word-to-pdf"];
     case "image":
-      return count > 1 ? ["image-to-pdf", "convert-image"] : ["compress-image", "convert-image", "image-to-pdf"];
+      return count > 1 ? ["image-to-pdf", "image-to-word", "convert-image"] : ["compress-image", "convert-image", "image-to-pdf", "image-to-word"];
     case "svg":
       return ["convert-image"];
     default:

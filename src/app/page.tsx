@@ -15,7 +15,7 @@ const POPULAR: { id: ToolId; art: React.ReactNode; wide?: boolean }[] = [
   { id: "convert-image", art: <ConvertVignette /> },
   { id: "image-to-pdf", art: <ImagesVignette /> },
 ];
-const MORE: ToolId[] = ["pdf-to-word", "word-to-pdf", "pdf-to-image", "split-pdf", "organize-pdf"];
+const MORE: ToolId[] = ["pdf-to-word", "word-to-pdf", "pdf-to-image", "image-to-word", "split-pdf", "organize-pdf"];
 
 /** Short action names for the "suggested for this PDF" illustration. */
 const SHORT_LABEL: Partial<Record<ToolId, string>> = {

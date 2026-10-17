@@ -5,6 +5,7 @@ import {
   computeInkMask,
   findTextureDonorRect,
   detectProtectedLines,
+  legibleOn,
   type PixelSource,
 } from "./regionColor";
 
@@ -187,5 +188,21 @@ describe("computeEditPadding", () => {
     const highConfidence = computeEditPadding(20, 95);
     const lowConfidence = computeEditPadding(20, 40);
     expect(lowConfidence).toBeLessThan(highConfidence);
+  });
+});
+
+describe("legibleOn — the colour a correction is written in", () => {
+  const dark = { r: 0.2, g: 0.2, b: 0.2 };
+  const white = { r: 1, g: 1, b: 1 };
+  const black = { r: 0, g: 0, b: 0 };
+
+  it("keeps the line's own colour when it stands out from the background (white text on a dark band)", () => {
+    expect(legibleOn(dark, white)).toEqual(white);
+    expect(legibleOn(white, black)).toEqual(black);
+  });
+
+  it("falls back to black on a light background and white on a dark one when the read is unusable", () => {
+    expect(legibleOn(dark, { r: 0.25, g: 0.25, b: 0.25 })).toEqual(white);
+    expect(legibleOn({ r: 0.95, g: 0.95, b: 0.9 }, { r: 0.9, g: 0.9, b: 0.9 })).toEqual(black);
   });
 });

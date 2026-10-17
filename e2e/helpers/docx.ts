@@ -9,6 +9,10 @@ export interface DocxSummary {
   paragraphs: { style: string | null; text: string; list: string | null; bold: string[] }[];
   tables: string[][][];
   pictures: number;
+  /** Pictures placed on the page (anchored), as a page kept as an image is. */
+  anchored: number;
+  /** [width, height] in points of each section's page. */
+  pageSizes: [number, number][];
   sections: number;
   media: Uint8Array[];
   text: string;
@@ -69,6 +73,8 @@ export async function readDocx(bytes: Buffer | Uint8Array): Promise<DocxSummary>
     paragraphs,
     tables,
     pictures: doc.getElementsByTagNameNS("http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing", "inline").length,
+    anchored: doc.getElementsByTagNameNS("http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing", "anchor").length,
+    pageSizes: Array.from(doc.getElementsByTagNameNS(W, "pgSz")).map((e) => [Number(e.getAttributeNS(W, "w")) / 20, Number(e.getAttributeNS(W, "h")) / 20] as [number, number]),
     sections: doc.getElementsByTagNameNS(W, "sectPr").length,
     media,
     text: order.join("\n"),

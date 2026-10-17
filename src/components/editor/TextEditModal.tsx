@@ -48,7 +48,8 @@ export function TextEditModal({ request, api, onClose }: TextEditModalProps) {
         originalText: request.text,
         newText: value,
         fontSize: estimatedFontSize,
-        color: COLOR_BLACK,
+        color: request.nativeColors?.textColor ?? COLOR_BLACK,
+        backgroundColor: request.nativeColors?.backgroundColor,
       });
       onClose();
       return;

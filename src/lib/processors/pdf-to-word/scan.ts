@@ -526,7 +526,7 @@ export function flattenFills(r: Raster, fills: PxFill[], paper: [number, number,
 }
 
 /**
- * Check boxes: small hollow squares (5–18 pt a side). Each connected piece of ink of about that size is
+ * Check boxes: small hollow squares (6.5–18 pt a side). Each connected piece of ink of about that size is
  * tested for a square: its two longest vertical strokes (the sides) of about equal height and as far apart as
  * they are tall, joined by straight top and bottom edges. A box is checked when its inside holds ink (a tick
  * or a cross, which may reach outside the square and is part of the same piece). Letters fail the test: an
@@ -536,7 +536,7 @@ export function checkBoxes(r: Raster, lum: Uint8Array, background: number, pxPer
   const W = r.width;
   const H = r.height;
   const t = inkThreshold(background);
-  const min = 5 * pxPerPt;
+  const min = 6.5 * pxPerPt;
   const max = 18 * pxPerPt;
   const seen = new Uint8Array(W * H);
   const out: PxCheckbox[] = [];

@@ -2,6 +2,7 @@ import type { PDFDocumentProxy, PDFPageProxy } from "pdfjs-dist";
 import type { Fill, PageImage, PageInput, Rule, TextItem } from "./layout";
 import { analyzeScan, eraseCheckboxes, eraseRules, flattenFills, invertBars, type Raster, type ScanAnalysis } from "./scan";
 import { scannedPageInput, type ScanReport } from "./scanPage";
+import { DEFAULT_STRATEGY, classifyScanned, hybridDecision, nativeKind, pixelSignals, type PageClass, type PageSignals, type PageStrategy } from "./classify";
 
 /**
  * Browser side of PDF → Word: reads each page with pdf.js (positioned text, fonts, pictures), decides
@@ -20,13 +21,24 @@ export interface PdfAnalysis {
 
 export type Progress =
   | { stage: "reading"; page: number; total: number }
+  | { stage: "preserve"; index: number; total: number }
   | { stage: "layout"; index: number; total: number }
   | { stage: "ocr"; index: number; total: number; fraction: number }
   | { stage: "building" }
   | { stage: "validating" };
 
-/** Fewer visible characters than this, with a picture covering most of the page, means a scan. */
-const MIN_TEXT_CHARS = 20;
+/** How one page was classified and written (the audit trail; nothing here is shown as a claim to the user). */
+export interface PageReport {
+  page: number;
+  cls: PageClass;
+  strategy: PageStrategy;
+  /** Why this class; for a plain scan, why it was or wasn't rebuilt as editable text. */
+  reason: string;
+  /** Size of the page picture written to Word (visual pages), in bytes. */
+  imageBytes?: number;
+  /** Pixels per inch of that picture. */
+  imageDpi?: number;
+}
 
 export class PdfToWordError extends Error {}
 
@@ -210,6 +222,7 @@ interface PageRead {
   input: PageInput;
   rotate: number;
   view: number[];
+  signals: PageSignals;
 }
 
 /** pdf.js path data: [op, coords…] with moveTo=0, lineTo=1, curveTo=2, quadraticCurveTo=3, closePath=4. */
@@ -283,11 +296,15 @@ async function readPage(page: PDFPageProxy): Promise<PageRead> {
   const fills: Fill[] = [];
   const colorStream: { ch: string; color: string }[] = [];
   let ctm: Matrix = [1, 0, 0, 1, 0, 0];
-  const stack: { ctm: Matrix; fill: string; stroke: string; lineWidth: number }[] = [];
+  const stack: { ctm: Matrix; fill: string; stroke: string; lineWidth: number; textMode: number }[] = [];
   let fill = "000000";
   let stroke = "000000";
   let lineWidth = 1;
+  let textMode = 0; // 3 = invisible (the text layer of a scan)
+  let invisibleChars = 0;
   let imageArea = 0;
+  let largestImage = 0;
+  let imageDpi = 0;
   const dots: { x: number; y: number; size: number }[] = [];
   const pageArea = frame.width * frame.height;
   const toFrame = (x: number, y: number) => {
@@ -297,11 +314,12 @@ async function readPage(page: PDFPageProxy): Promise<PageRead> {
   for (let i = 0; i < ops.fnArray.length; i++) {
     const fn = ops.fnArray[i];
     const args = ops.argsArray[i];
-    if (fn === OPS.save) stack.push({ ctm, fill, stroke, lineWidth });
+    if (fn === OPS.save) stack.push({ ctm, fill, stroke, lineWidth, textMode });
     else if (fn === OPS.restore) {
       const st = stack.pop();
-      if (st) ({ ctm, fill, stroke, lineWidth } = st);
-    } else if (fn === OPS.transform) ctm = mul(args as Matrix, ctm);
+      if (st) ({ ctm, fill, stroke, lineWidth, textMode } = st);
+    } else if (fn === OPS.setTextRenderingMode) textMode = Number(args?.[0]) || 0;
+    else if (fn === OPS.transform) ctm = mul(args as Matrix, ctm);
     else if (fn === OPS.setFillRGBColor) fill = hexColor(args);
     else if (fn === OPS.setStrokeRGBColor) stroke = hexColor(args);
     else if (fn === OPS.setLineWidth) lineWidth = Number(args?.[0]) || 0;
@@ -309,14 +327,19 @@ async function readPage(page: PDFPageProxy): Promise<PageRead> {
       const glyphs = (args as unknown[]).find((a) => Array.isArray(a)) as unknown[] | undefined;
       for (const g of glyphs ?? []) {
         const u = (g as { unicode?: string } | null)?.unicode;
-        if (typeof u === "string") for (const ch of mapSymbols(u)) if (ch.trim()) colorStream.push({ ch, color: fill });
+        if (typeof u === "string")
+          for (const ch of mapSymbols(u))
+            if (ch.trim()) {
+              colorStream.push({ ch, color: fill });
+              if (textMode === 3) invisibleChars++;
+            }
       }
     } else if (fn === OPS.paintFormXObjectBegin) {
-      stack.push({ ctm, fill, stroke, lineWidth });
+      stack.push({ ctm, fill, stroke, lineWidth, textMode });
       if (Array.isArray(args?.[0]) && args[0].length === 6) ctm = mul(args[0] as Matrix, ctm);
     } else if (fn === OPS.paintFormXObjectEnd) {
       const st = stack.pop();
-      if (st) ({ ctm, fill, stroke, lineWidth } = st);
+      if (st) ({ ctm, fill, stroke, lineWidth, textMode } = st);
     } else if (fn === OPS.constructPath) {
       const paint = args?.[0];
       const box = args?.[2] as ArrayLike<number> | undefined;
@@ -360,10 +383,14 @@ async function readPage(page: PDFPageProxy): Promise<PageRead> {
       const w = Math.max(...corners.map((c) => c.x)) - x;
       const h = Math.max(...corners.map((c) => c.y)) - y;
       imageArea += w * h;
+      largestImage = Math.max(largestImage, w * h);
       if (w < 12 || h < 12) continue;
       const img = fn === OPS.paintInlineImageXObject ? args[0] : await getObj(page, args[0] as string);
       const encoded = await imageToBytes(img);
-      if (encoded) images.push({ x, y, w, h, bytes: encoded.bytes, mime: encoded.mime, pxWidth: encoded.w, pxHeight: encoded.h });
+      if (encoded) {
+        images.push({ x, y, w, h, bytes: encoded.bytes, mime: encoded.mime, pxWidth: encoded.w, pxHeight: encoded.h });
+        if (w * h >= largestImage) imageDpi = encoded.w / (w / 72);
+      }
     }
   }
 
@@ -410,8 +437,66 @@ async function readPage(page: PDFPageProxy): Promise<PageRead> {
     }
   }
 
-  const kind: PageKind = chars >= MIN_TEXT_CHARS ? "text" : imageArea > pageArea * 0.3 ? "scanned" : chars > 0 ? "text" : "blank";
-  return { kind, input: { width: frame.width, height: frame.height, items, images, rules, fills }, rotate: page.rotate, view: [...page.view] };
+  // Is there text you can see, or only a picture (with or without an invisible text layer)?
+  const signals: PageSignals = {
+    visibleChars: Math.max(0, chars - invisibleChars),
+    invisibleChars,
+    imageCoverage: Math.min(1, imageArea / Math.max(1, pageArea)),
+    largestImageCoverage: Math.min(1, largestImage / Math.max(1, pageArea)),
+    imageDpi,
+  };
+  const nk = nativeKind(signals);
+  const kind: PageKind = nk === "scanned" ? "scanned" : nk === "blank" ? "blank" : "text";
+  return { kind, input: { width: frame.width, height: frame.height, items, images, rules, fills }, rotate: page.rotate, view: [...page.view], signals };
+}
+
+/**
+ * The same signals for the upload screen, without encoding anything: is the text visible, and do pictures
+ * cover the page? Pages with no pictures at all skip the operator walk.
+ */
+async function quickSignals(page: PDFPageProxy): Promise<PageSignals> {
+  const pdfjs = await import("pdfjs-dist");
+  const OPS = pdfjs.OPS;
+  const content = await page.getTextContent();
+  const chars = content.items.reduce((n, it) => n + ("str" in it ? it.str.replace(/\s/g, "").length : 0), 0);
+  const ops = await page.getOperatorList();
+  const hasImage = ops.fnArray.some((f) => f === OPS.paintImageXObject || f === OPS.paintInlineImageXObject);
+  if (!hasImage) return { visibleChars: chars, invisibleChars: 0, imageCoverage: 0, largestImageCoverage: 0, imageDpi: 0 };
+  const [x0, y0, x1, y1] = page.view;
+  const pageArea = Math.max(1, (x1 - x0) * (y1 - y0));
+  let ctm: Matrix = [1, 0, 0, 1, 0, 0];
+  const stack: { ctm: Matrix; textMode: number }[] = [];
+  let textMode = 0;
+  let invisible = 0;
+  let imageArea = 0;
+  let largest = 0;
+  for (let i = 0; i < ops.fnArray.length; i++) {
+    const fn = ops.fnArray[i];
+    const args = ops.argsArray[i];
+    if (fn === OPS.save || fn === OPS.paintFormXObjectBegin) {
+      stack.push({ ctm, textMode });
+      if (fn === OPS.paintFormXObjectBegin && Array.isArray(args?.[0]) && args[0].length === 6) ctm = mul(args[0] as Matrix, ctm);
+    } else if (fn === OPS.restore || fn === OPS.paintFormXObjectEnd) {
+      const st = stack.pop();
+      if (st) ({ ctm, textMode } = st);
+    } else if (fn === OPS.setTextRenderingMode) textMode = Number(args?.[0]) || 0;
+    else if (fn === OPS.transform) ctm = mul(args as Matrix, ctm);
+    else if (fn === OPS.showText || fn === OPS.showSpacedText || fn === OPS.nextLineShowText || fn === OPS.nextLineSetSpacingShowText) {
+      if (textMode === 3) {
+        const glyphs = (args as unknown[]).find((a) => Array.isArray(a)) as unknown[] | undefined;
+        for (const g of glyphs ?? []) {
+          const u = (g as { unicode?: string } | null)?.unicode;
+          if (typeof u === "string") invisible += u.replace(/\s/g, "").length;
+        }
+      }
+    } else if (fn === OPS.paintImageXObject || fn === OPS.paintInlineImageXObject) {
+      const w = Math.hypot(ctm[0], ctm[1]);
+      const h = Math.hypot(ctm[2], ctm[3]);
+      imageArea += w * h;
+      largest = Math.max(largest, w * h);
+    }
+  }
+  return { visibleChars: Math.max(0, chars - invisible), invisibleChars: invisible, imageCoverage: Math.min(1, imageArea / pageArea), largestImageCoverage: Math.min(1, largest / pageArea), imageDpi: 0 };
 }
 
 /** Quick look for the upload screen: page count and whether it's text, scanned or mixed. */
@@ -420,15 +505,9 @@ export async function analyzePdf(file: File): Promise<PdfAnalysis> {
   const kinds: PageKind[] = [];
   for (let i = 1; i <= doc.numPages; i++) {
     const page = await doc.getPage(i);
-    const text = await page.getTextContent();
-    const chars = text.items.reduce((n, it) => n + ("str" in it ? it.str.replace(/\s/g, "").length : 0), 0);
-    if (chars >= MIN_TEXT_CHARS) kinds.push("text");
-    else {
-      const ops = await page.getOperatorList();
-      const pdfjs = await import("pdfjs-dist");
-      const hasImage = ops.fnArray.some((f) => f === pdfjs.OPS.paintImageXObject || f === pdfjs.OPS.paintInlineImageXObject);
-      kinds.push(hasImage ? "scanned" : chars > 0 ? "text" : "blank");
-    }
+    const nk = nativeKind(await quickSignals(page));
+    kinds.push(nk === "scanned" ? "scanned" : nk === "blank" ? "blank" : "text");
+    page.cleanup();
   }
   await close();
   const scanned = kinds.filter((k) => k === "scanned").length;
@@ -461,47 +540,150 @@ async function encodeRegion(r: Raster, box: { x: number; y: number; w: number; h
 
 export interface ExtractResult {
   pages: PageInput[];
-  /** Per page: how a scanned page was rebuilt (absent for text pages). */
+  /** Per page: how a plain scan was rebuilt as editable text (absent for every other page). */
   reports: (ScanReport | undefined)[];
+  /** Per page: its class, how it was written, and why. */
+  pageReports: PageReport[];
 }
 
 /**
- * Pixels per point a scanned page is rendered at for layout analysis and OCR: 216 dpi. At 144 dpi body text
- * has an x-height of ~9 px, below what the recogniser reads reliably (it misses and misreads words); scans
- * are usually 200–300 dpi, so this keeps most of their detail at a bounded cost.
+ * Pixels per point a page is rendered at when it has to be read (layout analysis and OCR): 216 dpi. At 144
+ * dpi body text has an x-height of ~9 px, below what the recogniser reads reliably; scans are usually 200–300
+ * dpi, so this keeps most of their detail at a bounded cost.
  */
 const OCR_SCALE = 3;
 
-/** Reads every page; scanned pages are recognised with the local OCR engine in `ocrLang`. */
+/**
+ * A page kept as it looks is written as a picture of this density at most: 200 dpi (readable at any normal
+ * zoom, and a letter page stays well under a megabyte as JPEG) — and never above the source's own, so a
+ * 100 dpi scan isn't blown up into a larger, no sharper file.
+ */
+const VISUAL_MAX_SCALE = 200 / 72;
+const VISUAL_MIN_SCALE = 1.5;
+/** Longest side of a page picture, in pixels: A2 at 200 dpi fits; larger pages are drawn at a lower density. */
+const VISUAL_MAX_SIDE_PX = 5000;
+
+/** A page rendered to a canvas, as pixels. */
+async function renderPage(page: PDFPageProxy, scale: number): Promise<{ canvas: HTMLCanvasElement; raster: Raster }> {
+  const viewport = page.getViewport({ scale });
+  const canvas = document.createElement("canvas");
+  canvas.width = Math.ceil(viewport.width);
+  canvas.height = Math.ceil(viewport.height);
+  const ctx = canvas.getContext("2d", { willReadFrequently: true });
+  if (!ctx) throw new PdfToWordError("Your browser can't render this page.");
+  await page.render({ canvasContext: ctx, viewport, canvas }).promise;
+  const image = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  return { canvas, raster: { data: image.data, width: image.width, height: image.height } };
+}
+
+/** Few distinct colours (a screenshot, clean line art, a flat form): PNG is smaller and exact. */
+function fewColours(r: Raster, limit = 64): boolean {
+  const seen = new Set<number>();
+  for (let i = 0; i < r.data.length; i += 4 * 7) {
+    seen.add(((r.data[i] >> 4) << 8) | ((r.data[i + 1] >> 4) << 4) | (r.data[i + 2] >> 4));
+    if (seen.size > limit) return false;
+  }
+  return true;
+}
+
+/**
+ * The page as the picture that goes into Word: JPEG at high quality — or, for a page of few colours, PNG when
+ * that is smaller (a screenshot or clean line art; a scan with faint noise is not, and would be several times
+ * the size of its JPEG for no visible gain).
+ */
+async function encodePagePicture(canvas: HTMLCanvasElement, raster: Raster): Promise<PageImage | null> {
+  const encode = (mime: string) => new Promise<Blob | null>((res) => canvas.toBlob(res, mime, 0.92));
+  let mime = "image/jpeg";
+  let blob = await encode(mime);
+  if (blob && fewColours(raster)) {
+    const png = await encode("image/png");
+    if (png && png.size < blob.size) [mime, blob] = ["image/png", png];
+  }
+  if (!blob) return null;
+  return { x: 0, y: 0, w: 0, h: 0, bytes: new Uint8Array(await blob.arrayBuffer()), mime: mime as PageImage["mime"], pxWidth: canvas.width, pxHeight: canvas.height };
+}
+
+/** Share of words that sit in lines of at least `min` words (running text rather than labels and values). */
+function runningTextShare(words: { line?: number }[], min = 6): number {
+  const perLine = new Map<number, number>();
+  for (const w of words) if (w.line !== undefined) perLine.set(w.line, (perLine.get(w.line) ?? 0) + 1);
+  let inRuns = 0;
+  for (const n of perLine.values()) if (n >= min) inRuns += n;
+  return words.length ? inRuns / words.length : 0;
+}
+
+/**
+ * Reads every page and decides what "convert" means for it:
+ *  - a page with real text becomes editable Word content (native);
+ *  - a page that is a picture is kept as it looks — the page goes into the Word file as an image, nothing is
+ *    recognised or rebuilt — unless it is a plain scan of running text that the local OCR reads with
+ *    extremely high confidence, which may become editable paragraphs (hybrid).
+ * OCR runs only to judge such a plain scan; forms, IDs, certificates, tables, photos and signed pages never
+ * reach it.
+ */
 export async function extractPages(file: File, ocrLang: string, onProgress: (p: Progress) => void): Promise<ExtractResult> {
   const { doc, close } = await openDocument(file);
   const reads: PageRead[] = [];
-  for (let i = 1; i <= doc.numPages; i++) {
-    onProgress({ stage: "reading", page: i, total: doc.numPages });
-    const page = await doc.getPage(i);
-    reads.push(await readPage(page));
-    page.cleanup();
+  const pageReports: PageReport[] = [];
+  const visual = new Map<number, PageImage>();
+  const candidates: number[] = [];
+  const total = doc.numPages;
+  try {
+    for (let i = 1; i <= total; i++) {
+      onProgress({ stage: "reading", page: i, total });
+      const page = await doc.getPage(i);
+      const read = await readPage(page);
+      reads.push(read);
+      const idx = i - 1;
+      if (read.kind !== "scanned") {
+        const mixed = nativeKind(read.signals) === "mixed";
+        pageReports.push({ page: i, cls: read.kind === "blank" ? "BLANK" : mixed ? "MIXED" : "NATIVE_TEXT", strategy: "editable", reason: read.kind === "blank" ? "nothing on the page" : `${read.signals.visibleChars} characters of real text${mixed ? " and large pictures" : ""}` });
+        page.cleanup();
+        continue;
+      }
+      // A picture of a page: what is it a picture of?
+      const dpi = read.signals.imageDpi || 0;
+      const wanted = dpi ? Math.max(VISUAL_MIN_SCALE, Math.min(VISUAL_MAX_SCALE, dpi / 72)) : VISUAL_MAX_SCALE;
+      // A poster-size page isn't rendered past what a canvas holds (and what the page analysis can chew through).
+      const unit = page.getViewport({ scale: 1 });
+      const scale = Math.min(wanted, VISUAL_MAX_SIDE_PX / Math.max(unit.width, unit.height));
+      onProgress({ stage: "preserve", index: i, total });
+      const { canvas, raster } = await renderPage(page, scale);
+      const analysis = analyzeScan(raster, scale);
+      const { cls, reason } = classifyScanned(pixelSignals(analysis, raster, scale));
+      const picture = await encodePagePicture(canvas, raster);
+      if (!picture) throw new PdfToWordError("A page couldn't be prepared for Word. Please try again.");
+      const v = page.getViewport({ scale: 1 });
+      visual.set(idx, { ...picture, x: 0, y: 0, w: v.width, h: v.height });
+      read.input = { width: v.width, height: v.height, items: [], images: [], rules: [], fills: [], background: visual.get(idx), strategy: "visual-preserved" };
+      pageReports.push({ page: i, cls, strategy: DEFAULT_STRATEGY[cls], reason, imageBytes: picture.bytes.length, imageDpi: Math.round(canvas.width / (v.width / 72)) });
+      if (cls === "SCANNED_TEXT") candidates.push(idx);
+      page.cleanup();
+    }
+  } finally {
+    await close();
   }
-  await close();
 
-  const scannedIdx = reads.map((r, i) => (r.kind === "scanned" ? i : -1)).filter((i) => i >= 0);
   const reports: (ScanReport | undefined)[] = reads.map(() => undefined);
-  if (scannedIdx.length) {
+  const rebuilt = new Map<number, { input: PageInput; report: ScanReport; reason: string }>();
+  if (candidates.length) {
+    // A plain scan of text: read it, and keep it as editable paragraphs only if the read is extremely
+    // confident and the page holds nothing but that text. Otherwise the picture stands.
     const { createOcrSession } = await import("@/lib/processors/ocr");
     const session = await createOcrSession(ocrLang);
     try {
-      for (const [n, idx] of scannedIdx.entries()) {
-        onProgress({ stage: "ocr", index: n + 1, total: scannedIdx.length, fraction: 0 });
+      for (const [n, idx] of candidates.entries()) {
+        onProgress({ stage: "ocr", index: n + 1, total: candidates.length, fraction: 0 });
         const read = reads[idx];
         const result = await session.recognizePage(file, idx + 1, {
           scale: OCR_SCALE,
           refine: true,
           rotate: (((read.rotate % 360) + 360) % 360) as 0 | 90 | 180 | 270,
-          onProgress: (fraction) => onProgress({ stage: "ocr", index: n + 1, total: scannedIdx.length, fraction }),
+          onProgress: (fraction) => onProgress({ stage: "ocr", index: n + 1, total: candidates.length, fraction }),
           // Layout from the pixels first (rules, boxes, tables, shading), then the lines are erased so the
           // OCR engine reads the words between them instead of the grid.
           prepare: (image, map) => {
-            onProgress({ stage: "layout", index: n + 1, total: scannedIdx.length });
+            onProgress({ stage: "layout", index: n + 1, total: candidates.length });
             const original = { data: new Uint8ClampedArray(image.data), width: image.width, height: image.height };
             const analysis = analyzeScan(image, OCR_SCALE);
             const bg = analysis.backgroundColor.match(/../g)!.map((h) => parseInt(h, 16)) as [number, number, number];
@@ -510,7 +692,7 @@ export async function extractPages(file: File, ocrLang: string, onProgress: (p: 
             flattenFills(image, analysis.fills.filter((f) => !analysis.bars.some((b) => b.x === f.x && b.y === f.y)), bg);
             eraseRules(image, analysis.rules, bg);
             eraseCheckboxes(image, analysis.checkboxes, bg);
-            onProgress({ stage: "ocr", index: n + 1, total: scannedIdx.length, fraction: 0 });
+            onProgress({ stage: "ocr", index: n + 1, total: candidates.length, fraction: 0 });
             return { analysis, original, map } satisfies Prepared;
           },
         });
@@ -518,7 +700,7 @@ export async function extractPages(file: File, ocrLang: string, onProgress: (p: 
         const frame = frameFor(read.view, read.rotate);
         const words = result.words.map((w) => ({ text: w.text, confidence: w.confidence, pdfBox: w.pdfBox, line: w.line }));
         const prep = result.prepared as Prepared | undefined;
-        if (!prep) throw new PdfToWordError("This scanned page couldn't be analysed.");
+        if (!prep) continue; // can't judge it: the picture stands
         const { input, report } = await scannedPageInput({
           words,
           lines: result.lines,
@@ -529,14 +711,41 @@ export async function extractPages(file: File, ocrLang: string, onProgress: (p: 
           frame,
           encode: (box, mime) => encodeRegion(prep.original, box, mime),
         });
-        read.input = input;
-        reports[idx] = report;
+        const kept = Math.max(0, words.length - report.droppedNoise.length);
+        const decision = hybridDecision({
+          words: kept,
+          textConfidence: report.textConfidence,
+          inkExplained: report.inkExplained,
+          droppedNoise: report.droppedNoise.length,
+          pictures: report.strategy === "structured-scan" ? report.pictures : report.pictures || 1,
+          rules: report.rules,
+          fills: report.fills,
+          runningTextShare: runningTextShare(words.filter((w) => !report.droppedNoise.includes(w.text))),
+        });
+        const entry = pageReports[idx];
+        if (decision.ok && report.strategy === "structured-scan") rebuilt.set(idx, { input, report, reason: decision.reason });
+        else entry.reason = `kept as it looks: ${decision.reason}`;
       }
     } finally {
       await session.terminate();
     }
   }
+  // Editable text from a scan is all or nothing for a document: if any of its pictures is a form, an ID, a
+  // signed page or anything else kept as it looks, its plain-text scans stay pictures too — one document
+  // shouldn't be half retyped and half image.
+  const scannedPages = pageReports.filter((r) => r.cls !== "NATIVE_TEXT" && r.cls !== "MIXED" && r.cls !== "BLANK").length;
+  for (const [idx, r] of rebuilt) {
+    const entry = pageReports[idx];
+    if (rebuilt.size === scannedPages) {
+      reads[idx].input = r.input;
+      reports[idx] = r.report;
+      entry.strategy = "hybrid";
+      entry.reason = r.reason;
+      delete entry.imageBytes;
+      delete entry.imageDpi;
+    } else entry.reason = "kept as it looks: this document has other pages (signatures, forms, pictures) that must stay as they are";
+  }
   onProgress({ stage: "building" });
-  for (const r of reads) if (r.kind !== "scanned") r.input.strategy = "native";
-  return { pages: reads.map((r) => r.input), reports };
+  for (const r of reads) if (!r.input.strategy) r.input.strategy = "native";
+  return { pages: reads.map((r) => r.input), reports, pageReports };
 }

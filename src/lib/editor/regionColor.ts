@@ -168,6 +168,17 @@ export function estimateRegionColors(source: PixelSource, wordRectPx: PixelRect,
   };
 }
 
+/** Perceived brightness, 0–1. */
+function brightness(c: RgbColor): number {
+  return 0.299 * c.r + 0.587 * c.g + 0.114 * c.b;
+}
+
+/** The text colour to write on `background`: the line's own when it stands out from it, otherwise black or white. */
+export function legibleOn(background: RgbColor, text: RgbColor): RgbColor {
+  if (Math.abs(brightness(background) - brightness(text)) >= 0.4) return text;
+  return brightness(background) < 0.5 ? { r: 1, g: 1, b: 1 } : { r: 0, g: 0, b: 0 };
+}
+
 /** Small, conservative padding (in PDF points) around a word's tight OCR box, just enough
  * to cover anti-aliased glyph edges without eating into neighboring characters. Scales
  * gently with font size (taller text has thicker stroke edges to cover) and backs off for

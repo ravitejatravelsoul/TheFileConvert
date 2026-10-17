@@ -19,7 +19,7 @@ import { viewportSpecForPage, effectiveRotation, type EditorDocument, type Edito
 import type { NativeTextRegion } from "@/lib/editor/nativeText";
 import type { OcrPageResult } from "@/lib/processors/ocr";
 import { confidenceTier } from "@/lib/processors/ocr";
-import { estimateRegionColors, computeEditPadding, type PixelSource } from "@/lib/editor/regionColor";
+import { estimateRegionColors, computeEditPadding, legibleOn, type PixelSource } from "@/lib/editor/regionColor";
 import { composeOcrPatch, type ComposeOcrPatchResult } from "@/lib/editor/scanPatch";
 import { planOcrPatch, type CharBox } from "@/lib/editor/textDiff";
 import type { EditorWorkspaceApi, ToolId, SearchMatch } from "./useEditorWorkspace";
@@ -51,6 +51,9 @@ export interface EditableRegionRequest {
    * (and so its baseline) really is. Used to place the invisible searchable-text run. */
   wordPdfBox?: Rect;
   ocrColors?: OcrColorEstimate;
+  /** Native text only: the page's own colours behind and in the line, so a correction on a dark or tinted band
+   * is covered and written in those colours rather than black on white. Unset where the background isn't flat. */
+  nativeColors?: { backgroundColor: RgbColor; textColor: RgbColor };
   /** Renders a real, export-identical raster preview of what typing `newText` would look
    * like (scanned-text pipeline only — see scanPatch.ts) — synchronous, cheap enough to call
    * on every keystroke for a single word. Recomputes the *changed-substring* region fresh on
@@ -776,7 +779,11 @@ export function PageSurface({
               onPointerDown={(e) => e.stopPropagation()}
               onClick={() => {
                 if (activeTool !== "select") return;
-                onRequestTextEdit({ kind: "native", pageId: page.id, text: region.text, pdfBox: region.pdfBox });
+                // Read the colours around and in the line from the page itself (flat backgrounds only).
+                const padPx = Math.max(2, 2 * spec.scale);
+                const source = canvasPixelSource({ x: vRect.x - padPx * 2, y: vRect.y - padPx * 2, width: vRect.width + padPx * 4, height: vRect.height + padPx * 4 });
+                const est = source ? estimateRegionColors(source, vRect, padPx) : null;
+                onRequestTextEdit({ kind: "native", pageId: page.id, text: region.text, pdfBox: region.pdfBox, nativeColors: est && !est.complex ? { backgroundColor: est.backgroundColor, textColor: legibleOn(est.backgroundColor, est.textColor) } : undefined });
               }}
             />
           );
