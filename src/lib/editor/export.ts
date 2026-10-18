@@ -53,6 +53,23 @@ async function dataUrlToBytes(dataUrl: string): Promise<Uint8Array> {
 interface Fonts {
   regular: PDFFont;
   bold: PDFFont;
+  /** Standard fonts embedded on first use (added text can pick a family and italics). */
+  extra?: Map<string, PDFFont>;
+}
+
+const STANDARD: Record<"sans" | "serif" | "mono", [StandardFonts, StandardFonts, StandardFonts, StandardFonts]> = {
+  sans: [StandardFonts.Helvetica, StandardFonts.HelveticaBold, StandardFonts.HelveticaOblique, StandardFonts.HelveticaBoldOblique],
+  serif: [StandardFonts.TimesRoman, StandardFonts.TimesRomanBold, StandardFonts.TimesRomanItalic, StandardFonts.TimesRomanBoldItalic],
+  mono: [StandardFonts.Courier, StandardFonts.CourierBold, StandardFonts.CourierOblique, StandardFonts.CourierBoldOblique],
+};
+
+async function addedTextFont(doc: PDFDocument, fonts: Fonts, family: "sans" | "serif" | "mono", bold: boolean, italic: boolean): Promise<PDFFont> {
+  if (family === "sans" && !italic) return bold ? fonts.bold : fonts.regular;
+  const name = STANDARD[family][(italic ? 2 : 0) + (bold && italic ? 1 : bold ? 1 : 0)];
+  fonts.extra ??= new Map();
+  let f = fonts.extra.get(name);
+  if (!f) fonts.extra.set(name, (f = await doc.embedFont(name)));
+  return f;
 }
 
 /** Draws a whiteout rectangle over a region — used both by the standalone Whiteout tool
@@ -229,7 +246,7 @@ async function drawObject(
     }
 
     case "added-text": {
-      const font = obj.bold ? fonts.bold : fonts.regular;
+      const font = await addedTextFont(doc, fonts, obj.family ?? "sans", obj.bold, Boolean(obj.italic));
       const size = obj.fontSize;
       const canEncode = (ch: string) => {
         try {
@@ -254,6 +271,10 @@ async function drawObject(
         const at = frame.toPdf(u, lineBaselineY(frame.height, size, i));
         try {
           page.drawText(line, { x: at.x, y: at.y, size, font, color: toPdfLibColor(obj.color), rotate: degrees(frame.rotation) });
+          if (obj.underline) {
+            const y = lineBaselineY(frame.height, size, i) - size * 0.12;
+            page.drawLine({ start: frame.toPdf(u, y), end: frame.toPdf(u + measure(line), y), thickness: Math.max(0.5, size * 0.055), color: toPdfLibColor(obj.color) });
+          }
         } catch {
           // Shouldn't happen after sanitizing, but one bad line shouldn't fail the export.
         }

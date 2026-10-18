@@ -130,6 +130,10 @@ export interface AddedTextObject extends BaseObject {
   color: RgbColor;
   align: "left" | "center" | "right";
   bold: boolean;
+  italic?: boolean;
+  underline?: boolean;
+  /** Typeface: Helvetica-, Times- or Courier-like (PDF's standard fonts). Absent = sans. */
+  family?: "sans" | "serif" | "mono";
   /** Content turned counter-clockwise by this much inside the box, so it reads upright on a page
    * shown rotated (see contentFrame.ts). Absent = 0, the behaviour of objects saved before this existed. */
   rotation?: ContentRotation;

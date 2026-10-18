@@ -52,3 +52,31 @@ test("privacy: editing text and pictures and exporting sends nothing off the dev
   expect(foreign).toEqual([]);
   expect(seen.filter((r) => r.method !== "GET" && r.method !== "HEAD" && !r.url.startsWith("blob:"))).toEqual([]);
 });
+
+test("performance: a 25-page document opens fast, renders only what is near, and an edit commits quickly", async ({ page }) => {
+  const file = path.join(EDITOR_FIXTURES, "EDITOR-11-long-document-25-pages.pdf");
+  let canvases = 0;
+  await page.exposeFunction("__tfcCanvas", () => canvases++);
+  await page.addInitScript(() => {
+    const orig = HTMLCanvasElement.prototype.getContext;
+    HTMLCanvasElement.prototype.getContext = function (this: HTMLCanvasElement, ...a: Parameters<typeof orig>) {
+      (window as unknown as { __tfcCanvas: () => void }).__tfcCanvas();
+      return orig.apply(this, a as never);
+    } as typeof orig;
+  });
+  const t0 = Date.now();
+  await openEditor(page, file);
+  const openMs = Date.now() - t0;
+  await page.waitForTimeout(1500);
+  const afterOpenCanvases = canvases;
+  const t1 = Date.now();
+  await editText(page, { has: "recieve", find: "recieve", replace: "receive" });
+  const editMs = Date.now() - t1;
+  const fs = await import("node:fs");
+  const evidence = path.join(EDITOR_FIXTURES, "..", "review", "pdf-editor", "performance.json");
+  fs.writeFileSync(evidence, JSON.stringify({ document: "EDITOR-11 (25 pages)", openToEditableMs: openMs, canvasesAfterOpen: afterOpenCanvases, editTypeAndCommitMs: editMs, note: "Chromium, this machine, production build" }, null, 1));
+  expect(openMs).toBeLessThan(15_000);
+  expect(editMs).toBeLessThan(15_000);
+  // the page and the thumbnails near the top: far fewer canvases than pages x2
+  expect(afterOpenCanvases).toBeLessThan(25);
+});

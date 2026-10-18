@@ -418,7 +418,17 @@ function ObjectProperties({ api, object }: { api: EditorWorkspaceApi; object: No
         </p>
       )}
       {object.type === "added-text" && (
-        <div className="flex items-center gap-3 text-xs">
+        <label className="block">
+          <span className="mb-1 block text-xs font-medium text-[var(--ink)]">Font</span>
+          <select value={object.family ?? "sans"} onChange={(e) => api.updateObject(object.id, { family: e.target.value as "sans" | "serif" | "mono" })} className="field w-full text-sm" aria-label="Font family">
+            <option value="sans">Sans (Helvetica)</option>
+            <option value="serif">Serif (Times)</option>
+            <option value="mono">Monospace (Courier)</option>
+          </select>
+        </label>
+      )}
+      {object.type === "added-text" && (
+        <div className="flex flex-wrap items-center gap-3 text-xs">
           <label className="flex items-center gap-1.5">
             <input
               type="checkbox"
@@ -427,6 +437,14 @@ function ObjectProperties({ api, object }: { api: EditorWorkspaceApi; object: No
               className="h-4 w-4 accent-[var(--ink)]"
             />
             Bold
+          </label>
+          <label className="flex items-center gap-1.5">
+            <input type="checkbox" checked={Boolean(object.italic)} onChange={(e) => api.updateObject(object.id, { italic: e.target.checked })} className="h-4 w-4 accent-[var(--ink)]" />
+            Italic
+          </label>
+          <label className="flex items-center gap-1.5">
+            <input type="checkbox" checked={Boolean(object.underline)} onChange={(e) => api.updateObject(object.id, { underline: e.target.checked })} className="h-4 w-4 accent-[var(--ink)]" />
+            Underline
           </label>
           <div className="flex items-center gap-1" role="group" aria-label="Text alignment">
             {(["left", "center", "right"] as const).map((a) => (

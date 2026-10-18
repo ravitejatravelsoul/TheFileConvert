@@ -74,7 +74,7 @@ export function ThumbnailRail({ api, doc, onInsertFile, layout = "rail" }: Thumb
             }`}
           >
             <button type="button" onClick={() => api.setActivePageId(page.id)} aria-label={`Go to page ${index + 1}`} aria-current={active ? "page" : undefined} className="block w-full">
-              <PageThumbnail doc={doc} page={page} />
+              <PageThumbnail doc={doc} page={page} working={api.state.workingByPage[page.id]?.file ?? null} />
               <span className="tabular mt-1 block text-center text-xs font-medium text-[var(--ink-2)]">{index + 1}</span>
             </button>
 
@@ -115,21 +115,37 @@ export function ThumbnailRail({ api, doc, onInsertFile, layout = "rail" }: Thumb
   );
 }
 
-function PageThumbnail({ doc, page }: { doc: EditorDocument; page: EditorPage }) {
+/** A page's thumbnail: drawn from the page with the editor's edits applied, only once it is (nearly) on screen, and only redrawn when
+ * its own picture changes — not on every edit made elsewhere in the document. */
+function PageThumbnail({ doc, page, working }: { doc: EditorDocument; page: EditorPage; working: File | null }) {
   const hostRef = useRef<HTMLDivElement>(null);
+  const [near, setNear] = useState(false);
+  const source = doc.sourceFiles[page.sourceFileId];
+  const file = working ?? source;
+  const index = working ? 0 : page.sourcePageIndex;
+  const rotation = effectiveRotation(page);
+  const box = page.mediaBox;
 
   useEffect(() => {
+    const el = hostRef.current;
+    if (!el) return;
+    // without IntersectionObserver every thumbnail is "near" at once (the observer callback is the only place state is set)
+    const io = new IntersectionObserver((entries) => entries.some((e) => e.isIntersecting) && setNear(true), { rootMargin: "300px" });
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!near || !file) return;
     let cancelled = false;
-    const file = doc.sourceFiles[page.sourceFileId];
-    if (!file) return;
     (async () => {
       const pdfDoc = await loadPdfJsDocument(file);
       if (cancelled) return;
-      const width = page.mediaBox[2] - page.mediaBox[0];
-      const rotated = effectiveRotation(page) === 90 || effectiveRotation(page) === 270;
-      const baseWidth = rotated ? page.mediaBox[3] - page.mediaBox[1] : width;
+      const width = box[2] - box[0];
+      const rotated = rotation === 90 || rotation === 270;
+      const baseWidth = rotated ? box[3] - box[1] : width;
       const scale = THUMB_WIDTH / Math.max(1, baseWidth);
-      const canvas = await renderPageToCanvas(pdfDoc, page.sourcePageIndex + 1, scale, effectiveRotation(page));
+      const canvas = await renderPageToCanvas(pdfDoc, index + 1, scale, rotation);
       if (cancelled || !hostRef.current) return;
       hostRef.current.innerHTML = "";
       canvas.className = "w-full h-auto rounded-[2px] bg-white shadow-[0_0_0_1px_var(--line)]";
@@ -138,7 +154,7 @@ function PageThumbnail({ doc, page }: { doc: EditorDocument; page: EditorPage })
     return () => {
       cancelled = true;
     };
-  }, [doc, page, page.rotationDelta]);
+  }, [near, file, index, rotation, box]);
 
   return <div ref={hostRef} className="flex min-h-[80px] items-center justify-center rounded-[4px] bg-[var(--surface-2)]" />;
 }

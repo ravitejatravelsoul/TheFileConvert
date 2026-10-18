@@ -295,10 +295,12 @@ function AddedTextContent({ object, spec, boxHeightPx, editing, onStopEdit, onTe
   const fontPx = object.fontSize * spec.scale;
 
   const common: React.CSSProperties = {
-    fontFamily: "Helvetica, Arial, sans-serif",
+    fontFamily: object.family === "serif" ? '"Times New Roman", Times, serif' : object.family === "mono" ? '"Courier New", Courier, monospace' : "Helvetica, Arial, sans-serif",
     fontSize: fontPx,
     lineHeight: TEXT_LINE_HEIGHT,
     fontWeight: object.bold ? 700 : 400,
+    fontStyle: object.italic ? "italic" : "normal",
+    textDecoration: object.underline ? "underline" : "none",
     color: rgbToCss(object.color),
     textAlign: object.align,
     whiteSpace: "pre-wrap",
@@ -326,7 +328,7 @@ function AddedTextContent({ object, spec, boxHeightPx, editing, onStopEdit, onTe
     const target = Math.max(fontPx * TEXT_LINE_HEIGHT, natural);
     if (Math.abs(target - boxHeightPx) > 0.75) onAutoHeight?.(target);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [object.text, object.width, object.height, object.rotation, object.bold, object.fontSize, spec.scale, spec.rotation, editing]);
+  }, [object.text, object.width, object.height, object.rotation, object.bold, object.italic, object.underline, object.family, object.fontSize, spec.scale, spec.rotation, editing]);
 
   // Focus the moment the editor appears, so the very first keystroke after clicking lands in it
   // (waiting a tick, as below, left a window where a fast typist's first letter was dropped).

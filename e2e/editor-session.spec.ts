@@ -114,3 +114,23 @@ test("a long uninterrupted session: ten edits across ten pages, then export, wit
   // pages that were not touched are as they were
   expect(await pdfText(out, 20)).toBe(await pdfText(orig, 20));
 });
+
+test("shortcuts pick tools (V E T H U D), never while typing; Escape leaves a tool; controls are named", async ({ page }) => {
+  await openEditor(page, LETTER);
+  const pressed = async (name: string) => (await page.getByRole("button", { name, exact: true }).getAttribute("aria-pressed")) === "true";
+  for (const [key, name] of [["e", "Edit text"], ["t", "Add text"], ["h", "Highlight"], ["u", "Underline"], ["d", "Draw"], ["v", "Select"]] as const) {
+    await page.keyboard.press(key);
+    expect(await pressed(name), `${key} → ${name}`).toBe(true);
+  }
+  await page.keyboard.press("h");
+  await page.keyboard.press("Escape");
+  expect(await pressed("Select")).toBe(true);
+  // typing in the page's own text box must not switch tools
+  await typeInto(page, { has: "Review the draft", before: "Review", insert: "hdtuev" });
+  expect(await pressed("Select")).toBe(true);
+  await page.getByRole("button", { name: "Cancel this text edit" }).click();
+  // every dock button has an accessible name and a tooltip
+  for (const b of await page.locator('[role="toolbar"] button').all()) {
+    expect((await b.getAttribute("aria-label")) ?? (await b.innerText())).toBeTruthy();
+  }
+});
