@@ -198,3 +198,12 @@ export function IconFitPage(props: IconProps) {
   );
 }
 
+
+export function IconAddText(props: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" {...base} {...props}>
+      <path d="M4 7V5h12v2M10 5v12M7.5 17h5" />
+      <path d="M18 13v6M15 16h6" />
+    </svg>
+  );
+}

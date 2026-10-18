@@ -1,5 +1,6 @@
 import type { ContentRotation } from "./contentFrame";
 import type { Rotation, ViewportSpec } from "./coordinates";
+import type { NativeEdit } from "./native";
 
 export interface RgbColor {
   r: number; // 0-1
@@ -63,16 +64,21 @@ interface BaseObject {
   height: number;
 }
 
-export interface NativeTextReplacementObject extends BaseObject {
-  type: "native-text-replacement";
+/** An edit to text that is already in the PDF: the engine rewrites the page's own text (see lib/editor/native.ts). */
+export interface NativeTextEditObject extends BaseObject {
+  type: "native-text-edit";
+  /** The text before the edit (for undo history labels, search and the properties panel). */
   originalText: string;
-  newText: string;
-  fontSize: number;
-  /** The text colour: the original line's, read from the page, so white-on-dark stays white-on-dark. */
-  color: RgbColor;
-  /** What covers the old text: the page's own colour behind it (white when unset, as for older sessions). */
-  backgroundColor?: RgbColor;
+  edit: Extract<NativeEdit, { kind: "text" }>;
 }
+
+/** An edit to a picture that is already in the PDF: moved, resized, rotated, replaced or deleted. */
+export interface NativeImageEditObject extends BaseObject {
+  type: "native-image-edit";
+  edit: Extract<NativeEdit, { kind: "image" }>;
+}
+
+export const isNativeEdit = (o: { type: string }): o is NativeTextEditObject | NativeImageEditObject => o.type === "native-text-edit" || o.type === "native-image-edit";
 
 export interface OcrTextReplacementObject extends BaseObject {
   type: "ocr-text-replacement";
@@ -179,7 +185,8 @@ export interface AnnotationObjectData extends BaseObject {
 }
 
 export type EditorObject =
-  | NativeTextReplacementObject
+  | NativeTextEditObject
+  | NativeImageEditObject
   | OcrTextReplacementObject
   | AddedTextObject
   | ImageObjectData

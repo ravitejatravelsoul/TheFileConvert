@@ -78,7 +78,7 @@ test.describe("output integrity", () => {
     await page.goto("/pdf-editor");
     await addFiles(page, pdfFile("scan.pdf", await generationOneScan()));
     await page.getByTestId("page-surface").first().waitFor();
-    await page.getByRole("button", { name: "Text", exact: true }).click();
+    await page.getByRole("button", { name: "Add text", exact: true }).click();
     const box = (await page.getByTestId("page-surface").first().boundingBox())!;
     await page.mouse.click(box.x + box.width * 0.2, box.y + box.height * 0.2);
     await page.keyboard.type("Checked");

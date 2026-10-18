@@ -80,7 +80,7 @@ test.describe("PDF Editor: mobile editing checklist", () => {
     expect(hasOverflow).toBe(false);
 
     // 1. Add text.
-    await page.getByRole("button", { name: "Text", exact: true }).click();
+    await page.getByRole("button", { name: "Add text", exact: true }).click();
     const surface = page.locator('[data-testid="page-surface"]').first();
     await surface.click({ position: { x: 40, y: 300 } });
     await expect(page.locator('[data-object-type="added-text"]')).toHaveCount(1);

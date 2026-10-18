@@ -16,11 +16,14 @@ import {
   EditorDocumentError,
 } from "@/lib/editor/document";
 import type { Rect } from "@/lib/editor/coordinates";
-import { extractNativeTextRegions, type NativeTextRegion } from "@/lib/editor/nativeText";
+import { buildWorkingPage, boxTransform, editKey, type NativeEdit, type PageAnalysis } from "@/lib/editor/native";
+import type { StyleOverride } from "@/lib/pdf-engine/edit-text";
+import { browserFontLoader } from "@/lib/processors/word-to-pdf/fonts";
 import { exportEditorDocument, EditorExportError } from "@/lib/editor/export";
 import { generateUuidV4 } from "@/lib/id";
-import { classifyPdfPages, createOcrSession, type OcrPageResult, type OcrSession, type PageClassification } from "@/lib/processors/ocr";
-import type { EditorDocument, EditorObject, EditorPage } from "@/lib/editor/types";
+import { createOcrSession, type OcrPageResult, type OcrSession } from "@/lib/processors/ocr";
+import type { EditorDocument, EditorObject, EditorPage, NativeImageEditObject, NativeTextEditObject } from "@/lib/editor/types";
+import { isNativeEdit } from "@/lib/editor/types";
 import { effectiveRotation } from "@/lib/editor/types";
 import { applyCorrections } from "@/lib/editor/searchLayer";
 import { validateFileForTool } from "@/lib/security/validators";
@@ -30,6 +33,7 @@ const tool = getTool("pdf-editor");
 
 export type ToolId =
   | "select"
+  | "edit-text"
   | "add-text"
   | "highlight"
   | "underline"
@@ -44,9 +48,23 @@ export type ToolId =
 
 export type ZoomMode = "custom" | "fit-width" | "fit-page";
 
-export type EditableRegion =
-  | { kind: "native"; region: NativeTextRegion }
-  | { kind: "ocr"; pageIndex: number; word: { text: string; confidence: number; pdfBox: { x: number; y: number; width: number; height: number } }; index: number };
+/** What is selected among the page's own content: a block of text, or a picture. */
+export type NativeSelection = { kind: "text"; pageId: string; blockId: string } | { kind: "image"; pageId: string; imageId: string };
+
+/** The page as the editor shows it: the source page with the editor's edits to its own text and pictures applied. */
+export interface WorkingState {
+  /** The edits this state was built for. */
+  sig: string;
+  status: "loading" | "ready" | "error";
+  analysis: PageAnalysis | null;
+  /** A one-page PDF with the edits applied; null while there are none (the source page is shown as it is). */
+  file: File | null;
+  /** The same page with the block being edited blanked out, shown while its text is on the canvas as a live text box. */
+  editingFile?: File | null;
+  error?: string;
+}
+
+export type NativeResult = { ok: true } | { ok: false; reason: string };
 
 export interface SearchMatch {
   pageId: string;
@@ -69,8 +87,10 @@ interface WorkspaceState {
   zoom: number;
   zoomMode: ZoomMode;
   showOcrOverlay: boolean;
-  pageClassifications: Record<string, PageClassification["classification"]>;
-  nativeRegionsByPage: Record<string, NativeTextRegion[]>;
+  workingByPage: Record<string, WorkingState>;
+  selectedNative: NativeSelection | null;
+  /** The block whose text is being edited on the canvas. */
+  editingText: { pageId: string; blockId: string } | null;
   ocrResultsByPage: Record<string, OcrPageResult>;
   ocrLanguage: string;
   ocrBusyPageId: string | null;
@@ -109,8 +129,9 @@ export function useEditorWorkspace() {
     // PageSurface.tsx's word buttons) without needing every word permanently boxed —
     // confidence-colored region boxes are opt-in via "Show text regions" (spec section 25).
     showOcrOverlay: false,
-    pageClassifications: {},
-    nativeRegionsByPage: {},
+    workingByPage: {},
+    selectedNative: null,
+    editingText: null,
     ocrResultsByPage: {},
     ocrLanguage: "eng",
     ocrBusyPageId: null,
@@ -120,6 +141,11 @@ export function useEditorWorkspace() {
     searchMatchIndex: 0,
     searchNavTick: 0,
     cropDraft: null,
+  });
+
+  const stateRef = useRef(state);
+  useEffect(() => {
+    stateRef.current = state;
   });
 
   useEffect(() => {
@@ -140,17 +166,19 @@ export function useEditorWorkspace() {
       doc: next,
       selectedObjectId: opts?.keepSelection ? s.selectedObjectId : null,
       editingObjectId: opts?.keepSelection ? s.editingObjectId : null,
+      selectedNative: opts?.keepSelection ? s.selectedNative : null,
+      editingText: null,
     }));
   }, []);
 
   const undo = useCallback(() => {
     const next = historyRef.current.undo();
-    setState((s) => ({ ...s, doc: next, selectedObjectId: null, editingObjectId: null }));
+    setState((s) => ({ ...s, doc: next, selectedObjectId: null, editingObjectId: null, selectedNative: null, editingText: null }));
   }, []);
 
   const redo = useCallback(() => {
     const next = historyRef.current.redo();
-    setState((s) => ({ ...s, doc: next, selectedObjectId: null, editingObjectId: null }));
+    setState((s) => ({ ...s, doc: next, selectedObjectId: null, editingObjectId: null, selectedNative: null, editingText: null }));
   }, []);
 
   const openFile = useCallback(async (file: File) => {
@@ -162,12 +190,6 @@ export function useEditorWorkspace() {
     }
     try {
       const doc = await loadEditorDocument(file);
-      const classifications = await classifyPdfPages(file);
-      const byId: Record<string, PageClassification["classification"]> = {};
-      classifications.forEach((c, i) => {
-        const page = doc.pages[i];
-        if (page) byId[page.id] = c.classification;
-      });
       const signed = await likelyHasDigitalSignature(file).catch(() => false);
 
       historyRef.current = new EditorHistory<EditorDocument>(doc);
@@ -176,8 +198,9 @@ export function useEditorWorkspace() {
         stage: "ready",
         doc,
         activePageId: doc.pages[0]?.id ?? null,
-        pageClassifications: byId,
-        nativeRegionsByPage: {},
+        workingByPage: {},
+        selectedNative: null,
+        editingText: null,
         ocrResultsByPage: {},
         signedWarning: signed,
         selectedObjectId: null,
@@ -206,8 +229,9 @@ export function useEditorWorkspace() {
       zoom: 1,
       zoomMode: "custom",
       showOcrOverlay: false,
-      pageClassifications: {},
-      nativeRegionsByPage: {},
+      workingByPage: {},
+      selectedNative: null,
+      editingText: null,
       ocrResultsByPage: {},
       ocrLanguage: "eng",
       ocrBusyPageId: null,
@@ -223,7 +247,7 @@ export function useEditorWorkspace() {
   // -------------------------------------------------------------- selection / tools
 
   const setActivePageId = useCallback((pageId: string) => {
-    setState((s) => ({ ...s, activePageId: pageId, selectedObjectId: null }));
+    setState((s) => ({ ...s, activePageId: pageId, selectedObjectId: null, selectedNative: null, editingText: null }));
   }, []);
 
   const setActiveTool = useCallback((toolId: ToolId, opts?: { keepSelection?: boolean }) => {
@@ -232,11 +256,13 @@ export function useEditorWorkspace() {
       activeTool: toolId,
       selectedObjectId: opts?.keepSelection ? s.selectedObjectId : null,
       editingObjectId: null,
+      selectedNative: opts?.keepSelection ? s.selectedNative : null,
+      editingText: toolId === "select" || toolId === "edit-text" ? s.editingText : null,
     }));
   }, []);
 
   const setSelectedObjectId = useCallback((id: string | null) => {
-    setState((s) => ({ ...s, selectedObjectId: id, editingObjectId: id && s.editingObjectId === id ? id : null }));
+    setState((s) => ({ ...s, selectedObjectId: id, selectedNative: id ? null : s.selectedNative, editingObjectId: id && s.editingObjectId === id ? id : null }));
   }, []);
 
   const setEditingObjectId = useCallback((id: string | null) => {
@@ -248,21 +274,152 @@ export function useEditorWorkspace() {
     setState((s) => ({ ...s, zoom, zoomMode: mode }));
   }, []);
 
-  // -------------------------------------------------------------- native text
+  // -------------------------------------------------------------- the page's own text and pictures
 
-  const loadNativeRegionsForPage = useCallback(
+  /** The edits the editor has made to a page's own content, in the order they were made. */
+  const nativeEditsOf = (doc: EditorDocument, pageId: string): NativeEdit[] => doc.objects.filter((o) => o.pageId === pageId && isNativeEdit(o)).map((o) => (o as NativeTextEditObject | NativeImageEditObject).edit);
+  const sigOf = (edits: NativeEdit[]) => edits.map(editKey).join("|");
+
+  const workingSeq = useRef<Record<string, number>>({});
+  const bytesToFile = (bytes: Uint8Array) => new File([bytes as BlobPart], "page.pdf", { type: "application/pdf" });
+
+  /** Builds (or rebuilds) a page's working copy and its analysis when its edits have changed. Cheap when nothing changed. */
+  const ensureWorking = useCallback(
     async (page: EditorPage) => {
-      if (state.nativeRegionsByPage[page.id]) return;
-      const file = state.doc.sourceFiles[page.sourceFileId];
-      if (!file) return;
-      try {
-        const regions = await extractNativeTextRegions(file, page.sourcePageIndex + 1);
-        setState((s) => ({ ...s, nativeRegionsByPage: { ...s.nativeRegionsByPage, [page.id]: regions } }));
-      } catch {
-        setState((s) => ({ ...s, nativeRegionsByPage: { ...s.nativeRegionsByPage, [page.id]: [] } }));
-      }
+      const doc = historyRef.current.current;
+      const edits = nativeEditsOf(doc, page.id);
+      const sig = sigOf(edits);
+      const current = stateRef.current.workingByPage[page.id];
+      if (current && current.sig === sig && current.status !== "error") return;
+      const sourceFile = doc.sourceFiles[page.sourceFileId];
+      if (!sourceFile) return;
+      const seq = (workingSeq.current[page.id] = (workingSeq.current[page.id] ?? 0) + 1);
+      setState((s) => ({ ...s, workingByPage: { ...s.workingByPage, [page.id]: { ...(s.workingByPage[page.id] ?? { analysis: null, file: null }), sig, status: "loading" } } }));
+      const res = await buildWorkingPage(sourceFile, page.sourceFileId, page.sourcePageIndex, edits, browserFontLoader).catch((e: unknown) => ({ ok: false as const, index: -1, reason: e instanceof Error ? e.message : "The page couldn't be read." }));
+      if (workingSeq.current[page.id] !== seq) return;
+      setState((s) => ({
+        ...s,
+        workingByPage: {
+          ...s.workingByPage,
+          [page.id]: res.ok ? { sig, status: "ready", analysis: res.page.analysis, file: edits.length ? bytesToFile(res.page.bytes) : null } : { analysis: s.workingByPage[page.id]?.analysis ?? null, file: null, sig, status: "error", error: res.reason },
+        },
+      }));
     },
-    [state.doc.sourceFiles, state.nativeRegionsByPage]
+    []
+  );
+
+  const selectNative = useCallback((sel: NativeSelection | null) => {
+    setState((s) => ({ ...s, selectedNative: sel, selectedObjectId: sel ? null : s.selectedObjectId, editingObjectId: null }));
+  }, []);
+
+  /** Puts the text of a block on the canvas as a live text box: the page is shown with that block's own text taken out. */
+  const beginTextEdit = useCallback(
+    async (pageId: string, blockId: string) => {
+      const doc = historyRef.current.current;
+      const page = doc.pages.find((p) => p.id === pageId);
+      const file = page && doc.sourceFiles[page.sourceFileId];
+      if (!page || !file) return;
+      setState((s) => ({ ...s, editingText: { pageId, blockId }, selectedNative: { kind: "text", pageId, blockId }, selectedObjectId: null, editingObjectId: null }));
+      const edits = nativeEditsOf(doc, pageId);
+      const res = await buildWorkingPage(file, page.sourceFileId, page.sourcePageIndex, [...edits, { kind: "text", block: blockId, newText: "" }], browserFontLoader);
+      if (!res.ok) return;
+      setState((s) => {
+        if (s.editingText?.blockId !== blockId || s.editingText.pageId !== pageId) return s;
+        return { ...s, workingByPage: { ...s.workingByPage, [pageId]: { ...(s.workingByPage[pageId] ?? { sig: "", status: "ready", analysis: null, file: null }), editingFile: bytesToFile(res.page.bytes) } } };
+      });
+    },
+    []
+  );
+
+  const cancelTextEdit = useCallback(() => {
+    setState((s) => {
+      if (!s.editingText) return s;
+      const w = s.workingByPage[s.editingText.pageId];
+      return { ...s, editingText: null, workingByPage: w ? { ...s.workingByPage, [s.editingText.pageId]: { ...w, editingFile: null } } : s.workingByPage };
+    });
+  }, []);
+
+  /** Applies a native edit (checked first: the engine either writes it exactly or says why not) and records it in history. */
+  const commitNativeEdit = useCallback(
+    async (pageId: string, edit: NativeEdit, label: string, bbox: { x: number; y: number; width: number; height: number }): Promise<NativeResult> => {
+      const doc = historyRef.current.current;
+      const page = doc.pages.find((p) => p.id === pageId);
+      const file = page && doc.sourceFiles[page.sourceFileId];
+      if (!page || !file) return { ok: false, reason: "That page isn't available." };
+      const edits = nativeEditsOf(doc, pageId);
+      const res = await buildWorkingPage(file, page.sourceFileId, page.sourcePageIndex, [...edits, edit], browserFontLoader).catch((e: unknown) => ({ ok: false as const, index: -1, reason: e instanceof Error ? e.message : "The edit couldn't be applied." }));
+      if (!res.ok) return { ok: false, reason: res.reason };
+      const object: NativeTextEditObject | NativeImageEditObject =
+        edit.kind === "text"
+          ? { id: generateUuidV4(), type: "native-text-edit", pageId, ...bbox, originalText: label, edit }
+          : { id: generateUuidV4(), type: "native-image-edit", pageId, ...bbox, edit };
+      const next = { ...doc, objects: [...doc.objects, object] };
+      const sig = sigOf([...edits, edit]);
+      workingSeq.current[pageId] = (workingSeq.current[pageId] ?? 0) + 1; // any build still running is out of date
+      historyRef.current.push(next);
+      setState((s) => ({
+        ...s,
+        doc: next,
+        editingText: null,
+        workingByPage: { ...s.workingByPage, [pageId]: { sig, status: "ready", analysis: res.page.analysis, file: bytesToFile(res.page.bytes), editingFile: null } },
+      }));
+      return { ok: true };
+    },
+    []
+  );
+
+  const commitTextEdit = useCallback(
+    async (pageId: string, blockId: string, newText: string, opts?: { style?: StyleOverride; align?: "left" | "center" | "right" }): Promise<NativeResult> => {
+      const block = stateRef.current.workingByPage[pageId]?.analysis?.blocks.find((b) => b.id === blockId);
+      if (!block) return { ok: false, reason: "That text is no longer on the page." };
+      if (newText === block.text && !opts?.style) {
+        cancelTextEdit();
+        return { ok: true };
+      }
+      return commitNativeEdit(pageId, { kind: "text", block: blockId, newText, style: opts?.style, align: opts?.align }, block.text, block.bbox);
+    },
+    [commitNativeEdit, cancelTextEdit]
+  );
+
+  const applyTextStyle = useCallback(
+    async (pageId: string, blockId: string, style: StyleOverride, align?: "left" | "center" | "right"): Promise<NativeResult> => {
+      const block = stateRef.current.workingByPage[pageId]?.analysis?.blocks.find((b) => b.id === blockId);
+      if (!block) return { ok: false, reason: "That text is no longer on the page." };
+      return commitNativeEdit(pageId, { kind: "text", block: blockId, newText: block.text, style, align }, block.text, block.bbox);
+    },
+    [commitNativeEdit]
+  );
+
+  /** Moves/resizes/rotates a picture on the page: `box` is where it should be (as it appears), `degrees` the turn about its centre. */
+  const transformImage = useCallback(
+    async (pageId: string, imageId: string, box: { x: number; y: number; width: number; height: number }, degrees = 0): Promise<NativeResult> => {
+      const im = stateRef.current.workingByPage[pageId]?.analysis?.images.find((x) => x.id === imageId);
+      if (!im) return { ok: false, reason: "That picture is no longer on the page." };
+      return commitNativeEdit(pageId, { kind: "image", id: imageId, action: { type: "transform", matrix: boxTransform(im.bbox, box, degrees) } }, "", box);
+    },
+    [commitNativeEdit]
+  );
+
+  const deleteNativeImage = useCallback(
+    async (pageId: string, imageId: string): Promise<NativeResult> => {
+      const im = stateRef.current.workingByPage[pageId]?.analysis?.images.find((x) => x.id === imageId);
+      if (!im) return { ok: false, reason: "That picture is no longer on the page." };
+      const res = await commitNativeEdit(pageId, { kind: "image", id: imageId, action: { type: "delete" } }, "", im.bbox);
+      if (res.ok) setState((s) => ({ ...s, selectedNative: null }));
+      return res;
+    },
+    [commitNativeEdit]
+  );
+
+  const replaceNativeImage = useCallback(
+    async (pageId: string, imageId: string, dataUrl: string): Promise<NativeResult> => {
+      const im = stateRef.current.workingByPage[pageId]?.analysis?.images.find((x) => x.id === imageId);
+      if (!im) return { ok: false, reason: "That picture is no longer on the page." };
+      const res = await commitNativeEdit(pageId, { kind: "image", id: imageId, action: { type: "replace", dataUrl } }, "", im.bbox);
+      if (res.ok) setState((s) => ({ ...s, selectedNative: null }));
+      return res;
+    },
+    [commitNativeEdit]
   );
 
   // -------------------------------------------------------------- OCR
@@ -511,20 +668,15 @@ export function useEditorWorkspace() {
     const q = state.searchQuery.trim().toLowerCase();
     if (!q) return matches;
     for (const page of state.doc.pages) {
-      // Search what the page will *say*, not what it said originally: a corrected word replaces the text it
-      // covers, and text added in the editor is searchable too.
       const pageObjects = state.doc.objects.filter((o) => o.pageId === page.id);
-      const replacements = pageObjects.filter((o): o is Extract<typeof o, { type: "native-text-replacement" | "ocr-text-replacement" }> => o.type === "native-text-replacement" || o.type === "ocr-text-replacement");
-      // The same rule the exported PDF's searchable text layer uses (searchLayer.ts).
-      const currentText = (text: string, box: { x: number; y: number; width: number; height: number }) => applyCorrections(text, box, replacements).text;
-      for (const region of state.nativeRegionsByPage[page.id] ?? []) {
-        const text = currentText(region.text, region.pdfBox);
-        if (text.toLowerCase().includes(q)) matches.push({ pageId: page.id, text, pdfBox: region.pdfBox });
+      // Search what the page says *now*: the working page already has the editor's corrections in it.
+      for (const block of state.workingByPage[page.id]?.analysis?.blocks ?? []) {
+        for (const line of block.lines) if (line.text.toLowerCase().includes(q)) matches.push({ pageId: page.id, text: line.text, pdfBox: line.bbox });
       }
       const ocr = state.ocrResultsByPage[page.id];
       if (ocr) {
         for (const line of ocr.lines) {
-          const text = currentText(line.text, line.pdfBox);
+          const text = applyCorrections(line.text, line.pdfBox, pageObjects.filter((o): o is Extract<typeof o, { type: "ocr-text-replacement" }> => o.type === "ocr-text-replacement")).text;
           if (text.toLowerCase().includes(q)) matches.push({ pageId: page.id, text, pdfBox: line.pdfBox });
         }
       }
@@ -535,7 +687,7 @@ export function useEditorWorkspace() {
       }
     }
     return matches;
-  }, [state.searchQuery, state.doc.pages, state.doc.objects, state.nativeRegionsByPage, state.ocrResultsByPage]);
+  }, [state.searchQuery, state.doc.pages, state.doc.objects, state.workingByPage, state.ocrResultsByPage]);
 
   const setSearchQuery = useCallback((query: string) => {
     setState((s) => ({ ...s, searchQuery: query, searchMatchIndex: 0 }));
@@ -573,7 +725,15 @@ export function useEditorWorkspace() {
     setSelectedObjectId,
     setEditingObjectId,
     setZoom,
-    loadNativeRegionsForPage,
+    ensureWorking,
+    selectNative,
+    beginTextEdit,
+    cancelTextEdit,
+    commitTextEdit,
+    applyTextStyle,
+    transformImage,
+    deleteNativeImage,
+    replaceNativeImage,
     runOcr,
     cancelOcr,
     setOcrLanguage,

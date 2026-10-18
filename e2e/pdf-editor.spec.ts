@@ -72,7 +72,7 @@ test.describe("PDF Editor: add text / shapes / annotations", () => {
   test("adds a text box and it appears at export in the reopened PDF", async ({ page }) => {
     await openFile(page, path.join(OCR_FIXTURES, "native-text.pdf"));
 
-    await page.getByRole("button", { name: "Text", exact: true }).click();
+    await page.getByRole("button", { name: "Add text", exact: true }).click();
     const surface = page.locator('[data-testid="page-surface"]').first();
     await surface.click({ position: { x: 60, y: 600 } });
 
@@ -174,7 +174,7 @@ test.describe("PDF Editor: undo/redo", () => {
   test("Ctrl+Z undoes an added text object and Ctrl+Shift+Z redoes it", async ({ page, isMobile }) => {
     await openFile(page, path.join(OCR_FIXTURES, "native-text.pdf"));
 
-    await page.getByRole("button", { name: "Text", exact: true }).click();
+    await page.getByRole("button", { name: "Add text", exact: true }).click();
     const surface = page.locator('[data-testid="page-surface"]').first();
     await surface.click({ position: { x: 60, y: 600 } });
     await openMobilePanel(page, isMobile, "Properties");
@@ -223,7 +223,7 @@ test.describe("PDF Editor: privacy / network", () => {
 
     await page.getByRole("button", { name: "Actual size (100%)" }).click(); // a phone opens fit to width
     requests.length = 0;
-    await page.getByRole("button", { name: "Text", exact: true }).click();
+    await page.getByRole("button", { name: "Add text", exact: true }).click();
     await page.locator('[data-testid="page-surface"]').first().click({ position: { x: 60, y: 600 } });
     await exportAndSave(page, "privacy-check.pdf");
 

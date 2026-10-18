@@ -29,7 +29,7 @@ test("text added to a page shown rotated is upright on screen and in the exporte
   const surface = await openRotated(page);
   const box = (await surface.boundingBox())!;
   expect(box.height).toBeGreaterThan(box.width); // shown portrait
-  await page.getByRole("button", { name: "Text", exact: true }).click();
+  await page.getByRole("button", { name: "Add text", exact: true }).click();
   await page.mouse.click(box.x + box.width * 0.15, box.y + box.height * 0.2);
   await page.keyboard.type("Upright words");
   await page.keyboard.press("Escape");

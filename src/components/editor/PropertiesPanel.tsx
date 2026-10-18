@@ -8,10 +8,12 @@ import { SUPPORTED_OCR_LANGUAGES } from "@/lib/processors/ocr";
 import { addWatermark, addPageNumbers, addHeaderFooter, type WatermarkOptions, type PageNumberOptions, type HeaderFooterOptions } from "@/lib/processors/pdf";
 import { exportEditorDocument } from "@/lib/editor/export";
 import { IconTrash, IconWarning } from "@/components/icons";
+import { NativeImageProperties, NativeTextProperties } from "./NativeProperties";
 import type { EditorDocument } from "@/lib/editor/types";
 
 const TOOL_HINT: Record<EditorWorkspaceApi["state"]["activeTool"], { title: string; hint: string }> = {
-  select: { title: "Select", hint: "Click existing text to edit it, or click something you added to move, resize or restyle it." },
+  select: { title: "Select", hint: "Double-click text on the page to edit it. Click a picture or something you added to move, resize or restyle it." },
+  "edit-text": { title: "Edit text", hint: "Click any text on the page and type. Nothing is covered up: the PDF's own text is changed." },
   "add-text": { title: "Text", hint: "Click on the page where the text should go, then type." },
   highlight: { title: "Highlight", hint: "Drag across text to highlight it. The tool stays on until you choose another." },
   underline: { title: "Underline", hint: "Drag across text to underline it. The tool stays on until you choose another." },
@@ -27,7 +29,8 @@ const TOOL_HINT: Record<EditorWorkspaceApi["state"]["activeTool"], { title: stri
 
 const OBJECT_LABEL: Record<string, string> = {
   "added-text": "Text",
-  "native-text-replacement": "Edited text",
+  "native-text-edit": "Edited text",
+  "native-image-edit": "Edited picture",
   "ocr-text-replacement": "Corrected scan text",
   highlight: "Highlight",
   underline: "Underline",
@@ -61,7 +64,11 @@ export function PropertiesPanel({ api, doc, toolOptions: defaultOptions, onToolO
     if (objectPatch) api.updateObject(selectedObject.id, objectPatch, { coalesceKey: `opt:${selectedObject.id}:${Object.keys(patch).join(",")}` });
   };
   const activePage = doc.pages.find((p) => p.id === state.activePageId) ?? null;
-  const scannedPages = doc.pages.filter((p) => state.pageClassifications[p.id] && state.pageClassifications[p.id] !== "native");
+  const scannedPages = doc.pages.filter((p) => state.workingByPage[p.id]?.analysis?.scanned);
+  const nativeSel = state.selectedNative;
+  const nativeAnalysis = nativeSel ? state.workingByPage[nativeSel.pageId]?.analysis : null;
+  const nativeBlock = nativeSel?.kind === "text" ? (nativeAnalysis?.blocks.find((b) => b.id === nativeSel.blockId) ?? null) : null;
+  const nativeImage = nativeSel?.kind === "image" ? (nativeAnalysis?.images.find((i) => i.id === nativeSel.imageId) ?? null) : null;
 
   const tool = state.activeTool;
   const isShape = tool.startsWith("shape-");
@@ -75,9 +82,9 @@ export function PropertiesPanel({ api, doc, toolOptions: defaultOptions, onToolO
   return (
     <div className="flex h-full flex-col gap-4 overflow-y-auto p-4 text-sm">
       <div>
-        <p className="text-xs font-medium uppercase tracking-[0.06em] text-[var(--ink-2)]">{selectedObject ? "Selected" : "Tool"}</p>
-        <p className="mt-1 text-base font-semibold tracking-[-0.01em]">{selectedObject ? (OBJECT_LABEL[selectedObject.type] ?? "Object") : TOOL_HINT[tool].title}</p>
-        {!selectedObject && <p className="mt-1 leading-relaxed text-[var(--ink-2)]">{TOOL_HINT[tool].hint}</p>}
+        <p className="text-xs font-medium uppercase tracking-[0.06em] text-[var(--ink-2)]">{selectedObject || nativeBlock || nativeImage ? "Selected" : "Tool"}</p>
+        <p className="mt-1 text-base font-semibold tracking-[-0.01em]">{selectedObject ? (OBJECT_LABEL[selectedObject.type] ?? "Object") : nativeBlock ? "Text on the page" : nativeImage ? "Picture on the page" : TOOL_HINT[tool].title}</p>
+        {!selectedObject && !nativeBlock && !nativeImage && <p className="mt-1 leading-relaxed text-[var(--ink-2)]">{TOOL_HINT[tool].hint}</p>}
       </div>
 
       {state.signedWarning && (
@@ -95,6 +102,17 @@ export function PropertiesPanel({ api, doc, toolOptions: defaultOptions, onToolO
             to hide sensitive information.
           </span>
         </div>
+      )}
+
+      {nativeSel && nativeBlock && (
+        <Section title="Text" defaultOpen>
+          <NativeTextProperties key={nativeBlock.id} api={api} pageId={nativeSel.pageId} block={nativeBlock} />
+        </Section>
+      )}
+      {nativeSel && nativeImage && (
+        <Section title="Picture" defaultOpen>
+          <NativeImageProperties key={nativeImage.id} api={api} pageId={nativeSel.pageId} image={nativeImage} />
+        </Section>
       )}
 
       {selectedObject && (
@@ -157,7 +175,7 @@ export function PropertiesPanel({ api, doc, toolOptions: defaultOptions, onToolO
 
       <p className="mt-2 border-t border-[var(--line)] pt-4 text-xs font-medium uppercase tracking-[0.06em] text-[var(--ink-2)]">Document</p>
 
-      <Section title="Recognize Text (OCR)">
+      <Section title="Recognize text (search & copy)">
         <div className="space-y-2.5">
           <label className="block">
             <span className="mb-1 block text-xs font-medium text-[var(--ink)]">Language</span>
@@ -174,9 +192,10 @@ export function PropertiesPanel({ api, doc, toolOptions: defaultOptions, onToolO
             </select>
           </label>
 
-          {activePage && state.pageClassifications[activePage.id] && state.pageClassifications[activePage.id] !== "native" && (
-            <p className="rounded-[var(--radius-sm)] bg-[var(--accent-soft)] p-2 text-xs text-[var(--ink)]">
-              Scanned page detected. No editable text was found on this page.
+          <p className="text-xs text-[var(--ink-2)]">Makes a scan searchable and copyable on this device. It does not make the scan editable as text.</p>
+          {activePage && state.workingByPage[activePage.id]?.analysis?.scanned && (
+            <p className="rounded-[var(--radius-sm)] bg-[var(--accent-soft)] p-2 text-xs text-[var(--ink)]" data-testid="scanned-page-note">
+              Scanned page &mdash; its text is part of the picture. Add text, whiteout, highlight, draw, sign or crop instead.
             </p>
           )}
 
@@ -372,7 +391,7 @@ function Section({ title, children, defaultOpen }: { title: string; children: Re
 function ObjectProperties({ api, object }: { api: EditorWorkspaceApi; object: NonNullable<EditorWorkspaceApi["state"]["doc"]["objects"][number]> }) {
   return (
     <div className="space-y-2.5">
-      {(object.type === "added-text" || object.type === "native-text-replacement" || object.type === "ocr-text-replacement") && (
+      {(object.type === "added-text" || object.type === "ocr-text-replacement") && (
         <label className="block">
           <span className="mb-1 block text-xs font-medium text-[var(--ink)]">Text</span>
           <textarea
@@ -385,8 +404,6 @@ function ObjectProperties({ api, object }: { api: EditorWorkspaceApi; object: No
                 // showing the old replacement word) — clear it so this falls back to simple
                 // text rendering that actually reflects the new value.
                 api.updateObject(object.id, { newText: e.target.value, patchDataUrl: undefined });
-              } else {
-                api.updateObject(object.id, { newText: e.target.value });
               }
             }}
             rows={2}

@@ -167,7 +167,7 @@ test.describe("PDF Editor: text is edited directly on the page", () => {
   test("place text, type a sentence continuously, edit inside it, and it exports where it shows", async ({ page }) => {
     await openFile(page, path.join(FIXTURES, "sample-a.pdf"));
     const sb = await surfaceBox(page);
-    await page.getByRole("button", { name: "Text", exact: true }).click();
+    await page.getByRole("button", { name: "Add text", exact: true }).click();
     await page.mouse.click(sb.x + 60, sb.y + 300);
 
     const editor = page.getByTestId("canvas-text-editor");
@@ -202,7 +202,7 @@ test.describe("PDF Editor: text is edited directly on the page", () => {
   test("clicking an already-selected text box (or double-clicking) re-enters editing; typing is one undo step", async ({ page }) => {
     await openFile(page, path.join(FIXTURES, "sample-a.pdf"));
     const sb = await surfaceBox(page);
-    await page.getByRole("button", { name: "Text", exact: true }).click();
+    await page.getByRole("button", { name: "Add text", exact: true }).click();
     await page.mouse.click(sb.x + 60, sb.y + 300);
     await page.keyboard.type("Hello world");
     await page.keyboard.press("Escape");
@@ -219,7 +219,7 @@ test.describe("PDF Editor: text is edited directly on the page", () => {
   test("the selected text's color and size are edited from the panel, and Delete removes it", async ({ page, isMobile }) => {
     await openFile(page, path.join(FIXTURES, "sample-a.pdf"));
     const sb = await surfaceBox(page);
-    await page.getByRole("button", { name: "Text", exact: true }).click();
+    await page.getByRole("button", { name: "Add text", exact: true }).click();
     await page.mouse.click(sb.x + 60, sb.y + 300);
     await page.getByTestId("canvas-text-editor").waitFor();
     await page.keyboard.type("Sized");
@@ -241,7 +241,7 @@ test.describe("PDF Editor: text is edited directly on the page", () => {
   test("typing into the properties-panel text box isn't cut off after one character", async ({ page, isMobile }) => {
     await openFile(page, path.join(FIXTURES, "sample-a.pdf"));
     const sb = await surfaceBox(page);
-    await page.getByRole("button", { name: "Text", exact: true }).click();
+    await page.getByRole("button", { name: "Add text", exact: true }).click();
     await page.mouse.click(sb.x + 60, sb.y + 300);
     await page.getByTestId("canvas-text-editor").waitFor();
     await page.keyboard.press("Escape");
@@ -371,7 +371,7 @@ test.describe("PDF Editor: added text on a rotated page", () => {
   test("keeps its layout (one line, real width) and turns with the page instead of wrapping into a sliver", async ({ page, isMobile }) => {
     await openFile(page, path.join(FIXTURES, "sample-a.pdf"));
     const sb = await surfaceBox(page);
-    await page.getByRole("button", { name: "Text", exact: true }).click();
+    await page.getByRole("button", { name: "Add text", exact: true }).click();
     await page.mouse.click(sb.x + 60, sb.y + 300);
     await page.getByTestId("canvas-text-editor").waitFor();
     await page.keyboard.type("A single line of text");
@@ -415,7 +415,7 @@ test.describe("PDF Editor: typing right after placing text", () => {
   test("the first character typed immediately after clicking is not lost", async ({ page }) => {
     await openFile(page, path.join(FIXTURES, "sample-a.pdf"));
     const sb = await surfaceBox(page);
-    await page.getByRole("button", { name: "Text", exact: true }).click();
+    await page.getByRole("button", { name: "Add text", exact: true }).click();
     await page.mouse.click(sb.x + 60, sb.y + 320);
     await page.keyboard.type("Reviewed by QA"); // no waiting for the editor to appear
     await expect(page.getByTestId("canvas-text-editor")).toHaveValue("Reviewed by QA");
@@ -424,7 +424,7 @@ test.describe("PDF Editor: typing right after placing text", () => {
   test("typing across a pause (e.g. thinking mid-sentence) never loses what was already typed", async ({ page }) => {
     await openFile(page, path.join(FIXTURES, "sample-a.pdf"));
     const sb = await surfaceBox(page);
-    await page.getByRole("button", { name: "Text", exact: true }).click();
+    await page.getByRole("button", { name: "Add text", exact: true }).click();
     await page.mouse.click(sb.x + 60, sb.y + 320);
     const editor = page.getByTestId("canvas-text-editor");
     await expect(editor).toBeFocused();

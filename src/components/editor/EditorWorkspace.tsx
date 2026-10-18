@@ -8,7 +8,7 @@ import { triggerDownload } from "@/lib/download";
 import { safeOutputName } from "@/lib/format";
 import { viewportDimensions, computeFitZoom } from "@/lib/editor/coordinates";
 import { viewportSpecForPage } from "@/lib/editor/types";
-import { useEditorWorkspace } from "./useEditorWorkspace";
+import { useEditorWorkspace, type ToolId } from "./useEditorWorkspace";
 import { EditorTopBar, ToolDock, ZoomControl } from "./Toolbar";
 import { ThumbnailRail } from "./ThumbnailRail";
 import { PropertiesPanel } from "./PropertiesPanel";
@@ -38,6 +38,7 @@ export default function EditorWorkspace({ file, onExit }: { file: File; onExit: 
     state.activeTool === "highlight" && !colorChosen ? { ...baseToolOptions, color: PRESET_COLORS[3].value } : baseToolOptions;
   const [textEditRequest, setTextEditRequest] = useState<EditableRegionRequest | null>(null);
   const [signaturePadOpen, setSignaturePadOpen] = useState(false);
+
   const [pendingPlacement, setPendingPlacement] = useState<{ kind: "image" | "signature"; dataUrl: string; naturalWidth: number; naturalHeight: number } | null>(null);
   const [insertAfterPageId, setInsertAfterPageId] = useState<string | null | undefined>(undefined);
   const [mobilePanel, setMobilePanel] = useState<"thumbnails" | "properties" | null>(null);
@@ -64,17 +65,18 @@ export default function EditorWorkspace({ file, onExit }: { file: File; onExit: 
 
   const activePage = state.doc.pages.find((p) => p.id === state.activePageId) ?? state.doc.pages[0] ?? null;
 
-  // Load native text regions for the active page on demand.
+  // Read the active page's own text and pictures (and apply the edits made to them) on demand.
+  const editSig = state.doc.objects;
   useEffect(() => {
-    if (activePage) api.loadNativeRegionsForPage(activePage);
+    if (activePage) void api.ensureWorking(activePage);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activePage?.id]);
+  }, [activePage?.id, editSig, state.doc.pages]);
 
   // Searching has to cover the whole document, not just the pages that have been viewed.
   const hasSearchQuery = state.searchQuery.trim().length > 0;
   useEffect(() => {
     if (!hasSearchQuery) return;
-    for (const p of state.doc.pages) api.loadNativeRegionsForPage(p);
+    for (const p of state.doc.pages) void api.ensureWorking(p);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hasSearchQuery, state.doc.pages.length]);
 
@@ -150,6 +152,27 @@ export default function EditorWorkspace({ file, onExit }: { file: File; onExit: 
         // area too — it's discarded with "Discard area", not by a stray key.
         if (api.state.activeTool !== "select") api.setActiveTool("select", { keepSelection: true });
         else if (api.state.selectedObjectId) api.setSelectedObjectId(null);
+        else if (api.state.selectedNative) api.selectNative(null);
+        return;
+      }
+      const SHORTCUTS: Record<string, ToolId> = { v: "select", e: "edit-text", t: "add-text", h: "highlight", u: "underline", d: "draw" };
+      const shortcutTool = SHORTCUTS[e.key.toLowerCase()];
+      if (shortcutTool && !e.shiftKey) {
+        e.preventDefault();
+        api.setActiveTool(shortcutTool);
+        return;
+      }
+      const nat = api.state.selectedNative;
+      if ((e.key === "Delete" || e.key === "Backspace") && nat?.kind === "image") {
+        e.preventDefault();
+        void api.deleteNativeImage(nat.pageId, nat.imageId).then((r) => {
+          if (!r.ok) api.showMessage(r.reason);
+        });
+        return;
+      }
+      if (e.key === "Enter" && nat?.kind === "text") {
+        e.preventDefault();
+        void api.beginTextEdit(nat.pageId, nat.blockId);
         return;
       }
       const selectedId = api.state.selectedObjectId;
@@ -237,8 +260,8 @@ export default function EditorWorkspace({ file, onExit }: { file: File; onExit: 
   // ------------------------------------------------------------------ workspace
   const currentDocId = state.doc.pages[0]?.id ?? null;
   const detectionBannerDismissed = detectionBannerDismissedForDocId === currentDocId;
-  const scannedPageIds = state.doc.pages.filter((p) => state.pageClassifications[p.id] && state.pageClassifications[p.id] !== "native").map((p) => p.id);
-  const unrecognized = scannedPageIds.filter((id) => !state.ocrResultsByPage[id]);
+  const activeScanned = Boolean(activePage && state.workingByPage[activePage.id]?.analysis?.scanned);
+  const unrecognized = activeScanned && activePage && !state.ocrResultsByPage[activePage.id] ? [activePage.id] : [];
   const showScanBanner = unrecognized.length > 0 && !detectionBannerDismissed && !state.ocrProgress;
 
   const dockProps = {
@@ -283,8 +306,8 @@ export default function EditorWorkspace({ file, onExit }: { file: File; onExit: 
         {showScanBanner && (
           <Strip tone="accent" icon={<IconScan className="h-4 w-4" />}>
             <span className="flex-1">
-              <strong className="font-semibold">Scanned text detected.</strong>{" "}
-              <span className="hidden sm:inline">Recognize it on this device, then click any word to edit it.</span>
+              <strong className="font-semibold">Scanned page.</strong>{" "}
+              <span className="hidden sm:inline">Its text is part of the picture, so it can&apos;t be edited as text. You can still add text, a signature, highlights, drawings, whiteout or crop — or recognize the text on this device to make it searchable.</span>
             </span>
             <button
               type="button"
@@ -386,7 +409,6 @@ export default function EditorWorkspace({ file, onExit }: { file: File; onExit: 
                 doc={state.doc}
                 zoom={state.zoom}
                 toolOptions={toolOptions}
-                nativeRegions={state.nativeRegionsByPage[activePage.id]}
                 ocrResult={state.ocrResultsByPage[activePage.id]}
                 showOcrOverlay={state.showOcrOverlay}
                 activeMatch={api.searchIndex[state.searchMatchIndex]?.pageId === activePage.id ? api.searchIndex[state.searchMatchIndex] : null}

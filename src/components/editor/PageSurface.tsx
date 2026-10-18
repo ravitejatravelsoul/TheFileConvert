@@ -16,16 +16,19 @@ import {
   type ResizeHandle,
 } from "@/lib/editor/coordinates";
 import { viewportSpecForPage, effectiveRotation, type EditorDocument, type EditorObject, type EditorPage, type RgbColor } from "@/lib/editor/types";
-import type { NativeTextRegion } from "@/lib/editor/nativeText";
+import { PageTransform } from "@/lib/editor/pageTransform";
+import { OCR_EDITING_ENABLED } from "@/lib/editor/flags";
 import type { OcrPageResult } from "@/lib/processors/ocr";
 import { confidenceTier } from "@/lib/processors/ocr";
-import { estimateRegionColors, computeEditPadding, legibleOn, type PixelSource } from "@/lib/editor/regionColor";
+import { estimateRegionColors, computeEditPadding, type PixelSource } from "@/lib/editor/regionColor";
 import { composeOcrPatch, type ComposeOcrPatchResult } from "@/lib/editor/scanPatch";
 import { planOcrPatch, type CharBox } from "@/lib/editor/textDiff";
 import type { EditorWorkspaceApi, ToolId, SearchMatch } from "./useEditorWorkspace";
 import type { ToolOptions } from "./toolOptions";
 import { rgbToCss } from "./toolOptions";
 import { ObjectView } from "./ObjectView";
+import { NativeLayer } from "./NativeLayer";
+import { TextEditorOverlay } from "./TextEditorOverlay";
 import { startCornerForDrag } from "@/lib/editor/shapeGeometry";
 import { withContentHeight } from "@/lib/editor/contentFrame";
 
@@ -51,9 +54,6 @@ export interface EditableRegionRequest {
    * (and so its baseline) really is. Used to place the invisible searchable-text run. */
   wordPdfBox?: Rect;
   ocrColors?: OcrColorEstimate;
-  /** Native text only: the page's own colours behind and in the line, so a correction on a dark or tinted band
-   * is covered and written in those colours rather than black on white. Unset where the background isn't flat. */
-  nativeColors?: { backgroundColor: RgbColor; textColor: RgbColor };
   /** Renders a real, export-identical raster preview of what typing `newText` would look
    * like (scanned-text pipeline only — see scanPatch.ts) — synchronous, cheap enough to call
    * on every keystroke for a single word. Recomputes the *changed-substring* region fresh on
@@ -71,7 +71,6 @@ interface PageSurfaceProps {
   doc: EditorDocument;
   zoom: number;
   toolOptions: ToolOptions;
-  nativeRegions: NativeTextRegion[] | undefined;
   ocrResult: OcrPageResult | undefined;
   showOcrOverlay: boolean;
   activeMatch: SearchMatch | null;
@@ -113,7 +112,6 @@ export function PageSurface({
   doc,
   zoom,
   toolOptions,
-  nativeRegions,
   ocrResult,
   showOcrOverlay,
   activeMatch,
@@ -126,8 +124,23 @@ export function PageSurface({
   /** Device pixels per CSS pixel the base canvas was drawn at (see the render effect). */
   const canvasRatioRef = useRef(1);
   const overlayRef = useRef<HTMLDivElement>(null);
-  const file = doc.sourceFiles[page.sourceFileId];
+  const sourceFile = doc.sourceFiles[page.sourceFileId];
+  // What is drawn is the page with the editor's edits applied (and, while a block of text is a live text box, with that block's
+  // own text taken out), so the screen shows what the exported file will contain.
+  const working = api.state.workingByPage[page.id];
+  const renderFile = working?.editingFile ?? working?.file ?? null;
+  const file = renderFile ?? sourceFile;
+  const renderIndex = renderFile ? 0 : page.sourcePageIndex;
   const spec = useMemo(() => viewportSpecForPage(page, zoom), [page, zoom]);
+  const dpr = typeof window === "undefined" ? 1 : Math.min(2, Math.max(1, window.devicePixelRatio || 1));
+  const transform = useMemo(() => new PageTransform(spec, zoom, dpr), [spec, zoom, dpr]);
+  const editingBlock = api.state.editingText?.pageId === page.id ? (working?.analysis?.blocks.find((b) => b.id === api.state.editingText!.blockId) ?? null) : null;
+  const [caretAt, setCaretAt] = useState<{ x: number; y: number } | "all" | undefined>(undefined);
+  const beginEdit = (blockId: string, at?: { x: number; y: number } | "all") => {
+    setCaretAt(at);
+    void api.beginTextEdit(page.id, blockId);
+  };
+
   const dims = useMemo(() => viewportDimensions(spec), [spec]);
 
   const [dragState, setDragState] = useState<{
@@ -158,7 +171,7 @@ export function PageSurface({
       // Draw at the display's pixel ratio (capped at 2x to bound memory) so text is crisp on
       // HiDPI/scaled screens; everything else in the editor keeps working in CSS pixels.
       const ratio = Math.min(2, Math.max(1, window.devicePixelRatio || 1));
-      const canvas = await renderPageToCanvas(pdfDoc, page.sourcePageIndex + 1, spec.scale, effectiveRotation(page), ratio);
+      const canvas = await renderPageToCanvas(pdfDoc, renderIndex + 1, spec.scale, effectiveRotation(page), ratio);
       if (cancelled) return;
       const host = canvasHostRef.current;
       if (!host) return;
@@ -170,7 +183,7 @@ export function PageSurface({
     return () => {
       cancelled = true;
     };
-  }, [file, page, spec.scale]);
+  }, [file, renderIndex, page, spec.scale]);
 
   function pointFromEvent(e: React.PointerEvent): { x: number; y: number } {
     const rect = overlayRef.current!.getBoundingClientRect();
@@ -505,6 +518,7 @@ export function PageSurface({
 
     // select tool clicking empty space: deselect
     api.setSelectedObjectId(null);
+    api.selectNative(null);
   }
 
   function handleOverlayPointerMove(e: React.PointerEvent) {
@@ -756,43 +770,33 @@ export function PageSurface({
         data-surface-background="true"
         className="absolute inset-0"
         style={{
-          cursor: activeTool === "select" ? "default" : "crosshair",
+          cursor: activeTool === "select" ? "default" : activeTool === "edit-text" ? "text" : "crosshair",
           // Drawing tools own touch/pen gestures on the page (so a stroke isn't turned into a
           // scroll); with Select the page still scrolls under a finger.
-          touchAction: activeTool === "select" && !dragState ? "auto" : "none",
+          touchAction: (activeTool === "select" || activeTool === "edit-text") && !dragState ? "auto" : "none",
         }}
         onPointerDown={handleOverlayPointerDown}
         onPointerMove={handleOverlayPointerMove}
         onPointerUp={handleOverlayPointerUp}
         onPointerCancel={handleOverlayPointerCancel}
       >
-        {/* Native text regions */}
-        {nativeRegions?.map((region) => {
-          const vRect = pdfRectToViewport(spec, region.pdfBox);
-          return (
-            <button
-              key={region.id}
-              type="button"
-              aria-label={`Edit text: ${region.text}`}
-              className="absolute rounded-sm border border-transparent hover:border-[var(--select)] hover:bg-[var(--select)]/10"
-              style={{ ...rectToCssStyle(vRect), cursor: regionsActive ? "text" : "inherit", pointerEvents: regionsActive ? "auto" : "none" }}
-              onPointerDown={(e) => e.stopPropagation()}
-              onClick={() => {
-                if (activeTool !== "select") return;
-                // Read the colours around and in the line from the page itself (flat backgrounds only).
-                const padPx = Math.max(2, 2 * spec.scale);
-                const source = canvasPixelSource({ x: vRect.x - padPx * 2, y: vRect.y - padPx * 2, width: vRect.width + padPx * 4, height: vRect.height + padPx * 4 });
-                const est = source ? estimateRegionColors(source, vRect, padPx) : null;
-                onRequestTextEdit({ kind: "native", pageId: page.id, text: region.text, pdfBox: region.pdfBox, nativeColors: est && !est.complex ? { backgroundColor: est.backgroundColor, textColor: legibleOn(est.backgroundColor, est.textColor) } : undefined });
-              }}
-            />
-          );
-        })}
+        {/* The page's own text and pictures. */}
+        <NativeLayer
+          api={api}
+          pageId={page.id}
+          transform={transform}
+          analysis={working?.analysis ?? null}
+          interactive={(activeTool === "select" || activeTool === "edit-text") && !pendingPlacement}
+          editTextTool={activeTool === "edit-text"}
+          editingBlockId={editingBlock?.id ?? null}
+          hostRef={overlayRef}
+          onBeginEdit={beginEdit}
+        />
 
         {/* OCR line regions — a lower-priority fallback target for clicking whitespace
             within a line that no word button covers; word buttons render after these and
             sit on top, so a click on an actual word always hits the word, never the line. */}
-        {ocrResult?.lines.map((line, i) => {
+        {OCR_EDITING_ENABLED && ocrResult?.lines.map((line, i) => {
           const vRect = pdfRectToViewport(spec, line.pdfBox);
           const wordsInLine = ocrResult.words.filter((w) => Math.abs(w.pdfBox.y - line.pdfBox.y) < line.pdfBox.height * 0.5);
           const lineConfidence =
@@ -816,7 +820,7 @@ export function PageSurface({
 
         {/* OCR word regions — the primary editable target: clicking a word edits only that
             word's bounding box, never the whole line (see requestOcrEdit / regionColor.ts). */}
-        {ocrResult?.words.map((word, i) => {
+        {OCR_EDITING_ENABLED && ocrResult?.words.map((word, i) => {
           const vRect = pdfRectToViewport(spec, word.pdfBox);
           return (
             <button
@@ -919,6 +923,18 @@ export function PageSurface({
             }}
           />
         ))}
+
+        {editingBlock && (
+          <TextEditorOverlay
+            key={editingBlock.id}
+            block={editingBlock}
+            transform={transform}
+            ready={Boolean(working?.editingFile)}
+            caretAt={caretAt}
+            onCommit={(text) => api.commitTextEdit(page.id, editingBlock.id, text)}
+            onCancel={api.cancelTextEdit}
+          />
+        )}
 
         {/* Live preview while dragging out a shape/annotation/whiteout: the very same object that
             will be created on release, drawn in the same place, so what you see is what you get. */}

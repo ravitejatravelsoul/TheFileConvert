@@ -8,6 +8,7 @@ import { IconChevronDown, IconDownload, IconImage } from "@/components/icons";
 import {
   IconSelect,
   IconEditText,
+  IconAddText,
   IconHighlight,
   IconUnderline,
   IconStrikethrough,
@@ -70,6 +71,12 @@ export function EditorTopBar({ api, fileName, onExport }: { api: EditorWorkspace
         </p>
         <p className="tabular text-xs text-[var(--ink-2)]">
           {pages} {pages === 1 ? "page" : "pages"}
+          {api.canUndo && (
+            <span data-testid="dirty-indicator" className="ml-2 inline-flex items-center gap-1 font-medium text-[var(--ink)]">
+              <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-[var(--accent-strong,#d97706)]" />
+              Unsaved changes
+            </span>
+          )}
         </p>
       </div>
       <span className="pill mr-1 hidden py-1 text-xs text-[var(--ink-2)] xl:inline-flex">
@@ -123,12 +130,13 @@ export function ToolDock({ api, onRequestImage, onRequestSign, pagesOpen, onTogg
       aria-label="Editing tools"
       className="flex items-stretch gap-0.5 overflow-x-auto px-1 [scrollbar-width:none] lg:overflow-visible lg:rounded-[18px] lg:border lg:border-[var(--line)] lg:bg-[var(--surface)] lg:p-1 lg:shadow-[var(--ring-highlight),var(--shadow-2)]"
     >
-      <DockButton label="Select" icon={IconSelect} pressed={active === "select"} onClick={() => pick("select")} />
-      <DockButton label="Text" icon={IconEditText} pressed={active === "add-text"} onClick={() => pick("add-text")} />
+      <DockButton label="Select" icon={IconSelect} pressed={active === "select"} onClick={() => pick("select")} shortcut="V" />
+      <DockButton label="Edit text" icon={IconEditText} pressed={active === "edit-text"} onClick={() => pick("edit-text")} shortcut="E" />
+      <DockButton label="Add text" icon={IconAddText} pressed={active === "add-text"} onClick={() => pick("add-text")} shortcut="T" />
       <Divider />
-      <DockButton label="Highlight" icon={IconHighlight} pressed={active === "highlight"} onClick={() => pick("highlight")} />
-      <DockButton label="Underline" icon={IconUnderline} pressed={active === "underline"} onClick={() => pick("underline")} />
-      <DockButton label="Draw" icon={IconDraw} pressed={active === "draw"} onClick={() => pick("draw")} />
+      <DockButton label="Highlight" icon={IconHighlight} pressed={active === "highlight"} onClick={() => pick("highlight")} shortcut="H" />
+      <DockButton label="Underline" icon={IconUnderline} pressed={active === "underline"} onClick={() => pick("underline")} shortcut="U" />
+      <DockButton label="Draw" icon={IconDraw} pressed={active === "draw"} onClick={() => pick("draw")} shortcut="D" />
       <DockMenu label="Shapes" icon={shape?.icon ?? IconRectangleShape} pressed={Boolean(shape)} items={SHAPES} active={active} onPick={pick} />
       <Divider />
       <DockButton label="Image" icon={(p) => <IconImage {...p} />} onClick={onRequestImage} />
@@ -146,12 +154,14 @@ function Divider() {
   return <span aria-hidden="true" className="mx-1 my-2 w-px shrink-0 bg-[var(--line)]" />;
 }
 
-function DockButton({ label, icon: Icon, pressed, onClick, className = "" }: { label: string; icon: IconC; pressed?: boolean; onClick: () => void; className?: string }) {
+function DockButton({ label, icon: Icon, pressed, onClick, className = "", shortcut }: { label: string; icon: IconC; pressed?: boolean; onClick: () => void; className?: string; shortcut?: string }) {
   return (
     <button
       type="button"
       onClick={onClick}
       aria-label={label}
+      title={shortcut ? `${label} (${shortcut})` : label}
+      aria-keyshortcuts={shortcut}
       aria-pressed={pressed}
       className={`flex min-h-12 min-w-[3.5rem] shrink-0 flex-col items-center justify-center gap-0.5 rounded-[12px] px-1.5 py-1 text-[11px] font-medium transition-[background-color,color,box-shadow] duration-200 ${
         pressed ? "bg-[linear-gradient(180deg,#34332f,var(--ink))] text-white shadow-[var(--shadow-button)]" : "text-[var(--ink-2)] hover:bg-[var(--band)] hover:text-[var(--ink)]"

@@ -1,5 +1,6 @@
 // @vitest-environment node
 import fs from "node:fs";
+import zlib from "node:zlib";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { PDFDocument } from "pdf-lib";
@@ -16,7 +17,6 @@ async function open(file: string, pageNo = 0) {
 
 /** A solid-colour PNG, made in the test. */
 function png(w: number, h: number): Uint8Array {
-  const zlib = require("node:zlib") as typeof import("node:zlib");
   const raw = Buffer.alloc((w * 3 + 1) * h);
   for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
     const o = y * (w * 3 + 1) + 1 + x * 3;

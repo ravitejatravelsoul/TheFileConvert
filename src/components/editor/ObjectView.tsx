@@ -4,7 +4,6 @@ import { useEffect, useLayoutEffect, useRef } from "react";
 import { pdfRectToViewport, pdfRectToCssStyle, pdfToViewportPoint, type ViewportSpec } from "@/lib/editor/coordinates";
 import { annotationLineThickness, arrowHead, drawingPdfPoints, lineEndpoints } from "@/lib/editor/shapeGeometry";
 import { TEXT_LINE_HEIGHT } from "@/lib/editor/textLayout";
-import { DESCENT_SHARE } from "@/lib/editor/nativeText";
 import { contentFrame } from "@/lib/editor/contentFrame";
 import type { AddedTextObject, DrawingObjectData, EditorObject, ShapeObjectData } from "@/lib/editor/types";
 import { rgbToCss } from "./toolOptions";
@@ -131,24 +130,9 @@ interface ContentProps {
 
 function ObjectContent({ object, spec, width, height, editing, onStopEdit, onTextChange, onAutoHeight, selectAllOnEdit }: ContentProps) {
   switch (object.type) {
-    case "native-text-replacement": {
-      // Drawn the way export draws it: white cover, Helvetica at the original size on the original
-      // baseline, shrunk only if it wouldn't fit the line's width.
-      const pxPerPt = height / object.height;
-      let fontPx = object.fontSize * pxPerPt;
-      const natural = measureHelvetica(object.newText, fontPx);
-      if (natural > width - pxPerPt && natural > 0) fontPx = Math.max(4 * pxPerPt, fontPx * ((width - pxPerPt) / natural));
-      return (
-        <div className="relative h-full w-full overflow-visible" style={{ backgroundColor: rgbToCss(object.backgroundColor ?? { r: 1, g: 1, b: 1 }) }} title={`Edited: ${object.newText}`}>
-          <span
-            className="absolute whitespace-nowrap"
-            style={{ color: rgbToCss(object.color), left: 0.5 * pxPerPt, bottom: height * DESCENT_SHARE - fontPx * HELVETICA_DESCENT, fontSize: fontPx, lineHeight: 1, fontFamily: "Helvetica, Arial, sans-serif" }}
-          >
-            {object.newText}
-          </span>
-        </div>
-      );
-    }
+    case "native-text-edit":
+    case "native-image-edit":
+      return null; // drawn into the page itself, not as an overlay
     case "ocr-text-replacement":
       // When a raster patch was composed (the normal scanned-text path — see scanPatch.ts),
       // render *that exact image*: the live canvas then shows precisely what export will
@@ -443,16 +427,4 @@ function ContentLayer({ object, spec, children }: { object: EditorObject & { rot
       {children}
     </div>
   );
-}
-
-/** Helvetica's descent as a share of the font size (line-height 1 puts the baseline this far above the box bottom). */
-const HELVETICA_DESCENT = 0.207;
-let measureCtx: CanvasRenderingContext2D | null = null;
-
-/** Width of text in Helvetica (or its metric twin Arial) at a pixel size — the font export uses. */
-function measureHelvetica(text: string, px: number): number {
-  measureCtx ??= document.createElement("canvas").getContext("2d");
-  if (!measureCtx) return 0;
-  measureCtx.font = `${px}px Helvetica, Arial, sans-serif`;
-  return measureCtx.measureText(text).width;
 }

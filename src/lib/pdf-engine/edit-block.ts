@@ -122,7 +122,6 @@ async function appendLine(env: EditEnv, content: PageContent, block: TextBlock, 
   }
   if (opts.style?.color && !run.color) return fail("This text's colour can't be read.", "unsupported");
   // the font: the run's own when it can write the text, otherwise the bundled one of the same family
-  let fontOps: string;
   const colour = opts.style?.color ?? run.color ?? { r: 0, g: 0, b: 0 };
   const stream = content.streams.get(run.streamKey);
   const editor = new StreamEditor(stream!.bytes, stream!.ops);

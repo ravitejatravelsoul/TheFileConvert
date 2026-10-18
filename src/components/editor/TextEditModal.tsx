@@ -35,26 +35,6 @@ export function TextEditModal({ request, api, onClose }: TextEditModalProps) {
       onClose();
       return;
     }
-    if (request.kind === "native") {
-      const estimatedFontSize = Math.max(6, box.height * 0.8);
-      api.addObject({
-        id: api.newObjectId(),
-        type: "native-text-replacement",
-        pageId: request.pageId,
-        x: box.x,
-        y: box.y,
-        width: box.width,
-        height: box.height,
-        originalText: request.text,
-        newText: value,
-        fontSize: estimatedFontSize,
-        color: request.nativeColors?.textColor ?? COLOR_BLACK,
-        backgroundColor: request.nativeColors?.backgroundColor,
-      });
-      onClose();
-      return;
-    }
-
     // Scanned-text path. If the region is unsafe to auto-erase (overlaps a table/border
     // line), Save stays disabled until the user explicitly opts into a manual overlay (see
     // canSave below) — never silently fall back to a risky automatic erase.

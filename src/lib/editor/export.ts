@@ -4,11 +4,12 @@ import type { EditorDocument, EditorObject, RgbColor } from "./types";
 import { effectiveRotation } from "./types";
 import { wrapText, lineBaselineY, sanitizeForFont } from "./textLayout";
 import { arrowHead, drawingPdfPoints, lineEndpoints, annotationLineThickness } from "./shapeGeometry";
-import { DESCENT_SHARE } from "./nativeText";
 import { contentFrame } from "./contentFrame";
 import { correctionsInLayer, drawOcrTextLayer, type Rect } from "./searchLayer";
 import type { OcrPageResult } from "@/lib/processors/ocr";
 import { loadPdfForEditing } from "@/lib/pdf/load";
+import { replayNativeEdits, type FontBytes } from "./native";
+import { isNativeEdit } from "./types";
 
 export class EditorExportError extends Error {}
 
@@ -95,17 +96,6 @@ function drawArrow(
   page.drawLine({ start: end, end: right, thickness: strokeWidth, color: pdfColor });
 }
 
-/** Sizes text to fit inside a box: primarily by height (matches normal reading size),
- * clamped so an unusually short/long replacement string doesn't blow up or vanish. */
-function fitFontSize(font: PDFFont, text: string, box: { width: number; height: number }, requestedSize?: number): number {
-  if (requestedSize) return requestedSize;
-  const heightEstimate = Math.max(6, box.height * 0.8);
-  const naturalWidth = font.widthOfTextAtSize(text || " ", heightEstimate);
-  if (naturalWidth <= box.width || box.width <= 0) return heightEstimate;
-  const scaled = heightEstimate * (box.width / naturalWidth);
-  return Math.max(4, scaled);
-}
-
 /** How far a replacement word's bounding box may grow past its original OCR box before
  * export gives up shrinking further and just lets it slightly overflow — this mirrors the
  * "shrink first, then tolerate a small overflow rather than silently covering neighboring
@@ -117,7 +107,7 @@ const MAX_WIDTH_GROWTH_FACTOR = 1.15;
  * replacement is wider than the original. */
 const MIN_SHRINK_FACTOR = 0.7;
 
-/** Like fitFontSize, but tuned for word-level OCR replacements: a tight word box has much
+/** Fits text for word-level OCR replacements: a tight word box has much
  * less slack than a whole line, so a longer replacement (e.g. "182.50" -> "1,282.50") is
  * allowed to grow the effective box a little before the font shrinks, and shrinking stops
  * at a legibility floor rather than continuing indefinitely for very long replacements. */
@@ -156,22 +146,10 @@ async function drawObject(
   drawnAsText: Set<EditorObject> = new Set()
 ): Promise<void> {
   switch (obj.type) {
-    case "native-text-replacement": {
-      page.drawRectangle({ x: obj.x, y: obj.y, width: obj.width, height: obj.height, color: toPdfLibColor(obj.backgroundColor ?? { r: 1, g: 1, b: 1 }) });
-      if (!obj.newText.trim()) break;
-      const font = fonts.regular;
-      const size = fitFontSize(font, obj.newText, obj, obj.fontSize);
-      try {
-        // Real (visible) text, so the correction is already searchable and copyable — a second
-        // invisible copy would make every search/copy of this text appear twice.
-        // Same baseline as the text it replaces (the region box extends below it for descenders).
-        page.drawText(obj.newText, { x: obj.x + 0.5, y: obj.y + obj.height * DESCENT_SHARE, size, font, color: toPdfLibColor(obj.color) });
-      } catch {
-        // A character outside Helvetica's supported encoding shouldn't fail the whole
-        // export — the region is still whited out, just without replacement text drawn.
-      }
+    case "native-text-edit":
+    case "native-image-edit":
+      // Edits to the page's own text and pictures are replayed on the page before anything is drawn (see exportEditorDocument).
       break;
-    }
 
     case "ocr-text-replacement": {
       // Primary path: embed the raster patch composed in the browser (see scanPatch.ts) —
@@ -363,6 +341,8 @@ async function drawObject(
 }
 
 export interface ExportOptions {
+  /** Where the bundled fonts come from (the browser fetches them from /fonts/word/; tests read them from disk). */
+  loadFont?: FontBytes;
   /** Recognised text per page id: those pages get an invisible, searchable text layer. */
   ocrResultsByPage?: Record<string, OcrPageResult | undefined>;
   /** Where a source page already has real text (PDF space). Defaults to reading it with pdf.js. */
@@ -427,6 +407,13 @@ export async function exportEditorDocument(doc: EditorDocument, options: ExportO
     reconnectFormFields(out, copiedPage, reconnectedFieldRefs);
 
     const objectsForPage = doc.objects.filter((o) => o.pageId === page.id);
+    // The page's own text and pictures first: the editor's edits to them, in the order they were made.
+    const nativeEdits = objectsForPage.filter(isNativeEdit).map((o) => o.edit);
+    if (nativeEdits.length) {
+      const loadFont = options.loadFont ?? (await import("@/lib/processors/word-to-pdf/fonts")).browserFontLoader;
+      const replayed = await replayNativeEdits(out, copiedPage, nativeEdits, loadFont);
+      if (!replayed.ok) throw new EditorExportError(`An edit couldn't be applied to page ${doc.pages.indexOf(page) + 1}: ${replayed.reason}`);
+    }
     // A recognised scan: its words become searchable text (corrected words with their new text).
     const ocr = options.ocrResultsByPage?.[page.id];
     const corrections = objectsForPage.filter((o): o is Extract<EditorObject, { type: "ocr-text-replacement" }> => o.type === "ocr-text-replacement");
