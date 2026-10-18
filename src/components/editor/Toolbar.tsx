@@ -74,7 +74,7 @@ export function EditorTopBar({ api, fileName, onExport }: { api: EditorWorkspace
           {api.canUndo && (
             <span data-testid="dirty-indicator" className="ml-2 inline-flex items-center gap-1 font-medium text-[var(--ink)]">
               <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-[var(--accent-strong,#d97706)]" />
-              Unsaved changes
+              <span className="sr-only min-[480px]:not-sr-only">Unsaved changes</span>
             </span>
           )}
         </p>

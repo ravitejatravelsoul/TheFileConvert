@@ -3,7 +3,8 @@ import { test, expect } from "@playwright/test";
 import { EDITOR_FIXTURES, EVIDENCE, exportPdf, finishEdit, openEditor, pdfText, typeInto } from "./helpers/native";
 
 test.describe("Native text editing — the user's real flow", () => {
-  test("fix a spelling mistake in a Chromium PDF: double-click, type, Done, export, reopen", async ({ page }) => {
+  test("fix a spelling mistake in a Chromium PDF: double-click, type, Done, export, reopen", async ({ page, isMobile }) => {
+    test.skip(isMobile, "desktop keyboard flow; the phone has its own spec");
     test.setTimeout(120_000);
     await openEditor(page, path.join(EDITOR_FIXTURES, "EDITOR-01-simple-text.pdf"));
     await page.waitForTimeout(500);
