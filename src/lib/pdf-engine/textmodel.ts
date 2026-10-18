@@ -59,8 +59,10 @@ export interface TextBlock {
   softWrapped: boolean;
   align: "left" | "center" | "right";
   bbox: Rect;
-  /** Width the text may fill: the longest line of the block, along the baseline. */
+  /** Width of the longest line of the block, along the baseline. */
   width: number;
+  /** Width the text may fill: that of its column (the furthest any line starting at the same left edge reaches). */
+  maxWidth: number;
   /** Baseline-to-baseline distance (page units), 0 for a single line. */
   leading: number;
 }
@@ -295,6 +297,7 @@ function makeBlock(lines: TextLine[], all: TextLine[]): TextBlock {
     align,
     bbox,
     width,
+    maxWidth: align === "left" ? Math.max(width, columnRight(lines[0], all) - minS0) : width,
     leading,
   };
 }

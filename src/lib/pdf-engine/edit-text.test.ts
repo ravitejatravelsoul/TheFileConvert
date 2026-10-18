@@ -187,3 +187,24 @@ describe("other kinds of text", () => {
     }
   });
 });
+
+describe("changing the style of a line", () => {
+  const F = FX("EDITOR-01-simple-text.pdf");
+  it("colour, bold and size are applied with the bundled font of the same family", async () => {
+    const { res, out } = await edit(F, "Prepared for the planning committee", "Prepared for the planning committee", 0, { style: { color: { r: 0.8, g: 0, b: 0 }, bold: true, size: 10 } });
+    expect(res.ok, res.ok ? "" : res.reason).toBe(true);
+    expect(await textOf(out)).toContain("Prepared for the planning committee");
+    expect(res.ok && res.usedSubstituteFont).toBe(true);
+  });
+  it("a family change", async () => {
+    const { res, out } = await edit(F, "Next steps", "Next steps", 0, { style: { family: "serif" } });
+    expect(res.ok, res.ok ? "" : res.reason).toBe(true);
+    expect(await textOf(out)).toContain("Next steps");
+  });
+  it("keeps a right-aligned line anchored at its right edge", async () => {
+    const { res, out, line } = await edit(FX("EDITOR-02-resume.pdf"), "2022 – present", "2021 – present", 0, { align: "right" });
+    expect(res.ok, res.ok ? "" : res.reason).toBe(true);
+    expect(line.s1).toBeGreaterThan(0);
+    expect(await textOf(out)).toContain("2021 – present");
+  });
+});
