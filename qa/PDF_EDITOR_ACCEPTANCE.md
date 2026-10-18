@@ -22,8 +22,8 @@ skipping on the phone project and phone-only specs skipping on desktop.
 
 | Matrix | Cases | Result |
 |---|---|---|
-| Native text: every native fixture × its deliberate mistakes (teh → the, recieve → receive, …) | 40 | all pass |
-| Native text scenarios: same length, shorter, longer, single character insert / replace / delete, whole word, several words, line end, bold, italic, coloured, large heading, small body, rotated pages 2–4, special characters, currency, form page, page 12 of 25 | 18 | all pass |
+| Native text: every native fixture × its deliberate mistakes (teh → the, recieve → receive, …) | 37 | all pass |
+| Native text scenarios: same length, shorter, longer, single character insert / replace / delete, whole word, several words, line end, bold, italic, coloured, large heading, small body, rotated pages 2–4, special characters, currency, form page, page 12 of 25 | 21 | all pass |
 | Other producers (Adobe Designer W-9, Antenna House 1040-ES, Acrobat PDFMaker table) | 3 | all pass |
 | Independent validation of all 61 exports: qpdf opens and checks them, MuPDF and poppler read the new text and not the old, other pages are pixel-identical, and pixels outside the edited paragraph | 61 | 61 ok; largest share of a page changed outside the edited paragraph 0.0053 % (anti-alias noise) |
 | Pictures: select, move, resize (proportions kept), turn, replace, delete, undo, redo; six-picture page moves only the touched one | 3 specs | pass |
