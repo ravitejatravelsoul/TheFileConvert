@@ -213,14 +213,16 @@ export default function EditorWorkspace({ file, onExit }: { file: File; onExit: 
   }, [api.canUndo]);
 
   // After a download, offer the next step (compress, merge, Word) without re-picking the file.
-  const [exported, setExported] = useState<File | null>(null);
+  const [exportedAt, setExported] = useState<{ file: File; doc: unknown } | null>(null);
+  // the "downloaded" card floats over the page: it goes away as soon as the document changes again
+  const exported = exportedAt && exportedAt.doc === state.doc ? exportedAt.file : null;
   const handleExport = useCallback(async () => {
     const blob = await api.exportDocument();
     if (!blob) return;
     const name = safeOutputName(fileName, "edited", "pdf");
     triggerDownload(name, blob);
-    setExported(new File([blob], name, { type: "application/pdf" }));
-  }, [api, fileName]);
+    setExported({ file: new File([blob], name, { type: "application/pdf" }), doc: state.doc });
+  }, [api, fileName, state.doc]);
 
   function handleImagePicked(file: File | undefined) {
     if (!file) return;

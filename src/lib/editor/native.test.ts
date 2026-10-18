@@ -83,3 +83,28 @@ describe("the working page", () => {
     expect(r.page.analysis.blocks.length).toBe(0);
   });
 });
+
+describe("working page and export agree", () => {
+  it("a picture replaced and then turned: the edit list replays in memory exactly as it was built step by step", async () => {
+    const { PDFDocument } = await import("pdf-lib");
+    const { replayNativeEdits } = await import("./native");
+    const f = fileOf("EDITOR-08-images.pdf");
+    const png = "data:image/png;base64," + fs.readFileSync(path.resolve("e2e/fixtures/image-2x1.png")).toString("base64");
+    const w0 = await buildWorkingPage(f, "f9", 0, [], loader as never);
+    if (!w0.ok) throw new Error("no page");
+    const e1: NativeEdit = { kind: "image", id: w0.page.analysis.images[0].id, action: { type: "replace", dataUrl: png } };
+    const w1 = await buildWorkingPage(f, "f9", 0, [e1], loader as never);
+    if (!w1.ok) throw new Error(w1.reason);
+    const im = w1.page.analysis.images[0];
+    const e2: NativeEdit = { kind: "image", id: im.id, action: { type: "transform", matrix: boxTransform(im.bbox, im.bbox, 90) } };
+    const w2 = await buildWorkingPage(f, "f9", 0, [e1, e2], loader as never);
+    expect(w2.ok, "step-by-step: " + (w2.ok ? "" : w2.reason)).toBe(true);
+    // export: the same edits, replayed in one go on a fresh copy of the page
+    const src = await PDFDocument.load(new Uint8Array(await f.arrayBuffer()));
+    const out = await PDFDocument.create();
+    const [p] = await out.copyPages(src, [0]);
+    out.addPage(p);
+    const res = await replayNativeEdits(out, out.getPage(0), [e1, e2], loader as never);
+    expect(res.ok, "replay: " + (res.ok ? "" : res.reason)).toBe(true);
+  });
+});

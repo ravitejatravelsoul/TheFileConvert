@@ -15,7 +15,7 @@ import {
   type Rect,
   type ResizeHandle,
 } from "@/lib/editor/coordinates";
-import { viewportSpecForPage, effectiveRotation, type EditorDocument, type EditorObject, type EditorPage, type RgbColor } from "@/lib/editor/types";
+import { isNativeEdit, viewportSpecForPage, effectiveRotation, type EditorDocument, type EditorObject, type EditorPage, type RgbColor } from "@/lib/editor/types";
 import { PageTransform } from "@/lib/editor/pageTransform";
 import { OCR_EDITING_ENABLED } from "@/lib/editor/flags";
 import type { OcrPageResult } from "@/lib/processors/ocr";
@@ -160,7 +160,8 @@ export function PageSurface({
   } | null>(null);
 
   const activeTool = api.state.activeTool;
-  const objects = useMemo(() => doc.objects.filter((o) => o.pageId === page.id), [doc.objects, page.id]);
+  // edits to the page's own text and pictures are in the working page, not drawn as objects
+  const objects = useMemo(() => doc.objects.filter((o) => o.pageId === page.id && !isNativeEdit(o)), [doc.objects, page.id]);
 
   // Render the base page image whenever page/zoom/rotation changes.
   useEffect(() => {

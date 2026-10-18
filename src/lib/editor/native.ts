@@ -172,6 +172,8 @@ export async function replayNativeEdits(doc: PDFDocument, page: PDFPage, edits: 
       if (!im) return { ok: false, index: i, reason: "The picture this edit was made to is no longer on the page." };
       const a = edit.action;
       const res = a.type === "delete" ? deleteImage(page, content, im) : a.type === "transform" ? placeImage(page, content, im, transformedPlacement(im, a.matrix)) : await replaceImage(doc, page, content, im, dataUrlBytes(a.dataUrl));
+      // a new picture is only written into the document when it is flushed; the next edit has to see it
+      if (a.type === "replace") await doc.flush();
       if (!res.ok) return { ok: false, index: i, reason: res.reason };
     }
   }
