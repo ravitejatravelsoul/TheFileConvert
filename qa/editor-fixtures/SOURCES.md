@@ -5,6 +5,8 @@ LibreOffice via python-docx, MuPDF, pdf-lib-free). All text is invented; no real
 repository's own (generated content, no third-party material). Each text fixture has deliberate spelling mistakes; the
 manifest (`manifest.json`) lists them with the correction the real-user matrix applies.
 
+EDITOR-05 (the AcroForm) is built with MuPDF and then re-written with pikepdf so its radio buttons form one group with named choices (Student / Individual / Family), as real forms do.
+
 **EDITOR-12 / 13** — copies of `qa/real-user-fixtures/DOCUMENT-02` and `DOCUMENT-07`: fake scans (JPEG page images) made by
 `qa/scripts/real-user-fixtures.py`.
 

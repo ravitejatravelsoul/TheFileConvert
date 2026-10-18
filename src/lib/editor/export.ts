@@ -28,6 +28,8 @@ function reconnectFormFields(out: PDFDocument, copiedPage: PDFPage, seen: Set<st
     if (!(annotRef instanceof PDFRef)) continue;
     let ref: PDFRef = annotRef;
     let dict = out.context.lookup(ref);
+    // only form widgets belong in the form: a link or a note registered as a "field" makes pdf-lib fail when it saves
+    if (!(dict instanceof PDFDict) || dict.get(PDFName.of("Subtype")) !== PDFName.of("Widget")) continue;
     while (dict instanceof PDFDict && dict.has(PDFName.of("Parent"))) {
       const parentRef = dict.get(PDFName.of("Parent"));
       if (!(parentRef instanceof PDFRef)) break;
@@ -36,6 +38,7 @@ function reconnectFormFields(out: PDFDocument, copiedPage: PDFPage, seen: Set<st
     }
     if (seen.has(ref.toString())) continue;
     seen.add(ref.toString());
+    if (!(dict instanceof PDFDict) || !(dict.has(PDFName.of("FT")) || dict.has(PDFName.of("Kids")))) continue;
     acroForm.addField(ref);
   }
 }
@@ -483,6 +486,8 @@ export async function exportEditorDocument(doc: EditorDocument, options: ExportO
     }
   }
 
-  const bytes = await savePdfChecked(out);
+  // when no field was filled in, the file's own field appearances are left exactly as they are
+  const formTouched = doc.formFields.some((f) => f.value !== f.initial);
+  const bytes = await savePdfChecked(out, formTouched ? {} : { updateFieldAppearances: false });
   return new Blob([bytes as BlobPart], { type: "application/pdf" });
 }

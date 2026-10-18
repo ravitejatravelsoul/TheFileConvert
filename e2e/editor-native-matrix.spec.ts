@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import { test, expect } from "@playwright/test";
+import { test } from "@playwright/test";
 import { EDITOR_FIXTURES, editText, expectTextChanged, exportPdf, goToPage, openEditor, saveForValidator, type TypedEdit } from "./helpers/native";
 
 /**
@@ -47,6 +47,10 @@ const scenarios: Case[] = [
   { tag: "special-accent", fixture: "EDITOR-15-special-characters.pdf", edit: { has: "Café", find: "recieve", replace: "receive" }, from: "recieve", to: "receive" },
   { tag: "special-currency", fixture: "EDITOR-15-special-characters.pdf", edit: { has: "€120.50", find: "€120.50", replace: "€125.50" }, from: "€120.50", to: "€125.50" },
   { tag: "later-page", fixture: "EDITOR-11-long-document-25-pages.pdf", page: 12, edit: { has: "recieve", find: "recieve", replace: "receive" }, from: "recieve", to: "receive" },
+  // documents from other producers (public, see qa/editor-fixtures/SOURCES.md): Adobe Designer, Antenna House, Acrobat PDFMaker
+  { tag: "adobe-designer", fixture: "public/fw9.pdf", edit: { has: "requester. Do not", find: "requester", replace: "requestor" }, from: "requester", to: "requestor" },
+  { tag: "antenna-house", fixture: "public/f1040es.pdf", edit: { has: "Estimated tax is the method", find: "method", replace: "way" }, from: "method", to: "way" },
+  { tag: "pdfmaker", fixture: "public/table.pdf", edit: { has: "This is an example", find: "example", replace: "sample" }, from: "example", to: "sample" },
   { tag: "form-page-text", fixture: "EDITOR-05-form-acroform.pdf", edit: { has: "recieve this form", find: "recieve", replace: "receive" }, from: "recieve", to: "receive" },
 ];
 
@@ -60,6 +64,6 @@ for (const c of [...spelling, ...scenarios]) {
     const { bbox } = await editText(page, c.edit);
     const out = await exportPdf(page, "out.pdf");
     await expectTextChanged(orig, out, pageNo, c.from, c.to);
-    saveForValidator(`${c.fixture.replace(/\.pdf$/, "")}__${c.tag}${c.page ? `-p${c.page}` : ""}`, orig, out, { from: c.from, to: c.to, page: pageNo, bbox });
+    saveForValidator(`${c.fixture.replace(/\.pdf$/, "").replace("/", "_")}__${c.tag}${c.page ? `-p${c.page}` : ""}`, orig, out, { from: c.from, to: c.to, page: pageNo, bbox });
   });
 }
