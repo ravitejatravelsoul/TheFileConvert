@@ -86,6 +86,32 @@ w.text_fontsize = 10
 p.add_widget(w)
 save(doc, "EDITOR-05-form-acroform.pdf", "MuPDF AcroForm", "text, checkbox, radio group, dropdown, list box", [("recieve", "receive"), ("teh", "the")])
 
+# MuPDF writes three separate "member_type" fields, each with the on-state "Yes". A real radio group is one field with a
+# widget per choice, each choice named (what pdf-lib and Acrobat read as the options): rebuild it that way.
+import pikepdf  # noqa: E402
+
+_path = os.path.join(OUT, "EDITOR-05-form-acroform.pdf")
+with pikepdf.open(_path, allow_overwriting_input=True) as _pk:
+    _fields = _pk.Root.AcroForm.Fields
+    _radios = [f for f in _fields if str(f.get("/T", "")) == "member_type"]
+    _parent = _pk.make_indirect(pikepdf.Dictionary(FT=pikepdf.Name("/Btn"), T=pikepdf.String("member_type"), Ff=49152, V=pikepdf.Name("/Off")))
+    _kids = pikepdf.Array()
+    for _w, _opt in zip(_radios, ["Student", "Individual", "Family"]):
+        for _key in ("/T", "/FT", "/Ff", "/V"):
+            if _key in _w:
+                del _w[_key]
+        for _k in ("/N", "/D"):
+            if _k in _w.AP and "/Yes" in _w.AP[_k]:
+                _w.AP[_k][pikepdf.Name("/" + _opt)] = _w.AP[_k]["/Yes"]
+                del _w.AP[_k]["/Yes"]
+        _w.AS = pikepdf.Name("/Off")
+        _w.Parent = _parent
+        _kids.append(_w)
+    _parent.Kids = _kids
+    _keep = [f for f in _fields if str(f.get("/T", "")) != "member_type" and not any(f.objgen == r.objgen for r in _radios)]
+    _pk.Root.AcroForm.Fields = pikepdf.Array(_keep + [_parent])
+    _pk.save(_path)
+
 # ---- 09 rotated pages (the /Rotate entry on text pages)
 doc = pymupdf.open()
 for rot in (0, 90, 180, 270):

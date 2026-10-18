@@ -175,7 +175,7 @@ export function PropertiesPanel({ api, doc, toolOptions: defaultOptions, onToolO
 
       <p className="mt-2 border-t border-[var(--line)] pt-4 text-xs font-medium uppercase tracking-[0.06em] text-[var(--ink-2)]">Document</p>
 
-      <Section title="Recognize text (search & copy)">
+      <Section title="Recognize text (OCR, for search & copy)">
         <div className="space-y-2.5">
           <label className="block">
             <span className="mb-1 block text-xs font-medium text-[var(--ink)]">Language</span>

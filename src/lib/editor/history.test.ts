@@ -61,14 +61,14 @@ describe("EditorHistory", () => {
 
   it("caps history length so memory doesn't grow unbounded", () => {
     const h = new EditorHistory(0);
-    for (let i = 1; i <= 100; i++) h.push(i);
-    expect(h.current).toBe(100);
+    for (let i = 1; i <= 400; i++) h.push(i);
+    expect(h.current).toBe(400);
     let undoCount = 0;
     while (h.canUndo) {
       h.undo();
       undoCount++;
     }
-    expect(undoCount).toBeLessThanOrEqual(50);
+    expect(undoCount).toBeLessThanOrEqual(200);
     expect(undoCount).toBeGreaterThan(0);
   });
 

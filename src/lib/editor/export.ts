@@ -438,6 +438,8 @@ export async function exportEditorDocument(doc: EditorDocument, options: ExportO
     try {
       const form = out.getForm();
       for (const field of doc.formFields) {
+        // untouched fields keep the file's own appearance, byte for byte
+        if (field.value === field.initial) continue;
         try {
           if (field.kind === "text") {
             form.getTextField(field.name).setText(field.value);

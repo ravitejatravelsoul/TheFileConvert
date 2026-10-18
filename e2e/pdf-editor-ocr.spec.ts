@@ -134,9 +134,12 @@ async function verifyWordEditIsLocalized(
   expect(diff.changedPixelCount).toBeGreaterThan(0);
 }
 
+const OCR_EDITING = process.env.TFC_OCR_EDITING === "1";
+
 test.describe.configure({ timeout: 150_000 });
 
 test.describe("PDF Editor: OCR integration", () => {
+  test.skip(!OCR_EDITING, "Editing recognized words is experimental and off by default (build with NEXT_PUBLIC_TFC_OCR_EDITING=1 and run with TFC_OCR_EDITING=1).");
   test("recognizes a scanned page inside a mixed document and lets you correct the text", async ({ page, isMobile }) => {
     await openFile(page, path.join(OCR_FIXTURES, "mixed-native-scanned.pdf"));
     await openMobilePanel(page, isMobile, "Pages");
@@ -158,6 +161,7 @@ test.describe("PDF Editor: OCR integration", () => {
 });
 
 test.describe("PDF Editor: OCR text edit round trip", () => {
+  test.skip(!OCR_EDITING, "Editing recognized words is experimental and off by default (build with NEXT_PUBLIC_TFC_OCR_EDITING=1 and run with TFC_OCR_EDITING=1).");
   test("corrects exactly one recognized word — original text carries only that word, not the whole line", async ({ page, isMobile }) => {
     await openFile(page, path.join(OCR_FIXTURES, "clean-scan.pdf"));
 
@@ -267,6 +271,7 @@ test.describe("PDF Editor: OCR text edit round trip", () => {
 });
 
 test.describe("PDF Editor: OCR visual-fidelity fixtures", () => {
+  test.skip(!OCR_EDITING, "Editing recognized words is experimental and off by default (build with NEXT_PUBLIC_TFC_OCR_EDITING=1 and run with TFC_OCR_EDITING=1).");
   // Each of these is a synthetic "scan" (real text rendered to a raster image, then
   // embedded as an image-only PDF page — no native text layer, so OCR is required, exactly
   // like a real scanned document) built to stress a specific background scenario called
@@ -631,6 +636,7 @@ test.describe("PDF Editor: OCR visual-fidelity fixtures", () => {
 });
 
 test.describe("PDF Editor: OCR privacy regression", () => {
+  test.skip(!OCR_EDITING, "Editing recognized words is experimental and off by default (build with NEXT_PUBLIC_TFC_OCR_EDITING=1 and run with TFC_OCR_EDITING=1).");
   test("recognizing and correcting a scanned page, then exporting, never sends document content or scan pixels off-device", async ({ page, isMobile }) => {
     const requests: { url: string; method: string }[] = [];
     page.on("request", (req) => requests.push({ url: req.url(), method: req.method() }));

@@ -182,6 +182,7 @@ export function NativeLayer({ api, pageId, transform: t, analysis, interactive, 
             data-block-id={b.id}
             data-editable={b.editable ? "true" : "false"}
             data-text={b.text}
+            data-bbox={JSON.stringify(b.bbox)}
             role="button"
             tabIndex={active ? 0 : -1}
             aria-label={`Text: ${b.text.slice(0, 120)}${b.editable ? "" : " (can't be edited)"}`}

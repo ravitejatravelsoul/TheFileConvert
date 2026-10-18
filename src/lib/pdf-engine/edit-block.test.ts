@@ -97,3 +97,16 @@ describe("editBlock", () => {
     expect(await textOf(out)).toContain("Flat 12, Willow Court");
   });
 });
+
+describe("editBlock: a line that grows within its page", () => {
+  it("a large single-line heading can take one more letter (it is not wrapped into a line that has no room)", async () => {
+    const { res, out } = await editPara("EDITOR-01-simple-text.pdf", "Quarterly Update", (t) => `${t}s`);
+    expect(res.ok, res.ok ? "" : res.reason).toBe(true);
+    expect(await textOf(out)).toContain("Quarterly Updates");
+  });
+  it("a short line of a different size in a mixed-font page can take a longer word", async () => {
+    const { res, out } = await editPara("EDITOR-06-mixed-fonts.pdf", "Large blue text", (t) => t.replace("occured", "occurred"));
+    expect(res.ok, res.ok ? "" : res.reason).toBe(true);
+    expect(await textOf(out)).toContain("occurred");
+  });
+});

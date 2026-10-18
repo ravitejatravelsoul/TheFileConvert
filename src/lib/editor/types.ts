@@ -203,6 +203,22 @@ export interface FormFieldValue {
   value: string; // for checkbox: "true"/"false"; for radio/dropdown: the selected option
   /** For radio groups and dropdowns: the choices the PDF offers. */
   options?: string[];
+  /** The value the file had when it was opened: a field is only rewritten on export if it differs from this. */
+  initial: string;
+  /** Where the field's widgets are on the source pages (page space), so the field can be filled right on the page. */
+  widgets: FormWidget[];
+  multiline?: boolean;
+  readOnly?: boolean;
+  maxLength?: number;
+}
+
+export interface FormWidget {
+  /** The file the field was read from, and the index of the page in it. */
+  sourceFileId: string;
+  pageIndex: number;
+  rect: { x: number; y: number; width: number; height: number };
+  /** For one button of a radio group: the option this widget selects. */
+  onValue?: string;
 }
 
 export interface EditorDocument {

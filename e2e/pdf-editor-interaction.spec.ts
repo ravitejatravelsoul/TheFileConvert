@@ -87,7 +87,7 @@ test.describe("PDF Editor: drag previews follow the pointer", () => {
   test("a drag started on top of the page's text still draws (the text hit-target doesn't swallow it)", async ({ page }) => {
     await openFile(page, path.join(FIXTURES, "sample-a.pdf"));
     await page.getByRole("button", { name: "Highlight", exact: true }).click();
-    const target = await page.getByRole("button", { name: /Edit text: Sample A - page 1/ }).boundingBox();
+    const target = await page.locator('[data-testid="native-block"][data-text*="Sample A - page 1"]').boundingBox();
     if (!target) throw new Error("no text region");
     await drag(page, target.x + 4, target.y + 4, target.x + target.width - 4, target.y + target.height - 2);
     await expect(page.locator("[data-object-type=annotation]")).toHaveCount(1);
@@ -543,7 +543,7 @@ test.describe("PDF Editor on a phone: touch input", () => {
     const tool = (name: string) => pickTool(page, name);
 
     // Text: tap, type, tap away.
-    await tool("Text");
+    await tool("Add text");
     await page.touchscreen.tap(sb.x + 100, sb.y + sb.height * 0.6);
     await page.getByTestId("canvas-text-editor").waitFor();
     await page.keyboard.type("Typed on a phone");

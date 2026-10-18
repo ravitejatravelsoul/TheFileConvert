@@ -53,7 +53,27 @@ export function diffChars(oldChars: string[], newChars: string[]): Hunk[] {
     }
   }
   flush();
-  return hunks;
+  return mergeNearby(hunks, oldChars);
+}
+
+/**
+ * Two changes with only a character or two of unchanged text between them are one change: "Bold" → "Strong" is a new word, not
+ * "Str" + the old "o" + "ng" (which would mix glyphs of two fonts inside one word). A word break between them keeps them apart.
+ */
+function mergeNearby(hunks: Hunk[], oldChars: string[]): Hunk[] {
+  const out: Hunk[] = [];
+  for (const h of hunks) {
+    const prev = out[out.length - 1];
+    if (prev) {
+      const between = oldChars.slice(prev.delEnd, h.delStart);
+      if (between.length <= 2 && between.every((c) => c.trim() !== "")) {
+        out[out.length - 1] = { delStart: prev.delStart, delEnd: h.delEnd, insert: prev.insert + between.join("") + h.insert };
+        continue;
+      }
+    }
+    out.push({ ...h });
+  }
+  return out;
 }
 
 /** Applies hunks to the old characters (for tests and sanity checks). */

@@ -634,13 +634,18 @@ export function useEditorWorkspace() {
 
   const setFormFieldValue = useCallback(
     (name: string, value: string) => {
-      pushDoc({
-        ...state.doc,
-        formFields: state.doc.formFields.map((f) => (f.name === name ? { ...f, value } : f)),
-      });
+      pushDoc(
+        {
+          ...state.doc,
+          formFields: state.doc.formFields.map((f) => (f.name === name ? { ...f, value } : f)),
+        },
+        { keepSelection: true, coalesceKey: `form:${name}` }
+      );
     },
     [pushDoc, state.doc]
   );
+
+  const breakCoalescing = useCallback(() => historyRef.current.breakCoalescing(), []);
 
   // -------------------------------------------------------------- export
 
@@ -754,6 +759,7 @@ export function useEditorWorkspace() {
     applyCrop,
     clearCrop,
     setFormFieldValue,
+    breakCoalescing,
     exportDocument,
     exporting,
     exportError,

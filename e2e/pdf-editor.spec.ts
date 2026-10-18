@@ -50,14 +50,14 @@ test.describe("PDF Editor: native text editing", () => {
   test("corrects native text, exports, and the correction is verifiable in the reopened PDF", async ({ page }) => {
     await openFile(page, path.join(OCR_FIXTURES, "native-text.pdf"));
 
-    await page.getByRole("button", { name: /Edit text: Quarterly Report/i }).click();
-    const dialog = page.getByRole("dialog", { name: "Edit text" });
-    await expect(dialog).toBeVisible();
-    const input = dialog.locator("input[type=text]");
-    await expect(input).toHaveValue("Quarterly Report");
-    await input.fill("Annual Summary");
-    await dialog.getByRole("button", { name: "Save correction" }).click();
-    await expect(dialog).not.toBeVisible();
+    await page.locator('[data-testid="native-block"][data-text*="Quarterly Report"]').dblclick();
+    const editor = page.getByTestId("native-text-editor");
+    await expect(editor).toBeFocused();
+    await expect(editor).toHaveText("Quarterly Report");
+    await page.keyboard.press("Control+A");
+    await page.keyboard.type("Annual Summary");
+    await page.getByRole("button", { name: "Apply this text edit" }).click();
+    await expect(editor).toHaveCount(0);
 
     const bytes = await exportAndSave(page, "native-corrected.pdf");
     const doc = await PDFDocument.load(bytes);
@@ -65,6 +65,7 @@ test.describe("PDF Editor: native text editing", () => {
 
     const text = await extractText(bytes, 1);
     expect(text).toContain("Annual Summary");
+    expect(text).not.toContain("Quarterly Report");
   });
 });
 

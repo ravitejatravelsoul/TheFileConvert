@@ -8,7 +8,7 @@
  * without bound.
  */
 
-const MAX_HISTORY = 50;
+const MAX_HISTORY = 200;
 const COALESCE_WINDOW_MS = 1500;
 
 export class EditorHistory<T> {

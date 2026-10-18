@@ -64,3 +64,13 @@ describe("StreamEditor", () => {
     expect(newIndex[one]).toBe(4); // the replaced op: first op of its replacement
   });
 });
+
+describe("changes close together", () => {
+  it("a new word is one change, not new letters around an old one (Bold → Strong)", () => {
+    const hunks = diffChars([..."Bold"], [..."Strong"]);
+    expect(hunks).toEqual([{ delStart: 0, delEnd: 4, insert: "Strong" }]);
+  });
+  it("a word break keeps two changes apart", () => {
+    expect(diffChars([..."aXb cYd"], [..."a1b c2d"]).length).toBe(2); // the kept "b c" holds a space
+  });
+});

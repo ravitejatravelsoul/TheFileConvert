@@ -28,6 +28,7 @@ import type { ToolOptions } from "./toolOptions";
 import { rgbToCss } from "./toolOptions";
 import { ObjectView } from "./ObjectView";
 import { NativeLayer } from "./NativeLayer";
+import { FormLayer } from "./FormLayer";
 import { TextEditorOverlay } from "./TextEditorOverlay";
 import { startCornerForDrag } from "@/lib/editor/shapeGeometry";
 import { withContentHeight } from "@/lib/editor/contentFrame";
@@ -792,6 +793,8 @@ export function PageSurface({
           hostRef={overlayRef}
           onBeginEdit={beginEdit}
         />
+
+        <FormLayer api={api} page={page} transform={transform} fields={doc.formFields} interactive={(activeTool === "select" || activeTool === "edit-text") && !pendingPlacement} />
 
         {/* OCR line regions — a lower-priority fallback target for clicking whitespace
             within a line that no word button covers; word buttons render after these and

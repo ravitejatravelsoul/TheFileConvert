@@ -263,6 +263,23 @@ function columnRight(line: TextLine, all: TextLine[]): number {
   return right;
 }
 
+/**
+ * How far right text of this block may grow: to the page's text margin (the furthest right edge of any line running the same
+ * way), but not into another line that sits beside it.
+ */
+function freeRight(lines: TextLine[], all: TextLine[]): number {
+  const first = lines[0];
+  let page = first.s1;
+  let cap = Infinity;
+  for (const l of all) {
+    if (lines.includes(l)) continue;
+    if (Math.abs(l.ux * first.uy - l.uy * first.ux) > 0.04) continue;
+    page = Math.max(page, l.s1);
+    if (lines.some((b) => Math.abs(l.t - b.t) < Math.max(b.size, l.size) * 0.7 && l.s0 > b.s1 - 1)) cap = Math.min(cap, l.s0 - first.size * 0.6);
+  }
+  return Math.min(page, cap);
+}
+
 function makeBlock(lines: TextLine[], all: TextLine[]): TextBlock {
   const xs = lines.flatMap((l) => [l.bbox.x, l.bbox.x + l.bbox.width]);
   const ys = lines.flatMap((l) => [l.bbox.y, l.bbox.y + l.bbox.height]);
@@ -297,7 +314,7 @@ function makeBlock(lines: TextLine[], all: TextLine[]): TextBlock {
     align,
     bbox,
     width,
-    maxWidth: align === "left" ? Math.max(width, columnRight(lines[0], all) - minS0) : width,
+    maxWidth: align === "left" ? Math.max(width, softWrapped ? columnRight(lines[0], all) - minS0 : Math.max(columnRight(lines[0], all), freeRight(lines, all)) - minS0) : width,
     leading,
   };
 }
