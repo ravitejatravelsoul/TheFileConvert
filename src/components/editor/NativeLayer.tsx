@@ -113,6 +113,9 @@ export function NativeLayer({ api, pageId, transform: t, analysis, interactive, 
   return (
     <>
       {analysis.images.map((im) => {
+        // a picture that is (nearly) the whole page — a scan, a full-bleed background — is the page, not an object to grab
+        const [x0, y0, x1, y1] = t.box;
+        if (im.bbox.width * im.bbox.height >= 0.85 * (x1 - x0) * (y1 - y0)) return null;
         const css = t.rectToCss(previewBox(im));
         const isSel = selected?.kind === "image" && selected.imageId === im.id;
         const active = interactive && !editingBlockId;
@@ -169,6 +172,25 @@ export function NativeLayer({ api, pageId, transform: t, analysis, interactive, 
           </div>
         );
       })}
+
+      {(() => {
+        const sel = selected?.kind === "text" && !editingBlockId && interactive ? analysis.blocks.find((b) => b.id === selected.blockId) : null;
+        if (!sel || !sel.editable) return null;
+        const css = t.rectToCss(sel.bbox);
+        return (
+          <button
+            type="button"
+            data-testid="native-edit-button"
+            onPointerDown={(e) => e.stopPropagation()}
+            onClick={() => onBeginEdit(sel.id)}
+            className="btn btn-primary btn-sm absolute z-20 [@media(pointer:coarse)]:min-h-11"
+            style={{ left: css.x, top: Math.max(4, css.y - 40) }}
+            aria-label="Edit this text"
+          >
+            Edit text
+          </button>
+        );
+      })()}
 
       {analysis.blocks.map((b) => {
         if (b.id === editingBlockId) return null;

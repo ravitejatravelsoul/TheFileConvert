@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { test, expect } from "@playwright/test";
 import { PDFDocument } from "pdf-lib";
-import { EDITOR_FIXTURES, exportPdf, openEditor, pdfText } from "./helpers/native";
+import { EDITOR_FIXTURES, EVIDENCE, exportPdf, openEditor, pdfText } from "./helpers/native";
 
 test.describe.configure({ timeout: 120_000 });
 
@@ -24,7 +24,7 @@ test("form fields are filled on the page, survive export and reopen, and untouch
   test.skip(isMobile, "desktop layout");
   const orig = fs.readFileSync(FORM);
   await openEditor(page, FORM);
-  await page.screenshot({ path: info.outputPath("form-before.png") });
+  await page.screenshot({ path: path.join(EVIDENCE, "form-before.png") });
 
   const name = page.locator('[data-testid="form-field"][data-field-name="full_name"]');
   const email = page.locator('[data-testid="form-field"][data-field-name="email"]');
@@ -36,7 +36,7 @@ test("form fields are filled on the page, survive export and reopen, and untouch
   await page.locator('[data-testid="form-field"][data-field-name="member_type"][data-option="Family"]').click();
   await page.locator('[data-testid="form-field"][data-field-name="country"]').selectOption({ index: 2 });
   const countryChosen = await page.locator('[data-testid="form-field"][data-field-name="country"]').inputValue();
-  await page.screenshot({ path: info.outputPath("form-after.png") });
+  await page.screenshot({ path: path.join(EVIDENCE, "form-after.png") });
 
   const out = await exportPdf(page, "filled.pdf");
   const v = await values(out);

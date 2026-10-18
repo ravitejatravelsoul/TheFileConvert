@@ -3,7 +3,7 @@ import path from "node:path";
 import { test, expect, type Page } from "@playwright/test";
 import { PDFDocument } from "pdf-lib";
 import { interpretPage } from "../src/lib/pdf-engine/interpreter";
-import { EDITOR_FIXTURES, exportPdf, openEditor, pdfText } from "./helpers/native";
+import { EDITOR_FIXTURES, EVIDENCE, exportPdf, openEditor, pdfText } from "./helpers/native";
 
 test.describe.configure({ timeout: 120_000 });
 test.skip(({ isMobile }) => isMobile, "desktop pointer flow; touch handles are covered in the mobile spec");
@@ -36,14 +36,14 @@ async function settle(page: Page) {
   await page.waitForTimeout(600);
 }
 
-test("an existing picture can be selected, moved, resized (proportions kept), turned, replaced and deleted — and each is undoable", async ({ page }, info) => {
+test("an existing picture can be selected, moved, resized (proportions kept), turned, replaced and deleted — and each is undoable", async ({ page }) => {
   const orig = fs.readFileSync(GALLERY);
   const before = await placements(orig);
   expect(before.length).toBe(2);
 
   await openEditor(page, GALLERY);
   const first = await pick(page, 0);
-  await page.screenshot({ path: info.outputPath("image-edit-before.png") });
+  await page.screenshot({ path: path.join(EVIDENCE, "image-edit-before.png") });
 
   // move
   const box = (await first.boundingBox())!;
@@ -92,7 +92,7 @@ test("an existing picture can be selected, moved, resized (proportions kept), tu
   out = await exportPdf(page, "deleted.pdf");
   expect((await placements(out)).length).toBe(1);
   expect(await pdfText(out)).toContain("Site photos");
-  await page.screenshot({ path: info.outputPath("image-edit-after.png") });
+  await page.screenshot({ path: path.join(EVIDENCE, "image-edit-after.png") });
   await page.getByRole("button", { name: "Undo" }).click();
   await expect(page.locator('[data-testid="native-image"]')).toHaveCount(2, { timeout: 15_000 });
 });

@@ -3,6 +3,7 @@ import path from "node:path";
 import { expect, test, type Page } from "@playwright/test";
 
 export const EDITOR_FIXTURES = path.join(__dirname, "..", "..", "qa", "editor-fixtures");
+export const EVIDENCE = path.join(__dirname, "..", "..", "qa", "review", "pdf-editor");
 export const UI_OUT = path.join(__dirname, "..", "..", "qa", "fidelity", "_work", "ui-out");
 
 export async function openEditor(page: Page, filePath: string) {
@@ -16,7 +17,7 @@ export async function openEditor(page: Page, filePath: string) {
 
 export async function goToPage(page: Page, n: number) {
   if (n === 1) return;
-  await page.getByRole("button", { name: `Go to page ${n}` }).click();
+  await page.getByRole("button", { name: `Go to page ${n}`, exact: true }).click();
   await expect(page.locator('[data-testid="page-surface"]').first()).toBeVisible();
   await expect(page.locator('[data-testid="native-block"], [data-testid="native-image"]').first()).toBeAttached({ timeout: 30_000 });
 }

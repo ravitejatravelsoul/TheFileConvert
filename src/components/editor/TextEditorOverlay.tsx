@@ -51,10 +51,10 @@ export function TextEditorOverlay({ block, transform, ready, caretAt, onCommit, 
   useEffect(() => {
     const el = boxRef.current;
     if (!el) return;
-    let cancelled = false;
-    (async () => {
-      await ensureEditorFonts(block.segments);
-      if (cancelled || !boxRef.current) return;
+    // the box is built and focused at once, so keys typed right after the double-click are never lost; the page's own fonts load
+    // alongside and the browser re-flows the text when they arrive
+    void ensureEditorFonts(block.segments);
+    (() => {
       el.textContent = "";
       for (const seg of block.segments) {
         const span = document.createElement("span");
@@ -98,9 +98,6 @@ export function TextEditorOverlay({ block, transform, ready, caretAt, onCommit, 
       sel.addRange(range);
       setShown(true);
     })();
-    return () => {
-      cancelled = true;
-    };
     // the content is built once for this block
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [block.id]);
