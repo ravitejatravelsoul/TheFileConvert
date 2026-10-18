@@ -1,5 +1,6 @@
 import { sanitizeSvgMarkup } from "@/lib/security/validators";
 import type { SearchAttempt } from "./image-search";
+import { encodeCanvas } from "./canvas-blob";
 import { isCompleteImage } from "./image-integrity";
 
 export class ProcessorError extends Error {}
@@ -30,22 +31,15 @@ async function loadBitmap(file: File): Promise<ImageBitmap> {
   }
 }
 
-function canvasToBlob(canvas: HTMLCanvasElement, format: ImageOutputFormat, quality: number): Promise<Blob> {
-  return new Promise((resolve, reject) => {
-    canvas.toBlob(
-      (blob) => {
-        if (!blob) return reject(new ProcessorError("Encoding this image failed."));
-        // Browsers silently fall back to PNG for formats they can't encode (Safari and WebP) —
-        // never hand that back labelled as the format that was asked for.
-        if (blob.type !== MIME_BY_FORMAT[format]) {
-          return reject(new ProcessorError(`This browser can't save ${format === "jpeg" ? "JPG" : format.toUpperCase()} images. Try another format, or a different browser.`));
-        }
-        resolve(blob);
-      },
-      MIME_BY_FORMAT[format],
-      format === "png" ? undefined : quality
-    );
-  });
+async function canvasToBlob(canvas: HTMLCanvasElement, format: ImageOutputFormat, quality: number): Promise<Blob> {
+  const blob = await encodeCanvas(canvas, MIME_BY_FORMAT[format], format === "png" ? undefined : quality);
+  if (!blob) throw new ProcessorError("Encoding this image failed.");
+  // Browsers silently fall back to PNG for formats they can't encode (Safari and WebP) —
+  // never hand that back labelled as the format that was asked for.
+  if (blob.type !== MIME_BY_FORMAT[format]) {
+    throw new ProcessorError(`This browser can't save ${format === "jpeg" ? "JPG" : format.toUpperCase()} images. Try another format, or a different browser.`);
+  }
+  return blob;
 }
 
 let webpEncodeSupport: Promise<boolean> | null = null;

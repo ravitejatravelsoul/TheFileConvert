@@ -564,6 +564,43 @@ OCR call sites (complete list, `grep createOcrSession|recognizePage`): `pdf-to-w
 - Known cost: a plain scanned letter runs OCR once to be judged (≈ 10 s per page); a 2-page letter-like contract took 22 s. Forms/IDs/tables are instant (~1.2 s).
 - Not verified in Microsoft Word (cannot be automated here): the picture-only pages use a full-page anchored picture behind an empty paragraph; manual review checklist in `qa/manual-word-review/README.md`.
 
+## PDF → Word hang / "needs another click" (release blocker, after commit 024d31d)
+
+**Report.** PDF → Word sat on "Recognizing page 1 of 1…" for almost five minutes and finished when the page was
+clicked. Evidence and method: `qa/PROCESSING_FLOW_AUDIT.md`.
+
+**Was processing stuck or the UI?** Processing. React state, event listeners and the OCR worker were fine.
+`page.render()` in pdf.js's default (display) mode paces every step with `requestAnimationFrame`
+(`InternalRenderTask._scheduleNext`, pdfjs-dist 6.3.289). A browser delivers no animation frames to a tab that is in
+the background, minimised or covered, so the render promise never settled. The converter awaited such renders in
+`extract.ts` (every scanned page, label "Preparing…"), `ocr.ts` `recognizePage` (the render that precedes
+recognition — the "Recognizing page…" label is shown just before it) and `pdf.ts` (PDF → Image).
+
+**Why a click or double-click "fixed" it.** It brought the window forward; frames resumed; the queued callback fired.
+Reproduced both ways: a headed Chromium tab placed behind another tab (stuck 41 s+, finished the moment it was
+foregrounded) and an automated run that withholds frames until the first real input (stuck at one queued
+`requestAnimationFrame`, finished 5.7 s after one click). Not a "browser quirk": the dependency was ours.
+
+**Other event-dependent constructs audited** (`setTimeout`, `requestAnimationFrame`, `requestIdleCallback`,
+visibility/focus listeners, effects, stale closures, unawaited promises, worker listeners, AbortController): none in
+the conversion path except `getObj`'s 4 s fallback timer (resolves `null`, cannot block) — and one more hidden
+scheduler dependency found while measuring a background tab: `canvas.toBlob` is scheduled as browser idle work and
+took ~7 s per call (0.1 s in the foreground); Tesseract.js calls it itself when given a canvas. Both fixed.
+
+**Changes.**
+- `pdfjs-utils.ts` `renderPageOffscreen` (print intent: promise-scheduled, no frames) used by `extract.ts`, `ocr.ts`, `pdf.ts` (via `renderPageToCanvas(..., offscreen)`); pages the user is looking at (editor, thumbnails) keep display rendering. Output unchanged: OCR accuracy 100/90.3/92.5 % and render SSIM identical before/after.
+- `canvas-blob.ts` `encodeCanvas` (`OffscreenCanvas.convertToBlob`, `toBlob` fallback) in `extract.ts`, `pdf.ts`, `pdf-compress.ts`, `image.ts`, `word-to-pdf`; `ocr.ts` encodes the page once and gives Tesseract a Blob (no internal `toBlob`).
+- OCR lifecycle (`ocr.ts`, `extract.ts`): worker load bounded (90 s editor / 60 s converter), per-page recognition bounded (300 s editor / 90 s converter), `terminate()` never awaited unbounded. In the converter the OCR only *judges* a plain scan, so when it runs out of time, fails or is cancelled the page simply keeps its look — **no stage can hang the conversion** and nothing is lost. `user_defined_dpi` passed so Tesseract no longer prints to the console.
+- OCR is skipped entirely when the document has any scanned page that must stay a picture (hybrid is all-or-nothing): five-page mixed scan 7 s → 2.3 s, 0 OCR requests.
+- Progress and control (`PdfToWordTool.tsx`): real stages — *Analyzing PDF…, Preparing scanned page n of N…, Loading text recognition…, Recognizing page n of N…, Building Word document…, Checking output…* — no fake bar; a stall watchdog (30 s with no stage report, 60 s while recognising) shows "This is taking longer than expected." with **Retry** and **Cancel** (neither silent; the file is kept); `AbortSignal` through `convertPdfToWord`/`extractPages`; leaving the page aborts the run.
+
+**Race-condition review of my own change.** A run counts as *current* only if it has neither been replaced, cancelled nor reset (`runRef` id + `signal.aborted`): a late result from an aborted run is dropped, never shown after Cancel/Reset/Retry. Found and fixed during review: `reset()` aborted the run but did not invalidate it, so a conversion that still finished could flip the UI to "done" with no file selected. `guarded()` clears its timer and removes its abort listener on every exit path (unit-tested, including abort-after-settle). Cancel while OCR is running terminates the worker; Retry is an explicit user action — no automatic restart.
+
+**Tests added** (each fails on the old code — verified by putting the old render call back: 3 of the hands-off specs failed):
+`e2e/hands-off.spec.ts` (every tool: one click, no frames, no input — 12 cases desktop + mobile), `e2e/pdf-to-word-ocr.spec.ts` (OCR path hands-off; a model that arrives late still converts by itself and keeps the picture; stall notice → Cancel keeps the file → Retry converts), `guard.test.ts`, `canvas-blob.test.ts`, plus `qa/scripts/pf-audit.mjs` (90 runs: every tool × normal/starved × cold/warm, desktop and Pixel 7).
+
+**Remaining risks.** A background tab is still slower (OS gives it less CPU): letter 33 s against 6 s, finished unattended. The two timing seams (`__TFC_STALL_MS`, `__TFC_OCR_LOAD_MS`) are globals read only if a test sets them. The 90 s / 60 s budgets are fixed numbers: a very slow device could give up on a plain scan that would have read fine (the picture is then used — safe, not wrong).
+
 ## Investigated, not product defects (kept for the record)
 
 | Symptom | Finding |

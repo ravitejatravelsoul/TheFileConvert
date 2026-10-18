@@ -1,4 +1,6 @@
 import type { PDFDocumentProxy, PDFPageProxy } from "pdfjs-dist";
+import { renderPageOffscreen } from "@/lib/processors/pdfjs-utils";
+import { encodeCanvas } from "@/lib/processors/canvas-blob";
 import type { Fill, PageImage, PageInput, Rule, TextItem } from "./layout";
 import { analyzeScan, eraseCheckboxes, eraseRules, flattenFills, invertBars, type Raster, type ScanAnalysis } from "./scan";
 import { scannedPageInput, type ScanReport } from "./scanPage";
@@ -23,9 +25,54 @@ export type Progress =
   | { stage: "reading"; page: number; total: number }
   | { stage: "preserve"; index: number; total: number }
   | { stage: "layout"; index: number; total: number }
+  | { stage: "ocr-load" }
   | { stage: "ocr"; index: number; total: number; fraction: number }
   | { stage: "building" }
   | { stage: "validating" };
+
+/** The user pressed Cancel. */
+export class PdfToWordCancelled extends Error {
+  constructor() {
+    super("Conversion cancelled.");
+  }
+}
+
+/** Reading a scan to judge it took longer than it is allowed to. */
+export class OcrBudgetExceeded extends Error {}
+
+/**
+ * Time allowed for the OCR that only *judges* a plain scan (hybrid or not). Nothing depends on it finishing: when
+ * it runs out the picture stands, which is the safe default. Generous for a dense page on a slow machine.
+ */
+export const OCR_BUDGET = { loadMs: 60_000, pageMs: 90_000 };
+
+/** The budgets in force. Tests (e2e) shorten them through a global to simulate a recognition model that never arrives. */
+function ocrBudget(): { loadMs: number; pageMs: number } {
+  const g = globalThis as { __TFC_OCR_LOAD_MS?: number; __TFC_OCR_PAGE_MS?: number };
+  return { loadMs: g.__TFC_OCR_LOAD_MS ?? OCR_BUDGET.loadMs, pageMs: g.__TFC_OCR_PAGE_MS ?? OCR_BUDGET.pageMs };
+}
+
+/** Settles with `work`, or rejects when time runs out or the user cancels — whichever comes first. */
+export function guarded<T>(work: Promise<T>, ms: number, signal?: AbortSignal): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    let done = false;
+    const finish = (f: () => void) => {
+      if (done) return;
+      done = true;
+      clearTimeout(timer);
+      signal?.removeEventListener("abort", onAbort);
+      f();
+    };
+    const onAbort = () => finish(() => reject(new PdfToWordCancelled()));
+    const timer = setTimeout(() => finish(() => reject(new OcrBudgetExceeded())), ms);
+    if (signal?.aborted) return onAbort();
+    signal?.addEventListener("abort", onAbort);
+    work.then(
+      (v) => finish(() => resolve(v)),
+      (e) => finish(() => reject(e))
+    );
+  });
+}
 
 /** How one page was classified and written (the audit trail; nothing here is shown as a claim to the user). */
 export interface PageReport {
@@ -200,7 +247,7 @@ async function imageToBytes(img: unknown): Promise<{ bytes: Uint8Array; mime: "i
   } else return null;
   const photo = cw * ch > 250_000 && !hasAlpha;
   const mime = photo ? "image/jpeg" : "image/png";
-  const blob = await new Promise<Blob | null>((res) => canvas.toBlob(res, mime, 0.9));
+  const blob = await encodeCanvas(canvas, mime, 0.9);
   if (!blob) return null;
   return { bytes: new Uint8Array(await blob.arrayBuffer()), mime, w: cw, h: ch };
 }
@@ -533,7 +580,7 @@ async function encodeRegion(r: Raster, box: { x: number; y: number; w: number; h
   const img = ctx.createImageData(w, h);
   for (let row = 0; row < h; row++) img.data.set(r.data.subarray(((y + row) * r.width + x) * 4, ((y + row) * r.width + x + w) * 4), row * w * 4);
   ctx.putImageData(img, 0, 0);
-  const blob = await new Promise<Blob | null>((res) => canvas.toBlob(res, mime, 0.88));
+  const blob = await encodeCanvas(canvas, mime, 0.88);
   if (!blob) return null;
   return { x: 0, y: 0, w: 0, h: 0, bytes: new Uint8Array(await blob.arrayBuffer()), mime, pxWidth: w, pxHeight: h };
 }
@@ -571,7 +618,7 @@ async function renderPage(page: PDFPageProxy, scale: number): Promise<{ canvas: 
   canvas.height = Math.ceil(viewport.height);
   const ctx = canvas.getContext("2d", { willReadFrequently: true });
   if (!ctx) throw new PdfToWordError("Your browser can't render this page.");
-  await page.render({ canvasContext: ctx, viewport, canvas }).promise;
+  await renderPageOffscreen(page, { canvasContext: ctx, viewport, canvas });
   const image = ctx.getImageData(0, 0, canvas.width, canvas.height);
   return { canvas, raster: { data: image.data, width: image.width, height: image.height } };
 }
@@ -592,7 +639,7 @@ function fewColours(r: Raster, limit = 64): boolean {
  * the size of its JPEG for no visible gain).
  */
 async function encodePagePicture(canvas: HTMLCanvasElement, raster: Raster): Promise<PageImage | null> {
-  const encode = (mime: string) => new Promise<Blob | null>((res) => canvas.toBlob(res, mime, 0.92));
+  const encode = (mime: string) => encodeCanvas(canvas, mime, 0.92);
   let mime = "image/jpeg";
   let blob = await encode(mime);
   if (blob && fewColours(raster)) {
@@ -621,7 +668,7 @@ function runningTextShare(words: { line?: number }[], min = 6): number {
  * OCR runs only to judge such a plain scan; forms, IDs, certificates, tables, photos and signed pages never
  * reach it.
  */
-export async function extractPages(file: File, ocrLang: string, onProgress: (p: Progress) => void): Promise<ExtractResult> {
+export async function extractPages(file: File, ocrLang: string, onProgress: (p: Progress) => void, signal?: AbortSignal): Promise<ExtractResult> {
   const { doc, close } = await openDocument(file);
   const reads: PageRead[] = [];
   const pageReports: PageReport[] = [];
@@ -630,6 +677,7 @@ export async function extractPages(file: File, ocrLang: string, onProgress: (p: 
   const total = doc.numPages;
   try {
     for (let i = 1; i <= total; i++) {
+      if (signal?.aborted) throw new PdfToWordCancelled();
       onProgress({ stage: "reading", page: i, total });
       const page = await doc.getPage(i);
       const read = await readPage(page);
@@ -666,36 +714,66 @@ export async function extractPages(file: File, ocrLang: string, onProgress: (p: 
 
   const reports: (ScanReport | undefined)[] = reads.map(() => undefined);
   const rebuilt = new Map<number, { input: PageInput; report: ScanReport; reason: string }>();
+  // Editable text from a scan is all or nothing for a document (below): if any scanned page is a form, an ID, a
+  // table, a photo — anything kept as it looks — no page can become editable text, so reading the plain-text scans
+  // would be wasted work. Skip it: such a document converts without OCR at all.
+  const scannedCount = pageReports.filter((r) => r.cls !== "NATIVE_TEXT" && r.cls !== "MIXED" && r.cls !== "BLANK").length;
+  if (candidates.length && candidates.length < scannedCount) {
+    for (const idx of candidates) pageReports[idx].reason = "kept as it looks: this document has other pages (signatures, forms, pictures) that must stay as they are";
+    candidates.length = 0;
+  }
   if (candidates.length) {
     // A plain scan of text: read it, and keep it as editable paragraphs only if the read is extremely
     // confident and the page holds nothing but that text. Otherwise the picture stands.
+    onProgress({ stage: "ocr-load" });
     const { createOcrSession } = await import("@/lib/processors/ocr");
-    const session = await createOcrSession(ocrLang);
+    let session: Awaited<ReturnType<typeof createOcrSession>> | null = null;
+    let gaveUp: string | null = null;
+    try {
+      session = await guarded(createOcrSession(ocrLang), ocrBudget().loadMs, signal);
+    } catch (e) {
+      if (e instanceof PdfToWordCancelled) throw e;
+      gaveUp = e instanceof OcrBudgetExceeded ? `the text recognition didn't load within ${ocrBudget().loadMs / 1000} s` : "text recognition isn't available";
+    }
     try {
       for (const [n, idx] of candidates.entries()) {
+        if (!session || gaveUp) break;
+        if (signal?.aborted) throw new PdfToWordCancelled();
         onProgress({ stage: "ocr", index: n + 1, total: candidates.length, fraction: 0 });
         const read = reads[idx];
-        const result = await session.recognizePage(file, idx + 1, {
-          scale: OCR_SCALE,
-          refine: true,
-          rotate: (((read.rotate % 360) + 360) % 360) as 0 | 90 | 180 | 270,
-          onProgress: (fraction) => onProgress({ stage: "ocr", index: n + 1, total: candidates.length, fraction }),
-          // Layout from the pixels first (rules, boxes, tables, shading), then the lines are erased so the
-          // OCR engine reads the words between them instead of the grid.
-          prepare: (image, map) => {
-            onProgress({ stage: "layout", index: n + 1, total: candidates.length });
-            const original = { data: new Uint8ClampedArray(image.data), width: image.width, height: image.height };
-            const analysis = analyzeScan(image, OCR_SCALE);
-            const bg = analysis.backgroundColor.match(/../g)!.map((h) => parseInt(h, 16)) as [number, number, number];
-            // Light text on dark bands is turned dark-on-paper (the recogniser reads it badly otherwise).
-            invertBars(image, analysis.bars, bg);
-            flattenFills(image, analysis.fills.filter((f) => !analysis.bars.some((b) => b.x === f.x && b.y === f.y)), bg);
-            eraseRules(image, analysis.rules, bg);
-            eraseCheckboxes(image, analysis.checkboxes, bg);
-            onProgress({ stage: "ocr", index: n + 1, total: candidates.length, fraction: 0 });
-            return { analysis, original, map } satisfies Prepared;
-          },
-        });
+        let result;
+        try {
+          result = await guarded(
+            session.recognizePage(file, idx + 1, {
+              scale: OCR_SCALE,
+              refine: true,
+              rotate: (((read.rotate % 360) + 360) % 360) as 0 | 90 | 180 | 270,
+              onProgress: (fraction) => onProgress({ stage: "ocr", index: n + 1, total: candidates.length, fraction }),
+              // Layout from the pixels first (rules, boxes, tables, shading), then the lines are erased so the
+              // OCR engine reads the words between them instead of the grid.
+              prepare: (image, map) => {
+                onProgress({ stage: "layout", index: n + 1, total: candidates.length });
+                const original = { data: new Uint8ClampedArray(image.data), width: image.width, height: image.height };
+                const analysis = analyzeScan(image, OCR_SCALE);
+                const bg = analysis.backgroundColor.match(/../g)!.map((h) => parseInt(h, 16)) as [number, number, number];
+                // Light text on dark bands is turned dark-on-paper (the recogniser reads it badly otherwise).
+                invertBars(image, analysis.bars, bg);
+                flattenFills(image, analysis.fills.filter((f) => !analysis.bars.some((b) => b.x === f.x && b.y === f.y)), bg);
+                eraseRules(image, analysis.rules, bg);
+                eraseCheckboxes(image, analysis.checkboxes, bg);
+                onProgress({ stage: "ocr", index: n + 1, total: candidates.length, fraction: 0 });
+                return { analysis, original, map } satisfies Prepared;
+              },
+            }),
+            ocrBudget().pageMs,
+            signal
+          );
+        } catch (e) {
+          if (e instanceof PdfToWordCancelled) throw e;
+          // Too slow (or it failed): stop judging; the pictures stand. Nothing is lost by giving up.
+          gaveUp = e instanceof OcrBudgetExceeded ? `reading page ${idx + 1} took longer than ${ocrBudget().pageMs / 1000} s` : "the text recognition failed";
+          break;
+        }
         // The page as shown is upright; in page space its text runs at the page's /Rotate angle.
         const frame = frameFor(read.view, read.rotate);
         const words = result.words.map((w) => ({ text: w.text, confidence: w.confidence, pdfBox: w.pdfBox, line: w.line }));
@@ -727,13 +805,15 @@ export async function extractPages(file: File, ocrLang: string, onProgress: (p: 
         else entry.reason = `kept as it looks: ${decision.reason}`;
       }
     } finally {
-      await session.terminate();
+      // Never wait on a worker that is busy or gone: the browser tears it down whether or not it answers.
+      if (session) await guarded(session.terminate(), 3_000).catch(() => {});
     }
+    if (gaveUp) for (const idx of candidates) pageReports[idx].reason = `kept as it looks: ${gaveUp}`;
   }
   // Editable text from a scan is all or nothing for a document: if any of its pictures is a form, an ID, a
   // signed page or anything else kept as it looks, its plain-text scans stay pictures too — one document
   // shouldn't be half retyped and half image.
-  const scannedPages = pageReports.filter((r) => r.cls !== "NATIVE_TEXT" && r.cls !== "MIXED" && r.cls !== "BLANK").length;
+  const scannedPages = scannedCount;
   for (const [idx, r] of rebuilt) {
     const entry = pageReports[idx];
     if (rebuilt.size === scannedPages) {

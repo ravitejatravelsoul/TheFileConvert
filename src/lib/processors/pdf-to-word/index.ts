@@ -1,9 +1,9 @@
 import { buildDocx, verifyDocx } from "./docx";
-import { extractPages, PdfToWordError, type PageReport, type Progress } from "./extract";
+import { extractPages, PdfToWordError, PdfToWordCancelled, type PageReport, type Progress } from "./extract";
 import { documentStats, findHeadersFooters, layoutPage, type PageLayout } from "./layout";
 import type { ScanReport, Strategy } from "./scanPage";
 
-export { analyzePdf, PdfToWordError, type PageReport, type PdfAnalysis, type Progress } from "./extract";
+export { analyzePdf, PdfToWordError, PdfToWordCancelled, type PageReport, type PdfAnalysis, type Progress } from "./extract";
 export { type PageClass, type PageStrategy } from "./classify";
 
 export const DOCX_MIME = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
@@ -36,9 +36,10 @@ export interface PdfToWordResult {
  *   → semantic reconstruction (layout.ts: headings, paragraphs, lists, tables, columns, boxes, rules)
  *   → DOCX generation (docx.ts) → DOCX validation (verifyDocx).
  */
-export async function convertPdfToWord(file: File, options: { ocrLang?: string; onProgress?: (p: Progress) => void } = {}): Promise<PdfToWordResult> {
+export async function convertPdfToWord(file: File, options: { ocrLang?: string; onProgress?: (p: Progress) => void; signal?: AbortSignal } = {}): Promise<PdfToWordResult> {
   const onProgress = options.onProgress ?? (() => {});
-  const { pages: inputs, reports, pageReports } = await extractPages(file, options.ocrLang ?? "eng", onProgress);
+  const { pages: inputs, reports, pageReports } = await extractPages(file, options.ocrLang ?? "eng", onProgress, options.signal);
+  if (options.signal?.aborted) throw new PdfToWordCancelled();
   const stats = documentStats(inputs);
   const listKeys = { next: 1 };
   const bands = findHeadersFooters(inputs);

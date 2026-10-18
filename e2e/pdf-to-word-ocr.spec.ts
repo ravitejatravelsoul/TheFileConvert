@@ -3,6 +3,7 @@ import { test, expect } from "@playwright/test";
 import { fx, downloadFrom } from "./helpers/tool";
 import { convertToWord, readDocx } from "./helpers/docx";
 import { withOcrLock } from "./helpers/ocr-lock";
+import { installHandsOff, pressOnceThenHandsOff, expectNoInteractionAfter } from "./helpers/hands-off";
 
 // PDF → Word for scanned and mixed PDFs. The contract: conversion is not OCR. A scanned form, ID, certificate,
 // invoice or signed page keeps its look (the page goes into Word as a picture, nothing is retyped); real-text
@@ -84,5 +85,70 @@ test.describe("PDF to Word — scanned and mixed PDFs", () => {
     expect(d.text).toContain("Chapter 2");
     expect(d.text.indexOf("Chapter 1")).toBeLessThan(d.text.indexOf("Chapter 2"));
     if (strategies[1] === "visual") expect(d.anchored).toBe(1); // the scanned page is a picture, in its place
+  });
+});
+
+test.describe("PDF to Word — OCR never holds a conversion hostage", () => {
+  test.setTimeout(240_000);
+  const LETTER = FAKE("DOCUMENT-07-scanned-letter.pdf");
+
+  test("a plain scanned letter (the OCR path) finishes by itself after one click, even with no animation frames", async ({ page }) => {
+    await installHandsOff(page);
+    await page.goto("/pdf-to-word");
+    await page.getByTestId("file-input").first().setInputFiles(LETTER);
+    await withOcrLock(async () => {
+      await pressOnceThenHandsOff(page, page.getByRole("button", { name: "Convert to Word" }));
+      await expect(page.getByTestId("result")).toBeVisible({ timeout: 200_000 });
+    });
+    await expectNoInteractionAfter(page);
+  });
+
+  test("a recognition model that doesn't arrive in time doesn't block the conversion: the page keeps its look", async ({ page }) => {
+    // The model files take 15 s; the budget for loading them is 1.5 s.
+    await page.addInitScript(() => Object.assign(globalThis, { __TFC_OCR_LOAD_MS: 1500 }));
+    await page.route("**/tesseract/**", async (route) => {
+      await new Promise((r) => setTimeout(r, 15_000));
+      await route.continue().catch(() => {});
+    });
+    await installHandsOff(page);
+    await page.goto("/pdf-to-word");
+    await page.getByTestId("file-input").first().setInputFiles(LETTER);
+    await withOcrLock(async () => {
+      await pressOnceThenHandsOff(page, page.getByRole("button", { name: "Convert to Word" }));
+      await expect(page.getByTestId("result")).toBeVisible({ timeout: 60_000 }); // far sooner than the model would have come
+    });
+    await expectNoInteractionAfter(page); // before the test's own Download click
+    await expect(page.getByTestId("result")).toHaveAttribute("data-page-strategies", "visual");
+    const { bytes } = await downloadFrom(page, page.getByRole("button", { name: "Download .docx" }));
+    const d = await readDocx(bytes);
+    expect(d.text).toBe(""); // nothing was read, nothing was retyped: the scan is the page
+    expect(d.anchored).toBe(1);
+  });
+
+  test("a stage that goes quiet says so, and offers Retry and Cancel; Cancel keeps the file, Retry converts it", async ({ page }) => {
+    let slow = true;
+    await page.addInitScript(() => Object.assign(globalThis, { __TFC_STALL_MS: 1500 }));
+    await page.route("**/tesseract/**", async (route) => {
+      if (slow) await new Promise((r) => setTimeout(r, 20_000));
+      await route.continue().catch(() => {});
+    });
+    await page.goto("/pdf-to-word");
+    await page.getByTestId("file-input").first().setInputFiles(LETTER);
+    await withOcrLock(async () => {
+      await page.getByRole("button", { name: "Convert to Word" }).click();
+      const note = page.getByTestId("stalled");
+      await expect(note).toContainText("This is taking longer than expected.", { timeout: 30_000 });
+      // Cancel: back to the file, nothing discarded.
+      await note.getByRole("button", { name: "Cancel" }).click();
+      await expect(page.getByRole("button", { name: "Convert to Word" })).toBeVisible();
+      await expect(page.getByText("DOCUMENT-07-scanned-letter.pdf")).toBeVisible();
+      await expect(page.getByTestId("stalled")).toHaveCount(0);
+      // Retry (an explicit choice): start again, stall again, press Retry — and this time the model is there.
+      await page.getByRole("button", { name: "Convert to Word" }).click();
+      await expect(page.getByTestId("stalled")).toContainText("This is taking longer than expected.", { timeout: 30_000 });
+      slow = false;
+      await page.getByTestId("stalled").getByRole("button", { name: "Retry" }).click();
+      await expect(page.getByTestId("result")).toBeVisible({ timeout: 200_000 });
+    });
   });
 });

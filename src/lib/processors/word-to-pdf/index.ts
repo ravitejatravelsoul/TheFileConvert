@@ -38,7 +38,7 @@ export const browserImageDecoder: ImageDecoder = async (m) => {
     canvas.width = bmp.width;
     canvas.height = bmp.height;
     canvas.getContext("2d")!.drawImage(bmp, 0, 0);
-    const blob = await new Promise<Blob | null>((r) => canvas.toBlob(r, "image/png"));
+    const blob = await (await import("../canvas-blob")).encodeCanvas(canvas, "image/png");
     return blob ? new Uint8Array(await blob.arrayBuffer()) : null;
   } catch {
     return null;

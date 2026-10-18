@@ -3,6 +3,7 @@ import { PDFArray, PDFDict, PDFDocument, PDFName, PDFNumber, PDFRawStream, PDFRe
 import { colorChannels, decodeFlateImage, filterChain, isFlateChain, type RawImage } from "./pdf-image-decode";
 import { loadPdfForEditing, replaceReferences } from "@/lib/pdf/load";
 import { deflate } from "@/lib/pdf/zlib";
+import { encodeCanvas } from "./canvas-blob";
 
 /**
  * Browser-local PDF size reduction, in three honest levels:
@@ -235,7 +236,7 @@ export const canvasReencoder: JpegReencoder = async (jpeg, { quality, maxLongSid
     if (!ctx) return null;
     ctx.imageSmoothingQuality = "high";
     ctx.drawImage(bitmap, 0, 0, w, h);
-    const out = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/jpeg", quality));
+    const out = await encodeCanvas(canvas, "image/jpeg", quality);
     if (!out) return null;
     return { bytes: new Uint8Array(await out.arrayBuffer()), width: w, height: h };
   } finally {
@@ -270,7 +271,7 @@ export const canvasRawReencoder: RawReencoder = async (img, { quality, maxLongSi
     tctx.imageSmoothingQuality = "high";
     tctx.drawImage(src, 0, 0, w, h);
   }
-  const out = await new Promise<Blob | null>((resolve) => target.toBlob(resolve, "image/jpeg", quality));
+  const out = await encodeCanvas(target, "image/jpeg", quality);
   if (!out) return null;
   return { bytes: new Uint8Array(await out.arrayBuffer()), width: w, height: h };
 };

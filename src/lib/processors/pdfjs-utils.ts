@@ -22,6 +22,22 @@ export async function loadPdfJsDocument(file: File): Promise<PDFDocumentProxy> {
   }
 }
 
+/**
+ * Draws a page onto a canvas for a conversion, without waiting for the browser to paint.
+ *
+ * pdf.js paces an on-screen ("display") render with requestAnimationFrame, and a browser delivers no animation
+ * frames to a tab or window that is in the background, minimised or covered. A conversion that renders pages that
+ * way sits at "Recognizing page 1…" until the user clicks back into the tab. The "print" intent has no such
+ * dependency (it schedules its steps as promises), so every render that is part of a conversion — not a page the
+ * user is looking at — goes through here.
+ */
+export function renderPageOffscreen(
+  page: import("pdfjs-dist").PDFPageProxy,
+  params: { canvasContext: CanvasRenderingContext2D; viewport: import("pdfjs-dist").PageViewport; canvas: HTMLCanvasElement }
+): Promise<void> {
+  return page.render({ ...params, intent: "print" }).promise;
+}
+
 /** Renders one page (1-indexed, matching pdf.js convention) to an offscreen canvas. */
 export async function renderPageToCanvas(
   doc: PDFDocumentProxy,
@@ -34,7 +50,9 @@ export async function renderPageToCanvas(
   /** Device pixels per CSS pixel. The canvas is drawn at `scale * pixelRatio` and sized back down
    * to `scale` in CSS, so on a HiDPI/scaled display the page is crisp instead of being
    * upscaled (blurry) by the browser. 1 keeps the old one-pixel-per-CSS-pixel canvas. */
-  pixelRatio = 1
+  pixelRatio = 1,
+  /** A conversion's render (not a page being looked at): don't wait for animation frames — see renderPageOffscreen. */
+  offscreen = false
 ): Promise<HTMLCanvasElement> {
   const page = await doc.getPage(pageNumber);
   const rotation = rotate ?? page.rotate;
@@ -49,7 +67,8 @@ export async function renderPageToCanvas(
   }
   const ctx = canvas.getContext("2d");
   if (!ctx) throw new PdfRenderError("Your browser can't render canvas content.");
-  await page.render({ canvasContext: ctx, viewport, canvas }).promise;
+  if (offscreen) await renderPageOffscreen(page, { canvasContext: ctx, viewport, canvas });
+  else await page.render({ canvasContext: ctx, viewport, canvas }).promise;
   return canvas;
 }
 

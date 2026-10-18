@@ -1,4 +1,5 @@
-import { loadPdfJsDocument, getPageTextContent, PdfRenderError } from "./pdfjs-utils";
+import { loadPdfJsDocument, getPageTextContent, renderPageOffscreen, PdfRenderError } from "./pdfjs-utils";
+import { encodeCanvas } from "./canvas-blob";
 import type { PageViewport } from "pdfjs-dist";
 
 export class OcrError extends Error {}
@@ -211,7 +212,7 @@ const REFINE_MAX = 60;
 type RawWord = { text: string; confidence: number; bbox: Bbox; symbols: { text: string; bbox: Bbox }[]; line?: number };
 type RefineWorker = {
   setParameters(p: Record<string, string>): Promise<unknown>;
-  recognize(image: HTMLCanvasElement, options: object, output: object): Promise<{ data: { text: string; confidence: number; blocks?: { paragraphs: { lines: { words: { text: string; confidence: number; bbox: Bbox }[] }[] }[] }[] | null } }>;
+  recognize(image: Blob, options: object, output: object): Promise<{ data: { text: string; confidence: number; blocks?: { paragraphs: { lines: { words: { text: string; confidence: number; bbox: Bbox }[] }[] }[] }[] | null } }>;
 };
 
 /**
@@ -224,7 +225,7 @@ type RefineWorker = {
  *    picture) is read as one line, and kept when read with clear confidence;
  * 3. words still under REFINE_BELOW are read again alone ("Tact" → "Issue").
  */
-async function refineLowConfidence(worker: RefineWorker, canvas: HTMLCanvasElement, words: RawWord[], lines: { text: string; bbox: Bbox; baseline?: Bbox & { has_baseline?: boolean } }[]): Promise<void> {
+async function refineLowConfidence(worker: RefineWorker, canvas: HTMLCanvasElement, image: Blob, words: RawWord[], lines: { text: string; bbox: Bbox; baseline?: Bbox & { has_baseline?: boolean } }[]): Promise<void> {
   let reads = 0;
   const crop = (b: Bbox) => {
     const pad = 6;
@@ -254,7 +255,7 @@ async function refineLowConfidence(worker: RefineWorker, canvas: HTMLCanvasEleme
         const mean = row.reduce((n, w) => n + w.confidence, 0) / row.length;
         if (row.length < 2 || mean >= REFINE_ROW_BELOW || reads >= REFINE_MAX) continue;
         const box = { x0: Math.min(...row.map((w) => w.bbox.x0)), y0: Math.min(...row.map((w) => w.bbox.y0)), x1: Math.max(...row.map((w) => w.bbox.x1)), y1: Math.max(...row.map((w) => w.bbox.y1)) };
-        const r = await worker.recognize(canvas, { rectangle: crop(box) }, { text: true, blocks: true });
+        const r = await worker.recognize(image, { rectangle: crop(box) }, { text: true, blocks: true });
         reads++;
         const fresh: RawWord[] = [];
         for (const b of r.data.blocks ?? []) for (const p of b.paragraphs) for (const l of p.lines) for (const w of l.words) if (w.text.trim()) fresh.push({ text: w.text, confidence: w.confidence, bbox: w.bbox, symbols: [], line });
@@ -271,7 +272,7 @@ async function refineLowConfidence(worker: RefineWorker, canvas: HTMLCanvasEleme
     // with clear confidence (a chart, a stamp or a signature reads badly and stays a picture).
     for (const box of unreadText(canvas, words)) {
       if (reads >= REFINE_MAX) break;
-      const r = await worker.recognize(canvas, { rectangle: crop(box) }, { text: true, blocks: true });
+      const r = await worker.recognize(image, { rectangle: crop(box) }, { text: true, blocks: true });
       reads++;
       const fresh: RawWord[] = [];
       const index = lines.filter((l) => l.text.trim()).length;
@@ -291,7 +292,7 @@ async function refineLowConfidence(worker: RefineWorker, canvas: HTMLCanvasEleme
       if (w.confidence >= REFINE_BELOW || !/[\p{L}\p{N}]/u.test(w.text) || reads >= REFINE_MAX) continue;
       const c = crop(w.bbox);
       if (c.width < 8 || c.height < 8) continue;
-      const r = await worker.recognize(canvas, { rectangle: c }, { text: true });
+      const r = await worker.recognize(image, { rectangle: c }, { text: true });
       reads++;
       const text = r.data.text.trim();
       // (Same length, about: a crop reaching into a neighbouring word mustn't turn "6" into "695.00".)
@@ -384,6 +385,28 @@ function unreadText(canvas: HTMLCanvasElement, words: RawWord[]): Bbox[] {
   return out.slice(0, 12);
 }
 
+/** No awaited OCR step may wait forever: it settles with `work` or, after `ms`, rejects with `message`. */
+function within<T>(work: Promise<T>, ms: number, message: string): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    const timer = setTimeout(() => reject(new OcrError(message)), ms);
+    work.then(
+      (v) => {
+        clearTimeout(timer);
+        resolve(v);
+      },
+      (e) => {
+        clearTimeout(timer);
+        reject(e);
+      }
+    );
+  });
+}
+
+/** Loading the engine and its model (same origin, a few MB). */
+const WORKER_LOAD_MS = 90_000;
+/** One page of recognition, including the second look at doubtful words. */
+const RECOGNIZE_PAGE_MS = 300_000;
+
 export async function createOcrSession(langCode: string): Promise<OcrSession> {
   const { createWorker, OEM } = await import("tesseract.js");
 
@@ -394,7 +417,7 @@ export async function createOcrSession(langCode: string): Promise<OcrSession> {
 
   let worker;
   try {
-    worker = await createWorker(langCode, OEM.LSTM_ONLY, {
+    worker = await within(createWorker(langCode, OEM.LSTM_ONLY, {
       workerPath: TESSERACT_WORKER_PATH,
       corePath: TESSERACT_CORE_PATH,
       langPath: TESSERACT_LANG_PATH,
@@ -407,8 +430,9 @@ export async function createOcrSession(langCode: string): Promise<OcrSession> {
           activeProgressHandler(m.progress);
         }
       },
-    });
-  } catch {
+    }), WORKER_LOAD_MS, "The OCR engine took too long to load. Check your connection and try again.");
+  } catch (e) {
+    if (e instanceof OcrError) throw e;
     throw new OcrError(
       "The OCR engine couldn't load. Check your connection and try again — the first run needs to download a small recognition model."
     );
@@ -430,7 +454,7 @@ export async function createOcrSession(langCode: string): Promise<OcrSession> {
       canvas.height = Math.ceil(viewport.height);
       const ctx = canvas.getContext("2d");
       if (!ctx) throw new PdfRenderError("Your browser can't render canvas content.");
-      await page.render({ canvasContext: ctx, viewport, canvas }).promise;
+      await renderPageOffscreen(page, { canvasContext: ctx, viewport, canvas });
 
       if (options.enhance) enhanceCanvasForOcr(canvas);
 
@@ -448,11 +472,17 @@ export async function createOcrSession(langCode: string): Promise<OcrSession> {
       options.onProgress?.(0);
 
       let result;
+      let image: Blob | null = null;
       try {
         // The canvas carries no resolution; say what it is rather than letting Tesseract guess (and print its guess).
         await worker.setParameters({ user_defined_dpi: String(Math.round(scale * 72)) });
-        result = await worker.recognize(canvas, {}, { text: true, blocks: true });
-      } catch {
+        // Encoded here, once, so Tesseract isn't handed a canvas: it would call canvas.toBlob itself for every read, which
+        // in a background tab takes seconds each (see canvas-blob.ts).
+        image = await encodeCanvas(canvas, "image/png");
+        if (!image) throw new OcrError(`Recognition failed on page ${pageNumber}.`);
+        result = await within(worker.recognize(image, {}, { text: true, blocks: true }), RECOGNIZE_PAGE_MS, `Recognition took too long on page ${pageNumber}. Try again, or cancel.`);
+      } catch (e) {
+        if (e instanceof OcrError) throw e;
         throw new OcrError(`Recognition failed on page ${pageNumber}.`);
       } finally {
         activeProgressHandler = null;
@@ -480,7 +510,7 @@ export async function createOcrSession(langCode: string): Promise<OcrSession> {
         }
       }
 
-      if (options.refine) await refineLowConfidence(worker, canvas, rawWords, rawLines);
+      if (options.refine && image) await refineLowConfidence(worker, canvas, image, rawWords, rawLines);
 
       const words = mapWordsToPdfSpace(rawWords, viewport);
       const lines = mapLinesToPdfSpace(rawLines, viewport);

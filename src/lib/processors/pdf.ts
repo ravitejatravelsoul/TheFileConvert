@@ -364,7 +364,7 @@ export async function pdfToImages(file: File, format: "png" | "jpeg", scale: num
 
   for (const [n, index] of indices.entries()) {
     if (index < 0 || index >= doc.numPages) throw new ProcessorError(`Page ${index + 1} doesn't exist in this PDF.`);
-    const canvas = await renderPageToCanvas(doc, index + 1, scale);
+    const canvas = await renderPageToCanvas(doc, index + 1, scale, undefined, 1, true);
     if (format === "jpeg") {
       // JPEG has no transparency: pages with a transparent background would otherwise turn black.
       const flat = document.createElement("canvas");
@@ -389,8 +389,9 @@ export async function pdfToImages(file: File, format: "png" | "jpeg", scale: num
   return results;
 }
 
-function canvasBlob(canvas: HTMLCanvasElement, mime: string): Promise<Blob> {
-  return new Promise((resolve, reject) => {
-    canvas.toBlob((b) => (b ? resolve(b) : reject(new ProcessorError("Rendering failed for this page."))), mime, 0.92);
-  });
+async function canvasBlob(canvas: HTMLCanvasElement, mime: string): Promise<Blob> {
+  const { encodeCanvas } = await import("./canvas-blob");
+  const blob = await encodeCanvas(canvas, mime, 0.92);
+  if (!blob) throw new ProcessorError("Rendering failed for this page.");
+  return blob;
 }

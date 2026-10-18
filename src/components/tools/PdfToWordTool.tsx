@@ -15,6 +15,9 @@ import type { PdfAnalysis, Progress } from "@/lib/processors/pdf-to-word";
 
 const tool = getTool("pdf-to-word");
 
+/** How long a stage may go without reporting anything before the user is told, and offered Retry / Cancel. */
+const STALL_MS = { default: 30_000, recognition: 60_000 };
+
 type Phase =
   | { name: "ready" }
   | { name: "working"; progress: Progress | null }
@@ -26,6 +29,10 @@ export function PdfToWordTool() {
   const [analysis, setAnalysis] = useState<{ file: File; result: PdfAnalysis | null; error: string | null } | null>(null);
   const [phase, setPhase] = useState<Phase>({ name: "ready" });
   const resultRef = useRef<HTMLDivElement>(null);
+  // A run that has been cancelled or replaced must not report back; and progress is watched for stalls.
+  const runRef = useRef<{ id: number; abort: AbortController | null }>({ id: 0, abort: null });
+  const lastProgressRef = useRef(0);
+  const [stalled, setStalled] = useState(false);
   const { intake, rejections } = useFileIntake(tool, (files) => {
     setFile(files[0]);
     setPhase({ name: "ready" });
@@ -57,21 +64,71 @@ export function PdfToWordTool() {
     if (phase.name === "done") resultRef.current?.scrollIntoView({ block: "start", behavior: "smooth" });
   }, [phase.name]);
 
+  // Leaving the page stops a run in progress (its OCR worker is torn down), instead of leaving it working unseen.
+  useEffect(() => {
+    const run = runRef;
+    return () => run.current.abort?.abort();
+  }, []);
+
+  // Stall watchdog: while converting, if no stage has reported for a while, say so — never leave a spinner unexplained.
+  useEffect(() => {
+    if (phase.name !== "working") return;
+    const timer = setInterval(() => {
+      const p = phase.progress;
+      const override = (globalThis as { __TFC_STALL_MS?: number }).__TFC_STALL_MS; // tests shorten the wait
+      const limit = override ?? (p && (p.stage === "ocr" || p.stage === "layout" || p.stage === "ocr-load") ? STALL_MS.recognition : STALL_MS.default);
+      setStalled(Date.now() - lastProgressRef.current > limit);
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [phase]);
+
+  /** Stops the current run (its result, if it still arrives, is ignored) and returns to the file. The file is kept. */
+  function cancel() {
+    runRef.current.abort?.abort();
+    runRef.current = { id: runRef.current.id + 1, abort: null };
+    setStalled(false);
+    setPhase({ name: "ready" });
+  }
+
+  function retry() {
+    cancel();
+    void run();
+  }
+
   async function run() {
     if (!file) return;
     const started = performance.now();
+    const abort = new AbortController();
+    const id = runRef.current.id + 1;
+    runRef.current = { id, abort };
+    const current = () => runRef.current.id === id && !abort.signal.aborted; // not replaced, not cancelled, not reset
+    lastProgressRef.current = Date.now();
+    setStalled(false);
     setPhase({ name: "working", progress: null });
     try {
       const { convertPdfToWord, DOCX_MIME } = await import("@/lib/processors/pdf-to-word");
-      const result = await convertPdfToWord(file, { onProgress: (progress) => setPhase({ name: "working", progress }) });
+      const result = await convertPdfToWord(file, {
+        signal: abort.signal,
+        onProgress: (progress) => {
+          if (!current()) return;
+          lastProgressRef.current = Date.now();
+          setStalled(false);
+          setPhase({ name: "working", progress });
+        },
+      });
+      if (!current()) return;
       const output = new File([result.blob], withExtension(file.name, "docx"), { type: DOCX_MIME });
       setPhase({ name: "done", output, pages: result.pages, images: result.images, visualPages: result.visualPages, editablePages: result.editablePages, classes: result.pageReports.map((r) => r.cls).join(","), strategies: result.pageReports.map((r) => r.strategy).join(","), ms: performance.now() - started });
     } catch (e) {
+      if (!current() || abort.signal.aborted) return; // cancelled or replaced: nothing to report
       setPhase({ name: "error", message: e instanceof Error && e.message ? e.message : "This PDF couldn't be converted." });
     }
   }
 
   function reset() {
+    runRef.current.abort?.abort();
+    runRef.current = { id: runRef.current.id + 1, abort: null };
+    setStalled(false);
     setFile(null);
     setAnalysis(null);
     setPhase({ name: "ready" });
@@ -96,20 +153,48 @@ export function PdfToWordTool() {
     const label = !p
       ? "Opening your PDF…"
       : p.stage === "reading"
-        ? `Analyzing document — page ${p.page} of ${p.total}…`
+        ? `Analyzing PDF — page ${p.page} of ${p.total}…`
         : p.stage === "preserve"
-          ? `Preserving page ${p.index} of ${p.total}…`
-          : p.stage === "layout"
-            ? `Detecting layout — page ${p.index} of ${p.total}…`
-            : p.stage === "ocr"
-              ? `Recognizing page ${p.index} of ${p.total}…`
-              : p.stage === "validating"
-                ? "Validating result…"
-                : "Building Word document…";
+          ? `Preparing scanned page ${p.index} of ${p.total}…`
+          : p.stage === "ocr-load"
+            ? "Loading text recognition…"
+            : p.stage === "layout"
+              ? `Checking the layout of page ${p.index} of ${p.total}…`
+              : p.stage === "ocr"
+                ? `Recognizing page ${p.index} of ${p.total}…`
+                : p.stage === "validating"
+                  ? "Checking output…"
+                  : "Building Word document…";
     const fraction = !p ? null : p.stage === "reading" ? (p.page - 1) / p.total : p.stage === "preserve" ? (p.index - 1) / p.total : p.stage === "ocr" ? (p.index - 1 + p.fraction) / p.total : p.stage === "layout" ? (p.index - 1) / p.total : null;
     return (
       <div className="mx-auto max-w-3xl">
-        <Working label={label} fraction={fraction} detail={p?.stage === "ocr" || p?.stage === "layout" ? "Checking a plain scan on this device — the first run downloads a small recognition model." : "Everything happens in this tab. Nothing is uploaded."} />
+        <Working
+          label={label}
+          fraction={fraction}
+          detail={
+            p?.stage === "ocr-load"
+              ? "Only a plain scan of text needs this: it is read once to see whether it can become editable text. Otherwise it keeps its look."
+              : p?.stage === "ocr" || p?.stage === "layout"
+                ? "Reading a plain scan on this device to see whether it can become editable text. If it can't be read reliably, the page keeps its look."
+                : "Everything happens in this tab. Nothing is uploaded."
+          }
+        />
+        {stalled && (
+          <div className="mt-4" data-testid="stalled">
+            <Alert tone="warning">
+              <p className="font-medium">This is taking longer than expected.</p>
+              <p className="mt-1">Your file is safe and nothing was sent anywhere. You can keep waiting, retry, or cancel and go back to your file.</p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                <button type="button" className="btn btn-secondary" onClick={retry}>
+                  Retry
+                </button>
+                <button type="button" className="btn btn-ghost" onClick={cancel}>
+                  Cancel
+                </button>
+              </div>
+            </Alert>
+          </div>
+        )}
       </div>
     );
   }
