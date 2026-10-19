@@ -214,6 +214,11 @@ export interface FormFieldValue {
   multiline?: boolean;
   readOnly?: boolean;
   maxLength?: number;
+  /** The file's appearance of this field is missing, stale (it no longer shows the value), or the form says /NeedAppearances:
+   * the field's appearance is written from its value (on screen and on export) instead of trusting the file's. */
+  regen?: boolean;
+  /** Why the field can be seen but not edited here (password, comb, rich text, rotated widget …). */
+  unsupported?: string;
 }
 
 export interface FormWidget {
@@ -223,6 +228,17 @@ export interface FormWidget {
   rect: { x: number; y: number; width: number; height: number };
   /** For one button of a radio group: the option this widget selects. */
   onValue?: string;
+  /** How the widget is set out (from /DA, /Q, /MK, /BS) — what the live text box has to look like. */
+  style?: {
+    fontSize: number;
+    family: "sans" | "serif" | "mono";
+    color: { r: number; g: number; b: number };
+    align: 0 | 1 | 2;
+    borderWidth: number;
+    background?: { r: number; g: number; b: number };
+    borderColor?: { r: number; g: number; b: number };
+    rotation: 0 | 90 | 180 | 270;
+  };
 }
 
 export interface EditorDocument {

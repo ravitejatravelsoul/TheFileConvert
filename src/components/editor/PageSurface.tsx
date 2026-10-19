@@ -136,6 +136,8 @@ export function PageSurface({
   const dpr = typeof window === "undefined" ? 1 : Math.min(2, Math.max(1, window.devicePixelRatio || 1));
   const transform = useMemo(() => new PageTransform(spec, zoom, dpr), [spec, zoom, dpr]);
   const editingBlock = api.state.editingText?.pageId === page.id ? (working?.analysis?.blocks.find((b) => b.id === api.state.editingText!.blockId) ?? null) : null;
+  /** The file whose picture is on the canvas right now. */
+  const [paintedFile, setPaintedFile] = useState<File | null>(null);
   const [caretAt, setCaretAt] = useState<{ x: number; y: number } | "all" | undefined>(undefined);
   const beginEdit = (blockId: string, at?: { x: number; y: number } | "all") => {
     setCaretAt(at);
@@ -161,6 +163,11 @@ export function PageSurface({
 
   const activeTool = api.state.activeTool;
   // edits to the page's own text and pictures are in the working page, not drawn as objects
+  // a live form field owns the text inside its widget: it is never also a block of the page's own text
+  const formRects = useMemo(
+    () => doc.formFields.flatMap((f) => f.widgets.filter((w) => w.sourceFileId === page.sourceFileId && w.pageIndex === page.sourcePageIndex).map((w) => w.rect)),
+    [doc.formFields, page.sourceFileId, page.sourcePageIndex]
+  );
   const objects = useMemo(() => doc.objects.filter((o) => o.pageId === page.id && !isNativeEdit(o)), [doc.objects, page.id]);
 
   // Render the base page image whenever page/zoom/rotation changes.
@@ -181,6 +188,7 @@ export function PageSurface({
       host.appendChild(canvas);
       baseCanvasRef.current = canvas;
       canvasRatioRef.current = ratio;
+      setPaintedFile(file);
     })();
     return () => {
       cancelled = true;
@@ -792,10 +800,18 @@ export function PageSurface({
           editTextTool={activeTool === "edit-text"}
           editingBlockId={editingBlock?.id ?? null}
           hostRef={overlayRef}
+          formRects={formRects}
           onBeginEdit={beginEdit}
         />
 
-        <FormLayer api={api} page={page} transform={transform} fields={doc.formFields} interactive={(activeTool === "select" || activeTool === "edit-text") && !pendingPlacement} />
+        <FormLayer
+          api={api}
+          page={page}
+          transform={transform}
+          fields={doc.formFields}
+          interactive={(activeTool === "select" || activeTool === "edit-text") && !pendingPlacement}
+          drawn={paintedFile === file && working?.status === "ready" && working.sig === api.currentWorkingSig(page)}
+        />
 
         {/* OCR line regions — a lower-priority fallback target for clicking whitespace
             within a line that no word button covers; word buttons render after these and

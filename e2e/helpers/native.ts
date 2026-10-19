@@ -11,8 +11,8 @@ export async function openEditor(page: Page, filePath: string) {
   await page.getByTestId("file-input").first().setInputFiles(filePath);
   await expect(page.locator('[data-testid="page-surface"]').first()).toBeVisible({ timeout: 20_000 });
   await page.getByRole("button", { name: "Actual size (100%)" }).click();
-  // the page's own text is read in the background; the hit targets appear when it is
-  await expect(page.locator('[data-testid="native-block"], [data-testid="native-image"]').first()).toBeAttached({ timeout: 30_000 });
+  // the page's own text is read in the background; the hit targets appear when it is (a page may have none: then the fields do)
+  await expect(page.locator('[data-testid="native-block"], [data-testid="native-image"], [data-testid="form-field"]').first()).toBeAttached({ timeout: 30_000 });
 }
 
 export async function goToPage(page: Page, n: number) {

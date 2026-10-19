@@ -7,6 +7,8 @@
  * can't disagree.
  */
 import { PDFDocument, type PDFPage } from "pdf-lib";
+import { applyFormState } from "./formApply";
+import type { FormFieldValue } from "./types";
 import type { FaceKey } from "@/lib/processors/word-to-pdf/fonts";
 import { editBlock } from "@/lib/pdf-engine/edit-block";
 import { boxTransform, deleteImage, placeImage, replaceImage, transformedPlacement } from "@/lib/pdf-engine/edit-image";
@@ -184,6 +186,8 @@ export interface WorkingPage {
   /** A one-page PDF: the source page with the edits applied. */
   bytes: Uint8Array;
   analysis: PageAnalysis;
+  /** Form values / appearances were written into `bytes`. */
+  formsApplied: boolean;
 }
 
 export type WorkingResult = { ok: true; page: WorkingPage } | { ok: false; index: number; reason: string };
@@ -208,7 +212,7 @@ export const editKey = (e: NativeEdit) => JSON.stringify(e);
  * The working page for `edits` on page `pageIndex` of `file`. Reuses the longest already-computed prefix of the edit list, so
  * adding one edit costs one edit, and undo (a shorter list) is a cache hit.
  */
-export async function buildWorkingPage(file: File, fileKey: string, pageIndex: number, edits: NativeEdit[], loadFont: FontBytes): Promise<WorkingResult> {
+export async function buildWorkingPage(file: File, fileKey: string, pageIndex: number, edits: NativeEdit[], loadFont: FontBytes, forms: FormFieldValue[] = []): Promise<WorkingResult> {
   const base = `${fileKey}:${pageIndex}`;
   const keys = edits.map(editKey);
   let start = 0;
@@ -239,7 +243,12 @@ export async function buildWorkingPage(file: File, fileKey: string, pageIndex: n
     prefixCache.set(`${base}|${keys.join("|")}`, bytes);
     if (prefixCache.size > PREFIX_LIMIT) prefixCache.delete(prefixCache.keys().next().value as string);
   }
-  return { ok: true, page: { bytes, analysis: await analyzeBytes(bytes) } };
+  const analysis = await analyzeBytes(bytes);
+  if (!forms.length) return { ok: true, page: { bytes, analysis, formsApplied: false } };
+  // the fields on this page, with their values and appearances, written the way the export writes them
+  const withForms = await PDFDocument.load(bytes, { ignoreEncryption: true, updateMetadata: false });
+  await applyFormState(withForms, withForms.getPage(0), forms);
+  return { ok: true, page: { bytes: await withForms.save({ updateFieldAppearances: false }), analysis, formsApplied: true } };
 }
 
 export { boxTransform };

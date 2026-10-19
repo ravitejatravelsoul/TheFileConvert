@@ -22,7 +22,7 @@ import { browserFontLoader } from "@/lib/processors/word-to-pdf/fonts";
 import { exportEditorDocument, EditorExportError } from "@/lib/editor/export";
 import { generateUuidV4 } from "@/lib/id";
 import { createOcrSession, type OcrPageResult, type OcrSession } from "@/lib/processors/ocr";
-import type { EditorDocument, EditorObject, EditorPage, NativeImageEditObject, NativeTextEditObject } from "@/lib/editor/types";
+import type { EditorDocument, EditorObject, EditorPage, FormFieldValue, NativeImageEditObject, NativeTextEditObject } from "@/lib/editor/types";
 import { isNativeEdit } from "@/lib/editor/types";
 import { effectiveRotation } from "@/lib/editor/types";
 import { applyCorrections } from "@/lib/editor/searchLayer";
@@ -278,7 +278,10 @@ export function useEditorWorkspace() {
 
   /** The edits the editor has made to a page's own content, in the order they were made. */
   const nativeEditsOf = (doc: EditorDocument, pageId: string): NativeEdit[] => doc.objects.filter((o) => o.pageId === pageId && isNativeEdit(o)).map((o) => (o as NativeTextEditObject | NativeImageEditObject).edit);
-  const sigOf = (edits: NativeEdit[]) => edits.map(editKey).join("|");
+  /** The form fields on a page whose picture has to be redrawn: filled in, or whose appearance can't be trusted. */
+  const formsOf = (doc: EditorDocument, page: EditorPage): FormFieldValue[] =>
+    doc.formFields.filter((f) => (f.value !== f.initial || f.regen) && f.widgets.some((w) => w.sourceFileId === page.sourceFileId && w.pageIndex === page.sourcePageIndex));
+  const sigOf = (edits: NativeEdit[], forms: FormFieldValue[] = []) => `${edits.map(editKey).join("|")}#${forms.map((f) => `${f.name}=${f.value}`).join("|")}`;
 
   const workingSeq = useRef<Record<string, number>>({});
   const bytesToFile = (bytes: Uint8Array) => new File([bytes as BlobPart], "page.pdf", { type: "application/pdf" });
@@ -288,25 +291,29 @@ export function useEditorWorkspace() {
     async (page: EditorPage) => {
       const doc = historyRef.current.current;
       const edits = nativeEditsOf(doc, page.id);
-      const sig = sigOf(edits);
+      const forms = formsOf(doc, page);
+      const sig = sigOf(edits, forms);
       const current = stateRef.current.workingByPage[page.id];
       if (current && current.sig === sig && current.status !== "error") return;
       const sourceFile = doc.sourceFiles[page.sourceFileId];
       if (!sourceFile) return;
       const seq = (workingSeq.current[page.id] = (workingSeq.current[page.id] ?? 0) + 1);
       setState((s) => ({ ...s, workingByPage: { ...s.workingByPage, [page.id]: { ...(s.workingByPage[page.id] ?? { analysis: null, file: null }), sig, status: "loading" } } }));
-      const res = await buildWorkingPage(sourceFile, page.sourceFileId, page.sourcePageIndex, edits, browserFontLoader).catch((e: unknown) => ({ ok: false as const, index: -1, reason: e instanceof Error ? e.message : "The page couldn't be read." }));
+      const res = await buildWorkingPage(sourceFile, page.sourceFileId, page.sourcePageIndex, edits, browserFontLoader, forms).catch((e: unknown) => ({ ok: false as const, index: -1, reason: e instanceof Error ? e.message : "The page couldn't be read." }));
       if (workingSeq.current[page.id] !== seq) return;
       setState((s) => ({
         ...s,
         workingByPage: {
           ...s.workingByPage,
-          [page.id]: res.ok ? { sig, status: "ready", analysis: res.page.analysis, file: edits.length ? bytesToFile(res.page.bytes) : null } : { analysis: s.workingByPage[page.id]?.analysis ?? null, file: null, sig, status: "error", error: res.reason },
+          [page.id]: res.ok ? { sig, status: "ready", analysis: res.page.analysis, file: edits.length || res.page.formsApplied ? bytesToFile(res.page.bytes) : null } : { analysis: s.workingByPage[page.id]?.analysis ?? null, file: null, sig, status: "error", error: res.reason },
         },
       }));
     },
     []
   );
+
+  /** The signature of what a page's picture should show now; the page is drawn current when its working copy has this signature. */
+  const currentWorkingSig = useCallback((page: EditorPage) => sigOf(nativeEditsOf(stateRef.current.doc, page.id), formsOf(stateRef.current.doc, page)), []);
 
   const selectNative = useCallback((sel: NativeSelection | null) => {
     setState((s) => ({ ...s, selectedNative: sel, selectedObjectId: sel ? null : s.selectedObjectId, editingObjectId: null }));
@@ -321,7 +328,7 @@ export function useEditorWorkspace() {
       if (!page || !file) return;
       setState((s) => ({ ...s, editingText: { pageId, blockId }, selectedNative: { kind: "text", pageId, blockId }, selectedObjectId: null, editingObjectId: null }));
       const edits = nativeEditsOf(doc, pageId);
-      const res = await buildWorkingPage(file, page.sourceFileId, page.sourcePageIndex, [...edits, { kind: "text", block: blockId, newText: "" }], browserFontLoader);
+      const res = await buildWorkingPage(file, page.sourceFileId, page.sourcePageIndex, [...edits, { kind: "text", block: blockId, newText: "" }], browserFontLoader, formsOf(doc, page));
       if (!res.ok) return;
       setState((s) => {
         if (s.editingText?.blockId !== blockId || s.editingText.pageId !== pageId) return s;
@@ -347,14 +354,14 @@ export function useEditorWorkspace() {
       const file = page && doc.sourceFiles[page.sourceFileId];
       if (!page || !file) return { ok: false, reason: "That page isn't available." };
       const edits = nativeEditsOf(doc, pageId);
-      const res = await buildWorkingPage(file, page.sourceFileId, page.sourcePageIndex, [...edits, edit], browserFontLoader).catch((e: unknown) => ({ ok: false as const, index: -1, reason: e instanceof Error ? e.message : "The edit couldn't be applied." }));
+      const res = await buildWorkingPage(file, page.sourceFileId, page.sourcePageIndex, [...edits, edit], browserFontLoader, formsOf(doc, page)).catch((e: unknown) => ({ ok: false as const, index: -1, reason: e instanceof Error ? e.message : "The edit couldn't be applied." }));
       if (!res.ok) return { ok: false, reason: res.reason };
       const object: NativeTextEditObject | NativeImageEditObject =
         edit.kind === "text"
           ? { id: generateUuidV4(), type: "native-text-edit", pageId, ...bbox, originalText: label, edit }
           : { id: generateUuidV4(), type: "native-image-edit", pageId, ...bbox, edit };
       const next = { ...doc, objects: [...doc.objects, object] };
-      const sig = sigOf([...edits, edit]);
+      const sig = sigOf([...edits, edit], formsOf(doc, page));
       workingSeq.current[pageId] = (workingSeq.current[pageId] ?? 0) + 1; // any build still running is out of date
       historyRef.current.push(next);
       setState((s) => ({
@@ -731,6 +738,7 @@ export function useEditorWorkspace() {
     setEditingObjectId,
     setZoom,
     ensureWorking,
+    currentWorkingSig,
     selectNative,
     beginTextEdit,
     cancelTextEdit,

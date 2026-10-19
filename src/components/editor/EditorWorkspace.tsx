@@ -66,11 +66,10 @@ export default function EditorWorkspace({ file, onExit }: { file: File; onExit: 
   const activePage = state.doc.pages.find((p) => p.id === state.activePageId) ?? state.doc.pages[0] ?? null;
 
   // Read the active page's own text and pictures (and apply the edits made to them) on demand.
-  const editSig = state.doc.objects;
   useEffect(() => {
     if (activePage) void api.ensureWorking(activePage);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activePage?.id, editSig, state.doc.pages]);
+  }, [activePage?.id, state.doc]);
 
   // Searching has to cover the whole document, not just the pages that have been viewed.
   const hasSearchQuery = state.searchQuery.trim().length > 0;

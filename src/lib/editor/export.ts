@@ -1,4 +1,5 @@
 import { savePdfChecked } from "@/lib/pdf/save";
+import { applyFormState, clearNeedAppearances } from "./formApply";
 import { PDFDocument, PDFDict, PDFName, PDFRef, StandardFonts, rgb, degrees, type PDFFont, type PDFPage } from "pdf-lib";
 import type { EditorDocument, EditorObject, RgbColor } from "./types";
 import { effectiveRotation } from "./types";
@@ -458,36 +459,13 @@ export async function exportEditorDocument(doc: EditorDocument, options: ExportO
     }
   }
 
+  // Form values and the appearances that show them are written by the same code the editor draws its page with.
   if (doc.formFields.length > 0) {
-    try {
-      const form = out.getForm();
-      for (const field of doc.formFields) {
-        // untouched fields keep the file's own appearance, byte for byte
-        if (field.value === field.initial) continue;
-        try {
-          if (field.kind === "text") {
-            form.getTextField(field.name).setText(field.value);
-          } else if (field.kind === "checkbox") {
-            const checkbox = form.getCheckBox(field.name);
-            if (field.value === "true") checkbox.check();
-            else checkbox.uncheck();
-          } else if (field.kind === "radio") {
-            form.getRadioGroup(field.name).select(field.value);
-          } else if (field.kind === "dropdown") {
-            form.getDropdown(field.name).select(field.value);
-          }
-        } catch {
-          // A single field that no longer resolves (e.g. rare field-name collisions
-          // across merged documents) shouldn't fail the whole export.
-        }
-      }
-    } catch {
-      // No form on this document — nothing to apply.
-    }
+    for (const p of out.getPages()) await applyFormState(out, p, doc.formFields);
+    if (!doc.formFields.some((f) => f.regen && f.unsupported)) clearNeedAppearances(out);
   }
 
-  // when no field was filled in, the file's own field appearances are left exactly as they are
-  const formTouched = doc.formFields.some((f) => f.value !== f.initial);
-  const bytes = await savePdfChecked(out, formTouched ? {} : { updateFieldAppearances: false });
+  // pdf-lib must not redraw field appearances at save: the ones we wrote, and the file's own, are final
+  const bytes = await savePdfChecked(out, { updateFieldAppearances: false });
   return new Blob([bytes as BlobPart], { type: "application/pdf" });
 }

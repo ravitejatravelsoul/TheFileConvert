@@ -19,7 +19,20 @@ interface Props {
   editingBlockId: string | null;
   /** The element the page is drawn in, to read pointer positions against. */
   hostRef: React.RefObject<HTMLDivElement | null>;
+  /** Widgets of live form fields on this page (page space): text inside them belongs to the field. */
+  formRects?: Rect[];
   onBeginEdit: (blockId: string, at?: { x: number; y: number }) => void;
+}
+
+/** Most of `box` lies inside one of `rects`. */
+function insideAny(box: Rect, rects: Rect[]): boolean {
+  const area = box.width * box.height;
+  if (area <= 0) return false;
+  return rects.some((r) => {
+    const w = Math.min(box.x + box.width, r.x + r.width) - Math.max(box.x, r.x);
+    const h = Math.min(box.y + box.height, r.y + r.height) - Math.max(box.y, r.y);
+    return w > 0 && h > 0 && (w * h) / area >= 0.5;
+  });
 }
 
 const CLICK_SLOP = 4;
@@ -35,7 +48,7 @@ type Drag =
  * them) and pictures (click selects; drag moves; corners resize keeping the proportions, Shift frees them; the round handle
  * rotates). Positions come from the page's analysis through the one PageTransform.
  */
-export function NativeLayer({ api, pageId, transform: t, analysis, interactive, editTextTool, editingBlockId, hostRef, onBeginEdit }: Props) {
+export function NativeLayer({ api, pageId, transform: t, analysis, interactive, editTextTool, editingBlockId, hostRef, formRects = [], onBeginEdit }: Props) {
   const selected = api.state.selectedNative;
   const [hover, setHover] = useState<string | null>(null);
   const [drag, setDrag] = useState<Drag | null>(null);
@@ -194,6 +207,7 @@ export function NativeLayer({ api, pageId, transform: t, analysis, interactive, 
 
       {analysis.blocks.map((b) => {
         if (b.id === editingBlockId) return null;
+        if (insideAny(b.bbox, formRects)) return null;
         const css = t.rectToCss(b.bbox);
         const isSel = selected?.kind === "text" && selected.blockId === b.id;
         const active = interactive;

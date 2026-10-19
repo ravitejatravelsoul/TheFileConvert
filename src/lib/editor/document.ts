@@ -1,4 +1,5 @@
 import { PDFDocument, PDFTextField, PDFCheckBox, PDFRadioGroup, PDFDropdown, type PDFField } from "pdf-lib";
+import { appearanceText, hasNormalAppearance, needAppearances, radioLabel, widgetStyle } from "./formPdf";
 import { generateUuidV4 } from "@/lib/id";
 import type { EditorDocument, EditorPage, FormFieldValue, FormWidget } from "./types";
 import type { Rotation } from "./coordinates";
@@ -65,13 +66,29 @@ function widgetsOf(parsed: PDFDocument, field: PDFField, sourceFileId: string): 
     const r = w.getRectangle();
     let onValue: string | undefined;
     try {
-      onValue = w.getOnValue()?.decodeText();
+      const state = w.getOnValue()?.decodeText();
+      onValue = state === undefined ? undefined : radioLabel(w.dict, state);
     } catch {
       onValue = undefined;
     }
-    out.push({ sourceFileId, pageIndex, rect: { x: r.x, y: r.y, width: r.width, height: r.height }, onValue });
+    const st = widgetStyle(w.dict, parsed);
+    out.push({ sourceFileId, pageIndex, rect: { x: r.x, y: r.y, width: r.width, height: r.height }, onValue, style: { fontSize: st.fontSize, family: st.family, color: st.color, align: st.align, borderWidth: st.borderWidth, background: st.background, borderColor: st.borderColor, rotation: st.rotation } });
   }
   return out;
+}
+
+/** The file's appearance of a text or choice field can't be trusted: it is missing, the form asks viewers to redraw
+ * (/NeedAppearances), or it draws something other than the field's value. */
+function staleAppearance(parsed: PDFDocument, field: PDFField, value: string): boolean {
+  const widgets = field.acroField.getWidgets();
+  if (!widgets.length) return false;
+  if (needAppearances(parsed)) return true;
+  const norm = (t: string) => t.replace(/\s+/g, "");
+  return widgets.some((w) => {
+    if (!hasNormalAppearance(w.dict)) return value !== "";
+    const drawn = appearanceText(w.dict);
+    return drawn !== null && norm(drawn) !== norm(value);
+  });
 }
 
 function extractFormFields(parsed: PDFDocument, sourceFileId: string): FormFieldValue[] {
@@ -84,7 +101,10 @@ function extractFormFields(parsed: PDFDocument, sourceFileId: string): FormField
         const common = { name, widgets: widgetsOf(parsed, field, sourceFileId), readOnly: field.isReadOnly() };
         if (field instanceof PDFTextField) {
           const value = field.getText() ?? "";
-          fields.push({ ...common, kind: "text", value, initial: value, multiline: field.isMultiline(), maxLength: field.getMaxLength() });
+          const ff = field.acroField.getFlags();
+          const unsupported = field.isPassword() ? "password field" : field.isCombed() ? "comb field" : field.isRichFormatted() ? "formatted (rich text) field" : common.widgets.some((w) => w.style?.rotation) ? "rotated field" : undefined;
+          void ff;
+          fields.push({ ...common, kind: "text", value, initial: value, multiline: field.isMultiline(), maxLength: field.getMaxLength(), regen: staleAppearance(parsed, field, value), unsupported });
         } else if (field instanceof PDFCheckBox) {
           const value = field.isChecked() ? "true" : "false";
           fields.push({ ...common, kind: "checkbox", value, initial: value });
@@ -93,7 +113,9 @@ function extractFormFields(parsed: PDFDocument, sourceFileId: string): FormField
           fields.push({ ...common, kind: "radio", value, initial: value, options: field.getOptions() });
         } else if (field instanceof PDFDropdown) {
           const selected: string[] = field.getSelected() ?? [];
-          fields.push({ ...common, kind: "dropdown", value: selected[0] ?? "", initial: selected[0] ?? "", options: field.getOptions() });
+          const dropValue = selected[0] ?? "";
+          const unsupported = field.isEditable() ? "editable (type-in) dropdown" : common.widgets.some((w) => w.style?.rotation) ? "rotated field" : undefined;
+          fields.push({ ...common, kind: "dropdown", value: dropValue, initial: dropValue, options: field.getOptions(), regen: staleAppearance(parsed, field, dropValue), unsupported });
         }
       } catch {
         // A field pdf-lib can enumerate but not read cleanly — skip it rather than fail
