@@ -6,8 +6,8 @@ Branch `rebuild/fresh-launch`. Nothing deployed, nothing merged to `main`. Evide
 
 | Check | Result |
 |---|---|
-| Unit tests (Vitest) | 577 passed, 50 files, 0 failed |
-| Playwright, whole suite, `--workers=1`, 4 projects (Chromium, Pixel 7, and the two OCR projects) | 400 passed, 110 skipped, 0 failed |
+| Unit tests (Vitest) | 587 passed, 52 files, 0 failed |
+| Playwright, whole suite, `--workers=1`, 4 projects (Chromium, Pixel 7, and the two OCR projects) | 432 passed, 144 skipped, 0 failed |
 | TypeScript `tsc --noEmit` | clean |
 | ESLint | 0 errors (0 warnings after the last edit) |
 | `next build` | passes |
@@ -53,3 +53,10 @@ skipping on the phone project and phone-only specs skipping on desktop.
 * Microsoft Word was not used for any validation. PDF readers used: qpdf, MuPDF, poppler, pdf.js, pdf-lib.
 * Editing text outside the bundled fonts' character coverage, Type 3 / outlined text, and complex-script shaping are refused with a reason.
 * Browsers tested: Chromium (desktop and Pixel 7 emulation) only. Firefox and Safari were not run.
+
+## Forms audit (pre-filled field drawn twice — fixed)
+
+Details: [PDF_EDITOR_CODE_REVIEW.md](PDF_EDITOR_CODE_REVIEW.md) §6. 11 synthetic form fixtures (`qa/form-fixtures/`) plus the public
+IRS W-9 and 1040-ES pre-filled in the tests; 34 real-browser form scenarios (`editor-forms`, `editor-forms-audit`,
+`editor-forms-export`) + a phone test; 20 exports read by qpdf / MuPDF / pdf-lib (`qa/validate/formcheck.py`), 0 corrupt, 0 failed.
+The regression test fails on the previous code (277 differing pixels over the field) and passes now.
