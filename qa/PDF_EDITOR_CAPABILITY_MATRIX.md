@@ -26,7 +26,9 @@ Status words are literal: **YES** = works and is verified, **LIMITED** = works w
 | Draw | Freehand ink live under mouse, touch and pen (coalesced samples) | YES | `pdf-editor-interaction`, mobile touch spec |
 | Shapes | Rectangle, ellipse, line, arrow; stroke/fill/colour | YES | `pdf-editor`, `pdf-editor-interaction` |
 | Signature | Draw or upload; placed as an image and labelled "visual signature — not a cryptographic digital signature" | YES | `pdf-editor-advanced` |
-| Forms | Fill text, checkbox, radio, dropdown directly on the page; values survive export and reopen; untouched fields are not rewritten | YES | `editor-forms` |
+| Forms | Fill text (single and multi-line), checkbox, radio, dropdown directly on the page; a pre-filled value is shown once; the edit box matches the field's font, size (fixed or auto), colour, alignment, padding and baseline at every zoom, scroll, rotation and HiDPI; values survive export and reopen; untouched fields are not rewritten | YES | `editor-forms`, `editor-forms-audit` (regression + matrices), `editor-forms-export` + `qa/validate/formcheck.py` (20 exports) |
+| | Missing or stale appearance, `/NeedAppearances`, flattened forms | YES | stale or missing appearances are redrawn from the value; a flattened form (no widgets) is ordinary page text |
+| | Password, comb, rich-text, rotated-widget fields, type-in dropdowns | LIMITED | shown and locked, with the reason in the tooltip |
 | | List boxes, signature fields, field property editing | NOT SHIPPED | list boxes are drawn but not editable |
 | Whiteout | Cover with a white box, labelled "Whiteout is not secure redaction" | YES | `pdf-editor-interaction` |
 | Secure redaction | Removing content so it cannot be recovered | NOT SHIPPED | the editor can remove text from a stream, but not picture pixels under a box, so it does not claim redaction |

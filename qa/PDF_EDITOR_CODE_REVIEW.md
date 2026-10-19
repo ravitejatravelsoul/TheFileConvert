@@ -71,3 +71,7 @@ that with a content-stream engine and a working-page model.
   `contentEditable="plaintext-only"` and its content is read back as text).
 * Output integrity: every export goes through the existing `savePdfChecked` and was re-read by qpdf, MuPDF, poppler, pdf.js
   and pdf-lib in the matrix.
+
+## 6. Forms: pre-filled value drawn twice
+
+A release-blocking defect found by the user; root cause, architecture, appearance handling and tests are in [PDF_EDITOR_FORMS_REVIEW.md](PDF_EDITOR_FORMS_REVIEW.md). Review result: PASS.
