@@ -59,3 +59,22 @@ test("on a phone: the page rail and properties open as sheets, and add-text by t
   await page.keyboard.type("Typed on a phone");
   await expect(page.locator('[data-object-type="added-text"]')).toHaveCount(1);
 });
+
+test("on a phone: a pre-filled form field shows once, takes a tap and typing, and exports", async ({ page }) => {
+  await page.goto("/pdf-editor");
+  await page.getByTestId("file-input").first().setInputFiles(path.join(EDITOR_FIXTURES, "..", "form-fixtures", "FORM-01-given-name.pdf"));
+  const f = page.locator('[data-testid="form-field"][data-field-name="given_name"]');
+  await expect(f).toBeAttached({ timeout: 30_000 });
+  await page.waitForTimeout(800);
+  await f.scrollIntoViewIfNeeded();
+  await f.tap();
+  await expect(f).toHaveAttribute("data-state", "editing");
+  await page.keyboard.press("End");
+  await page.keyboard.type("x");
+  await page.keyboard.press("Tab");
+  await expect(f).toHaveAttribute("data-state", "idle", { timeout: 15_000 });
+  await expect(f).toHaveValue("Ravitejax");
+  const out = await exportPdf(page, "phone-form.pdf");
+  const { PDFDocument } = await import("pdf-lib");
+  expect((await PDFDocument.load(out)).getForm().getTextField("given_name").getText()).toBe("Ravitejax");
+});

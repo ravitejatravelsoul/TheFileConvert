@@ -1,7 +1,8 @@
 import fs from "node:fs";
+import path from "node:path";
 import { test, expect } from "@playwright/test";
 import { PDFDocument } from "pdf-lib";
-import { exportPdf } from "./helpers/native";
+import { EVIDENCE, exportPdf } from "./helpers/native";
 import { HIDE_OVERLAYS, expectNoOverlayGhost, expectOpaqueWhileEditing, expectSameInk, field, form, openForm, settled } from "./helpers/forms";
 import { clipOf, diffCount, innerClip, ink, shot } from "./helpers/pixels";
 
@@ -25,11 +26,17 @@ test("REGRESSION — a pre-filled field (Raviteja) shows its value once: before 
   const idleInk = ink(idle);
   expect(idleInk.empty).toBe(false);
 
+  const around = async () => {
+    const b = (await field(page, "given_name").boundingBox())!;
+    return { x: Math.max(0, b.x - 24), y: Math.max(0, b.y - 36), width: b.width + 48, height: b.height + 56 };
+  };
+  await page.screenshot({ path: path.join(EVIDENCE, "form-prefilled-open.png"), clip: await around() });
   // clicking the field: one value, same size and place as the appearance it replaces
   await field(page, "given_name").click();
   await expect(field(page, "given_name")).toHaveAttribute("data-state", "editing");
   const editing = await expectOpaqueWhileEditing(page, "given_name");
   expectSameInk(idleInk, ink(editing), 2, "editing vs original appearance");
+  await page.screenshot({ path: path.join(EVIDENCE, "form-prefilled-editing.png"), clip: await around() });
 
   // the real-user sequence: change one character, leave, re-enter, change it back
   await page.keyboard.press("End");
@@ -44,6 +51,8 @@ test("REGRESSION — a pre-filled field (Raviteja) shows its value once: before 
   await settled(page, "given_name");
   const back = await expectNoOverlayGhost(page, "given_name");
   expectSameInk(idleInk, ink(back), 2, "after changing back");
+  await page.mouse.move(2, 2);
+  await page.screenshot({ path: path.join(EVIDENCE, "form-prefilled-after.png"), clip: await around() });
   const out = await exportPdf(page, "raviteja.pdf");
   expect((await PDFDocument.load(out)).getForm().getTextField("given_name").getText()).toBe("Raviteja");
   // reopen the exported file: one clean value, the size and place of the original
