@@ -119,7 +119,7 @@ if (which === "all" || which === "journeys") {
     await page.getByTestId("page-surface").first().waitFor({ timeout: 60_000 });
     await page.waitForTimeout(1000);
     const b = await page.getByTestId("page-surface").first().boundingBox();
-    await page.getByRole("button", { name: "Text", exact: true }).click();
+    await page.getByRole("button", { name: "Add text", exact: true }).click();
     await page.mouse.click(b.x + b.width * 0.2, b.y + Math.min(b.height * 0.9, 380));
     await page.keyboard.type("Approved 09/28/2026");
     await page.keyboard.press("Escape");
@@ -132,15 +132,19 @@ if (which === "all" || which === "journeys") {
     return { ok, organizedPages: o.pages, rotation: c.rotations[0], editedHasText: e.texts.join(" ").includes("Approved"), compressed: fs.statSync(small).size };
   });
 
-  await journey("E: scanned PDF → OCR → Word → download", async () => {
+  await journey("E: scanned PDF → Word → download (a plain scan becomes editable only when the reading is reliable; otherwise it keeps its look)", async () => {
+    // Current semantics (qa/CONVERSION_SEMANTICS.md): a plain scanned letter may become editable paragraphs when the on-device
+    // reading is extremely reliable; every other scan keeps the picture of the page. Either way nothing unreliable is retyped.
     const t = pdfTruth.find((x) => x.id === "PDF-WORD-09");
     await open(page, "/pdf-to-word");
     await addPaths(page, [WORD(t.file)]);
-    await page.getByTestId("ocr-note").waitFor({ timeout: 60_000 });
+    await page.getByRole("button", { name: /Convert to Word/ }).waitFor({ timeout: 60_000 });
     const docx = await pdfToWord("journeyE");
     const d = docxCheck(docx);
     const acc = accuracy(t.blocks.map((b) => b.text), d.text);
-    return { ok: d.ok && acc.recall >= 90, docxValid: d.ok, ...acc };
+    const editable = acc.recall >= 90;
+    const picture = fs.statSync(docx).size > 10_000;
+    return { ok: d.ok && (editable || picture), docxValid: d.ok, outcome: editable ? "editable text" : picture ? "page kept as a picture" : "neither", ...acc };
   });
 
   await journey("F: PNG → WebP → compress", async () => {

@@ -442,7 +442,7 @@ if (run("repeat")) {
       await page.getByTestId("page-surface").first().waitFor({ timeout: 60_000 });
       await page.waitForTimeout(1000); // let the fit-to-page zoom settle, as a person would
       const b = await page.getByTestId("page-surface").first().boundingBox();
-      await page.getByRole("button", { name: "Text", exact: true }).click();
+      await page.getByRole("button", { name: "Add text", exact: true }).click();
       await page.mouse.click(b.x + b.width * 0.2, b.y + Math.min(b.height * 0.9, 380));
       await page.keyboard.type(textToAdd);
       await page.keyboard.press("Escape");

@@ -57,7 +57,7 @@ export function SiteHeader() {
         className={`absolute inset-0 -z-10 transition-colors duration-300 ${scrolled ? "bg-[var(--paper)]/80 backdrop-blur-xl backdrop-saturate-150" : "bg-[var(--paper)]/60 backdrop-blur-md"}`}
       />
       <div className="container-x flex h-16 items-center gap-6">
-        <Link href="/" className="-m-1 rounded-lg p-1" aria-label="TheFileConvert home">
+        <Link href="/" className="-m-1 inline-flex min-h-11 items-center rounded-lg p-1" aria-label="TheFileConvert home">
           <Wordmark />
         </Link>
 
@@ -218,7 +218,7 @@ function MobileSheet({ onClose }: { onClose: () => void }) {
       <div className="absolute inset-0 bg-[rgb(20_20_19/0.35)]" onClick={onClose} aria-hidden="true" />
       <div ref={panelRef} className="animate-sheet absolute inset-x-0 top-0 flex max-h-dvh flex-col overflow-y-auto rounded-b-[var(--radius-xl)] bg-[var(--paper)] pb-6">
         <div className="container-x flex h-16 shrink-0 items-center justify-between">
-          <Link href="/" onClick={onClose} aria-label="TheFileConvert home">
+          <Link href="/" onClick={onClose} aria-label="TheFileConvert home" className="inline-flex min-h-11 items-center">
             <Wordmark />
           </Link>
           <button

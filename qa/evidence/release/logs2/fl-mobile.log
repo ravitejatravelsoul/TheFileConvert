@@ -1,0 +1,9 @@
+PASS    Compress PDF :: mobile: homepage hand-off + custom 700 KB — output=638222 pages=3 integrity=[{"file":"m-cpdf-FL-PDF-02-scan-4mb-compressed.pdf","bytes":638222,"ok":true,"kind":"pdf","pages":3}]
+PASS    Compress Image :: mobile: custom 300 KB — output=121301 integrity=[{"file":"m-cimg-FL-IMG-01-large-compressed.jpg","bytes":121301,"ok":true,"kind":"jpeg","w":1252,"h":894,"alpha":false}]
+PASS    Image Converter :: mobile: WebP → JPG — output=1305456 integrity=[{"file":"m-conv-FL-IMG-05-photo.jpg","bytes":1305456,"ok":true,"kind":"jpeg","w":2000,"h":1500,"alpha":false}]
+PASS    Merge PDF :: mobile: touch-drag reorder then merge — firstDocument=CHARLIE integrity=[{"file":"m-merge-merged.pdf","bytes":3691,"ok":true,"kind":"pdf","pages":9}]
+PASS    Organize PDF :: mobile: touch-drag, rotate, delete, save — labels=3,1,2,4,5,6,7,8,9,10,11 rotations=0,0,90,0,0,0,0,0,0,0,0 integrity=[{"file":"m-organize-FL-PDF-05-multipage-organized.pdf","bytes":4379,"ok":true,"kind":"pdf","pages":11}]
+PASS    PDF Editor :: mobile: recognize text, add text, draw (touch), crop (touch), export — typed=Mobile check drawings=0→1 crop=575x689 text=Mobile check  Name: Jordan Smith  Date: 12/20/2026  Service: Consultation  Amount: 1250.00  Thank you for your visit. Re integrity=[{"file":"m-editor-FL-PDF-08-scanned-text-edited.pdf","bytes":753348,"ok":true,"kind":"pdf","pages":1}]
+PASS    PDF Editor :: mobile: tap the page's own text, Edit text, type, Done, export — text=Mobile edit works  Billed to:   Jordan Smith Invoice date:   12/20/2026 Service:   Consultation Total due:   $1,250.00   integrity=[{"file":"m-editor-native-FL-PDF-07-native-text-edited.pdf","bytes":2154,"ok":true,"kind":"pdf","pages":1}]
+PASS    Mobile :: tap targets ≥ 44px on the editor dock and top bar — small=[]
+PASS    Mobile :: console errors

@@ -1,6 +1,7 @@
 // OCR scenarios in the PDF editor: clean, low-res, low contrast, rotated, Spanish, mixed, multi-page.
 // Word accuracy = share of ground-truth words found among the recognised words (case/punctuation-insensitive).
 //   BASE=http://localhost:3000 node qa/scripts/fs-ocr.mjs [mobile]
+import { execFileSync } from "node:child_process";
 import { launch, open, addPaths, download, rec, save, sx, SFIX, fs, path, pdfInfo } from "./fl-lib.mjs";
 
 const mobile = process.argv[2] === "mobile";
@@ -17,7 +18,7 @@ for (const t of truth) {
     await page.getByTestId("page-surface").first().waitFor({ timeout: 60_000 });
     if (t.lang !== "eng") {
       if (mobile) await page.getByRole("button", { name: "Properties", exact: true }).click().catch(() => {});
-      if (!(await page.getByLabel("Language").isVisible())) await page.locator("summary", { hasText: "Recognize Text (OCR)" }).click();
+      if (!(await page.getByLabel("Language").isVisible())) await page.locator("summary", { hasText: "Recognize text" }).click();
       await page.getByLabel("Language").selectOption(t.lang);
       if (mobile) await page.getByRole("button", { name: "Close panel" }).click().catch(() => {});
     }
@@ -25,22 +26,25 @@ for (const t of truth) {
     await banner.waitFor({ timeout: 30_000 });
     const t0 = Date.now();
     await banner.click();
-    await page.getByRole("button", { name: /^Edit recognized word: / }).first().waitFor({ timeout: 300_000 });
-    await page.getByRole("button", { name: "Cancel" }).waitFor({ state: "hidden", timeout: 300_000 }).catch(() => {});
+    // recognition runs on this device with a progress strip; it ends by itself
+    const busy = page.getByText(/Recognizing text|Preparing page|Loading text recognition/).first();
+    await busy.waitFor({ timeout: 120_000 }).catch(() => {});
+    await busy.waitFor({ state: "hidden", timeout: 300_000 });
     const ms = Date.now() - t0;
-    const pages = await page.getByRole("button", { name: /^Go to page \d+$/ }).count();
-    const found = [];
-    for (let p = 1; p <= Math.max(1, pages); p++) {
-      if (pages > 1) {
-        await page.getByRole("button", { name: `Go to page ${p}`, exact: true }).click();
-        await page.waitForTimeout(600);
-      }
-      const labels = await page.getByRole("button", { name: /^Edit recognized word: / }).evaluateAll((els) => els.map((e) => e.getAttribute("aria-label").replace(/^Edit recognized word: /, "")));
-      found.push(...labels);
-    }
+    // Recognized text is for search, copy and accessibility: its words are NOT an editing surface.
+    const editTargets = await page.getByRole("button", { name: /^Edit recognized (word|line): / }).count();
+    // the recognized words are found by the editor's own search
     const want = words(t.truth);
+    const probe = want.find((w) => w.length >= 5) ?? want[0];
+    await page.locator("summary", { hasText: /^\s*Search/ }).click();
+    await page.getByLabel("Search document text").fill(probe);
+    const searchHit = !(await page.getByText("No matches").isVisible().catch(() => false)) && (await page.getByText(/\d+ of \d+/).first().isVisible().catch(() => false));
+    // the export keeps the scan exactly as it looks, with the recognized words as an invisible, searchable layer
+    const out = await download(page, page.getByRole("button", { name: "Export PDF" }), `fs-ocr-${t.id}${mobile ? "-m" : ""}`);
+    const info = await pdfInfo(out);
+    const exported = words(info.texts);
     const pool = new Map();
-    for (const w of found.map(norm).filter(Boolean)) pool.set(w, (pool.get(w) ?? 0) + 1);
+    for (const w of exported) pool.set(w, (pool.get(w) ?? 0) + 1);
     let hit = 0;
     const missed = [];
     for (const w of want) {
@@ -50,13 +54,11 @@ for (const t of truth) {
       } else missed.push(w);
     }
     const accuracy = +((hit / want.length) * 100).toFixed(1);
-    // The export must still be a valid PDF with the recognised words searchable.
-    const out = await download(page, page.getByRole("button", { name: "Export PDF" }), `fs-ocr-${t.id}${mobile ? "-m" : ""}`);
-    const info = await pdfInfo(out);
-    const exported = words(info.texts);
-    const searchable = want.filter((w) => exported.includes(w)).length / want.length;
-    const verdict = accuracy >= 90 ? "PASS" : accuracy >= 60 ? "LIMITED" : "FAIL";
-    rec("OCR", test + (mobile ? " [mobile]" : ""), verdict, { ms, wordsRecognized: found.length, truthWords: want.length, accuracy: `${accuracy}%`, missed: missed.slice(0, 12), exportedSearchable: `${Math.round(searchable * 100)}%`, pages: info.pages });
+    const diff = JSON.parse(execFileSync("python", ["qa/validate/pagediff.py", sx(t.name), out], { encoding: "utf8" }).trim().split(String.fromCharCode(10)).pop());
+    const visuallyUnchanged = diff.maxDiffPct !== undefined && diff.maxDiffPct < 0.05;
+    const base = accuracy >= 90 ? "PASS" : accuracy >= 60 ? "LIMITED" : "FAIL";
+    const verdict = editTargets === 0 && visuallyUnchanged && searchHit ? base : "FAIL";
+    rec("OCR", test + (mobile ? " [mobile]" : ""), verdict, { ms, truthWords: want.length, searchableAccuracy: `${accuracy}%`, missed: missed.slice(0, 12), editTargets, searchHit, pixelDiffPct: diff.maxDiffPct, pages: info.pages });
   } catch (e) {
     rec("OCR", test, "FAIL", { error: String(e).slice(0, 300) });
   }

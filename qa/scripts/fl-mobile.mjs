@@ -128,24 +128,20 @@ await step("Organize PDF", "mobile: touch-drag, rotate, delete, save", async () 
   rec("Organize PDF", "mobile: touch-drag, rotate, delete, save", ok ? "PASS" : "FAIL", { labels: labels.join(","), rotations: info.rotations.join(",") });
 });
 
-await step("PDF Editor", "mobile: OCR, edit word, add text, draw (touch), crop (touch), export", async () => {
+await step("PDF Editor", "mobile: recognize text, add text, draw (touch), crop (touch), export", async () => {
   await open(page, "/pdf-editor");
   await tapChoose("Choose PDF", ["FL-PDF-08-scanned-text.pdf"]);
   await page.getByTestId("page-surface").waitFor({ timeout: 60_000 });
   await noOverflow("editor");
   await page.getByRole("button", { name: "Recognize text" }).tap();
-  const word = page.getByRole("button", { name: "Edit recognized word: 12/20/2026" }).first();
-  await word.waitFor({ timeout: 240_000 });
+  const busy = page.getByText(/Recognizing text|Preparing page|Loading text recognition/).first();
+  await busy.waitFor({ timeout: 120_000 }).catch(() => {});
+  await busy.waitFor({ state: "hidden", timeout: 240_000 });
   await shot(page, "15-editor-mobile.png");
-  await word.tap();
-  const dlg = page.getByRole("dialog", { name: "Edit text" });
-  await dlg.locator("input[type=text]").fill("12/20/2028");
-  await dlg.getByRole("button", { name: "Save correction" }).tap();
-  await dlg.waitFor({ state: "hidden" });
 
   const S = await page.getByTestId("page-surface").boundingBox();
   const at = (fx_, fy) => [S.x + S.width * fx_, S.y + S.height * fy];
-  await page.getByRole("button", { name: "Text", exact: true }).tap();
+  await page.getByRole("button", { name: "Add text", exact: true }).tap();
   await page.touchscreen.tap(...at(0.15, 0.86));
   await page.keyboard.type("Mobile check");
   const typed = await page.getByTestId("canvas-text-editor").inputValue();
@@ -166,13 +162,33 @@ await step("PDF Editor", "mobile: OCR, edit word, add text, draw (touch), crop (
   const info = await pdfInfo(out);
   const doc = await PDFDocument.load(fs.readFileSync(out));
   const crop = doc.getPage(0).getCropBox();
-  const ok = /12\/20\/2028/.test(info.texts[0]) && /Mobile check/.test(info.texts[0]) && typed === "Mobile check" && drawAfter === drawBefore + 1 && crop.height < 780;
-  rec("PDF Editor", "mobile: OCR, edit word, add text, draw (touch), crop (touch), export", ok ? "PASS" : "FAIL", {
+  const ok = /12\/20\/2026/.test(info.texts[0]) && /Mobile check/.test(info.texts[0]) && typed === "Mobile check" && drawAfter === drawBefore + 1 && crop.height < 780;
+  rec("PDF Editor", "mobile: recognize text, add text, draw (touch), crop (touch), export", ok ? "PASS" : "FAIL", {
     typed,
     drawings: `${drawBefore}→${drawAfter}`,
     crop: `${Math.round(crop.width)}x${Math.round(crop.height)}`,
     text: info.texts[0].slice(0, 120),
   });
+});
+
+await step("PDF Editor", "mobile: tap the page's own text, Edit text, type, Done, export", async () => {
+  await open(page, "/pdf-editor");
+  await tapChoose("Choose PDF", ["FL-PDF-07-native-text.pdf"]);
+  await page.getByTestId("page-surface").waitFor({ timeout: 60_000 });
+  const block = page.locator('[data-testid="native-block"]').first();
+  await block.waitFor({ state: "attached", timeout: 60_000 });
+  await block.scrollIntoViewIfNeeded();
+  await block.tap();
+  await page.getByTestId("native-edit-button").tap();
+  const editor = page.getByTestId("native-text-editor");
+  await editor.waitFor({ timeout: 30_000 });
+  await page.keyboard.press("Control+A");
+  await page.keyboard.type("Mobile edit works");
+  await page.getByRole("button", { name: "Apply this text edit" }).tap();
+  await editor.waitFor({ state: "detached", timeout: 30_000 });
+  const out = await download(page, page.getByRole("button", { name: "Export PDF" }), "m-editor-native");
+  const info = await pdfInfo(out);
+  rec("PDF Editor", "mobile: tap the page's own text, Edit text, type, Done, export", /Mobile edit works/.test(info.texts.join(" ")) ? "PASS" : "FAIL", { text: info.texts.join(" ").slice(0, 120) });
 });
 
 await step("Mobile", "tap targets ≥ 44px on the editor dock and top bar", async () => {

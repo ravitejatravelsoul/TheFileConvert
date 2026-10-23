@@ -64,7 +64,6 @@ export function PropertiesPanel({ api, doc, toolOptions: defaultOptions, onToolO
     if (objectPatch) api.updateObject(selectedObject.id, objectPatch, { coalesceKey: `opt:${selectedObject.id}:${Object.keys(patch).join(",")}` });
   };
   const activePage = doc.pages.find((p) => p.id === state.activePageId) ?? null;
-  const scannedPages = doc.pages.filter((p) => state.workingByPage[p.id]?.analysis?.scanned);
   const nativeSel = state.selectedNative;
   const nativeAnalysis = nativeSel ? state.workingByPage[nativeSel.pageId]?.analysis : null;
   const nativeBlock = nativeSel?.kind === "text" ? (nativeAnalysis?.blocks.find((b) => b.id === nativeSel.blockId) ?? null) : null;
@@ -215,13 +214,8 @@ export function PropertiesPanel({ api, doc, toolOptions: defaultOptions, onToolO
               >
                 Recognize current page
               </button>
-              <button
-                type="button"
-                disabled={scannedPages.length === 0}
-                onClick={() => api.runOcr(scannedPages.map((p) => p.id))}
-                className="btn btn-secondary btn-sm w-full"
-              >
-                Recognize all scanned pages ({scannedPages.length})
+              <button type="button" onClick={() => void api.recognizeScanned()} className="btn btn-secondary btn-sm w-full">
+                Recognize all scanned pages
               </button>
             </div>
           )}

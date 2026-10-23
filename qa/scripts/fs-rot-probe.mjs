@@ -11,7 +11,7 @@ const surf = page.getByTestId("page-surface").first();
 await surf.scrollIntoViewIfNeeded();
 const b = await surf.boundingBox();
 await page.screenshot({ path: path.join(OUT, "rot-probe-editor-before.png") });
-await page.getByRole("button", { name: "Text", exact: true }).click();
+await page.getByRole("button", { name: "Add text", exact: true }).click();
 await page.mouse.click(b.x + b.width * 0.15, b.y + b.height * 0.15);
 await page.keyboard.type("UPRIGHT TEXT");
 await page.keyboard.press("Escape");

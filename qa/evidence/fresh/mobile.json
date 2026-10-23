@@ -57,7 +57,7 @@
   "integrity": [
    {
     "file": "m-merge-merged.pdf",
-    "bytes": 3692,
+    "bytes": 3691,
     "ok": true,
     "kind": "pdf",
     "pages": 9
@@ -82,16 +82,31 @@
  },
  {
   "tool": "PDF Editor",
-  "test": "mobile: OCR, edit word, add text, draw (touch), crop (touch), export",
+  "test": "mobile: recognize text, add text, draw (touch), crop (touch), export",
   "verdict": "PASS",
   "typed": "Mobile check",
   "drawings": "0→1",
   "crop": "575x689",
-  "text": "12/20/2028  Mobile check",
+  "text": "Mobile check  Name: Jordan Smith  Date: 12/20/2026  Service: Consultation  Amount: 1250.00  Thank you for your visit. Re",
   "integrity": [
    {
     "file": "m-editor-FL-PDF-08-scanned-text-edited.pdf",
-    "bytes": 753708,
+    "bytes": 753348,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 1
+   }
+  ]
+ },
+ {
+  "tool": "PDF Editor",
+  "test": "mobile: tap the page's own text, Edit text, type, Done, export",
+  "verdict": "PASS",
+  "text": "Mobile edit works  Billed to:   Jordan Smith Invoice date:   12/20/2026 Service:   Consultation Total due:   $1,250.00  ",
+  "integrity": [
+   {
+    "file": "m-editor-native-FL-PDF-07-native-text-edited.pdf",
+    "bytes": 2154,
     "ok": true,
     "kind": "pdf",
     "pages": 1

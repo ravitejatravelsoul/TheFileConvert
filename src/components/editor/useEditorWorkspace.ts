@@ -64,7 +64,7 @@ export interface WorkingState {
   error?: string;
 }
 
-export type NativeResult = { ok: true } | { ok: false; reason: string };
+export type NativeResult = { ok: true; analysis?: PageAnalysis } | { ok: false; reason: string };
 
 export interface SearchMatch {
   pageId: string;
@@ -288,19 +288,37 @@ export function useEditorWorkspace() {
 
   /** Builds (or rebuilds) a page's working copy and its analysis when its edits have changed. Cheap when nothing changed. */
   const ensureWorking = useCallback(
-    async (page: EditorPage) => {
+    async (page: EditorPage): Promise<PageAnalysis | null> => {
       const doc = historyRef.current.current;
       const edits = nativeEditsOf(doc, page.id);
       const forms = formsOf(doc, page);
       const sig = sigOf(edits, forms);
       const current = stateRef.current.workingByPage[page.id];
-      if (current && current.sig === sig && current.status !== "error") return;
+      if (current && current.sig === sig && current.status === "ready") return current.analysis;
+      const key = `${page.id}|${sig}`;
+      const running = inflight.current.get(key);
+      if (running) return running; // the same build is already under way: wait for it instead of starting another
       const sourceFile = doc.sourceFiles[page.sourceFileId];
-      if (!sourceFile) return;
+      if (!sourceFile) return null;
+      const job = buildNow(page, doc, edits, forms, sig, sourceFile);
+      inflight.current.set(key, job);
+      try {
+        return await job;
+      } finally {
+        inflight.current.delete(key);
+      }
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
+
+  const inflight = useRef(new Map<string, Promise<PageAnalysis | null>>());
+  const buildNow = useCallback(
+    async (page: EditorPage, doc: EditorDocument, edits: NativeEdit[], forms: FormFieldValue[], sig: string, sourceFile: File): Promise<PageAnalysis | null> => {
       const seq = (workingSeq.current[page.id] = (workingSeq.current[page.id] ?? 0) + 1);
       setState((s) => ({ ...s, workingByPage: { ...s.workingByPage, [page.id]: { ...(s.workingByPage[page.id] ?? { analysis: null, file: null }), sig, status: "loading" } } }));
       const res = await buildWorkingPage(sourceFile, page.sourceFileId, page.sourcePageIndex, edits, browserFontLoader, forms).catch((e: unknown) => ({ ok: false as const, index: -1, reason: e instanceof Error ? e.message : "The page couldn't be read." }));
-      if (workingSeq.current[page.id] !== seq) return;
+      if (workingSeq.current[page.id] !== seq) return null;
       setState((s) => ({
         ...s,
         workingByPage: {
@@ -308,6 +326,7 @@ export function useEditorWorkspace() {
           [page.id]: res.ok ? { sig, status: "ready", analysis: res.page.analysis, file: edits.length || res.page.formsApplied ? bytesToFile(res.page.bytes) : null } : { analysis: s.workingByPage[page.id]?.analysis ?? null, file: null, sig, status: "error", error: res.reason },
         },
       }));
+      return res.ok ? res.page.analysis : null;
     },
     []
   );
@@ -370,7 +389,7 @@ export function useEditorWorkspace() {
         editingText: null,
         workingByPage: { ...s.workingByPage, [pageId]: { sig, status: "ready", analysis: res.page.analysis, file: bytesToFile(res.page.bytes), editingFile: null } },
       }));
-      return { ok: true };
+      return { ok: true, analysis: res.page.analysis };
     },
     []
   );
@@ -402,7 +421,16 @@ export function useEditorWorkspace() {
     async (pageId: string, imageId: string, box: { x: number; y: number; width: number; height: number }, degrees = 0): Promise<NativeResult> => {
       const im = stateRef.current.workingByPage[pageId]?.analysis?.images.find((x) => x.id === imageId);
       if (!im) return { ok: false, reason: "That picture is no longer on the page." };
-      return commitNativeEdit(pageId, { kind: "image", id: imageId, action: { type: "transform", matrix: boxTransform(im.bbox, box, degrees) } }, "", box);
+      const res = await commitNativeEdit(pageId, { kind: "image", id: imageId, action: { type: "transform", matrix: boxTransform(im.bbox, box, degrees) } }, "", box);
+      if (res.ok && res.analysis) {
+        // the picture keeps its place in the document but gets a new id: keep it selected, so the next drag or resize needs no click
+        const cx = box.x + box.width / 2;
+        const cy = box.y + box.height / 2;
+        const dist = (b: { x: number; y: number; width: number; height: number }) => Math.hypot(b.x + b.width / 2 - cx, b.y + b.height / 2 - cy);
+        const next = [...res.analysis.images].sort((a, b) => dist(a.bbox) - dist(b.bbox))[0];
+        if (next) setState((s) => (s.selectedNative?.kind === "image" && s.selectedNative.pageId === pageId ? { ...s, selectedNative: { kind: "image", pageId, imageId: next.id } } : s));
+      }
+      return res;
     },
     [commitNativeEdit]
   );
@@ -472,6 +500,16 @@ export function useEditorWorkspace() {
     },
     [state.doc.pages, state.doc.sourceFiles, state.ocrLanguage]
   );
+
+  /** Recognizes the text of every scanned page that has none yet (a page is scanned when its own analysis says so). */
+  const recognizeScanned = useCallback(async () => {
+    const ids: string[] = [];
+    for (const p of historyRef.current.current.pages) {
+      const analysis = await ensureWorking(p);
+      if (analysis?.scanned && !stateRef.current.ocrResultsByPage[p.id]) ids.push(p.id);
+    }
+    if (ids.length) await runOcr(ids);
+  }, [ensureWorking, runOcr]);
 
   const cancelOcr = useCallback(() => {
     ocrCancelRef.current = true;
@@ -748,6 +786,7 @@ export function useEditorWorkspace() {
     deleteNativeImage,
     replaceNativeImage,
     runOcr,
+    recognizeScanned,
     cancelOcr,
     setOcrLanguage,
     setShowOcrOverlay,

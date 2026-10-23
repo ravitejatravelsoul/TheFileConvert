@@ -78,7 +78,9 @@ await flow("pdf-editor (OCR + export)", async () => {
   await open(page, "/pdf-editor");
   await addFiles(page, ["FL-PDF-08-scanned-text.pdf"]);
   await page.getByRole("button", { name: "Recognize text" }).click();
-  await page.getByRole("button", { name: /Edit recognized word: 12\/20\/2026/ }).first().waitFor({ timeout: 240_000 });
+  const busy = page.getByText(/Recognizing text|Preparing page|Loading text recognition/).first();
+  await busy.waitFor({ timeout: 120_000 }).catch(() => {});
+  await busy.waitFor({ state: "hidden", timeout: 240_000 });
   const [dl] = await Promise.all([page.waitForEvent("download"), page.getByRole("button", { name: "Export PDF" }).click()]);
   await dl.path();
 });

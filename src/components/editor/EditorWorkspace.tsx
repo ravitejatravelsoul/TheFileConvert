@@ -17,6 +17,7 @@ import { TextEditModal } from "./TextEditModal";
 import { SignaturePad } from "./SignaturePad";
 import { DEFAULT_TOOL_OPTIONS, PRESET_COLORS, type ToolOptions } from "./toolOptions";
 import { useMediaQuery } from "./useMediaQuery";
+import { useDialogFocus } from "./useDialogFocus";
 
 /**
  * The full-screen editing workspace. Loaded on demand (see EditorLauncher) once a PDF has been
@@ -70,6 +71,25 @@ export default function EditorWorkspace({ file, onExit }: { file: File; onExit: 
     if (activePage) void api.ensureWorking(activePage);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activePage?.id, state.doc]);
+
+  // Read the other pages in the background (a page at a time, yielding in between) so a scan anywhere in the document is known:
+  // the "Scanned page" prompt must not depend on which page happens to be open.
+  const pageCount = state.doc.pages.length;
+  useEffect(() => {
+    if (state.stage !== "ready") return;
+    let cancelled = false;
+    (async () => {
+      for (const p of state.doc.pages.slice(0, 60)) {
+        if (cancelled) return;
+        await api.ensureWorking(p);
+        await new Promise((r) => setTimeout(r, 0));
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state.stage, pageCount, state.doc.pages[0]?.id]);
 
   // Searching has to cover the whole document, not just the pages that have been viewed.
   const hasSearchQuery = state.searchQuery.trim().length > 0;
@@ -262,7 +282,8 @@ export default function EditorWorkspace({ file, onExit }: { file: File; onExit: 
   const currentDocId = state.doc.pages[0]?.id ?? null;
   const detectionBannerDismissed = detectionBannerDismissedForDocId === currentDocId;
   const activeScanned = Boolean(activePage && state.workingByPage[activePage.id]?.analysis?.scanned);
-  const unrecognized = activeScanned && activePage && !state.ocrResultsByPage[activePage.id] ? [activePage.id] : [];
+  // every page already read that turned out to be a scan and has no recognized text yet
+  const unrecognized = state.doc.pages.filter((p) => state.workingByPage[p.id]?.analysis?.scanned && !state.ocrResultsByPage[p.id]).map((p) => p.id);
   const showScanBanner = unrecognized.length > 0 && !detectionBannerDismissed && !state.ocrProgress;
 
   const dockProps = {
@@ -307,14 +328,14 @@ export default function EditorWorkspace({ file, onExit }: { file: File; onExit: 
         {showScanBanner && (
           <Strip tone="accent" icon={<IconScan className="h-4 w-4" />}>
             <span className="flex-1">
-              <strong className="font-semibold">Scanned page.</strong>{" "}
+              <strong className="font-semibold">{activeScanned ? "Scanned page." : `${unrecognized.length} scanned page${unrecognized.length === 1 ? "" : "s"} in this document.`}</strong>{" "}
               <span className="hidden sm:inline">Its text is part of the picture, so it can&apos;t be edited as text. You can still add text, a signature, highlights, drawings, whiteout or crop — or recognize the text on this device to make it searchable.</span>
             </span>
             <button
               type="button"
               onClick={async () => {
                 setDetectionBannerDismissedForDocId(currentDocId);
-                await api.runOcr(unrecognized);
+                await api.recognizeScanned();
               }}
               className="btn btn-primary btn-sm"
             >
@@ -495,10 +516,12 @@ function Strip({ tone, icon, role, children }: { tone: "danger" | "info" | "acce
 
 /** Bottom sheet for phones, with a visible close button (there is no Escape key on a phone). */
 function Sheet({ title, onClose, children }: { title: string; onClose: () => void; children: React.ReactNode }) {
+  const panelRef = useRef<HTMLDivElement>(null);
+  useDialogFocus(panelRef, onClose);
   return (
     <div className="fixed inset-0 z-[75] lg:hidden" role="dialog" aria-modal="true" aria-label={title}>
       <div className="absolute inset-0 bg-[rgb(20_20_19/0.4)]" onClick={onClose} aria-hidden="true" />
-      <div className="animate-sheet absolute inset-x-0 bottom-0 flex max-h-[80dvh] flex-col rounded-t-[var(--radius-xl)] bg-[var(--surface)] shadow-[var(--shadow-3)]">
+      <div ref={panelRef} tabIndex={-1} className="animate-sheet outline-none absolute inset-x-0 bottom-0 flex max-h-[80dvh] flex-col rounded-t-[var(--radius-xl)] bg-[var(--surface)] shadow-[var(--shadow-3)]">
         <div className="flex shrink-0 items-center justify-between border-b border-[var(--line)] px-4 py-2">
           <p className="font-semibold tracking-[-0.01em]">{title}</p>
           <button type="button" onClick={onClose} aria-label="Close panel" className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-[var(--surface-2)]">

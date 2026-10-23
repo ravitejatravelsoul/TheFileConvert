@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { SmartDrop } from "@/components/home/SmartDrop";
 import { CompressVignette, ConvertVignette, EditorVignette, ImageCompressVignette, ImagesVignette, MergeVignette } from "@/components/home/Vignettes";
@@ -6,6 +7,9 @@ import { Faq } from "@/components/tool/Faq";
 import { IconArrowRight, IconCheck, IconDevice, IconLock, IconPdf, IconScan, IconTarget } from "@/components/icons";
 import { getTool, type ToolId } from "@/lib/tools/registry";
 import { SITE_NAME, SITE_URL, jsonLdScript } from "@/lib/seo";
+
+/** The home page is its own canonical URL (the other pages set theirs through pageMetadata). */
+export const metadata: Metadata = { alternates: { canonical: "/" } };
 
 const POPULAR: { id: ToolId; art: React.ReactNode; wide?: boolean }[] = [
   { id: "compress-pdf", art: <CompressVignette />, wide: true },

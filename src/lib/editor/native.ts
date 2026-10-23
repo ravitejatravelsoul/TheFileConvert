@@ -106,7 +106,11 @@ function styleOf(run: { font: { bold: boolean; italic: boolean; fontClass: "sans
   return { bold: run.font.bold, italic: run.font.italic, fontClass: run.font.fontClass, family: run.font.family, size: run.pageSize, color: run.color };
 }
 
-export function analyzeContent(content: PageContent): PageAnalysis {
+/** A page that is a picture of a page: a picture covers most of it and there is little real text (a heading over a scan counts). */
+const SCAN_COVER = 0.6;
+const SCAN_TEXT_LIMIT = 300;
+
+export function analyzeContent(content: PageContent, pageArea?: number): PageAnalysis {
   const lines = buildLines(content.runs);
   const blocks = buildBlocks(lines);
   const textChars = content.runs.filter((r) => !r.invisible).reduce((n, r) => n + r.glyphs.filter((g) => g.unicode.trim()).length, 0);
@@ -135,12 +139,16 @@ export function analyzeContent(content: PageContent): PageAnalysis {
     };
   });
   const images: ImageInfo[] = content.images.map((im) => ({ id: im.id, bbox: im.bbox, matrix: im.matrix, pixelWidth: im.pixelWidth, pixelHeight: im.pixelHeight, inline: im.inline, shared: im.shared }));
-  return { blocks: infos, images, textChars, scanned: textChars < 12 && images.some((im) => im.bbox.width * im.bbox.height > 0) };
+  return { blocks: infos, images, textChars, scanned: pageArea
+      ? images.some((im) => im.bbox.width * im.bbox.height >= SCAN_COVER * pageArea) && textChars < SCAN_TEXT_LIMIT
+      : textChars < 12 && images.some((im) => im.bbox.width * im.bbox.height > 0) };
 }
 
 export async function analyzeBytes(bytes: Uint8Array): Promise<PageAnalysis> {
   const doc = await PDFDocument.load(bytes, { ignoreEncryption: true, updateMetadata: false });
-  return analyzeContent(interpretPage(doc.getPage(0)));
+  const page = doc.getPage(0);
+  const { width, height } = page.getSize();
+  return analyzeContent(interpretPage(page), width * height);
 }
 
 function findBlock(content: PageContent, id: string): TextBlock | undefined {

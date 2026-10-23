@@ -14,7 +14,7 @@
   "leakedRequests": [],
   "psnr": 99,
   "ssim": 1,
-  "ms": 955,
+  "ms": 284,
   "integrity": [
    {
     "file": "fs-conv-IMAGE-B-p-png-IMAGE-B-photo-500k.png",
@@ -42,7 +42,7 @@
   "leakedRequests": [],
   "psnr": 37.59,
   "ssim": 0.9681,
-  "ms": 933,
+  "ms": 862,
   "integrity": [
    {
     "file": "fs-conv-X-portrai-webp-X-portrait-1200x1800.webp",
@@ -74,7 +74,7 @@
   "leakedRequests": [],
   "psnr": 43.17,
   "ssim": 0.9838,
-  "ms": 380,
+  "ms": 238,
   "integrity": [
    {
     "file": "fs-conv-IMAGE-F-t-jpeg-IMAGE-F-transparent.jpg",
@@ -102,7 +102,7 @@
   "leakedRequests": [],
   "psnr": 45.2,
   "ssim": 0.9914,
-  "ms": 890,
+  "ms": 940,
   "integrity": [
    {
     "file": "fs-conv-IMAGE-F-t-webp-IMAGE-F-transparent.webp",
@@ -130,7 +130,7 @@
   "leakedRequests": [],
   "psnr": 34.9,
   "ssim": 0.9457,
-  "ms": 275,
+  "ms": 178,
   "integrity": [
    {
     "file": "fs-conv-X-odd-100-jpeg-X-odd-1001x777.jpg",
@@ -158,7 +158,7 @@
   "leakedRequests": [],
   "psnr": 35.35,
   "ssim": 0.9981,
-  "ms": 93,
+  "ms": 77,
   "integrity": [
    {
     "file": "fs-conv-X-tiny-64-webp-X-tiny-64x48.webp",
@@ -186,7 +186,7 @@
   "leakedRequests": [],
   "psnr": 41.43,
   "ssim": 0.9834,
-  "ms": 895,
+  "ms": 373,
   "integrity": [
    {
     "file": "fs-conv-IMAGE-H-p-jpeg-IMAGE-H-photo.jpg",
@@ -214,7 +214,7 @@
   "leakedRequests": [],
   "psnr": 99,
   "ssim": 1,
-  "ms": 275,
+  "ms": 124,
   "integrity": [
    {
     "file": "fs-conv-X-transpa-png-X-transparent.png",
@@ -240,7 +240,7 @@
   "corner": null,
   "exifGone": true,
   "leakedRequests": [],
-  "ms": 104,
+  "ms": 126,
   "integrity": [
    {
     "file": "fs-conv-IMAGE-I-v-png-IMAGE-I-vector.png",
@@ -266,7 +266,7 @@
   "corner": null,
   "exifGone": true,
   "leakedRequests": [],
-  "ms": 160,
+  "ms": 134,
   "integrity": [
    {
     "file": "fs-conv-IMAGE-I-v-jpeg-IMAGE-I-vector.jpg",
@@ -292,7 +292,7 @@
   "corner": null,
   "exifGone": true,
   "leakedRequests": [],
-  "ms": 266,
+  "ms": 128,
   "integrity": [
    {
     "file": "fs-conv-IMAGE-I-v-webp-IMAGE-I-vector.webp",
@@ -318,7 +318,7 @@
   "corner": null,
   "exifGone": true,
   "leakedRequests": [],
-  "ms": 103,
+  "ms": 67,
   "integrity": [
    {
     "file": "fs-conv-IMAGE-J-u-png-IMAGE-J-unsafe.png",
@@ -346,7 +346,7 @@
   "leakedRequests": [],
   "psnr": 99,
   "ssim": 1,
-  "ms": 929,
+  "ms": 261,
   "integrity": [
    {
     "file": "fs-conv-IMAGE-K-e-png-IMAGE-K-exif-rich.png",
@@ -374,7 +374,7 @@
   "leakedRequests": [],
   "psnr": 38.09,
   "ssim": 0.9911,
-  "ms": 47169,
+  "ms": 23028,
   "integrity": [
    {
     "file": "fs-conv-IMAGE-E-p-webp-IMAGE-E-photo-15mb.webp",
@@ -402,7 +402,7 @@
   "leakedRequests": [],
   "psnr": 40.3,
   "ssim": 0.9839,
-  "ms": 931,
+  "ms": 415,
   "integrity": [
    {
     "file": "fs-conv-IMAGE-G-l-jpeg-IMAGE-G-large-photo.jpg",
@@ -430,7 +430,7 @@
   "leakedRequests": [],
   "psnr": 38.21,
   "ssim": 0.9789,
-  "ms": 180,
+  "ms": 67,
   "integrity": [
    {
     "file": "fs-conv-X-jpeg-na-webp-X-jpeg-named.webp",
@@ -471,7 +471,7 @@
   "dims": "1224x1584",
   "aspectOk": true,
   "nonBlank": true,
-  "ms": 967,
+  "ms": 604,
   "integrity": [
    {
     "file": "fs-p2i-OCR-A-OCR-A-clean-300dpi-page-1.png",
@@ -493,7 +493,7 @@
   "dims": "1224x1584 1224x1584 1224x1584 1224x1584 1224x1584 1224x1584 1224x1584 1224x1584 1224x1584 1224x1584",
   "aspectOk": true,
   "nonBlank": true,
-  "ms": 1485,
+  "ms": 1266,
   "integrity": [
    {
     "file": "fs-p2i-PDF-H-PDF-H-multipage-text-image-images.zip",
@@ -513,7 +513,7 @@
   "dims": "1224x1584 1584x1224 1224x1584 1584x1224",
   "aspectOk": true,
   "nonBlank": true,
-  "ms": 930,
+  "ms": 1163,
   "integrity": [
    {
     "file": "fs-p2i-PDF-I-PDF-I-rotated-images.zip",
@@ -533,7 +533,7 @@
   "dims": "1224x1584 1190x1684 1224x2016 1190x840 1584x2448 452x1200",
   "aspectOk": true,
   "nonBlank": true,
-  "ms": 955,
+  "ms": 1133,
   "integrity": [
    {
     "file": "fs-p2i-PDF-J-PDF-J-mixed-page-sizes-images.zip",
@@ -553,7 +553,7 @@
   "dims": "1190x1684 1190x1684",
   "aspectOk": true,
   "nonBlank": true,
-  "ms": 958,
+  "ms": 1299,
   "integrity": [
    {
     "file": "fs-p2i-PDF-C-PDF-C-scan-3.8mb-incremental-images.zip",
@@ -573,7 +573,7 @@
   "dims": "1224x1584 1224x1584",
   "aspectOk": true,
   "nonBlank": true,
-  "ms": 381,
+  "ms": 435,
   "integrity": [
    {
     "file": "fs-p2i-PDF-K-PDF-K-native-text-images.zip",
@@ -593,7 +593,7 @@
   "dims": "1224x1584 1224x1584 1224x1584 1224x1584 1224x1584 1224x1584",
   "aspectOk": true,
   "nonBlank": true,
-  "ms": 938,
+  "ms": 1017,
   "integrity": [
    {
     "file": "fs-p2i-PDF-Q-PDF-Q-owner-password-only-images.zip",
@@ -635,12 +635,12 @@
   "pages": 2,
   "sizes": "1800x1200 900x1350",
   "corner": null,
-  "output": 1205812,
-  "ms": 303,
+  "output": 1205813,
+  "ms": 191,
   "integrity": [
    {
     "file": "fs-i2p-2-Fittoimage-images.pdf",
-    "bytes": 1205812,
+    "bytes": 1205813,
     "ok": true,
     "kind": "pdf",
     "pages": 2
@@ -654,12 +654,12 @@
   "pages": 2,
   "sizes": "595x842 842x595",
   "corner": null,
-  "output": 1205862,
-  "ms": 295,
+  "output": 1205863,
+  "ms": 133,
   "integrity": [
    {
     "file": "fs-i2p-2-A4-images.pdf",
-    "bytes": 1205862,
+    "bytes": 1205863,
     "ok": true,
     "kind": "pdf",
     "pages": 2
@@ -677,12 +677,12 @@
    255,
    255
   ],
-  "output": 2685027,
-  "ms": 1293,
+  "output": 2685028,
+  "ms": 584,
   "integrity": [
    {
     "file": "fs-i2p-1-Letter-IMAGE-F-transparent.pdf",
-    "bytes": 2685027,
+    "bytes": 2685028,
     "ok": true,
     "kind": "pdf",
     "pages": 1
@@ -696,12 +696,12 @@
   "pages": 2,
   "sizes": "842x595 842x595",
   "corner": null,
-  "output": 22685406,
-  "ms": 1512,
+  "output": 22685407,
+  "ms": 892,
   "integrity": [
    {
     "file": "fs-i2p-2-A4-images.pdf",
-    "bytes": 22685406,
+    "bytes": 22685407,
     "ok": true,
     "kind": "pdf",
     "pages": 2
@@ -716,7 +716,7 @@
   "sizes": "900x1200",
   "corner": null,
   "output": 779702,
-  "ms": 426,
+  "ms": 198,
   "integrity": [
    {
     "file": "fs-i2p-1-Fittoimage-IMAGE-K-exif-rich.pdf",
@@ -735,7 +735,7 @@
   "sizes": "842x595 842x595 842x595 842x595 595x842 842x595 595x842 842x595 842x595 842x595",
   "corner": null,
   "output": 11090177,
-  "ms": 3458,
+  "ms": 2125,
   "integrity": [
    {
     "file": "fs-i2p-10-A4-images.pdf",
@@ -769,12 +769,12 @@
   "pages": "5/5",
   "sizesOk": true,
   "rotOk": true,
-  "output": 4553,
-  "ms": 165,
+  "output": 4551,
+  "ms": 98,
   "integrity": [
    {
     "file": "fs-merge-2-2PDFs-merged.pdf",
-    "bytes": 4553,
+    "bytes": 4551,
     "ok": true,
     "kind": "pdf",
     "pages": 5
@@ -790,7 +790,7 @@
   "sizesOk": true,
   "rotOk": true,
   "output": 6345,
-  "ms": 150,
+  "ms": 91,
   "integrity": [
    {
     "file": "fs-merge-3-3PDFs-merged.pdf",
@@ -811,7 +811,7 @@
   "rotOk": true,
   "formNote": "form fields flattened/dropped (visual appearance kept)",
   "output": 14932245,
-  "ms": 469,
+  "ms": 266,
   "integrity": [
    {
     "file": "fs-merge-10-10PDF-merged.pdf",
@@ -832,7 +832,7 @@
   "rotOk": true,
   "formNote": "form fields flattened/dropped (visual appearance kept)",
   "output": 3628584,
-  "ms": 256,
+  "ms": 106,
   "integrity": [
    {
     "file": "fs-merge-3-mixed-merged.pdf",
@@ -852,7 +852,7 @@
   "sizesOk": true,
   "rotOk": true,
   "output": 647540,
-  "ms": 152,
+  "ms": 75,
   "integrity": [
    {
     "file": "fs-merge-2-rotate-merged.pdf",
@@ -871,12 +871,12 @@
   "pages": "8/8",
   "sizesOk": true,
   "rotOk": true,
-  "output": 4092,
-  "ms": 130,
+  "output": 4090,
+  "ms": 92,
   "integrity": [
    {
     "file": "fs-merge-2-mixed-merged.pdf",
-    "bytes": 4092,
+    "bytes": 4090,
     "ok": true,
     "kind": "pdf",
     "pages": 8
@@ -908,7 +908,7 @@
   "integrity": [
    {
     "file": "fs-merge-after-corrupt-merged.pdf",
-    "bytes": 4552,
+    "bytes": 4551,
     "ok": true,
     "kind": "pdf",
     "pages": 5
@@ -991,11 +991,11 @@
   "test": "multiple typed ranges 1-2,5,9-10",
   "verdict": "PASS",
   "pages": "1,2,5,9,10",
-  "output": 2652922,
+  "output": 2652918,
   "integrity": [
    {
     "file": "fs-split-1_2_5_9_10-PDF-H-multipage-text-image-pages-1-2_5_9-10.pdf",
-    "bytes": 2652922,
+    "bytes": 2652918,
     "ok": true,
     "kind": "pdf",
     "pages": 5
@@ -1015,7 +1015,7 @@
   "integrity": [
    {
     "file": "fs-split-every-PDF-H-PDF-H-multipage-text-image-pages.zip",
-    "bytes": 5323039,
+    "bytes": 5323044,
     "ok": true,
     "kind": "zip",
     "entries": 10
@@ -1081,11 +1081,11 @@
   "verdict": "PASS",
   "labels": "1,2,3,4,5,6,7,8,9",
   "rotations": "0,0,0,0,0,0,0,0,0",
-  "output": 4805655,
+  "output": 4805656,
   "integrity": [
    {
     "file": "fs-org-deletep-PDF-H-multipage-text-image-organized.pdf",
-    "bytes": 4805655,
+    "bytes": 4805656,
     "ok": true,
     "kind": "pdf",
     "pages": 9
@@ -1098,11 +1098,11 @@
   "verdict": "PASS",
   "labels": "4,1,1,2,3,5,6,7,8,10",
   "rotations": "0,0,0,270,0,0,0,0,0,0",
-  "output": 4773314,
+  "output": 4773316,
   "integrity": [
    {
     "file": "fs-org-combined-PDF-H-multipage-text-image-organized.pdf",
-    "bytes": 4773314,
+    "bytes": 4773316,
     "ok": true,
     "kind": "pdf",
     "pages": 10
@@ -1114,11 +1114,11 @@
   "test": "incremental-update scan: rotate + save",
   "verdict": "PASS",
   "rotations": "90,0",
-  "output": 3623901,
+  "output": 3623902,
   "integrity": [
    {
     "file": "fs-org-genone-PDF-C-scan-38mb-incremental-organized.pdf",
-    "bytes": 3623901,
+    "bytes": 3623902,
     "ok": true,
     "kind": "pdf",
     "pages": 2
@@ -1166,26 +1166,8 @@
  {
   "tool": "PDF Editor",
   "test": "repeat use: second document in the same tab (no stale state)",
-  "verdict": "PASS",
-  "firstPages": 2,
-  "secondPages": 3,
-  "secondText": "Annual Summary — Page 1  Quarterly operations review. Revenu",
-  "integrity": [
-   {
-    "file": "fs-repeat-editor-1-PDF-K-native-text-edited.pdf",
-    "bytes": 2744,
-    "ok": true,
-    "kind": "pdf",
-    "pages": 2
-   },
-   {
-    "file": "fs-repeat-editor-2-PDF-N-metadata-rich-edited.pdf",
-    "bytes": 3493,
-    "ok": true,
-    "kind": "pdf",
-    "pages": 3
-   }
-  ]
+  "verdict": "FAIL",
+  "error": "TimeoutError: locator.click: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('button', { name: 'Text', exact: true })\u001b[22m\n"
  },
  {
   "tool": "Errors",
@@ -1743,11 +1725,11 @@
   "integrity": [
    {
     "file": "fs-repeat-CompressImage-1-IMAGE-B-photo-500k-compressed.jpg",
-    "bytes": 244707,
+    "bytes": 243433,
     "ok": true,
     "kind": "jpeg",
-    "w": 1426,
-    "h": 950,
+    "w": 1482,
+    "h": 988,
     "alpha": false
    },
    {
@@ -1855,7 +1837,7 @@
   "integrity": [
    {
     "file": "fs-repeat-SplitPDF-1-PDF-H-multipage-text-image-pages-2.pdf",
-    "bytes": 518541,
+    "bytes": 518542,
     "ok": true,
     "kind": "pdf",
     "pages": 1
@@ -1887,7 +1869,7 @@
    },
    {
     "file": "fs-repeat-OrganizePDF-2-PDF-K-native-text-organized.pdf",
-    "bytes": 2292,
+    "bytes": 2293,
     "ok": true,
     "kind": "pdf",
     "pages": 2

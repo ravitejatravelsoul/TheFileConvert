@@ -16,10 +16,10 @@ export async function openEditor(page: Page, filePath: string) {
 }
 
 export async function goToPage(page: Page, n: number) {
-  if (n === 1) return;
   await page.getByRole("button", { name: `Go to page ${n}`, exact: true }).click();
   await expect(page.locator('[data-testid="page-surface"]').first()).toBeVisible();
-  await expect(page.locator('[data-testid="native-block"], [data-testid="native-image"]').first()).toBeAttached({ timeout: 30_000 });
+  await expect(page.locator('[data-testid="page-surface"]').first()).toHaveAttribute("data-page-number", String(n), { timeout: 15_000 });
+  await expect(page.locator('[data-testid="native-block"], [data-testid="native-image"], [data-testid="form-field"]').first()).toBeAttached({ timeout: 30_000 });
 }
 
 /** The hit target of the block of text that contains `fragment`. */

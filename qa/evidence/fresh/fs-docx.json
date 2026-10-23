@@ -7,8 +7,8 @@
   "kind": "docx",
   "input": 37010,
   "meta": "37 KB · Word document · 1 page",
-  "ms": 405,
-  "output": 8813,
+  "ms": 191,
+  "output": 8814,
   "pages": 1,
   "pictures": 0,
   "links": 0,
@@ -26,7 +26,7 @@
   "integrity": [
    {
     "file": "w2p-WORD-01-simple-WORD-01-simple.pdf",
-    "bytes": 8813,
+    "bytes": 8814,
     "ok": true,
     "kind": "pdf",
     "pages": 1
@@ -41,8 +41,8 @@
   "kind": "docx",
   "input": 36892,
   "meta": "37 KB · Word document · 1 page",
-  "ms": 369,
-  "output": 15532,
+  "ms": 378,
+  "output": 15533,
   "pages": 1,
   "pictures": 0,
   "links": 0,
@@ -63,7 +63,7 @@
   "integrity": [
    {
     "file": "w2p-WORD-02-headings-WORD-02-headings.pdf",
-    "bytes": 15532,
+    "bytes": 15533,
     "ok": true,
     "kind": "pdf",
     "pages": 1
@@ -78,7 +78,7 @@
   "kind": "docx",
   "input": 36903,
   "meta": "37 KB · Word document · 1 page",
-  "ms": 439,
+  "ms": 468,
   "output": 44698,
   "pages": 1,
   "pictures": 0,
@@ -125,8 +125,8 @@
   "kind": "docx",
   "input": 36772,
   "meta": "37 KB · Word document · 1 page",
-  "ms": 338,
-  "output": 9255,
+  "ms": 208,
+  "output": 9256,
   "pages": 1,
   "pictures": 0,
   "links": 0,
@@ -147,7 +147,7 @@
   "integrity": [
    {
     "file": "w2p-WORD-04-lists-WORD-04-lists.pdf",
-    "bytes": 9255,
+    "bytes": 9256,
     "ok": true,
     "kind": "pdf",
     "pages": 1
@@ -162,8 +162,8 @@
   "kind": "docx",
   "input": 36920,
   "meta": "37 KB · Word document · 1 page",
-  "ms": 388,
-  "output": 13983,
+  "ms": 298,
+  "output": 13985,
   "pages": 1,
   "pictures": 0,
   "links": 0,
@@ -184,7 +184,7 @@
   "integrity": [
    {
     "file": "w2p-WORD-05-table-WORD-05-table.pdf",
-    "bytes": 13983,
+    "bytes": 13985,
     "ok": true,
     "kind": "pdf",
     "pages": 1
@@ -199,8 +199,8 @@
   "kind": "docx",
   "input": 57489,
   "meta": "57 KB · Word document · 1 page",
-  "ms": 392,
-  "output": 123899,
+  "ms": 389,
+  "output": 123900,
   "pages": 1,
   "pictures": 2,
   "links": 0,
@@ -221,7 +221,7 @@
   "integrity": [
    {
     "file": "w2p-WORD-06-images-WORD-06-images.pdf",
-    "bytes": 123899,
+    "bytes": 123900,
     "ok": true,
     "kind": "pdf",
     "pages": 1
@@ -236,8 +236,8 @@
   "kind": "docx",
   "input": 36668,
   "meta": "37 KB · Word document · 3 pages",
-  "ms": 384,
-  "output": 11287,
+  "ms": 336,
+  "output": 11288,
   "pages": 3,
   "pictures": 0,
   "links": 0,
@@ -257,7 +257,7 @@
   "integrity": [
    {
     "file": "w2p-WORD-07-page-breaks-WORD-07-page-breaks.pdf",
-    "bytes": 11287,
+    "bytes": 11288,
     "ok": true,
     "kind": "pdf",
     "pages": 3
@@ -272,8 +272,8 @@
   "kind": "docx",
   "input": 36901,
   "meta": "37 KB · Word document · 1 page",
-  "ms": 471,
-  "output": 18293,
+  "ms": 357,
+  "output": 18294,
   "pages": 1,
   "pictures": 0,
   "links": 0,
@@ -293,7 +293,7 @@
   "integrity": [
    {
     "file": "w2p-WORD-08-special-characters-WORD-08-special-characters.pdf",
-    "bytes": 18293,
+    "bytes": 18294,
     "ok": true,
     "kind": "pdf",
     "pages": 1
@@ -308,8 +308,8 @@
   "kind": "docx",
   "input": 36858,
   "meta": "37 KB · Word document · 1 page",
-  "ms": 328,
-  "output": 8976,
+  "ms": 338,
+  "output": 8977,
   "pages": 1,
   "pictures": 0,
   "links": 0,
@@ -329,7 +329,7 @@
   "integrity": [
    {
     "file": "w2p-WORD-09-alignment-WORD-09-alignment.pdf",
-    "bytes": 8976,
+    "bytes": 8977,
     "ok": true,
     "kind": "pdf",
     "pages": 1
@@ -344,8 +344,8 @@
   "kind": "docx",
   "input": 38142,
   "meta": "38 KB · Word document · 3 pages",
-  "ms": 417,
-  "output": 15597,
+  "ms": 389,
+  "output": 15596,
   "pages": 3,
   "pictures": 0,
   "links": 0,
@@ -366,7 +366,7 @@
   "integrity": [
    {
     "file": "w2p-WORD-10-header-footer-WORD-10-header-footer.pdf",
-    "bytes": 15597,
+    "bytes": 15596,
     "ok": true,
     "kind": "pdf",
     "pages": 3
@@ -381,7 +381,7 @@
   "kind": "docx",
   "input": 38643,
   "meta": "39 KB · Word document · 23 pages",
-  "ms": 977,
+  "ms": 816,
   "output": 63974,
   "pages": 23,
   "pictures": 0,
@@ -417,7 +417,7 @@
   "kind": "docx",
   "input": 41716,
   "meta": "42 KB · Word document · 2 pages",
-  "ms": 454,
+  "ms": 425,
   "output": 34336,
   "pages": 2,
   "pictures": 1,
@@ -459,8 +459,8 @@
   "kind": "docx",
   "input": 3646378,
   "meta": "3.65 MB · Word document · 2 pages",
-  "ms": 995,
-  "output": 3638792,
+  "ms": 427,
+  "output": 3638794,
   "pages": 2,
   "pictures": 3,
   "links": 0,
@@ -480,7 +480,7 @@
   "integrity": [
    {
     "file": "w2p-WORD-15-photos-WORD-15-photos.pdf",
-    "bytes": 3638792,
+    "bytes": 3638794,
     "ok": true,
     "kind": "pdf",
     "pages": 2
@@ -555,8 +555,8 @@
   "kind": "docx",
   "input": 4195,
   "meta": "4.2 KB · Word document · 1 page",
-  "ms": 318,
-  "output": 16856,
+  "ms": 328,
+  "output": 16857,
   "pages": 1,
   "pictures": 0,
   "links": 0,
@@ -574,7 +574,7 @@
   "integrity": [
    {
     "file": "w2p-WORD-14-from-pdf-to-word-WORD-14-from-pdf-to-word.pdf",
-    "bytes": 16856,
+    "bytes": 16857,
     "ok": true,
     "kind": "pdf",
     "pages": 1

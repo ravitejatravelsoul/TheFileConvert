@@ -7,7 +7,7 @@
   "wordPdf": 3638794,
   "compressed": 965516,
   "pages": 2,
-  "ms": 13119,
+  "ms": 9966,
   "uploads": [],
   "integrity": [
    {
@@ -34,12 +34,12 @@
   "recall": 100,
   "order": 100,
   "pages": 1,
-  "ms": 6660,
+  "ms": 5693,
   "uploads": [],
   "integrity": [
    {
     "file": "journeyB-1-PDF-WORD-03-headings.docx",
-    "bytes": 4044,
+    "bytes": 4103,
     "ok": true,
     "kind": "docx",
     "pages": 1,
@@ -49,7 +49,7 @@
    },
    {
     "file": "journeyB-2-journeyB-1-PDF-WORD-03-headings.pdf",
-    "bytes": 16855,
+    "bytes": 16857,
     "ok": true,
     "kind": "pdf",
     "pages": 1
@@ -61,16 +61,16 @@
   "test": "C: JPG → PDF → merge with another PDF → compress",
   "verdict": "PASS",
   "ok": true,
-  "imagePdf": 2976468,
+  "imagePdf": 2976470,
   "mergedPages": 3,
   "merged": 2978159,
   "compressed": 984331,
-  "ms": 21107,
+  "ms": 17113,
   "uploads": [],
   "integrity": [
    {
     "file": "journeyC-1-IMAGE-C-photo-3mb.pdf",
-    "bytes": 2976468,
+    "bytes": 2976470,
     "ok": true,
     "kind": "pdf",
     "pages": 1
@@ -100,12 +100,12 @@
   "rotation": 90,
   "editedHasText": true,
   "compressed": 469935,
-  "ms": 16342,
+  "ms": 10543,
   "uploads": [],
   "integrity": [
    {
     "file": "journeyD-1-PDF-H-multipage-text-image-organized.pdf",
-    "bytes": 4805664,
+    "bytes": 4805665,
     "ok": true,
     "kind": "pdf",
     "pages": 9
@@ -129,25 +129,8 @@
  {
   "tool": "Journey",
   "test": "E: scanned PDF → OCR → Word → download",
-  "verdict": "PASS",
-  "ok": true,
-  "docxValid": true,
-  "recall": 100,
-  "order": 100,
-  "ms": 8338,
-  "uploads": [],
-  "integrity": [
-   {
-    "file": "journeyE-PDF-WORD-09-scanned.docx",
-    "bytes": 3850,
-    "ok": true,
-    "kind": "docx",
-    "pages": 1,
-    "paragraphs": 7,
-    "tables": 0,
-    "pictures": 0
-   }
-  ]
+  "verdict": "FAIL",
+  "error": "TimeoutError: locator.waitFor: Timeout 60000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByTestId('ocr-note') to be visible\u001b[22m\n"
  },
  {
   "tool": "Journey",
@@ -157,7 +140,7 @@
   "webp": 1915738,
   "compressed": 33848,
   "format": "webp",
-  "ms": 16656,
+  "ms": 23386,
   "uploads": [],
   "integrity": [
    {
@@ -194,7 +177,7 @@
   "integrity": [
    {
     "file": "rt1-PDF-WORD-01-PDF-WORD-01-simple-text.docx",
-    "bytes": 3804,
+    "bytes": 3862,
     "ok": true,
     "kind": "docx",
     "pages": 1,
@@ -204,7 +187,7 @@
    },
    {
     "file": "rt1-PDF-WORD-01-rt1-PDF-WORD-01-PDF-WORD-01-simple-text.pdf",
-    "bytes": 14029,
+    "bytes": 14030,
     "ok": true,
     "kind": "pdf",
     "pages": 1
@@ -225,7 +208,7 @@
   "integrity": [
    {
     "file": "rt1-PDF-WORD-03-PDF-WORD-03-headings.docx",
-    "bytes": 4044,
+    "bytes": 4104,
     "ok": true,
     "kind": "docx",
     "pages": 1,
@@ -235,7 +218,7 @@
    },
    {
     "file": "rt1-PDF-WORD-03-rt1-PDF-WORD-03-PDF-WORD-03-headings.pdf",
-    "bytes": 16856,
+    "bytes": 16857,
     "ok": true,
     "kind": "pdf",
     "pages": 1
@@ -256,7 +239,7 @@
   "integrity": [
    {
     "file": "rt1-PDF-WORD-04-PDF-WORD-04-bold-italic.docx",
-    "bytes": 3704,
+    "bytes": 3764,
     "ok": true,
     "kind": "docx",
     "pages": 1,
@@ -266,7 +249,7 @@
    },
    {
     "file": "rt1-PDF-WORD-04-rt1-PDF-WORD-04-PDF-WORD-04-bold-italic.pdf",
-    "bytes": 22759,
+    "bytes": 22760,
     "ok": true,
     "kind": "pdf",
     "pages": 1
@@ -287,7 +270,7 @@
   "integrity": [
    {
     "file": "rt1-PDF-WORD-05-PDF-WORD-05-lists.docx",
-    "bytes": 3997,
+    "bytes": 4056,
     "ok": true,
     "kind": "docx",
     "pages": 1,
@@ -297,7 +280,7 @@
    },
    {
     "file": "rt1-PDF-WORD-05-rt1-PDF-WORD-05-PDF-WORD-05-lists.pdf",
-    "bytes": 15487,
+    "bytes": 15488,
     "ok": true,
     "kind": "pdf",
     "pages": 1
@@ -318,7 +301,7 @@
   "integrity": [
    {
     "file": "rt1-PDF-WORD-06-PDF-WORD-06-table.docx",
-    "bytes": 4043,
+    "bytes": 4098,
     "ok": true,
     "kind": "docx",
     "pages": 1,
@@ -328,7 +311,7 @@
    },
    {
     "file": "rt1-PDF-WORD-06-rt1-PDF-WORD-06-PDF-WORD-06-table.pdf",
-    "bytes": 15945,
+    "bytes": 15944,
     "ok": true,
     "kind": "pdf",
     "pages": 1
@@ -349,7 +332,7 @@
   "integrity": [
    {
     "file": "rt1-PDF-WORD-07-PDF-WORD-07-images.docx",
-    "bytes": 425239,
+    "bytes": 425298,
     "ok": true,
     "kind": "docx",
     "pages": 1,
@@ -380,7 +363,7 @@
   "integrity": [
    {
     "file": "rt1-PDF-WORD-08-PDF-WORD-08-two-column.docx",
-    "bytes": 4050,
+    "bytes": 4136,
     "ok": true,
     "kind": "docx",
     "pages": 2,
@@ -390,7 +373,7 @@
    },
    {
     "file": "rt1-PDF-WORD-08-rt1-PDF-WORD-08-PDF-WORD-08-two-column.pdf",
-    "bytes": 17087,
+    "bytes": 17019,
     "ok": true,
     "kind": "pdf",
     "pages": 1
@@ -411,7 +394,7 @@
   "integrity": [
    {
     "file": "rt1-PDF-WORD-12-PDF-WORD-12-special-chars.docx",
-    "bytes": 4020,
+    "bytes": 4082,
     "ok": true,
     "kind": "docx",
     "pages": 1,
@@ -421,7 +404,7 @@
    },
    {
     "file": "rt1-PDF-WORD-12-rt1-PDF-WORD-12-PDF-WORD-12-special-chars.pdf",
-    "bytes": 27044,
+    "bytes": 27045,
     "ok": true,
     "kind": "pdf",
     "pages": 1
@@ -442,7 +425,7 @@
   "integrity": [
    {
     "file": "rt1-PDF-WORD-13-PDF-WORD-13-large-24-pages.docx",
-    "bytes": 5403,
+    "bytes": 5467,
     "ok": true,
     "kind": "docx",
     "pages": 24,
@@ -452,7 +435,7 @@
    },
    {
     "file": "rt1-PDF-WORD-13-rt1-PDF-WORD-13-PDF-WORD-13-large-24-pages.pdf",
-    "bytes": 49857,
+    "bytes": 49856,
     "ok": true,
     "kind": "pdf",
     "pages": 24
@@ -475,14 +458,14 @@
   "integrity": [
    {
     "file": "rt2-WORD-02-WORD-02-headings.pdf",
-    "bytes": 15532,
+    "bytes": 15533,
     "ok": true,
     "kind": "pdf",
     "pages": 1
    },
    {
     "file": "rt2-WORD-02-rt2-WORD-02-WORD-02-headings.docx",
-    "bytes": 3925,
+    "bytes": 3986,
     "ok": true,
     "kind": "docx",
     "pages": 1,
@@ -516,7 +499,7 @@
    },
    {
     "file": "rt2-WORD-03-rt2-WORD-03-WORD-03-formatting.docx",
-    "bytes": 3907,
+    "bytes": 4050,
     "ok": true,
     "kind": "docx",
     "pages": 1,
@@ -543,14 +526,14 @@
   "integrity": [
    {
     "file": "rt2-WORD-04-WORD-04-lists.pdf",
-    "bytes": 9255,
+    "bytes": 9256,
     "ok": true,
     "kind": "pdf",
     "pages": 1
    },
    {
     "file": "rt2-WORD-04-rt2-WORD-04-WORD-04-lists.docx",
-    "bytes": 3969,
+    "bytes": 4028,
     "ok": true,
     "kind": "docx",
     "pages": 1,
@@ -576,14 +559,14 @@
   "integrity": [
    {
     "file": "rt2-WORD-05-WORD-05-table.pdf",
-    "bytes": 13983,
+    "bytes": 13985,
     "ok": true,
     "kind": "pdf",
     "pages": 1
    },
    {
     "file": "rt2-WORD-05-rt2-WORD-05-WORD-05-table.docx",
-    "bytes": 3953,
+    "bytes": 4016,
     "ok": true,
     "kind": "docx",
     "pages": 1,
@@ -609,14 +592,14 @@
   "integrity": [
    {
     "file": "rt2-WORD-06-WORD-06-images.pdf",
-    "bytes": 123899,
+    "bytes": 123900,
     "ok": true,
     "kind": "pdf",
     "pages": 1
    },
    {
     "file": "rt2-WORD-06-rt2-WORD-06-WORD-06-images.docx",
-    "bytes": 24195,
+    "bytes": 24257,
     "ok": true,
     "kind": "docx",
     "pages": 1,
@@ -640,14 +623,14 @@
   "integrity": [
    {
     "file": "rt2-WORD-08-WORD-08-special-characters.pdf",
-    "bytes": 18293,
+    "bytes": 18294,
     "ok": true,
     "kind": "pdf",
     "pages": 1
    },
    {
     "file": "rt2-WORD-08-rt2-WORD-08-WORD-08-special-characters.docx",
-    "bytes": 3908,
+    "bytes": 3969,
     "ok": true,
     "kind": "docx",
     "pages": 1,
@@ -678,7 +661,7 @@
    },
    {
     "file": "rt2-WORD-10-rt2-WORD-10-WORD-10-header-footer.docx",
-    "bytes": 5869,
+    "bytes": 6179,
     "ok": true,
     "kind": "docx",
     "pages": 3,
@@ -704,14 +687,14 @@
   "integrity": [
    {
     "file": "rt2-WORD-12-WORD-12-complex.pdf",
-    "bytes": 34336,
+    "bytes": 34337,
     "ok": true,
     "kind": "pdf",
     "pages": 2
    },
    {
     "file": "rt2-WORD-12-rt2-WORD-12-WORD-12-complex.docx",
-    "bytes": 12929,
+    "bytes": 13211,
     "ok": true,
     "kind": "docx",
     "pages": 2,

@@ -9,11 +9,9 @@
   "input": 35839,
   "meta": "36 KB · 1 page · Text PDF",
   "ocrNote": false,
-  "progress": [
-   "Building your Word document…"
-  ],
-  "ms": 423,
-  "output": 3804,
+  "progress": [],
+  "ms": 256,
+  "output": 3863,
   "docxValid": true,
   "problems": [],
   "paragraphs": 4,
@@ -40,7 +38,7 @@
   "integrity": [
    {
     "file": "word-PDFWORD01-PDF-WORD-01-simple-text.docx",
-    "bytes": 3804,
+    "bytes": 3863,
     "ok": true,
     "kind": "docx",
     "pages": 1,
@@ -60,11 +58,9 @@
   "input": 44631,
   "meta": "45 KB · 4 pages · Text PDF",
   "ocrNote": false,
-  "progress": [
-   "Reading page 4 of 4…"
-  ],
-  "ms": 397,
-  "output": 4086,
+  "progress": [],
+  "ms": 358,
+  "output": 4142,
   "docxValid": true,
   "problems": [],
   "paragraphs": 24,
@@ -91,7 +87,7 @@
   "integrity": [
    {
     "file": "word-PDFWORD02-PDF-WORD-02-multipage.docx",
-    "bytes": 4086,
+    "bytes": 4142,
     "ok": true,
     "kind": "docx",
     "pages": 4,
@@ -111,11 +107,9 @@
   "input": 40947,
   "meta": "41 KB · 1 page · Text PDF",
   "ocrNote": false,
-  "progress": [
-   "Building your Word document…"
-  ],
-  "ms": 404,
-  "output": 4044,
+  "progress": [],
+  "ms": 392,
+  "output": 4103,
   "docxValid": true,
   "problems": [],
   "paragraphs": 10,
@@ -143,7 +137,7 @@
   "integrity": [
    {
     "file": "word-PDFWORD03-PDF-WORD-03-headings.docx",
-    "bytes": 4044,
+    "bytes": 4103,
     "ok": true,
     "kind": "docx",
     "pages": 1,
@@ -164,8 +158,8 @@
   "meta": "55 KB · 1 page · Text PDF",
   "ocrNote": false,
   "progress": [],
-  "ms": 391,
-  "output": 3704,
+  "ms": 262,
+  "output": 3764,
   "docxValid": true,
   "problems": [],
   "paragraphs": 5,
@@ -193,7 +187,7 @@
   "integrity": [
    {
     "file": "word-PDFWORD04-PDF-WORD-04-bold-italic.docx",
-    "bytes": 3704,
+    "bytes": 3764,
     "ok": true,
     "kind": "docx",
     "pages": 1,
@@ -214,8 +208,8 @@
   "meta": "40 KB · 1 page · Text PDF",
   "ocrNote": false,
   "progress": [],
-  "ms": 395,
-  "output": 3996,
+  "ms": 418,
+  "output": 4055,
   "docxValid": true,
   "problems": [],
   "paragraphs": 10,
@@ -243,7 +237,7 @@
   "integrity": [
    {
     "file": "word-PDFWORD05-PDF-WORD-05-lists.docx",
-    "bytes": 3996,
+    "bytes": 4055,
     "ok": true,
     "kind": "docx",
     "pages": 1,
@@ -264,8 +258,8 @@
   "meta": "39 KB · 1 page · Text PDF",
   "ocrNote": false,
   "progress": [],
-  "ms": 419,
-  "output": 4043,
+  "ms": 272,
+  "output": 4098,
   "docxValid": true,
   "problems": [],
   "paragraphs": 3,
@@ -292,7 +286,7 @@
   "integrity": [
    {
     "file": "word-PDFWORD06-PDF-WORD-06-table.docx",
-    "bytes": 4043,
+    "bytes": 4098,
     "ok": true,
     "kind": "docx",
     "pages": 1,
@@ -313,10 +307,10 @@
   "meta": "134 KB · 1 page · Text PDF",
   "ocrNote": false,
   "progress": [
-   "Reading page 1 of 1…"
+   "Building Word document…"
   ],
-  "ms": 924,
-  "output": 425239,
+  "ms": 860,
+  "output": 425299,
   "docxValid": true,
   "problems": [],
   "paragraphs": 4,
@@ -343,7 +337,7 @@
   "integrity": [
    {
     "file": "word-PDFWORD07-PDF-WORD-07-images.docx",
-    "bytes": 425239,
+    "bytes": 425299,
     "ok": true,
     "kind": "docx",
     "pages": 1,
@@ -364,8 +358,8 @@
   "meta": "41 KB · 1 page · Text PDF",
   "ocrNote": false,
   "progress": [],
-  "ms": 421,
-  "output": 4049,
+  "ms": 362,
+  "output": 4136,
   "docxValid": true,
   "problems": [],
   "paragraphs": 11,
@@ -392,7 +386,7 @@
   "integrity": [
    {
     "file": "word-PDFWORD08-PDF-WORD-08-two-column.docx",
-    "bytes": 4049,
+    "bytes": 4136,
     "ok": true,
     "kind": "docx",
     "pages": 2,
@@ -411,77 +405,26 @@
   "inputPages": 1,
   "input": 101223,
   "meta": "101 KB · 1 page · Scanned PDF",
-  "ocrNote": true,
+  "ocrNote": false,
   "progress": [
-   "Reading page 1 of 1…",
-   "Recognizing page 1 of 1…"
+   "Preparing scanned page 1 of 1…",
+   "Loading text recognition…",
+   "Recognizing page 1 of 1…",
+   "Building Word document…"
   ],
-  "ms": 4989,
-  "output": 3850,
+  "ms": 5557,
+  "output": 3971,
   "docxValid": true,
   "problems": [],
-  "paragraphs": 7,
+  "paragraphs": 8,
   "tables": 0,
   "pictures": 0,
   "sections": 1,
   "recall": 100,
   "order": 100,
-  "paragraphsIntact": "7/7",
+  "paragraphsIntact": "6/7",
   "merged": 0,
-  "separation": 100,
-  "structure": {
-   "mustContain": true,
-   "pageBreaks": true
-  },
-  "mammoth": {
-   "recall": 100,
-   "headings": 1,
-   "lists": 0,
-   "tables": 0,
-   "images": 0
-  },
-  "uploads": [],
-  "integrity": [
-   {
-    "file": "word-PDFWORD09-PDF-WORD-09-scanned.docx",
-    "bytes": 3850,
-    "ok": true,
-    "kind": "docx",
-    "pages": 1,
-    "paragraphs": 7,
-    "tables": 0,
-    "pictures": 0
-   }
-  ]
- },
- {
-  "tool": "PDF to Word",
-  "test": "PDF-WORD-10 3 pages: native (Chapter 1), scanned appendix, native (Chapter 2)",
-  "verdict": "PASS",
-  "fixture": "PDF-WORD-10",
-  "kind": "mixed",
-  "inputPages": 3,
-  "input": 145265,
-  "meta": "145 KB · 3 pages · Mixed PDF",
-  "ocrNote": true,
-  "progress": [
-   "Reading page 2 of 3…",
-   "Reading page 3 of 3…",
-   "Recognizing page 1 of 1…"
-  ],
-  "ms": 3976,
-  "output": 4122,
-  "docxValid": true,
-  "problems": [],
-  "paragraphs": 15,
-  "tables": 0,
-  "pictures": 0,
-  "sections": 3,
-  "recall": 100,
-  "order": 100,
-  "paragraphsIntact": "15/15",
-  "merged": 0,
-  "separation": 100,
+  "separation": 85.7,
   "structure": {
    "mustContain": true,
    "pageBreaks": true
@@ -496,12 +439,70 @@
   "uploads": [],
   "integrity": [
    {
+    "file": "word-PDFWORD09-PDF-WORD-09-scanned.docx",
+    "bytes": 3971,
+    "ok": true,
+    "kind": "docx",
+    "pages": 1,
+    "paragraphs": 8,
+    "tables": 0,
+    "pictures": 0
+   }
+  ]
+ },
+ {
+  "tool": "PDF to Word",
+  "test": "PDF-WORD-10 3 pages: native (Chapter 1), scanned appendix, native (Chapter 2)",
+  "verdict": "LIMITED",
+  "fixture": "PDF-WORD-10",
+  "kind": "mixed",
+  "inputPages": 3,
+  "input": 145265,
+  "meta": "145 KB · 3 pages · Mixed PDF",
+  "ocrNote": false,
+  "progress": [
+   "Analyzing PDF — page 2 of 3…",
+   "Preparing scanned page 2 of 3…",
+   "Loading text recognition…",
+   "Recognizing page 1 of 1…"
+  ],
+  "ms": 4794,
+  "output": 60467,
+  "docxValid": true,
+  "problems": [],
+  "paragraphs": 12,
+  "tables": 0,
+  "pictures": 0,
+  "sections": 3,
+  "recall": 89,
+  "order": 89,
+  "paragraphsIntact": "13/15",
+  "merged": 2,
+  "separation": 73.3,
+  "structure": {
+   "mustContain": false,
+   "missing": [
+    "48213",
+    "03/14/2026"
+   ],
+   "pageBreaks": true
+  },
+  "mammoth": {
+   "recall": 96.6,
+   "headings": 2,
+   "lists": 0,
+   "tables": 0,
+   "images": 1
+  },
+  "uploads": [],
+  "integrity": [
+   {
     "file": "word-PDFWORD10-PDF-WORD-10-mixed.docx",
-    "bytes": 4122,
+    "bytes": 60467,
     "ok": true,
     "kind": "docx",
     "pages": 3,
-    "paragraphs": 15,
+    "paragraphs": 12,
     "tables": 0,
     "pictures": 0
    }
@@ -518,10 +519,10 @@
   "meta": "40 KB · 2 pages · Text PDF",
   "ocrNote": false,
   "progress": [
-   "Building your Word document…"
+   "Building Word document…"
   ],
-  "ms": 386,
-  "output": 4098,
+  "ms": 423,
+  "output": 4158,
   "docxValid": true,
   "problems": [],
   "paragraphs": 20,
@@ -547,7 +548,7 @@
   "integrity": [
    {
     "file": "word-PDFWORD11-PDF-WORD-11-rotated.docx",
-    "bytes": 4098,
+    "bytes": 4158,
     "ok": true,
     "kind": "docx",
     "pages": 2,
@@ -567,11 +568,9 @@
   "input": 60660,
   "meta": "61 KB · 1 page · Text PDF",
   "ocrNote": false,
-  "progress": [
-   "Building your Word document…"
-  ],
-  "ms": 383,
-  "output": 4021,
+  "progress": [],
+  "ms": 390,
+  "output": 4082,
   "docxValid": true,
   "problems": [],
   "paragraphs": 7,
@@ -598,7 +597,7 @@
   "integrity": [
    {
     "file": "word-PDFWORD12-PDF-WORD-12-special-chars.docx",
-    "bytes": 4021,
+    "bytes": 4082,
     "ok": true,
     "kind": "docx",
     "pages": 1,
@@ -619,11 +618,10 @@
   "meta": "101 KB · 24 pages · Text PDF",
   "ocrNote": false,
   "progress": [
-   "Reading page 5 of 24…",
-   "Building your Word document…"
+   "Analyzing PDF — page 5 of 24…"
   ],
-  "ms": 892,
-  "output": 5403,
+  "ms": 881,
+  "output": 5467,
   "docxValid": true,
   "problems": [],
   "paragraphs": 192,
@@ -649,7 +647,7 @@
   "integrity": [
    {
     "file": "word-PDFWORD13-PDF-WORD-13-large-24-pages.docx",
-    "bytes": 5403,
+    "bytes": 5467,
     "ok": true,
     "kind": "docx",
     "pages": 24,
@@ -670,48 +668,51 @@
  {
   "tool": "PDF to Word",
   "test": "REAL user scan user-supplied scan",
-  "verdict": "PASS",
+  "verdict": "LIMITED",
   "fixture": "REAL user scan",
   "kind": "scanned",
   "inputPages": 2,
   "input": 3982736,
   "meta": "3.98 MB · 2 pages · Scanned PDF",
-  "ocrNote": true,
+  "ocrNote": false,
   "progress": [
-   "Reading page 1 of 2…",
-   "Reading page 2 of 2…",
-   "Recognizing page 1 of 2…",
-   "Recognizing page 2 of 2…"
+   "Analyzing PDF — page 1 of 2…",
+   "Preparing scanned page 1 of 2…",
+   "Analyzing PDF — page 2 of 2…",
+   "Preparing scanned page 2 of 2…"
   ],
-  "ms": 10083,
-  "output": 4688,
+  "ms": 2959,
+  "output": 332272,
   "docxValid": true,
   "problems": [],
-  "paragraphs": 19,
-  "tables": 1,
+  "paragraphs": 0,
+  "tables": 0,
   "pictures": 0,
   "sections": 2,
   "structure": {
-   "mustContain": true,
+   "mustContain": false,
+   "missing": [
+    "12/20/2026"
+   ],
    "pageBreaks": true
   },
   "mammoth": {
    "recall": null,
-   "headings": 4,
+   "headings": 0,
    "lists": 0,
-   "tables": 1,
-   "images": 0
+   "tables": 0,
+   "images": 2
   },
   "uploads": [],
   "integrity": [
    {
     "file": "word-REALuserscan-TheFileConvert_Scanned_OCR_Test.docx",
-    "bytes": 4688,
+    "bytes": 332272,
     "ok": true,
     "kind": "docx",
     "pages": 2,
-    "paragraphs": 19,
-    "tables": 1,
+    "paragraphs": 0,
+    "tables": 0,
     "pictures": 0
    }
   ]

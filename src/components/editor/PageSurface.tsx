@@ -773,6 +773,7 @@ export function PageSurface({
       style={{ width: dims.width, height: dims.height }}
       data-testid="page-surface"
       data-page-id={page.id}
+      data-page-number={doc.pages.findIndex((p) => p.id === page.id) + 1}
     >
       <div ref={canvasHostRef} className="pointer-events-none absolute inset-0" aria-hidden="true" />
       <div

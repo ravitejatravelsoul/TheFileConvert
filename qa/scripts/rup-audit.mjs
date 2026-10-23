@@ -568,15 +568,22 @@ pts=[(int(x0),int(y0)),(int(x1),int(y0)),(int(x0),int(y1)),(int(x1),int(y1))]
 print(json.dumps(max(abs(a[y-2:y+2,x-2:x+2].mean()-b[y-2:y+2,x-2:x+2].mean()) for x,y in pts)))`], { encoding: "utf8" }));
   const OPS = [
     [APP, "export with no edits", async () => {}, null],
-    [APP, "add a typed note on the form", async (at) => { await pick("Text"); await page.mouse.click(...at(60, 610)); await page.keyboard.type("Received 10 Oct 2026"); await page.keyboard.press("Escape"); }, [50, 590, 300, 630]],
+    [APP, "add a typed note on the form", async (at) => { await pick("Add text"); await page.mouse.click(...at(60, 610)); await page.keyboard.type("Received 10 Oct 2026"); await page.keyboard.press("Escape"); }, [50, 590, 300, 630]],
     [APP, "highlight a line on the form", async (at) => { await pick("Highlight"); await drag(at(60, 308), at(300, 322)); }, [55, 303, 305, 327]],
     [RES, "correct a word in the native résumé", async () => {
-      await page.getByRole("button", { name: new RegExp(`^Edit text: .*${probe.word}`) }).first().click();
-      const dlg = page.getByRole("dialog", { name: "Edit text" });
-      const v = await dlg.locator("input[type=text]").inputValue();
-      await dlg.locator("input[type=text]").fill(v.replace(probe.word, "Replaced"));
-      await dlg.getByRole("button", { name: "Save correction" }).click();
-      await dlg.waitFor({ state: "hidden" });
+      // the page's own text, edited in place: double-click the paragraph, type the new word over the old one
+      const block = page.locator(`[data-testid="native-block"][data-text*="${probe.word}"]`).first();
+      await block.waitFor({ state: "attached", timeout: 60_000 });
+      const text = (await block.getAttribute("data-text")) ?? "";
+      await block.dblclick();
+      const editor = page.getByTestId("native-text-editor");
+      await editor.waitFor({ timeout: 30_000 });
+      await page.keyboard.press("Control+Home");
+      for (let i = 0; i < text.indexOf(probe.word); i++) await page.keyboard.press("ArrowRight");
+      for (let i = 0; i < probe.word.length; i++) await page.keyboard.press("Shift+ArrowRight");
+      await page.keyboard.type("Replaced");
+      await page.getByRole("button", { name: "Apply this text edit" }).click();
+      await editor.waitFor({ state: "detached", timeout: 30_000 });
     }, probe.box],
   ];
   for (const [fixture, what, act, box] of OPS) {
@@ -632,19 +639,20 @@ if (run("ocr")) {
       await page.getByTestId("page-surface").first().waitFor({ timeout: 60_000 });
       await page.getByRole("button", { name: "Fit page" }).click();
       await page.getByRole("button", { name: "Recognize text" }).click();
-      await page.getByRole("button", { name: /^Edit recognized word: / }).first().waitFor({ timeout: 300_000 });
-      await page.getByRole("button", { name: "Cancel" }).waitFor({ state: "hidden", timeout: 300_000 }).catch(() => {});
-      const recognised = await page.getByRole("button", { name: /^Edit recognized word: / }).evaluateAll((els) => els.map((e) => e.getAttribute("aria-label").replace(/^Edit recognized word: /, "")));
+      const busy = page.getByText(/Recognizing text|Preparing page|Loading text recognition/).first();
+      await busy.waitFor({ timeout: 120_000 }).catch(() => {});
+      await busy.waitFor({ state: "hidden", timeout: 300_000 });
+      // recognized text is for search and copy: its words are not an editing surface
+      const editTargets = await page.getByRole("button", { name: /^Edit recognized (word|line): / }).count();
       const out = await download(page, page.getByRole("button", { name: "Export PDF" }), `rup-ocr-${fixture.slice(9, 11)}`);
       const d = visdiff("pdf", RUF(fixture), out, ["--dir", REVIEW, "--name", `ocr-${tag}-${fixture.slice(0, 11)}`, "--max-images", "1"]);
       const truth = tokens(REF(ref));
       const have = tokens(out);
       const searchable = share(truth, have);
-      const editable = share(truth, recognised.map(norm).filter(Boolean));
       const ocrRan = ocrRequests(log, mark).length > 0;
-      const checks = { ranOnlyBecauseAsked: flag(ocrRan), looksUnchanged: worst(band(d.minSsim, 0.999, 0.99), d.maxChangedPct <= 0.05 ? "PASS" : d.maxChangedPct <= 0.5 ? "LIMITED" : "FAIL"), pagesKept: flag(d.pagesOut === d.pagesSrc && d.allSizesKept), searchable: band(searchable, 90, 75), editableWords: band(editable, 90, 75) };
+      const checks = { ranOnlyBecauseAsked: flag(ocrRan), looksUnchanged: worst(band(d.minSsim, 0.999, 0.99), d.maxChangedPct <= 0.05 ? "PASS" : d.maxChangedPct <= 0.5 ? "LIMITED" : "FAIL"), pagesKept: flag(d.pagesOut === d.pagesSrc && d.allSizesKept), searchable: band(searchable, 90, 75), noEditSurface: flag(editTargets === 0) };
       const verdict = worst(...Object.values(checks));
-      rec("OCR (Recognize text)", fixture, verdict, { fixture, journey, represents: DOC[fixture].says, expectation: "Only when asked: the scan looks exactly as before and gains an invisible text layer — searchable, selectable, words correctable.", steps: "open /pdf-editor → add the scan → Recognize text → (words appear as editable) → Export PDF → compare, then read the PDF's text", output: `${tokens(out).length} words in the PDF text layer; ${recognised.length} recognised words in the editor`, visual: `unchanged: SSIM ${d.minSsim}, ${d.maxChangedPct}% changed`, structural: `searchable ${searchable}% of the document's words, editable ${editable}%`, difference: verdict === "PASS" ? "text layer added, pixels unchanged" : Object.entries(checks).filter(([, v]) => v !== "PASS").map(([k, v]) => `${k}=${v}`).join(", "), checks });
+      rec("OCR (Recognize text)", fixture, verdict, { fixture, journey, represents: DOC[fixture].says, expectation: "Only when asked: the scan looks exactly as before and gains an invisible text layer — searchable and selectable. The scan itself is not edited as text.", steps: "open /pdf-editor → add the scan → Recognize text → Export PDF → compare, then read the PDF's text", output: `${tokens(out).length} words in the PDF text layer; ${editTargets} words offered for editing`, visual: `unchanged: SSIM ${d.minSsim}, ${d.maxChangedPct}% changed`, structural: `searchable ${searchable}% of the document's words`, difference: verdict === "PASS" ? "text layer added, pixels unchanged" : Object.entries(checks).filter(([, v]) => v !== "PASS").map(([k, v]) => `${k}=${v}`).join(", "), checks });
     });
   }
 }

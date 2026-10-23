@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { useDialogFocus } from "./useDialogFocus";
 
 interface SignaturePadProps {
   onConfirm: (dataUrl: string, naturalWidth: number, naturalHeight: number) => void;
@@ -9,6 +10,7 @@ interface SignaturePadProps {
 
 export function SignaturePad({ onConfirm, onClose }: SignaturePadProps) {
   const [mode, setMode] = useState<"draw" | "upload">("draw");
+  const dialogRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const drawingRef = useRef(false);
   const [hasStroke, setHasStroke] = useState(false);
@@ -99,11 +101,14 @@ export function SignaturePad({ onConfirm, onClose }: SignaturePadProps) {
   }
 
   const canConfirm = mode === "draw" ? hasStroke : Boolean(uploadedDataUrl);
+  useDialogFocus(dialogRef, onClose);
 
   return (
     <div className="fixed inset-0 z-[80] flex items-center justify-center bg-[rgb(20_20_19/0.45)] p-4" onClick={onClose}>
       <div
-        className="w-full max-w-md rounded-[var(--radius-xl)] bg-[var(--surface)] p-6 shadow-[var(--shadow-3)]"
+        ref={dialogRef}
+        tabIndex={-1}
+        className="w-full max-w-md rounded-[var(--radius-xl)] bg-[var(--surface)] p-6 shadow-[var(--shadow-3)] outline-none"
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"

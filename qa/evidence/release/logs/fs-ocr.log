@@ -1,0 +1,29 @@
+FAIL    OCR :: OCR-A clean-300dpi (eng) — error=TimeoutError: locator.waitFor: Timeout 300000ms exceeded.
+Call log:
+[2m  - waiting for getByRole('button', { name: /^Edit recognized word: / }).first() to be visible[22m
+
+FAIL    OCR :: OCR-B low-res-100dpi (eng) — error=TimeoutError: locator.waitFor: Timeout 300000ms exceeded.
+Call log:
+[2m  - waiting for getByRole('button', { name: /^Edit recognized word: / }).first() to be visible[22m
+
+FAIL    OCR :: OCR-C low-contrast (eng) — error=TimeoutError: locator.waitFor: Timeout 300000ms exceeded.
+Call log:
+[2m  - waiting for getByRole('button', { name: /^Edit recognized word: / }).first() to be visible[22m
+
+FAIL    OCR :: OCR-D rotated (eng) — error=TimeoutError: locator.waitFor: Timeout 300000ms exceeded.
+Call log:
+[2m  - waiting for getByRole('button', { name: /^Edit recognized word: / }).first() to be visible[22m
+
+FAIL    OCR :: OCR-E spanish (spa) — error=TimeoutError: locator.click: Timeout 30000ms exceeded.
+Call log:
+[2m  - waiting for locator('summary').filter({ hasText: 'Recognize Text (OCR)' })[22m
+
+FAIL    OCR :: OCR-F mixed-native-scan (eng) — error=TimeoutError: locator.waitFor: Timeout 30000ms exceeded.
+Call log:
+[2m  - waiting for getByRole('button', { name: 'Recognize text' }) to be visible[22m
+
+FAIL    OCR :: OCR-G multipage (eng) — error=TimeoutError: locator.waitFor: Timeout 300000ms exceeded.
+Call log:
+[2m  - waiting for getByRole('button', { name: /^Edit recognized word: / }).first() to be visible[22m
+
+PASS    OCR :: console errors

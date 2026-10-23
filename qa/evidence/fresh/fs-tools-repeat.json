@@ -8,14 +8,14 @@
   "integrity": [
    {
     "file": "fs-repeat-merge-1-merged.pdf",
-    "bytes": 4552,
+    "bytes": 4551,
     "ok": true,
     "kind": "pdf",
     "pages": 5
    },
    {
     "file": "fs-repeat-merge-2-merged.pdf",
-    "bytes": 647823,
+    "bytes": 647822,
     "ok": true,
     "kind": "pdf",
     "pages": 10
@@ -32,7 +32,7 @@
   "integrity": [
    {
     "file": "fs-repeat-editor-1-PDF-K-native-text-edited.pdf",
-    "bytes": 2745,
+    "bytes": 2744,
     "ok": true,
     "kind": "pdf",
     "pages": 2
@@ -140,14 +140,14 @@
   "integrity": [
    {
     "file": "fs-repeat-ImagesPDF-1-IMAGE-B-photo-500k.pdf",
-    "bytes": 499524,
+    "bytes": 499525,
     "ok": true,
     "kind": "pdf",
     "pages": 1
    },
    {
     "file": "fs-repeat-ImagesPDF-2-X-portrait-1200x1800.pdf",
-    "bytes": 706893,
+    "bytes": 706892,
     "ok": true,
     "kind": "pdf",
     "pages": 1

@@ -108,3 +108,18 @@ describe("working page and export agree", () => {
     expect(res.ok, "replay: " + (res.ok ? "" : res.reason)).toBe(true);
   });
 });
+
+describe("scanned pages", () => {
+  it("a page that is a picture of a page is scanned — also with a native heading over it — and a text page is not", async () => {
+    const scanOf = async (file: File) => {
+      const r = await buildWorkingPage(file, `s-${file.name}`, 0, [], loader as never);
+      if (!r.ok) throw new Error(r.reason);
+      return r.page.analysis.scanned;
+    };
+    expect(await scanOf(fileOf("EDITOR-12-scanned-form.pdf"))).toBe(true);
+    expect(await scanOf(fileOf("EDITOR-01-simple-text.pdf"))).toBe(false);
+    expect(await scanOf(fileOf("EDITOR-08-images.pdf"))).toBe(false); // small pictures among text
+    const mixed = new File([fs.readFileSync(path.resolve("qa/fresh-scenario-fixtures/OCR-F-mixed-native-scan.pdf"))], "ocr-f.pdf", { type: "application/pdf" });
+    expect(await scanOf(mixed)).toBe(true);
+  });
+});
