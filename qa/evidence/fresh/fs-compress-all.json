@@ -14,9 +14,9 @@
   "text": "88669/88669 chars",
   "psnr": 99,
   "ssim": 1,
-  "quality": "Quality setting: Lossless · finished in 0.0 s",
+  "quality": "Quality setting: Lossless · finished in 0.1 s",
   "headline": "Done — 45 KB",
-  "ms": 148,
+  "ms": 166,
   "integrity": [
    {
     "file": "fs-cpdf-PDFA-250000-PDF-A-text-heavy-300k-compressed.pdf",
@@ -42,9 +42,9 @@
   "text": "88669/88669 chars",
   "psnr": 99,
   "ssim": 1,
-  "quality": "Quality setting: Lossless · finished in 0.0 s",
+  "quality": "Quality setting: Lossless · finished in 0.1 s",
   "headline": "Done — 45 KB",
-  "ms": 95,
+  "ms": 113,
   "integrity": [
    {
     "file": "fs-cpdf-PDFA-200000-PDF-A-text-heavy-300k-compressed.pdf",
@@ -70,9 +70,9 @@
   "text": "88669/88669 chars",
   "psnr": 99,
   "ssim": 1,
-  "quality": "Quality setting: Lossless · finished in 0.0 s",
+  "quality": "Quality setting: Lossless · finished in 0.1 s",
   "headline": "Done — 45 KB",
-  "ms": 77,
+  "ms": 110,
   "integrity": [
    {
     "file": "fs-cpdf-PDFA-150000-PDF-A-text-heavy-300k-compressed.pdf",
@@ -100,7 +100,7 @@
   "ssim": 1,
   "quality": "Quality setting: Original · finished in 0.0 s",
   "headline": "Already under your target",
-  "ms": 76,
+  "ms": 84,
   "integrity": [
    {
     "file": "fs-cpdf-PDFA-500000-PDF-A-text-heavy-300k.pdf",
@@ -126,9 +126,9 @@
   "text": "3270/3270 chars",
   "psnr": 38.75,
   "ssim": 0.9936,
-  "quality": "Quality setting: Maximum · finished in 0.2 s",
+  "quality": "Quality setting: Maximum · finished in 0.3 s",
   "headline": "Done — 620 KB",
-  "ms": 354,
+  "ms": 444,
   "integrity": [
    {
     "file": "fs-cpdf-PDFB-700000-PDF-B-mixed-800k-compressed.pdf",
@@ -154,9 +154,9 @@
   "text": "3270/3270 chars",
   "psnr": 33.83,
   "ssim": 0.9826,
-  "quality": "Quality setting: 42% · finished in 1.7 s",
+  "quality": "Quality setting: 42% · finished in 2.5 s",
   "headline": "Done — 404 KB",
-  "ms": 1893,
+  "ms": 3021,
   "integrity": [
    {
     "file": "fs-cpdf-PDFB-500000-PDF-B-mixed-800k-compressed.pdf",
@@ -182,9 +182,9 @@
   "text": "3270/3270 chars",
   "psnr": 33.37,
   "ssim": 0.9824,
-  "quality": "Quality setting: 35% · finished in 1.9 s",
+  "quality": "Quality setting: 35% · finished in 2.7 s",
   "headline": "Done — 295 KB",
-  "ms": 1922,
+  "ms": 3051,
   "integrity": [
    {
     "file": "fs-cpdf-PDFB-300000-PDF-B-mixed-800k-compressed.pdf",
@@ -210,9 +210,9 @@
   "text": "n/a (scan)",
   "psnr": 25.17,
   "ssim": 0.9125,
-  "quality": "Quality setting: 83% · finished in 2.1 s",
+  "quality": "Quality setting: 83% · finished in 4.5 s",
   "headline": "Done — 1.77 MB",
-  "ms": 2561,
+  "ms": 4929,
   "integrity": [
    {
     "file": "fs-cpdf-PDFC-2000000-PDF-C-scan-38mb-incremental-compressed.pdf",
@@ -238,9 +238,9 @@
   "text": "n/a (scan)",
   "psnr": 24.83,
   "ssim": 0.8973,
-  "quality": "Quality setting: 73% · finished in 2.0 s",
+  "quality": "Quality setting: 73% · finished in 4.1 s",
   "headline": "Done — 887 KB",
-  "ms": 2454,
+  "ms": 4332,
   "integrity": [
    {
     "file": "fs-cpdf-PDFC-1000000-PDF-C-scan-38mb-incremental-compressed.pdf",
@@ -266,9 +266,9 @@
   "text": "n/a (scan)",
   "psnr": 22.29,
   "ssim": 0.8493,
-  "quality": "Quality setting: Medium · finished in 1.9 s",
+  "quality": "Quality setting: Medium · finished in 4.5 s",
   "headline": "Done — 457 KB",
-  "ms": 2475,
+  "ms": 4711,
   "integrity": [
    {
     "file": "fs-cpdf-PDFC-500000-PDF-C-scan-38mb-incremental-compressed.pdf",
@@ -294,9 +294,9 @@
   "text": "60/60 chars",
   "psnr": 27.63,
   "ssim": 0.8579,
-  "quality": "Quality setting: 75% · finished in 3.7 s",
+  "quality": "Quality setting: 75% · finished in 6.4 s",
   "headline": "Done — 2.7 MB",
-  "ms": 4005,
+  "ms": 6722,
   "integrity": [
    {
     "file": "fs-cpdf-PDFD-3000000-PDF-D-photo-heavy-5mb-compressed.pdf",
@@ -322,9 +322,9 @@
   "text": "60/60 chars",
   "psnr": 28.09,
   "ssim": 0.875,
-  "quality": "Quality setting: Good · finished in 3.5 s",
+  "quality": "Quality setting: Good · finished in 6.3 s",
   "headline": "Done — 1.86 MB",
-  "ms": 3974,
+  "ms": 6719,
   "integrity": [
    {
     "file": "fs-cpdf-PDFD-2000000-PDF-D-photo-heavy-5mb-compressed.pdf",
@@ -350,9 +350,9 @@
   "text": "60/60 chars",
   "psnr": 28.17,
   "ssim": 0.8756,
-  "quality": "Quality setting: Medium · finished in 4.0 s",
+  "quality": "Quality setting: Medium · finished in 7.2 s",
   "headline": "Done — 947 KB",
-  "ms": 4059,
+  "ms": 7259,
   "integrity": [
    {
     "file": "fs-cpdf-PDFD-1000000-PDF-D-photo-heavy-5mb-compressed.pdf",
@@ -378,9 +378,9 @@
   "text": "n/a (scan)",
   "psnr": 23.51,
   "ssim": 0.8866,
-  "quality": "Quality setting: 83% · finished in 4.4 s",
+  "quality": "Quality setting: 83% · finished in 5.9 s",
   "headline": "Done — 4.48 MB",
-  "ms": 4614,
+  "ms": 6344,
   "integrity": [
    {
     "file": "fs-cpdf-PDFE-5000000-PDF-E-scan-10mb-compressed.pdf",
@@ -406,9 +406,9 @@
   "text": "n/a (scan)",
   "psnr": 25.91,
   "ssim": 0.9217,
-  "quality": "Quality setting: Good · finished in 4.2 s",
+  "quality": "Quality setting: Good · finished in 9.5 s",
   "headline": "Done — 1.81 MB",
-  "ms": 4527,
+  "ms": 9945,
   "integrity": [
    {
     "file": "fs-cpdf-PDFE-2000000-PDF-E-scan-10mb-compressed.pdf",
@@ -434,9 +434,9 @@
   "text": "n/a (scan)",
   "psnr": 22.55,
   "ssim": 0.8691,
-  "quality": "Quality setting: 56% · finished in 4.9 s",
+  "quality": "Quality setting: 56% · finished in 15.0 s",
   "headline": "Done — 922 KB",
-  "ms": 5119,
+  "ms": 15197,
   "integrity": [
    {
     "file": "fs-cpdf-PDFE-1000000-PDF-E-scan-10mb-compressed.pdf",
@@ -462,9 +462,9 @@
   "text": "88/88 chars",
   "psnr": 27.27,
   "ssim": 0.8729,
-  "quality": "Quality setting: 85% · finished in 10.4 s",
+  "quality": "Quality setting: 85% · finished in 25.1 s",
   "headline": "Done — 8.96 MB",
-  "ms": 10837,
+  "ms": 25383,
   "integrity": [
    {
     "file": "fs-cpdf-PDFF-10000000-PDF-F-photo-heavy-20mb-compressed.pdf",
@@ -490,9 +490,9 @@
   "text": "88/88 chars",
   "psnr": 27.47,
   "ssim": 0.8808,
-  "quality": "Quality setting: 78% · finished in 8.1 s",
+  "quality": "Quality setting: 78% · finished in 27.3 s",
   "headline": "Done — 4.85 MB",
-  "ms": 8366,
+  "ms": 27425,
   "integrity": [
    {
     "file": "fs-cpdf-PDFF-5000000-PDF-F-photo-heavy-20mb-compressed.pdf",
@@ -518,9 +518,9 @@
   "text": "88/88 chars",
   "psnr": 37.37,
   "ssim": 0.9742,
-  "quality": "Quality setting: 65% · finished in 7.9 s",
+  "quality": "Quality setting: 65% · finished in 23.7 s",
   "headline": "Done — 1.75 MB",
-  "ms": 8301,
+  "ms": 24136,
   "integrity": [
    {
     "file": "fs-cpdf-PDFF-2000000-PDF-F-photo-heavy-20mb-compressed.pdf",
@@ -548,7 +548,7 @@
   "ssim": 1,
   "quality": "Quality setting: Original · finished in 0.0 s",
   "headline": "Already under your target",
-  "ms": 85,
+  "ms": 80,
   "integrity": [
    {
     "file": "fs-cpdf-PDFG-200000-PDF-G-already-optimized.pdf",
@@ -574,9 +574,9 @@
   "text": "1608/1608 chars",
   "psnr": 42.85,
   "ssim": 0.997,
-  "quality": "Quality setting: Low · finished in 0.6 s",
+  "quality": "Quality setting: Low · finished in 0.7 s",
   "headline": "Done — 127 KB",
-  "ms": 881,
+  "ms": 926,
   "integrity": [
    {
     "file": "fs-cpdf-PDFG-130000-PDF-G-already-optimized-compressed.pdf",
@@ -602,9 +602,9 @@
   "text": "1608/1608 chars",
   "psnr": 28.7,
   "ssim": 0.9343,
-  "quality": "Quality setting: Lowest · finished in 0.6 s",
+  "quality": "Quality setting: Lowest · finished in 0.7 s",
   "headline": "Target not reached",
-  "ms": 868,
+  "ms": 912,
   "integrity": [
    {
     "file": "fs-cpdf-PDFG-15000-PDF-G-already-optimized-compressed.pdf",
@@ -630,9 +630,9 @@
   "text": "5532/5532 chars",
   "psnr": 46.01,
   "ssim": 0.9993,
-  "quality": "Quality setting: Maximum · finished in 0.3 s",
+  "quality": "Quality setting: Maximum · finished in 0.4 s",
   "headline": "Done — 922 KB",
-  "ms": 343,
+  "ms": 920,
   "integrity": [
    {
     "file": "fs-cpdf-PDFH-2000000-PDF-H-multipage-text-image-compressed.pdf",
@@ -658,9 +658,9 @@
   "text": "5532/5532 chars",
   "psnr": 46.01,
   "ssim": 0.9993,
-  "quality": "Quality setting: Maximum · finished in 0.2 s",
+  "quality": "Quality setting: Maximum · finished in 0.4 s",
   "headline": "Done — 922 KB",
-  "ms": 368,
+  "ms": 876,
   "integrity": [
    {
     "file": "fs-cpdf-PDFH-1000000-PDF-H-multipage-text-image-compressed.pdf",
@@ -686,9 +686,9 @@
   "text": "n/a (scan)",
   "psnr": 48.85,
   "ssim": 0.9976,
-  "quality": "Quality setting: Maximum · finished in 0.3 s",
+  "quality": "Quality setting: Maximum · finished in 0.4 s",
   "headline": "Done — 1.81 MB",
-  "ms": 345,
+  "ms": 487,
   "integrity": [
    {
     "file": "fs-cpdf-PDFL-2000000-PDF-L-image-only-scan-gray-a85-compressed.pdf",
@@ -714,9 +714,9 @@
   "text": "n/a (scan)",
   "psnr": 45.83,
   "ssim": 0.9952,
-  "quality": "Quality setting: 78% · finished in 1.5 s",
+  "quality": "Quality setting: 78% · finished in 2.1 s",
   "headline": "Done — 999 KB",
-  "ms": 1646,
+  "ms": 2209,
   "integrity": [
    {
     "file": "fs-cpdf-PDFL-1000000-PDF-L-image-only-scan-gray-a85-compressed.pdf",
@@ -742,9 +742,9 @@
   "text": "2193/2193 chars",
   "psnr": 44.4,
   "ssim": 0.9988,
-  "quality": "Quality setting: Medium · finished in 0.8 s",
+  "quality": "Quality setting: Medium · finished in 0.7 s",
   "headline": "Done — 298 KB",
-  "ms": 883,
+  "ms": 862,
   "integrity": [
    {
     "file": "fs-cpdf-PDFI-300000-PDF-I-rotated-compressed.pdf",
@@ -772,7 +772,7 @@
   "ssim": 1,
   "quality": "Quality setting: Original · finished in 0.0 s",
   "headline": "Already under your target",
-  "ms": 73,
+  "ms": 82,
   "integrity": [
    {
     "file": "fs-cpdf-PDFM-100000-PDF-M-acroform.pdf",
@@ -800,7 +800,7 @@
   "ssim": 1,
   "quality": "Quality setting: Original · finished in 0.0 s",
   "headline": "Already under your target",
-  "ms": 78,
+  "ms": 79,
   "integrity": [
    {
     "file": "fs-cpdf-PDFN-100000-PDF-N-metadata-rich.pdf",
@@ -826,9 +826,9 @@
   "text": "n/a (scan)",
   "psnr": 50.77,
   "ssim": 0.9985,
-  "quality": "Quality setting: Maximum · finished in 0.4 s",
+  "quality": "Quality setting: Maximum · finished in 0.8 s",
   "headline": "Done — 928 KB",
-  "ms": 996,
+  "ms": 1278,
   "integrity": [
    {
     "file": "fs-cpdf-REALuserscan-1000000-TheFileConvert_Scanned_OCR_Test-compressed.pdf",
@@ -854,9 +854,9 @@
   "text": "n/a (scan)",
   "psnr": 50.77,
   "ssim": 0.9985,
-  "quality": "Quality setting: Maximum · finished in 0.6 s",
+  "quality": "Quality setting: Maximum · finished in 0.8 s",
   "headline": "Done — 928 KB",
-  "ms": 1075,
+  "ms": 1263,
   "integrity": [
    {
     "file": "fs-cpdf-REALuserscan-2000000-TheFileConvert_Scanned_OCR_Test-compressed.pdf",
@@ -882,9 +882,9 @@
   "text": "n/a (scan)",
   "psnr": 31.57,
   "ssim": 0.9456,
-  "quality": "Quality setting: Very high · finished in 2.6 s",
+  "quality": "Quality setting: Very high · finished in 4.1 s",
   "headline": "Done — 458 KB",
-  "ms": 2905,
+  "ms": 4556,
   "integrity": [
    {
     "file": "fs-cpdf-REALuserscan-500000-TheFileConvert_Scanned_OCR_Test-compressed.pdf",
@@ -914,9 +914,9 @@
   "alpha": "false→false",
   "psnr": 32.81,
   "ssim": 0.8618,
-  "details": "JPG · 1263 × 842px (resized to 66%) · quality 75% · 0.4 s",
+  "details": "JPG · 1263 × 842px (resized to 66%) · quality 75% · 0.8 s",
   "headline": "Done — 183 KB",
-  "ms": 906,
+  "ms": 958,
   "integrity": [
    {
     "file": "fs-cimg-IMAGE-A-200000-IMAGE-A-optimized-250k-compressed.jpg",
@@ -943,9 +943,9 @@
   "alpha": "false→false",
   "psnr": 32.08,
   "ssim": 0.8371,
-  "details": "JPG · 1147 × 765px (resized to 60%) · quality 75% · 0.5 s",
+  "details": "JPG · 1147 × 765px (resized to 60%) · quality 75% · 0.8 s",
   "headline": "Done — 146 KB",
-  "ms": 911,
+  "ms": 904,
   "integrity": [
    {
     "file": "fs-cimg-IMAGE-A-150000-IMAGE-A-optimized-250k-compressed.jpg",
@@ -972,9 +972,9 @@
   "alpha": "false→false",
   "psnr": 30.78,
   "ssim": 0.7998,
-  "details": "JPG · 955 × 636px (resized to 50%) · quality 75% · 0.4 s",
+  "details": "JPG · 955 × 636px (resized to 50%) · quality 75% · 0.7 s",
   "headline": "Done — 98 KB",
-  "ms": 871,
+  "ms": 910,
   "integrity": [
    {
     "file": "fs-cimg-IMAGE-A-100000-IMAGE-A-optimized-250k-compressed.jpg",
@@ -1001,9 +1001,9 @@
   "alpha": "false→false",
   "psnr": 32.51,
   "ssim": 0.8402,
-  "details": "JPG · 1812 × 1208px (resized to 76%) · quality 75% · 0.8 s",
+  "details": "JPG · 1812 × 1208px (resized to 76%) · quality 75% · 1.3 s",
   "headline": "Done — 388 KB",
-  "ms": 904,
+  "ms": 1441,
   "integrity": [
    {
     "file": "fs-cimg-IMAGE-B-400000-IMAGE-B-photo-500k-compressed.jpg",
@@ -1030,9 +1030,9 @@
   "alpha": "false→false",
   "psnr": 31.69,
   "ssim": 0.8112,
-  "details": "JPG · 1482 × 988px (resized to 62%) · quality 75% · 0.7 s",
+  "details": "JPG · 1482 × 988px (resized to 62%) · quality 75% · 1.2 s",
   "headline": "Done — 243 KB",
-  "ms": 898,
+  "ms": 1472,
   "integrity": [
    {
     "file": "fs-cimg-IMAGE-B-250000-IMAGE-B-photo-500k-compressed.jpg",
@@ -1059,9 +1059,9 @@
   "alpha": "false→false",
   "psnr": 30.41,
   "ssim": 0.7539,
-  "details": "JPG · 1188 × 792px (resized to 49%) · quality 75% · 0.6 s",
+  "details": "JPG · 1188 × 792px (resized to 49%) · quality 75% · 1.1 s",
   "headline": "Done — 144 KB",
-  "ms": 907,
+  "ms": 1459,
   "integrity": [
    {
     "file": "fs-cimg-IMAGE-B-150000-IMAGE-B-photo-500k-compressed.jpg",
@@ -1088,9 +1088,9 @@
   "alpha": "false→false",
   "psnr": 31.53,
   "ssim": 0.8316,
-  "details": "JPG · 3586 × 2690px (resized to 90%) · quality 75% · 2.4 s",
+  "details": "JPG · 3586 × 2690px (resized to 90%) · quality 75% · 3.9 s",
   "headline": "Done — 1.95 MB",
-  "ms": 2921,
+  "ms": 4227,
   "integrity": [
    {
     "file": "fs-cimg-IMAGE-C-2000000-IMAGE-C-photo-3mb-compressed.jpg",
@@ -1117,9 +1117,9 @@
   "alpha": "false→false",
   "psnr": 28.53,
   "ssim": 0.6321,
-  "details": "JPG · 2244 × 1683px (resized to 56%) · quality 75% · 2.1 s",
+  "details": "JPG · 2244 × 1683px (resized to 56%) · quality 75% · 3.5 s",
   "headline": "Done — 648 KB",
-  "ms": 2548,
+  "ms": 3644,
   "integrity": [
    {
     "file": "fs-cimg-IMAGE-C-1000000-IMAGE-C-photo-3mb-compressed.jpg",
@@ -1146,9 +1146,9 @@
   "alpha": "false→false",
   "psnr": 27.7,
   "ssim": 0.5796,
-  "details": "JPG · 1586 × 1190px (resized to 40%) · quality 75% · 2.1 s",
+  "details": "JPG · 1586 × 1190px (resized to 40%) · quality 75% · 3.5 s",
   "headline": "Done — 266 KB",
-  "ms": 2602,
+  "ms": 3706,
   "integrity": [
    {
     "file": "fs-cimg-IMAGE-C-500000-IMAGE-C-photo-3mb-compressed.jpg",
@@ -1175,9 +1175,9 @@
   "alpha": "false→false",
   "psnr": 26.74,
   "ssim": 0.5278,
-  "details": "JPG · 1122 × 841px (resized to 28%) · quality 75% · 1.7 s",
+  "details": "JPG · 1122 × 841px (resized to 28%) · quality 75% · 3.2 s",
   "headline": "Done — 126 KB",
-  "ms": 2015,
+  "ms": 3596,
   "integrity": [
    {
     "file": "fs-cimg-IMAGE-C-250000-IMAGE-C-photo-3mb-compressed.jpg",
@@ -1204,9 +1204,9 @@
   "alpha": "false→false",
   "psnr": 30.16,
   "ssim": 0.8233,
-  "details": "JPG · 5728 × 3819px (resized to 95%) · quality 75% · 4.9 s",
+  "details": "JPG · 5728 × 3819px (resized to 95%) · quality 75% · 8.1 s",
   "headline": "Done — 4.76 MB",
-  "ms": 5239,
+  "ms": 8206,
   "integrity": [
    {
     "file": "fs-cimg-IMAGE-D-5000000-IMAGE-D-photo-8mb-compressed.jpg",
@@ -1233,9 +1233,9 @@
   "alpha": "false→false",
   "psnr": 26.78,
   "ssim": 0.5607,
-  "details": "JPG · 3107 × 2071px (resized to 52%) · quality 75% · 4.5 s",
+  "details": "JPG · 3107 × 2071px (resized to 52%) · quality 75% · 7.3 s",
   "headline": "Done — 1.12 MB",
-  "ms": 4741,
+  "ms": 7700,
   "integrity": [
    {
     "file": "fs-cimg-IMAGE-D-2000000-IMAGE-D-photo-8mb-compressed.jpg",
@@ -1262,9 +1262,9 @@
   "alpha": "false→false",
   "psnr": 26.07,
   "ssim": 0.4761,
-  "details": "JPG · 2197 × 1465px (resized to 37%) · quality 75% · 3.8 s",
+  "details": "JPG · 2197 × 1465px (resized to 37%) · quality 75% · 7.0 s",
   "headline": "Done — 462 KB",
-  "ms": 4094,
+  "ms": 7465,
   "integrity": [
    {
     "file": "fs-cimg-IMAGE-D-1000000-IMAGE-D-photo-8mb-compressed.jpg",
@@ -1291,9 +1291,9 @@
   "alpha": "false→false",
   "psnr": 25.75,
   "ssim": 0.4649,
-  "details": "JPG · 1554 × 1036px (resized to 26%) · quality 75% · 3.9 s",
+  "details": "JPG · 1554 × 1036px (resized to 26%) · quality 75% · 6.6 s",
   "headline": "Done — 209 KB",
-  "ms": 4100,
+  "ms": 6843,
   "integrity": [
    {
     "file": "fs-cimg-IMAGE-D-500000-IMAGE-D-photo-8mb-compressed.jpg",
@@ -1320,9 +1320,9 @@
   "alpha": "false→false",
   "psnr": 22.07,
   "ssim": 0.3855,
-  "details": "JPG · 4545 × 3409px (resized to 57%) · quality 75% · 7.3 s",
+  "details": "JPG · 4545 × 3409px (resized to 57%) · quality 75% · 14.1 s",
   "headline": "Done — 3.13 MB",
-  "ms": 7724,
+  "ms": 14284,
   "integrity": [
    {
     "file": "fs-cimg-IMAGE-E-5000000-IMAGE-E-photo-15mb-compressed.jpg",
@@ -1349,9 +1349,9 @@
   "alpha": "false→false",
   "psnr": 21.56,
   "ssim": 0.2725,
-  "details": "JPG · 2874 × 2156px (resized to 36%) · quality 75% · 7.1 s",
+  "details": "JPG · 2874 × 2156px (resized to 36%) · quality 75% · 13.1 s",
   "headline": "Done — 899 KB",
-  "ms": 7151,
+  "ms": 13396,
   "integrity": [
    {
     "file": "fs-cimg-IMAGE-E-2000000-IMAGE-E-photo-15mb-compressed.jpg",
@@ -1378,9 +1378,9 @@
   "alpha": "false→false",
   "psnr": 23.1,
   "ssim": 0.3089,
-  "details": "JPG · 2033 × 1524px (resized to 25%) · quality 75% · 6.0 s",
+  "details": "JPG · 2033 × 1524px (resized to 25%) · quality 75% · 12.5 s",
   "headline": "Done — 383 KB",
-  "ms": 6117,
+  "ms": 12849,
   "integrity": [
    {
     "file": "fs-cimg-IMAGE-E-1000000-IMAGE-E-photo-15mb-compressed.jpg",
@@ -1407,9 +1407,9 @@
   "alpha": "true→true",
   "psnr": 47.2,
   "ssim": 0.9966,
-  "details": "WebP · 1800 × 1400px · quality 92% · 0.7 s",
+  "details": "WebP · 1800 × 1400px · quality 92% · 0.8 s",
   "headline": "Done — 608 KB",
-  "ms": 1077,
+  "ms": 893,
   "integrity": [
    {
     "file": "fs-cimg-IMAGE-F-1000000-IMAGE-F-transparent-compressed.webp",
@@ -1438,7 +1438,7 @@
   "ssim": 0.9914,
   "details": "WebP · 1800 × 1400px · quality 85% · 2.1 s",
   "headline": "Done — 429 KB",
-  "ms": 2676,
+  "ms": 2458,
   "integrity": [
    {
     "file": "fs-cimg-IMAGE-F-500000-IMAGE-F-transparent-compressed.webp",
@@ -1465,9 +1465,9 @@
   "alpha": "true→true",
   "psnr": 40.4,
   "ssim": 0.961,
-  "details": "WebP · 1778 × 1383px (resized to 99%) · quality 75% · 2.8 s",
+  "details": "WebP · 1778 × 1383px (resized to 99%) · quality 75% · 4.2 s",
   "headline": "Done — 179 KB",
-  "ms": 2929,
+  "ms": 4510,
   "integrity": [
    {
     "file": "fs-cimg-IMAGE-F-250000-IMAGE-F-transparent-compressed.webp",
@@ -1494,9 +1494,9 @@
   "alpha": "false→false",
   "psnr": 39.78,
   "ssim": 0.9805,
-  "details": "WebP · 3000 × 2000px · quality 85% · 3.5 s",
+  "details": "WebP · 3000 × 2000px · quality 85% · 5.7 s",
   "headline": "Done — 1.92 MB",
-  "ms": 3958,
+  "ms": 6058,
   "integrity": [
    {
     "file": "fs-cimg-IMAGE-G-2000000-IMAGE-G-large-photo-compressed.webp",
@@ -1523,9 +1523,9 @@
   "alpha": "false→false",
   "psnr": 33.41,
   "ssim": 0.8529,
-  "details": "WebP · 2894 × 1929px (resized to 96%) · quality 75% · 6.4 s",
+  "details": "WebP · 2894 × 1929px (resized to 96%) · quality 75% · 11.2 s",
   "headline": "Done — 774 KB",
-  "ms": 6530,
+  "ms": 11668,
   "integrity": [
    {
     "file": "fs-cimg-IMAGE-G-1000000-IMAGE-G-large-photo-compressed.webp",
@@ -1552,9 +1552,9 @@
   "alpha": "false→false",
   "psnr": 31.76,
   "ssim": 0.7849,
-  "details": "WebP · 2115 × 1410px (resized to 71%) · quality 75% · 6.5 s",
+  "details": "WebP · 2115 × 1410px (resized to 71%) · quality 75% · 9.9 s",
   "headline": "Done — 457 KB",
-  "ms": 6590,
+  "ms": 10143,
   "integrity": [
    {
     "file": "fs-cimg-IMAGE-G-500000-IMAGE-G-large-photo-compressed.webp",
@@ -1583,7 +1583,7 @@
   "ssim": 1,
   "details": "",
   "headline": "Already under your target",
-  "ms": 85,
+  "ms": 91,
   "integrity": [
    {
     "file": "fs-cimg-IMAGE-L-50000-IMAGE-L-tiny-optimized.jpg",
@@ -1612,7 +1612,7 @@
   "ssim": 0.9461,
   "details": "JPG · 480 × 320px · quality 35% · 0.1 s",
   "headline": "Target not reached",
-  "ms": 242,
+  "ms": 270,
   "integrity": [
    {
     "file": "fs-cimg-IMAGE-L-20000-IMAGE-L-tiny-optimized-compressed.jpg",
@@ -1641,7 +1641,7 @@
   "ssim": 0.9461,
   "details": "JPG · 480 × 320px · quality 35% · 0.1 s",
   "headline": "Target not reached",
-  "ms": 244,
+  "ms": 290,
   "integrity": [
    {
     "file": "fs-cimg-IMAGE-L-2000-IMAGE-L-tiny-optimized-compressed.jpg",
@@ -1668,9 +1668,9 @@
   "alpha": "false→false",
   "psnr": 33.79,
   "ssim": 0.8587,
-  "details": "WebP · 2260 × 1507px (resized to 94%) · quality 75% · 4.3 s",
+  "details": "WebP · 2260 × 1507px (resized to 94%) · quality 75% · 7.6 s",
   "headline": "Done — 421 KB",
-  "ms": 4491,
+  "ms": 7622,
   "integrity": [
    {
     "file": "fs-cimg-IMAGE-H-500000-IMAGE-H-photo-compressed.webp",
@@ -1701,9 +1701,9 @@
    "gpsStripped": true,
    "upright": true
   },
-  "details": "JPG · 1169 × 1558px (resized to 97%) · quality 75% · 0.7 s",
+  "details": "JPG · 1169 × 1558px (resized to 97%) · quality 75% · 0.9 s",
   "headline": "Done — 295 KB",
-  "ms": 880,
+  "ms": 1508,
   "integrity": [
    {
     "file": "fs-cimg-IMAGE-K-300000-IMAGE-K-exif-rich-compressed.jpg",

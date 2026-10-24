@@ -1,0 +1,629 @@
+
+Running 622 tests using 1 worker
+
+  -    1 [chromium-ocr] › e2e\pdf-editor-ocr.spec.ts:143:7 › PDF Editor: OCR integration › recognizes a scanned page inside a mixed document and lets you correct the text
+  -    2 [chromium-ocr] › e2e\pdf-editor-ocr.spec.ts:165:7 › PDF Editor: OCR text edit round trip › corrects exactly one recognized word — original text carries only that word, not the whole line
+  -    3 [chromium-ocr] › e2e\pdf-editor-ocr.spec.ts:215:7 › PDF Editor: OCR text edit round trip › no-collateral-change: editing one word leaves the rest of the scanned page pixel-identical
+  -    4 [chromium-ocr] › e2e\pdf-editor-ocr.spec.ts:280:7 › PDF Editor: OCR visual-fidelity fixtures › B. uniform gray scan background: patch matches the gray, doesn't punch a white hole
+  -    5 [chromium-ocr] › e2e\pdf-editor-ocr.spec.ts:288:7 › PDF Editor: OCR visual-fidelity fixtures › C+D. colored form background with table border lines close to the value
+  -    6 [chromium-ocr] › e2e\pdf-editor-ocr.spec.ts:292:7 › PDF Editor: OCR visual-fidelity fixtures › screenshot acceptance: degree -> graduate on a textured serif scan renders in a matching style, not a generic sans-serif box
+  -    7 [chromium-ocr] › e2e\pdf-editor-ocr.spec.ts:393:7 › PDF Editor: OCR visual-fidelity fixtures › unsafe fallback: a word overlapping a ruling line refuses to auto-erase and requires an explicit manual overlay
+  -    8 [chromium-ocr] › e2e\pdf-editor-ocr.spec.ts:431:7 › PDF Editor: OCR visual-fidelity fixtures › a line-level edit that only swaps a digit keeps the rest of the line (not just the changed digit)
+  -    9 [chromium-ocr] › e2e\pdf-editor-ocr.spec.ts:498:7 › PDF Editor: OCR visual-fidelity fixtures › micro-edit acceptance: only the changed date digit is patched, not the whole date field
+  -   10 [chromium-ocr] › e2e\pdf-editor-ocr.spec.ts:591:7 › PDF Editor: OCR visual-fidelity fixtures › regression: selection handles on a freshly-saved micro-edit don't cover the edited glyph
+  -   11 [chromium-ocr] › e2e\pdf-editor-ocr.spec.ts:640:7 › PDF Editor: OCR privacy regression › recognizing and correcting a scanned page, then exporting, never sends document content or scan pixels off-device
+  ok  12 [chromium-ocr] › e2e\pdf-to-word-ocr.spec.ts:24:9 › PDF to Word — scanned and mixed PDFs › a scanned application form keeps its look: each page becomes a picture, nothing is recognised (5.7s)
+  ok  13 [chromium-ocr] › e2e\pdf-to-word-ocr.spec.ts:24:9 › PDF to Word — scanned and mixed PDFs › a scanned passport page keeps its look: each page becomes a picture, nothing is recognised (4.2s)
+  ok  14 [chromium-ocr] › e2e\pdf-to-word-ocr.spec.ts:24:9 › PDF to Word — scanned and mixed PDFs › a two-page scanned statement keeps its look: each page becomes a picture, nothing is recognised (5.6s)
+  ok  15 [chromium-ocr] › e2e\pdf-to-word-ocr.spec.ts:52:7 › PDF to Word — scanned and mixed PDFs › a plain scan of running text may become editable text — only when the reading is reliable (17.2s)
+  ok  16 [chromium-ocr] › e2e\pdf-to-word-ocr.spec.ts:69:7 › PDF to Word — scanned and mixed PDFs › a mixed PDF keeps its text pages editable and its scanned page as it looks (9.2s)
+  ok  17 [chromium-ocr] › e2e\pdf-to-word-ocr.spec.ts:95:7 › PDF to Word — OCR never holds a conversion hostage › a plain scanned letter (the OCR path) finishes by itself after one click, even with no animation frames (13.6s)
+  ok  18 [chromium-ocr] › e2e\pdf-to-word-ocr.spec.ts:106:7 › PDF to Word — OCR never holds a conversion hostage › a recognition model that doesn't arrive in time doesn't block the conversion: the page keeps its look (5.1s)
+  ok  19 [chromium-ocr] › e2e\pdf-to-word-ocr.spec.ts:128:7 › PDF to Word — OCR never holds a conversion hostage › a stage that goes quiet says so, and offers Retry and Cancel; Cancel keeps the file, Retry converts it (22.3s)
+  -   20 [mobile-chromium-ocr] › e2e\pdf-editor-ocr.spec.ts:143:7 › PDF Editor: OCR integration › recognizes a scanned page inside a mixed document and lets you correct the text
+  -   21 [mobile-chromium-ocr] › e2e\pdf-editor-ocr.spec.ts:165:7 › PDF Editor: OCR text edit round trip › corrects exactly one recognized word — original text carries only that word, not the whole line
+  -   22 [mobile-chromium-ocr] › e2e\pdf-editor-ocr.spec.ts:215:7 › PDF Editor: OCR text edit round trip › no-collateral-change: editing one word leaves the rest of the scanned page pixel-identical
+  -   23 [mobile-chromium-ocr] › e2e\pdf-editor-ocr.spec.ts:280:7 › PDF Editor: OCR visual-fidelity fixtures › B. uniform gray scan background: patch matches the gray, doesn't punch a white hole
+  -   24 [mobile-chromium-ocr] › e2e\pdf-editor-ocr.spec.ts:288:7 › PDF Editor: OCR visual-fidelity fixtures › C+D. colored form background with table border lines close to the value
+  -   25 [mobile-chromium-ocr] › e2e\pdf-editor-ocr.spec.ts:292:7 › PDF Editor: OCR visual-fidelity fixtures › screenshot acceptance: degree -> graduate on a textured serif scan renders in a matching style, not a generic sans-serif box
+  -   26 [mobile-chromium-ocr] › e2e\pdf-editor-ocr.spec.ts:393:7 › PDF Editor: OCR visual-fidelity fixtures › unsafe fallback: a word overlapping a ruling line refuses to auto-erase and requires an explicit manual overlay
+  -   27 [mobile-chromium-ocr] › e2e\pdf-editor-ocr.spec.ts:431:7 › PDF Editor: OCR visual-fidelity fixtures › a line-level edit that only swaps a digit keeps the rest of the line (not just the changed digit)
+  -   28 [mobile-chromium-ocr] › e2e\pdf-editor-ocr.spec.ts:498:7 › PDF Editor: OCR visual-fidelity fixtures › micro-edit acceptance: only the changed date digit is patched, not the whole date field
+  -   29 [mobile-chromium-ocr] › e2e\pdf-editor-ocr.spec.ts:591:7 › PDF Editor: OCR visual-fidelity fixtures › regression: selection handles on a freshly-saved micro-edit don't cover the edited glyph
+  -   30 [mobile-chromium-ocr] › e2e\pdf-editor-ocr.spec.ts:640:7 › PDF Editor: OCR privacy regression › recognizing and correcting a scanned page, then exporting, never sends document content or scan pixels off-device
+  ok  31 [mobile-chromium-ocr] › e2e\pdf-to-word-ocr.spec.ts:24:9 › PDF to Word — scanned and mixed PDFs › a scanned application form keeps its look: each page becomes a picture, nothing is recognised (4.1s)
+  ok  32 [mobile-chromium-ocr] › e2e\pdf-to-word-ocr.spec.ts:24:9 › PDF to Word — scanned and mixed PDFs › a scanned passport page keeps its look: each page becomes a picture, nothing is recognised (3.4s)
+  ok  33 [mobile-chromium-ocr] › e2e\pdf-to-word-ocr.spec.ts:24:9 › PDF to Word — scanned and mixed PDFs › a two-page scanned statement keeps its look: each page becomes a picture, nothing is recognised (4.1s)
+  ok  34 [mobile-chromium-ocr] › e2e\pdf-to-word-ocr.spec.ts:52:7 › PDF to Word — scanned and mixed PDFs › a plain scan of running text may become editable text — only when the reading is reliable (14.5s)
+  ok  35 [mobile-chromium-ocr] › e2e\pdf-to-word-ocr.spec.ts:69:7 › PDF to Word — scanned and mixed PDFs › a mixed PDF keeps its text pages editable and its scanned page as it looks (7.7s)
+  ok  36 [mobile-chromium-ocr] › e2e\pdf-to-word-ocr.spec.ts:95:7 › PDF to Word — OCR never holds a conversion hostage › a plain scanned letter (the OCR path) finishes by itself after one click, even with no animation frames (13.0s)
+  ok  37 [mobile-chromium-ocr] › e2e\pdf-to-word-ocr.spec.ts:106:7 › PDF to Word — OCR never holds a conversion hostage › a recognition model that doesn't arrive in time doesn't block the conversion: the page keeps its look (5.1s)
+  ok  38 [mobile-chromium-ocr] › e2e\pdf-to-word-ocr.spec.ts:128:7 › PDF to Word — OCR never holds a conversion hostage › a stage that goes quiet says so, and offers Retry and Cancel; Cancel keeps the file, Retry converts it (20.4s)
+  ok  39 [chromium] › e2e\compress.spec.ts:46:5 › a Flate-encoded scan really shrinks under a real target, with exact byte counts shown (3.5s)
+  ok  40 [chromium] › e2e\compress.spec.ts:67:5 › an unreachable target is reported honestly, with the closest result offered (2.7s)
+  ok  41 [chromium] › e2e\compress.spec.ts:82:5 › a PDF already under the target is returned byte-for-byte unchanged (2.0s)
+  ok  42 [chromium] › e2e\compress.spec.ts:92:5 › Continue with hands the result to the next tool without picking it again (1.1s)
+  ok  43 [chromium] › e2e\compress.spec.ts:104:5 › a ~320 KB Chrome-printed PDF really goes under a 200 KB target (3.8s)
+  ok  44 [chromium] › e2e\compress.spec.ts:124:5 › a file already under the target is returned unchanged by the image compressor too (1.5s)
+  ok  45 [chromium] › e2e\editor-addtext.spec.ts:17:5 › add text on the page: type, restyle (serif, italic, underline, bold, size, colour, align), move, resize, export (3.4s)
+  ok  46 [chromium] › e2e\editor-desktop-shot.spec.ts:6:5 › desktop editor screenshot (1.4s)
+  ok  47 [chromium] › e2e\editor-forms-audit.spec.ts:22:5 › REGRESSION — a pre-filled field (Raviteja) shows its value once: before editing, while editing, after editing (6.5s)
+  ok  48 [chromium] › e2e\editor-forms-audit.spec.ts:66:5 › replace, one character, shorter, longer, empty, restore, undo, redo — never doubled (9.1s)
+  ok  49 [chromium] › e2e\editor-forms-audit.spec.ts:101:7 › FORM-02-sizes.pdf: every field looks the same idle, while editing, and after editing — size, alignment, font, colour (19.9s)
+  ok  50 [chromium] › e2e\editor-forms-audit.spec.ts:101:7 › FORM-03-alignment.pdf: every field looks the same idle, while editing, and after editing — size, alignment, font, colour (11.1s)
+  ok  51 [chromium] › e2e\editor-forms-audit.spec.ts:101:7 › FORM-10-fonts-colours.pdf: every field looks the same idle, while editing, and after editing — size, alignment, font, colour (11.3s)
+  ok  52 [chromium] › e2e\editor-forms-audit.spec.ts:136:5 › FORM-04: multi-line fields — wrapping, size and layout match idle, editing and written (7.2s)
+  ok  53 [chromium] › e2e\editor-forms-audit.spec.ts:155:5 › FORM-05: checkbox, radio and dropdown — one state shown, toggling is exact, undo restores (6.9s)
+  ok  54 [chromium] › e2e\editor-forms-audit.spec.ts:194:7 › FORM-06-needappearances.pdf: no appearance + /NeedAppearances — the field shows /V once, laid out like any other (5.2s)
+  ok  55 [chromium] › e2e\editor-forms-audit.spec.ts:194:7 › FORM-07-stale-appearance.pdf: an appearance that shows an old value — the field shows /V once, laid out like any other (5.1s)
+  ok  56 [chromium] › e2e\editor-forms-audit.spec.ts:209:5 › FORM-08: a flattened form is page text, not a field — one editable representation (2.8s)
+  ok  57 [chromium] › e2e\editor-forms-audit.spec.ts:225:5 › FORM-09: a long form — ten-plus fields of every kind, edited with the keyboard (Tab) — no duplicates anywhere; export is right (8.5s)
+  ok  58 [chromium] › e2e\editor-forms-audit.spec.ts:285:9 › field geometry: the edit box sits exactly on the field at every zoom, scrolled, on a rotated page › FORM-01-given-name.pdf (18.8s)
+  ok  59 [chromium] › e2e\editor-forms-audit.spec.ts:285:9 › field geometry: the edit box sits exactly on the field at every zoom, scrolled, on a rotated page › FORM-11-rotated-page.pdf (16.7s)
+  ok  60 [chromium] › e2e\editor-forms-audit.spec.ts:327:7 › HiDPI › the edit box matches the field on a 2x display (4.3s)
+  ok  61 [chromium] › e2e\editor-forms-export.spec.ts:61:7 › export after editing — FORM-01-given-name.pdf (3.1s)
+  ok  62 [chromium] › e2e\editor-forms-export.spec.ts:61:7 › export after editing — FORM-02-sizes.pdf (7.3s)
+  ok  63 [chromium] › e2e\editor-forms-export.spec.ts:61:7 › export after editing — FORM-03-alignment.pdf (4.7s)
+  ok  64 [chromium] › e2e\editor-forms-export.spec.ts:61:7 › export after editing — FORM-04-multiline.pdf (4.3s)
+  ok  65 [chromium] › e2e\editor-forms-export.spec.ts:61:7 › export after editing — FORM-05-choices.pdf (4.4s)
+  ok  66 [chromium] › e2e\editor-forms-export.spec.ts:61:7 › export after editing — FORM-10-fonts-colours.pdf (4.6s)
+  ok  67 [chromium] › e2e\editor-forms-export.spec.ts:61:7 › export after editing — FORM-11-rotated-page.pdf (3.0s)
+  ok  68 [chromium] › e2e\editor-forms-export.spec.ts:85:7 › opening and exporting changes nothing — FORM-01-given-name.pdf (2.8s)
+  ok  69 [chromium] › e2e\editor-forms-export.spec.ts:85:7 › opening and exporting changes nothing — FORM-02-sizes.pdf (2.8s)
+  ok  70 [chromium] › e2e\editor-forms-export.spec.ts:85:7 › opening and exporting changes nothing — FORM-03-alignment.pdf (2.8s)
+  ok  71 [chromium] › e2e\editor-forms-export.spec.ts:85:7 › opening and exporting changes nothing — FORM-04-multiline.pdf (2.8s)
+  ok  72 [chromium] › e2e\editor-forms-export.spec.ts:85:7 › opening and exporting changes nothing — FORM-05-choices.pdf (2.9s)
+  ok  73 [chromium] › e2e\editor-forms-export.spec.ts:85:7 › opening and exporting changes nothing — FORM-08-flattened.pdf (2.8s)
+  ok  74 [chromium] › e2e\editor-forms-export.spec.ts:85:7 › opening and exporting changes nothing — FORM-09-long.pdf (2.8s)
+  ok  75 [chromium] › e2e\editor-forms-export.spec.ts:85:7 › opening and exporting changes nothing — FORM-10-fonts-colours.pdf (2.9s)
+  ok  76 [chromium] › e2e\editor-forms-export.spec.ts:85:7 › opening and exporting changes nothing — FORM-11-rotated-page.pdf (2.8s)
+Removing XFA form data as pdf-lib does not support reading or writing XFA
+  ok  77 [chromium] › e2e\editor-forms-export.spec.ts:112:7 › fw9.pdf (public form, pre-filled): untouched export is identical; editing one field changes only that field (5.5s)
+  ok  78 [chromium] › e2e\editor-forms-export.spec.ts:112:7 › f1040es.pdf (public form, pre-filled): untouched export is identical; editing one field changes only that field (7.7s)
+  ok  79 [chromium] › e2e\editor-forms.spec.ts:23:5 › form fields are filled on the page, survive export and reopen, and untouched fields stay as they were (3.7s)
+  ok  80 [chromium] › e2e\editor-forms.spec.ts:60:5 › typing in a field is one undo step; undo restores the value (2.1s)
+  ok  81 [chromium] › e2e\editor-images.spec.ts:39:5 › an existing picture can be selected, moved, resized (proportions kept), turned, replaced and deleted — and each is undoable (6.5s)
+  ok  82 [chromium] › e2e\editor-images.spec.ts:100:5 › a picture can be replaced from the panel and turned with the handle (5.0s)
+  ok  83 [chromium] › e2e\editor-images.spec.ts:130:5 › images in a six-picture gallery: only the one that was touched moves (2.7s)
+  -   84 [chromium] › e2e\editor-mobile.spec.ts:8:5 › on a phone: tap text, Edit text, type, Done, export; controls are touch-sized; no horizontal overflow
+  -   85 [chromium] › e2e\editor-mobile.spec.ts:47:5 › on a phone: the page rail and properties open as sheets, and add-text by tap works
+  -   86 [chromium] › e2e\editor-mobile.spec.ts:63:5 › on a phone: a pre-filled form field shows once, takes a tap and typing, and exports
+  ok  87 [chromium] › e2e\editor-native-matrix.spec.ts:58:7 › EDITOR-01-simple-text.pdf · fix-recieve: recieve → receive (3.0s)
+  ok  88 [chromium] › e2e\editor-native-matrix.spec.ts:58:7 › EDITOR-01-simple-text.pdf · fix-teh: teh → the (3.8s)
+  ok  89 [chromium] › e2e\editor-native-matrix.spec.ts:58:7 › EDITOR-01-simple-text.pdf · fix-seperate: seperate → separate (2.8s)
+  ok  90 [chromium] › e2e\editor-native-matrix.spec.ts:58:7 › EDITOR-01-simple-text.pdf · fix-occured: occured → occurred (3.7s)
+  ok  91 [chromium] › e2e\editor-native-matrix.spec.ts:58:7 › EDITOR-01-simple-text.pdf · fix-definately: definately → definitely (2.9s)
+  ok  92 [chromium] › e2e\editor-native-matrix.spec.ts:58:7 › EDITOR-01-simple-text.pdf · fix-adress: adress → address (3.0s)
+  ok  93 [chromium] › e2e\editor-native-matrix.spec.ts:58:7 › EDITOR-02-resume.pdf · fix-experiance: experiance → experience (3.3s)
+  ok  94 [chromium] › e2e\editor-native-matrix.spec.ts:58:7 › EDITOR-04-invoice.pdf · fix-seperate: seperate → separate (2.9s)
+  ok  95 [chromium] › e2e\editor-native-matrix.spec.ts:58:7 › EDITOR-04-invoice.pdf · fix-buisness: buisness → business (4.1s)
+  ok  96 [chromium] › e2e\editor-native-matrix.spec.ts:58:7 › EDITOR-06-mixed-fonts.pdf · fix-definately: definately → definitely (4.7s)
+  ok  97 [chromium] › e2e\editor-native-matrix.spec.ts:58:7 › EDITOR-06-mixed-fonts.pdf · fix-recieved: recieved → received (4.7s)
+  ok  98 [chromium] › e2e\editor-native-matrix.spec.ts:58:7 › EDITOR-06-mixed-fonts.pdf · fix-wich: wich → which (3.9s)
+  ok  99 [chromium] › e2e\editor-native-matrix.spec.ts:58:7 › EDITOR-06-mixed-fonts.pdf · fix-occured: occured → occurred (3.8s)
+  ok 100 [chromium] › e2e\editor-native-matrix.spec.ts:58:7 › EDITOR-06-mixed-fonts.pdf · fix-teh: teh → the (3.5s)
+  ok 101 [chromium] › e2e\editor-native-matrix.spec.ts:58:7 › EDITOR-07-multi-column.pdf · fix-recieve: recieve → receive (3.7s)
+  ok 102 [chromium] › e2e\editor-native-matrix.spec.ts:58:7 › EDITOR-07-multi-column.pdf · fix-teh: teh → the (4.5s)
+  ok 103 [chromium] › e2e\editor-native-matrix.spec.ts:58:7 › EDITOR-08-images.pdf · fix-teh: teh → the (2.6s)
+  ok 104 [chromium] › e2e\editor-native-matrix.spec.ts:58:7 › EDITOR-20-multi-image.pdf · fix-seperate: seperate → separate (3.3s)
+  ok 105 [chromium] › e2e\editor-native-matrix.spec.ts:58:7 › EDITOR-11-long-document-25-pages.pdf · fix-recieve: recieve → receive (3.6s)
+  ok 106 [chromium] › e2e\editor-native-matrix.spec.ts:58:7 › EDITOR-14-table-heavy.pdf · fix-teh: teh → the (2.7s)
+  ok 107 [chromium] › e2e\editor-native-matrix.spec.ts:58:7 › EDITOR-15-special-characters.pdf · fix-recieve: recieve → receive (3.5s)
+  ok 108 [chromium] › e2e\editor-native-matrix.spec.ts:58:7 › EDITOR-16-header-footer.pdf · fix-recieve: recieve → receive (3.1s)
+  ok 109 [chromium] › e2e\editor-native-matrix.spec.ts:58:7 › EDITOR-03-business-letter.pdf · fix-recieve: recieve → receive (4.4s)
+  ok 110 [chromium] › e2e\editor-native-matrix.spec.ts:58:7 › EDITOR-03-business-letter.pdf · fix-teh: teh → the (4.9s)
+  ok 111 [chromium] › e2e\editor-native-matrix.spec.ts:58:7 › EDITOR-03-business-letter.pdf · fix-seperate: seperate → separate (5.0s)
+  ok 112 [chromium] › e2e\editor-native-matrix.spec.ts:58:7 › EDITOR-03-business-letter.pdf · fix-occured: occured → occurred (3.9s)
+  ok 113 [chromium] › e2e\editor-native-matrix.spec.ts:58:7 › EDITOR-05-form-acroform.pdf · fix-recieve: recieve → receive (3.2s)
+  ok 114 [chromium] › e2e\editor-native-matrix.spec.ts:58:7 › EDITOR-05-form-acroform.pdf · fix-teh: teh → the (3.6s)
+  ok 115 [chromium] › e2e\editor-native-matrix.spec.ts:58:7 › EDITOR-09-rotated-pages.pdf · fix-recieve: recieve → receive (3.5s)
+  ok 116 [chromium] › e2e\editor-native-matrix.spec.ts:58:7 › EDITOR-09-rotated-pages.pdf · fix-teh: teh → the (3.5s)
+  ok 117 [chromium] › e2e\editor-native-matrix.spec.ts:58:7 › EDITOR-10-mixed-page-sizes.pdf · fix-recieve: recieve → receive (3.5s)
+  ok 118 [chromium] › e2e\editor-native-matrix.spec.ts:58:7 › EDITOR-10-mixed-page-sizes.pdf · fix-teh: teh → the (3.6s)
+  ok 119 [chromium] › e2e\editor-native-matrix.spec.ts:58:7 › EDITOR-17-watermark.pdf · fix-recieve: recieve → receive (3.4s)
+  ok 120 [chromium] › e2e\editor-native-matrix.spec.ts:58:7 › EDITOR-17-watermark.pdf · fix-teh: teh → the (3.5s)
+  ok 121 [chromium] › e2e\editor-native-matrix.spec.ts:58:7 › EDITOR-18-annotations.pdf · fix-recieve: recieve → receive (3.1s)
+  ok 122 [chromium] › e2e\editor-native-matrix.spec.ts:58:7 › EDITOR-19-cropbox.pdf · fix-recieve: recieve → receive (2.7s)
+  ok 123 [chromium] › e2e\editor-native-matrix.spec.ts:58:7 › EDITOR-19-cropbox.pdf · fix-teh: teh → the (3.1s)
+  ok 124 [chromium] › e2e\editor-native-matrix.spec.ts:58:7 › EDITOR-01-simple-text.pdf · same-length: teh → the (3.7s)
+  ok 125 [chromium] › e2e\editor-native-matrix.spec.ts:58:7 › EDITOR-01-simple-text.pdf · shorter: recieve → get (2.9s)
+  ok 126 [chromium] › e2e\editor-native-matrix.spec.ts:58:7 › EDITOR-01-simple-text.pdf · longer: recieve → receive in writing (3.0s)
+  ok 127 [chromium] › e2e\editor-native-matrix.spec.ts:58:7 › EDITOR-01-simple-text.pdf · single-char-insert: adress → address (2.8s)
+  ok 128 [chromium] › e2e\editor-native-matrix.spec.ts:58:7 › EDITOR-01-simple-text.pdf · single-char-replace: definately → definitely (2.6s)
+  ok 129 [chromium] › e2e\editor-native-matrix.spec.ts:58:7 › EDITOR-01-simple-text.pdf · single-char-delete: teh chair → te chair (3.7s)
+  ok 130 [chromium] › e2e\editor-native-matrix.spec.ts:58:7 › EDITOR-03-business-letter.pdf · whole-word: committee → board (4.1s)
+  ok 131 [chromium] › e2e\editor-native-matrix.spec.ts:58:7 › EDITOR-03-business-letter.pdf · multiple-words: committee will recieve your suggestions → board will receive all suggestions (5.2s)
+  ok 132 [chromium] › e2e\editor-native-matrix.spec.ts:58:7 › EDITOR-01-simple-text.pdf · line-end: asked → requested (4.1s)
+  ok 133 [chromium] › e2e\editor-native-matrix.spec.ts:58:7 › EDITOR-06-mixed-fonts.pdf · bold: Bold → Strong (5.2s)
+  ok 134 [chromium] › e2e\editor-native-matrix.spec.ts:58:7 › EDITOR-06-mixed-fonts.pdf · italic: Italic → Slanted (5.0s)
+  ok 135 [chromium] › e2e\editor-native-matrix.spec.ts:58:7 › EDITOR-06-mixed-fonts.pdf · colored: wich → which (3.7s)
+  ok 136 [chromium] › e2e\editor-native-matrix.spec.ts:58:7 › EDITOR-01-simple-text.pdf · large-heading: Quarterly Update → Quarterly Updates (2.8s)
+  ok 137 [chromium] › e2e\editor-native-matrix.spec.ts:58:7 › EDITOR-06-mixed-fonts.pdf · small-body: teh → the (3.4s)
+  ok 138 [chromium] › e2e\editor-native-matrix.spec.ts:58:7 › EDITOR-09-rotated-pages.pdf · rotated-p2 · page 2: recieve → receive (3.3s)
+  ok 139 [chromium] › e2e\editor-native-matrix.spec.ts:58:7 › EDITOR-09-rotated-pages.pdf · rotated-p3 · page 3: recieve → receive (3.4s)
+  ok 140 [chromium] › e2e\editor-native-matrix.spec.ts:58:7 › EDITOR-09-rotated-pages.pdf · rotated-p4 · page 4: recieve → receive (3.4s)
+  ok 141 [chromium] › e2e\editor-native-matrix.spec.ts:58:7 › EDITOR-15-special-characters.pdf · special-accent: recieve → receive (3.3s)
+  ok 142 [chromium] › e2e\editor-native-matrix.spec.ts:58:7 › EDITOR-15-special-characters.pdf · special-currency: €120.50 → €125.50 (2.8s)
+  ok 143 [chromium] › e2e\editor-native-matrix.spec.ts:58:7 › EDITOR-11-long-document-25-pages.pdf · later-page · page 12: recieve → receive (3.9s)
+  ok 144 [chromium] › e2e\editor-native-matrix.spec.ts:58:7 › public/fw9.pdf · adobe-designer: requester → requestor (4.1s)
+  ok 145 [chromium] › e2e\editor-native-matrix.spec.ts:58:7 › public/f1040es.pdf · antenna-house: method → way (5.1s)
+  ok 146 [chromium] › e2e\editor-native-matrix.spec.ts:58:7 › public/table.pdf · pdfmaker: example → sample (2.9s)
+  ok 147 [chromium] › e2e\editor-native-matrix.spec.ts:58:7 › EDITOR-05-form-acroform.pdf · form-page-text: recieve → receive (3.1s)
+  ok 148 [chromium] › e2e\editor-native-text.spec.ts:6:7 › Native text editing — the user's real flow › fix a spelling mistake in a Chromium PDF: double-click, type, Done, export, reopen (4.5s)
+  ok 149 [chromium] › e2e\editor-robustness.spec.ts:10:5 › manual-typing stress: type straight after the double-click, fast and long, press Done at once — nothing is lost (3.1s)
+  ok 150 [chromium] › e2e\editor-robustness.spec.ts:27:5 › a backgrounded tab: no animation frames, window without focus — editing and export still complete on their own (2.6s)
+  ok 151 [chromium] › e2e\editor-robustness.spec.ts:41:5 › privacy: editing text and pictures and exporting sends nothing off the device (3.5s)
+  ok 152 [chromium] › e2e\editor-robustness.spec.ts:56:5 › performance: a 25-page document opens fast, renders only what is near, and an edit commits quickly (4.3s)
+  ok 153 [chromium] › e2e\editor-scanned.spec.ts:12:7 › EDITOR-12-scanned-form.pdf: a scan says so, does not pretend to be editable text, and still takes everything that works on a picture (2.9s)
+  ok 154 [chromium] › e2e\editor-scanned.spec.ts:12:7 › EDITOR-13-scanned-letter.pdf: a scan says so, does not pretend to be editable text, and still takes everything that works on a picture (3.0s)
+  ok 155 [chromium] › e2e\editor-session.spec.ts:11:5 › undo and redo of text edits; typing one burst is one step; the dirty marker follows (7.8s)
+  ok 156 [chromium] › e2e\editor-session.spec.ts:46:5 › search finds the new text and not the old; copy reads the edit; Escape and Cancel leave the page untouched (5.1s)
+  ok 157 [chromium] › e2e\editor-session.spec.ts:66:5 › keyboard in the text box: Home/End/arrows/Delete/Backspace, Ctrl+A/C/V, Enter in a paragraph (2.6s)
+  ok 158 [chromium] › e2e\editor-session.spec.ts:88:5 › a long uninterrupted session: ten edits across ten pages, then export, with the first page's edit still there (21.6s)
+  ok 159 [chromium] › e2e\editor-session.spec.ts:118:5 › shortcuts pick tools (V E T H U D), never while typing; Escape leaves a tool; controls are named (2.6s)
+  ok 160 [chromium] › e2e\hands-off.spec.ts:28:9 › one click, then hands off › PDF → Word, a scanned form: finishes by itself, even with no animation frames (3.1s)
+  ok 161 [chromium] › e2e\hands-off.spec.ts:28:9 › one click, then hands off › PDF → Word, a passport-like scan: finishes by itself, even with no animation frames (3.1s)
+  ok 162 [chromium] › e2e\hands-off.spec.ts:28:9 › one click, then hands off › PDF → Word, a text PDF: finishes by itself, even with no animation frames (1.9s)
+  ok 163 [chromium] › e2e\hands-off.spec.ts:28:9 › one click, then hands off › PDF → Image: finishes by itself, even with no animation frames (2.6s)
+  ok 164 [chromium] › e2e\hands-off.spec.ts:28:9 › one click, then hands off › Word → PDF: finishes by itself, even with no animation frames (2.3s)
+  ok 165 [chromium] › e2e\hands-off.spec.ts:28:9 › one click, then hands off › Image → Word: finishes by itself, even with no animation frames (1.7s)
+  ok 166 [chromium] › e2e\hands-off.spec.ts:28:9 › one click, then hands off › Image → PDF: finishes by itself, even with no animation frames (1.7s)
+  ok 167 [chromium] › e2e\hands-off.spec.ts:28:9 › one click, then hands off › Image Converter: finishes by itself, even with no animation frames (1.2s)
+  ok 168 [chromium] › e2e\hands-off.spec.ts:28:9 › one click, then hands off › Merge PDF: finishes by itself, even with no animation frames (917ms)
+  ok 169 [chromium] › e2e\hands-off.spec.ts:28:9 › one click, then hands off › Organize PDF: finishes by itself, even with no animation frames (2.0s)
+  ok 170 [chromium] › e2e\hands-off.spec.ts:39:7 › one click, then hands off › Compress PDF and Compress Image finish by themselves (6.1s)
+  ok 171 [chromium] › e2e\hands-off.spec.ts:54:7 › one click, then hands off › PDF Editor: Export finishes by itself (1.3s)
+  ok 172 [chromium] › e2e\image-to-word.spec.ts:25:7 › Image to Word › a filled-in form PNG becomes one page that is the picture — no text, original bytes, same proportions (2.5s)
+  ok 173 [chromium] › e2e\image-to-word.spec.ts:43:7 › Image to Word › a wide ID card turns the page sideways instead of shrinking onto a portrait page (1.8s)
+  ok 174 [chromium] › e2e\image-to-word.spec.ts:50:7 › Image to Word › several images: one per page, in the order added, each as its own file (1.6s)
+  ok 175 [chromium] › e2e\image-to-word.spec.ts:62:7 › Image to Word › A4 centres the image inside a margin, never clipped or stretched (2.1s)
+  ok 176 [chromium] › e2e\image-to-word.spec.ts:68:7 › Image to Word › nothing is uploaded and nothing is read from the picture (1.5s)
+  ok 177 [chromium] › e2e\integrity.spec.ts:36:7 › output integrity › A: an incrementally-updated scan compressed under its target is a valid, openable PDF (2.8s)
+  ok 178 [chromium] › e2e\integrity.spec.ts:52:7 › output integrity › C: merge, split and organize outputs from the same file pass the strict check (5.2s)
+  ok 179 [chromium] › e2e\integrity.spec.ts:77:7 › output integrity › D: an editor export of the same file is valid (2.6s)
+  ok 180 [chromium] › e2e\integrity.spec.ts:90:7 › output integrity › encrypted PDFs are refused with a clear reason instead of producing a broken file (1.3s)
+  ok 181 [chromium] › e2e\integrity.spec.ts:102:7 › output integrity › E: an image that can't be decoded is reported, never converted into an empty file (1.3s)
+  ok 182 [chromium] › e2e\integrity.spec.ts:121:7 › output integrity › E: a JPEG cut off halfway (decodes grey in browsers) is refused by Image to PDF and the converter (1.3s)
+  ok 183 [chromium] › e2e\pdf-editor-advanced.spec.ts:65:7 › PDF Editor: signature › draws a signature, places and resizes it, and it renders at the intended location after export (3.0s)
+  ok 184 [chromium] › e2e\pdf-editor-advanced.spec.ts:146:7 › PDF Editor: image placement › inserts a real PNG image, preserves aspect ratio, and it renders at the placed location (1.9s)
+  ok 185 [chromium] › e2e\pdf-editor-advanced.spec.ts:209:7 › PDF Editor: annotations › highlight fills the selected region with a translucent color (2.2s)
+  ok 186 [chromium] › e2e\pdf-editor-advanced.spec.ts:231:7 › PDF Editor: annotations › underline draws a thin line at the bottom of the region, not a fill (2.0s)
+  ok 187 [chromium] › e2e\pdf-editor-advanced.spec.ts:248:7 › PDF Editor: annotations › strikethrough draws a thin line through the middle of the region (2.4s)
+  ok 188 [chromium] › e2e\pdf-editor-advanced.spec.ts:269:7 › PDF Editor: form fill › detects AcroForm fields, edits them, and the values persist in the exported PDF (2.0s)
+  ok 189 [chromium] › e2e\pdf-editor-advanced.spec.ts:297:7 › PDF Editor: crop › applies a crop box to the current page and it's reflected in the exported PDF's page box (2.6s)
+  ok 190 [chromium] › e2e\pdf-editor-advanced.spec.ts:343:7 › PDF Editor: header/footer › stamps header/footer text with a page-number token onto every page (2.1s)
+  ok 191 [chromium] › e2e\pdf-editor-interaction.spec.ts:65:7 › PDF Editor: drag previews follow the pointer › the live preview box sits exactly under the pointer while dragging (not at the page's top-left) (1.7s)
+  ok 192 [chromium] › e2e\pdf-editor-interaction.spec.ts:87:7 › PDF Editor: drag previews follow the pointer › a drag started on top of the page's text still draws (the text hit-target doesn't swallow it) (1.6s)
+  ok 193 [chromium] › e2e\pdf-editor-interaction.spec.ts:96:7 › PDF Editor: drag previews follow the pointer › placement is exact (0px) at different zooms, when scrolled, and on a rotated page (7.6s)
+  ok 194 [chromium] › e2e\pdf-editor-interaction.spec.ts:124:7 › PDF Editor: tools stay armed for repeated use › highlight, underline and strikethrough each work several times in a row without reselecting (3.4s)
+  ok 195 [chromium] › e2e\pdf-editor-interaction.spec.ts:135:7 › PDF Editor: tools stay armed for repeated use › Escape leaves the tool; a stray click without dragging doesn't create anything or drop the tool (1.6s)
+  ok 196 [chromium] › e2e\pdf-editor-interaction.spec.ts:148:7 › PDF Editor: freehand drawing › the stroke is visible while the pointer is still down, and the tool stays armed (2.2s)
+  ok 197 [chromium] › e2e\pdf-editor-interaction.spec.ts:167:7 › PDF Editor: text is edited directly on the page › place text, type a sentence continuously, edit inside it, and it exports where it shows (2.9s)
+  ok 198 [chromium] › e2e\pdf-editor-interaction.spec.ts:202:7 › PDF Editor: text is edited directly on the page › clicking an already-selected text box (or double-clicking) re-enters editing; typing is one undo step (2.0s)
+  ok 199 [chromium] › e2e\pdf-editor-interaction.spec.ts:219:7 › PDF Editor: text is edited directly on the page › the selected text's color and size are edited from the panel, and Delete removes it (2.0s)
+  ok 200 [chromium] › e2e\pdf-editor-interaction.spec.ts:241:7 › PDF Editor: text is edited directly on the page › typing into the properties-panel text box isn't cut off after one character (2.3s)
+  ok 201 [chromium] › e2e\pdf-editor-interaction.spec.ts:260:7 › PDF Editor: shapes, images, crop, search, pages › a line dragged down-right exports down-right, and matches what's on screen (2.3s)
+  ok 202 [chromium] › e2e\pdf-editor-interaction.spec.ts:288:7 › PDF Editor: shapes, images, crop, search, pages › a resized picture keeps its proportions (screen and export agree) (2.2s)
+  ok 203 [chromium] › e2e\pdf-editor-interaction.spec.ts:308:7 › PDF Editor: shapes, images, crop, search, pages › a crop area can be adjusted by its handles, is kept on the page, and applied from the action bar (2.7s)
+  ok 204 [chromium] › e2e\pdf-editor-interaction.spec.ts:335:7 › PDF Editor: shapes, images, crop, search, pages › search covers every page from the start and Next/Prev jump to the match (1.8s)
+  ok 205 [chromium] › e2e\pdf-editor-interaction.spec.ts:350:7 › PDF Editor: shapes, images, crop, search, pages › pages can be moved with the Move up/down buttons (works without dragging) (2.0s)
+  ok 206 [chromium] › e2e\pdf-editor-interaction.spec.ts:361:7 › PDF Editor: shapes, images, crop, search, pages › Whiteout shows the not-secure-redaction warning while it's the active tool (1.4s)
+  ok 207 [chromium] › e2e\pdf-editor-interaction.spec.ts:371:7 › PDF Editor: added text on a rotated page › keeps its layout (one line, real width) and turns with the page instead of wrapping into a sliver (1.9s)
+  ok 208 [chromium] › e2e\pdf-editor-interaction.spec.ts:395:7 › PDF Editor: underline and strikethrough as a flat drag › dragging straight along a line (almost no height) still creates the underline / strikethrough (2.3s)
+  ok 209 [chromium] › e2e\pdf-editor-interaction.spec.ts:415:7 › PDF Editor: typing right after placing text › the first character typed immediately after clicking is not lost (1.7s)
+  ok 210 [chromium] › e2e\pdf-editor-interaction.spec.ts:424:7 › PDF Editor: typing right after placing text › typing across a pause (e.g. thinking mid-sentence) never loses what was already typed (2.2s)
+  ok 211 [chromium] › e2e\pdf-editor-interaction.spec.ts:442:7 › PDF Editor: pages that carry a CropBox › the page is laid out on its visible (cropped) area, and the crop survives a round trip (1.7s)
+  -  212 [chromium] › e2e\pdf-editor-interaction.spec.ts:462:7 › PDF Editor on a phone › opens fit to the screen, has finger-sized controls, and both drawers can be closed and used
+  ok 213 [chromium] › e2e\pdf-editor-interaction.spec.ts:491:7 › PDF Editor: a page wider than its viewport › the page keeps its size (and its drawing overlay matches its canvas) and scrolls instead of being squeezed (1.8s)
+  -  214 [chromium] › e2e\pdf-editor-interaction.spec.ts:538:7 › PDF Editor on a phone: touch input › tap places text and typing works; highlight/underline stay armed; strokes render live; crop applies
+  ok 215 [chromium] › e2e\pdf-editor-qa.spec.ts:28:7 › PDF Editor: large document smoke test › handles a 25-page document: thumbnails, navigation, zoom, an annotation, and export (3.6s)
+  -  216 [chromium] › e2e\pdf-editor-qa.spec.ts:76:7 › PDF Editor: mobile editing checklist › every core editing action works on a mobile viewport
+  ok 217 [chromium] › e2e\pdf-editor-qa.spec.ts:150:9 › PDF Editor: responsive QA matrix › no horizontal overflow and core controls are reachable at 390x844 (1.6s)
+  ok 218 [chromium] › e2e\pdf-editor-qa.spec.ts:150:9 › PDF Editor: responsive QA matrix › no horizontal overflow and core controls are reachable at 768x1024 (1.5s)
+  ok 219 [chromium] › e2e\pdf-editor-qa.spec.ts:150:9 › PDF Editor: responsive QA matrix › no horizontal overflow and core controls are reachable at 1366x768 (1.6s)
+  ok 220 [chromium] › e2e\pdf-editor-qa.spec.ts:150:9 › PDF Editor: responsive QA matrix › no horizontal overflow and core controls are reachable at 1440x900 (1.6s)
+  ok 221 [chromium] › e2e\pdf-editor-qa.spec.ts:150:9 › PDF Editor: responsive QA matrix › no horizontal overflow and core controls are reachable at 1920x1080 (1.5s)
+  ok 222 [chromium] › e2e\pdf-editor-qa.spec.ts:150:9 › PDF Editor: responsive QA matrix › no horizontal overflow and core controls are reachable at 2560x1440 (1.6s)
+  ok 223 [chromium] › e2e\pdf-editor-qa.spec.ts:150:9 › PDF Editor: responsive QA matrix › no horizontal overflow and core controls are reachable at 3440x1440 (1.6s)
+  ok 224 [chromium] › e2e\pdf-editor-qa.spec.ts:180:7 › PDF Editor: privacy regression (signature / image / form / crop / header-footer) › no document bytes, signature/image contents, or third-party requests leave the browser across these flows (4.4s)
+  ok 225 [chromium] › e2e\pdf-editor-rotation.spec.ts:27:5 › text added to a page shown rotated is upright on screen and in the exported PDF (2.0s)
+  ok 226 [chromium] › e2e\pdf-editor-rotation.spec.ts:67:5 › a picture placed on a page shown rotated keeps its shape and exports upright (2.4s)
+  ok 227 [chromium] › e2e\pdf-editor.spec.ts:50:7 › PDF Editor: native text editing › corrects native text, exports, and the correction is verifiable in the reopened PDF (2.0s)
+  ok 228 [chromium] › e2e\pdf-editor.spec.ts:73:7 › PDF Editor: add text / shapes / annotations › adds a text box and it appears at export in the reopened PDF (1.9s)
+  ok 229 [chromium] › e2e\pdf-editor.spec.ts:85:7 › PDF Editor: add text / shapes / annotations › draws a whiteout box and the exported page renders a white-filled region (2.0s)
+  ok 230 [chromium] › e2e\pdf-editor.spec.ts:109:7 › PDF Editor: add text / shapes / annotations › draws a rectangle shape that survives export (2.2s)
+  ok 231 [chromium] › e2e\pdf-editor.spec.ts:134:7 › PDF Editor: page management › rotate, duplicate, and delete pages, then export and verify the result (2.4s)
+  ok 232 [chromium] › e2e\pdf-editor.spec.ts:156:7 › PDF Editor: page management › inserts pages from another PDF after the current page (1.8s)
+  ok 233 [chromium] › e2e\pdf-editor.spec.ts:175:7 › PDF Editor: undo/redo › Ctrl+Z undoes an added text object and Ctrl+Shift+Z redoes it (1.7s)
+  ok 234 [chromium] › e2e\pdf-editor.spec.ts:201:7 › PDF Editor: OCR integration › OCR is never fetched until recognition is explicitly requested (2.8s)
+  ok 235 [chromium] › e2e\pdf-editor.spec.ts:217:7 › PDF Editor: privacy / network › no document content is ever sent off-device while editing and exporting (2.4s)
+  ok 236 [chromium] › e2e\pdf-editor.spec.ts:238:7 › PDF Editor: security / error handling › a corrupted PDF fails safely with a friendly message (981ms)
+  ok 237 [chromium] › e2e\pdf-editor.spec.ts:247:7 › PDF Editor: security / error handling › a zero-byte file is rejected immediately (558ms)
+  ok 238 [chromium] › e2e\pdf-editor.spec.ts:253:7 › PDF Editor: security / error handling › an unsupported file type shows a friendly error (623ms)
+  ok 239 [chromium] › e2e\pdf-editor.spec.ts:261:7 › PDF Editor: responsive / mobile › no horizontal overflow and page panels are reachable via toggle buttons at 390px width (1.4s)
+  ok 240 [chromium] › e2e\pdf-to-word.spec.ts:9:7 › PDF to Word › native PDF: headings, paragraphs, a valid .docx named after the PDF (4.0s)
+  ok 241 [chromium] › e2e\pdf-to-word.spec.ts:30:7 › PDF to Word › lists become real Word bullet and numbered lists (3.3s)
+  ok 242 [chromium] › e2e\pdf-to-word.spec.ts:36:7 › PDF to Word › pictures are embedded, decodable and keep their proportions (2.8s)
+  ok 243 [chromium] › e2e\pdf-to-word.spec.ts:48:7 › PDF to Word › special characters come through unchanged (3.3s)
+  ok 244 [chromium] › e2e\pdf-to-word.spec.ts:54:7 › PDF to Word › a damaged PDF is refused with a clear message and nothing to download (1.2s)
+  ok 245 [chromium] › e2e\pdf-to-word.spec.ts:61:7 › PDF to Word › a password-protected PDF is refused with a clear message (1.6s)
+  ok 246 [chromium] › e2e\release-a11y.spec.ts:25:7 › axe: / has no serious or critical violation (2.0s)
+  ok 247 [chromium] › e2e\release-a11y.spec.ts:25:7 › axe: /compress-pdf has no serious or critical violation (1.5s)
+  ok 248 [chromium] › e2e\release-a11y.spec.ts:25:7 › axe: /pdf-to-word has no serious or critical violation (1.6s)
+  ok 249 [chromium] › e2e\release-a11y.spec.ts:25:7 › axe: /word-to-pdf has no serious or critical violation (1.6s)
+  ok 250 [chromium] › e2e\release-a11y.spec.ts:25:7 › axe: /pdf-editor has no serious or critical violation (1.6s)
+  ok 251 [chromium] › e2e\release-a11y.spec.ts:25:7 › axe: /tools has no serious or critical violation (1.6s)
+  ok 252 [chromium] › e2e\release-a11y.spec.ts:33:5 › axe: the editor with a PDF open (toolbar, rail, canvas, properties) (2.9s)
+  ok 253 [chromium] › e2e\release-a11y.spec.ts:47:5 › keyboard: skip link, Tab reaches the primary controls, Enter activates them (818ms)
+  ok 254 [chromium] › e2e\release-a11y.spec.ts:72:5 › dialogs: the signature dialog is labelled, takes focus and closes with Escape (1.4s)
+  -  255 [chromium] › e2e\release-a11y.spec.ts:86:5 › mobile: the menu opens and closes with its own button; tap targets in the nav and the editor dock are 44 px
+  ok 256 [chromium] › e2e\release-editor-features.spec.ts:22:5 › signature: draw, place, move, resize, delete — and upload; it is labelled a visual signature (4.6s)
+  ok 257 [chromium] › e2e\release-editor-features.spec.ts:66:5 › whiteout is labelled 'not secure redaction' and no redaction is offered (1.9s)
+  ok 258 [chromium] › e2e\release-editor-features.spec.ts:76:5 › crop: exact CropBox on a rotated page and on a page of a different size; other pages are untouched (6.7s)
+  ok 259 [chromium] › e2e\release-editor-features.spec.ts:128:5 › page organization in one session: insert blank, insert from another PDF, rotate, duplicate, reorder, delete (3.6s)
+  ok 260 [chromium] › e2e\release-editor-features.spec.ts:157:5 › undo and redo across text, picture, drawing, crop and page edits (12.7s)
+  ok 261 [chromium] › e2e\release-editor-session.spec.ts:56:5 › a 20+ action editor session: every change survives export and reopen (27.7s)
+  ok 262 [chromium] › e2e\release-perf.spec.ts:27:7 › /: loads no OCR, pdf.js worker or font files before a file is chosen (1.1s)
+  ok 263 [chromium] › e2e\release-perf.spec.ts:27:7 › /compress-pdf: loads no OCR, pdf.js worker or font files before a file is chosen (1.0s)
+  ok 264 [chromium] › e2e\release-perf.spec.ts:27:7 › /pdf-to-word: loads no OCR, pdf.js worker or font files before a file is chosen (1.1s)
+  ok 265 [chromium] › e2e\release-perf.spec.ts:27:7 › /word-to-pdf: loads no OCR, pdf.js worker or font files before a file is chosen (1.1s)
+  ok 266 [chromium] › e2e\release-perf.spec.ts:27:7 › /pdf-editor: loads no OCR, pdf.js worker or font files before a file is chosen (1.1s)
+  ok 267 [chromium] › e2e\release-perf.spec.ts:36:5 › /pdf-editor: the editor's code and pdf.js arrive when a PDF is chosen, not before (1.6s)
+  ok 268 [chromium] › e2e\release-perf.spec.ts:50:5 › /pdf-to-word: pdf.js and the converter load on demand; OCR assets only if a scan needs them (2.1s)
+  ok 269 [chromium] › e2e\security.spec.ts:5:7 › Bad input fails safely › a file with a .pdf name but other content can't be merged, and says which one (1.2s)
+  ok 270 [chromium] › e2e\security.spec.ts:15:7 › Bad input fails safely › a truncated PDF gives a friendly message (783ms)
+  ok 271 [chromium] › e2e\security.spec.ts:24:7 › Bad input fails safely › the editor explains a PDF it can't open and stays usable (902ms)
+  ok 272 [chromium] › e2e\security.spec.ts:31:7 › Bad input fails safely › an SVG with scripts and event handlers never executes when converted (971ms)
+  ok 273 [chromium] › e2e\security.spec.ts:47:7 › Bad input fails safely › an empty file is rejected by name (556ms)
+  ok 274 [chromium] › e2e\security.spec.ts:53:7 › Bad input fails safely › an unsupported type is rejected with what the tool accepts (589ms)
+  ok 275 [chromium] › e2e\site.spec.ts:20:7 › Homepage › leads with the headline and an upload you can use immediately (734ms)
+  ok 276 [chromium] › e2e\site.spec.ts:33:7 › Homepage › a dropped PDF gets PDF actions and hands the file to the chosen tool (2.5s)
+  ok 277 [chromium] › e2e\site.spec.ts:46:7 › Homepage › an image gets image actions; several images get the multi-file actions (1.5s)
+  ok 278 [chromium] › e2e\site.spec.ts:56:7 › Homepage › a Word document is offered Word to PDF and handed over; an old .doc is explained (2.6s)
+  ok 279 [chromium] › e2e\site.spec.ts:73:7 › Homepage › an unsupported file is explained, not accepted (611ms)
+  ok 280 [chromium] › e2e\site.spec.ts:79:7 › Homepage › shows the popular tools, privacy, how it works and FAQ sections (664ms)
+  ok 281 [chromium] › e2e\site.spec.ts:90:7 › Navigation › desktop menus reach every tool (2.4s)
+  -  282 [chromium] › e2e\site.spec.ts:110:7 › Navigation › the phone menu opens as a sheet, lists every tool and closes
+  ok 283 [chromium] › e2e\site.spec.ts:120:7 › Navigation › All tools lists every launch tool and nothing else (673ms)
+  ok 284 [chromium] › e2e\site.spec.ts:127:7 › Navigation › old URLs of the kept tools redirect; removed tools are gone (1.9s)
+  ok 285 [chromium] › e2e\site.spec.ts:145:9 › SEO › Compress PDF has its own title, description, canonical, Open Graph and structured data (587ms)
+  ok 286 [chromium] › e2e\site.spec.ts:145:9 › SEO › Compress Image has its own title, description, canonical, Open Graph and structured data (605ms)
+  ok 287 [chromium] › e2e\site.spec.ts:145:9 › SEO › PDF to Word has its own title, description, canonical, Open Graph and structured data (593ms)
+  ok 288 [chromium] › e2e\site.spec.ts:145:9 › SEO › Word to PDF has its own title, description, canonical, Open Graph and structured data (607ms)
+  ok 289 [chromium] › e2e\site.spec.ts:145:9 › SEO › PDF to Image has its own title, description, canonical, Open Graph and structured data (576ms)
+  ok 290 [chromium] › e2e\site.spec.ts:145:9 › SEO › Image to PDF has its own title, description, canonical, Open Graph and structured data (548ms)
+  ok 291 [chromium] › e2e\site.spec.ts:145:9 › SEO › Image to Word has its own title, description, canonical, Open Graph and structured data (620ms)
+  ok 292 [chromium] › e2e\site.spec.ts:145:9 › SEO › Image Converter has its own title, description, canonical, Open Graph and structured data (559ms)
+  ok 293 [chromium] › e2e\site.spec.ts:145:9 › SEO › Merge PDF has its own title, description, canonical, Open Graph and structured data (551ms)
+  ok 294 [chromium] › e2e\site.spec.ts:145:9 › SEO › Split PDF has its own title, description, canonical, Open Graph and structured data (607ms)
+  ok 295 [chromium] › e2e\site.spec.ts:145:9 › SEO › Organize PDF has its own title, description, canonical, Open Graph and structured data (640ms)
+  ok 296 [chromium] › e2e\site.spec.ts:145:9 › SEO › PDF Editor has its own title, description, canonical, Open Graph and structured data (642ms)
+  ok 297 [chromium] › e2e\site.spec.ts:159:7 › SEO › sitemap lists the home page, tools page and every tool; robots points to it (130ms)
+  ok 298 [chromium] › e2e\site.spec.ts:170:9 › Responsive layout › / has no sideways scroll (600ms)
+  ok 299 [chromium] › e2e\site.spec.ts:170:9 › Responsive layout › /tools has no sideways scroll (444ms)
+  ok 300 [chromium] › e2e\site.spec.ts:170:9 › Responsive layout › /privacy has no sideways scroll (414ms)
+  ok 301 [chromium] › e2e\site.spec.ts:170:9 › Responsive layout › /compress-pdf has no sideways scroll (480ms)
+  ok 302 [chromium] › e2e\site.spec.ts:170:9 › Responsive layout › /compress-image has no sideways scroll (511ms)
+  ok 303 [chromium] › e2e\site.spec.ts:170:9 › Responsive layout › /pdf-to-word has no sideways scroll (476ms)
+  ok 304 [chromium] › e2e\site.spec.ts:170:9 › Responsive layout › /word-to-pdf has no sideways scroll (506ms)
+  ok 305 [chromium] › e2e\site.spec.ts:170:9 › Responsive layout › /pdf-to-image has no sideways scroll (477ms)
+  ok 306 [chromium] › e2e\site.spec.ts:170:9 › Responsive layout › /image-to-pdf has no sideways scroll (507ms)
+  ok 307 [chromium] › e2e\site.spec.ts:170:9 › Responsive layout › /image-to-word has no sideways scroll (487ms)
+  ok 308 [chromium] › e2e\site.spec.ts:170:9 › Responsive layout › /convert-image has no sideways scroll (488ms)
+  ok 309 [chromium] › e2e\site.spec.ts:170:9 › Responsive layout › /merge-pdf has no sideways scroll (480ms)
+  ok 310 [chromium] › e2e\site.spec.ts:170:9 › Responsive layout › /split-pdf has no sideways scroll (531ms)
+  ok 311 [chromium] › e2e\site.spec.ts:170:9 › Responsive layout › /organize-pdf has no sideways scroll (422ms)
+  ok 312 [chromium] › e2e\site.spec.ts:170:9 › Responsive layout › /pdf-editor has no sideways scroll (486ms)
+  ok 313 [chromium] › e2e\tools.spec.ts:8:7 › Compress Image › reaches a preset target and says so with exact bytes (1.9s)
+  ok 314 [chromium] › e2e\tools.spec.ts:22:7 › Compress Image › a transparent PNG becomes WebP, keeps transparency and says why (2.1s)
+  ok 315 [chromium] › e2e\tools.spec.ts:35:7 › Compress Image › an image already under the target comes back untouched (811ms)
+  ok 316 [chromium] › e2e\tools.spec.ts:43:7 › Compress Image › an invalid custom size can't be submitted (762ms)
+  ok 317 [chromium] › e2e\tools.spec.ts:54:7 › Image converter › PNG → JPG flattens transparency; SVG → PNG renders at a usable size (1.4s)
+  ok 318 [chromium] › e2e\tools.spec.ts:70:7 › Image converter › a batch downloads as a ZIP and files already in the target format are skipped (2.2s)
+  ok 319 [chromium] › e2e\tools.spec.ts:82:7 › PDF → Image › selected pages become PNGs in a ZIP (2.6s)
+  ok 320 [chromium] › e2e\tools.spec.ts:96:7 › Images → PDF › images become pages in the order set with the move buttons (1.2s)
+  ok 321 [chromium] › e2e\tools.spec.ts:111:7 › Merge PDF › shows page counts, merges in the chosen order (2.2s)
+  ok 322 [chromium] › e2e\tools.spec.ts:124:7 › Merge PDF › needs at least two files (625ms)
+  ok 323 [chromium] › e2e\tools.spec.ts:133:7 › Split PDF › extracts the clicked pages; split-every-page gives a ZIP of single pages (2.8s)
+  ok 324 [chromium] › e2e\tools.spec.ts:151:7 › Split PDF › a typed range outside the document is refused with a clear message (1.6s)
+  ok 325 [chromium] › e2e\tools.spec.ts:161:7 › Organize PDF › rotate, delete (with restore) and duplicate pages, then save (2.5s)
+  ok 326 [chromium] › e2e\word-to-pdf.spec.ts:29:7 › Word to PDF › page, honest copy, and a header/footer document with real page numbers (4.2s)
+  ok 327 [chromium] › e2e\word-to-pdf.spec.ts:68:7 › Word to PDF › headings, lists, tables and special characters come through as text (9.4s)
+  ok 328 [chromium] › e2e\word-to-pdf.spec.ts:80:7 › Word to PDF › pictures are embedded and the result offers the next steps (3.0s)
+  ok 329 [chromium] › e2e\word-to-pdf.spec.ts:91:7 › Word to PDF › damaged, password-protected, fake and empty files are refused; nothing to download (2.0s)
+  ok 330 [chromium] › e2e\word-to-pdf.spec.ts:113:7 › Word to PDF › a Word file on a PDF tool points to Word to PDF (548ms)
+  ok 331 [mobile-chromium] › e2e\compress.spec.ts:46:5 › a Flate-encoded scan really shrinks under a real target, with exact byte counts shown (3.2s)
+  ok 332 [mobile-chromium] › e2e\compress.spec.ts:67:5 › an unreachable target is reported honestly, with the closest result offered (1.5s)
+  ok 333 [mobile-chromium] › e2e\compress.spec.ts:82:5 › a PDF already under the target is returned byte-for-byte unchanged (929ms)
+  ok 334 [mobile-chromium] › e2e\compress.spec.ts:92:5 › Continue with hands the result to the next tool without picking it again (836ms)
+  ok 335 [mobile-chromium] › e2e\compress.spec.ts:104:5 › a ~320 KB Chrome-printed PDF really goes under a 200 KB target (2.6s)
+  ok 336 [mobile-chromium] › e2e\compress.spec.ts:124:5 › a file already under the target is returned unchanged by the image compressor too (1.4s)
+  -  337 [mobile-chromium] › e2e\editor-addtext.spec.ts:17:5 › add text on the page: type, restyle (serif, italic, underline, bold, size, colour, align), move, resize, export
+  -  338 [mobile-chromium] › e2e\editor-desktop-shot.spec.ts:6:5 › desktop editor screenshot
+  -  339 [mobile-chromium] › e2e\editor-forms-audit.spec.ts:22:5 › REGRESSION — a pre-filled field (Raviteja) shows its value once: before editing, while editing, after editing
+  -  340 [mobile-chromium] › e2e\editor-forms-audit.spec.ts:66:5 › replace, one character, shorter, longer, empty, restore, undo, redo — never doubled
+  -  341 [mobile-chromium] › e2e\editor-forms-audit.spec.ts:101:7 › FORM-02-sizes.pdf: every field looks the same idle, while editing, and after editing — size, alignment, font, colour
+  -  342 [mobile-chromium] › e2e\editor-forms-audit.spec.ts:101:7 › FORM-03-alignment.pdf: every field looks the same idle, while editing, and after editing — size, alignment, font, colour
+  -  343 [mobile-chromium] › e2e\editor-forms-audit.spec.ts:101:7 › FORM-10-fonts-colours.pdf: every field looks the same idle, while editing, and after editing — size, alignment, font, colour
+  -  344 [mobile-chromium] › e2e\editor-forms-audit.spec.ts:136:5 › FORM-04: multi-line fields — wrapping, size and layout match idle, editing and written
+  -  345 [mobile-chromium] › e2e\editor-forms-audit.spec.ts:155:5 › FORM-05: checkbox, radio and dropdown — one state shown, toggling is exact, undo restores
+  -  346 [mobile-chromium] › e2e\editor-forms-audit.spec.ts:194:7 › FORM-06-needappearances.pdf: no appearance + /NeedAppearances — the field shows /V once, laid out like any other
+  -  347 [mobile-chromium] › e2e\editor-forms-audit.spec.ts:194:7 › FORM-07-stale-appearance.pdf: an appearance that shows an old value — the field shows /V once, laid out like any other
+  -  348 [mobile-chromium] › e2e\editor-forms-audit.spec.ts:209:5 › FORM-08: a flattened form is page text, not a field — one editable representation
+  -  349 [mobile-chromium] › e2e\editor-forms-audit.spec.ts:225:5 › FORM-09: a long form — ten-plus fields of every kind, edited with the keyboard (Tab) — no duplicates anywhere; export is right
+  -  350 [mobile-chromium] › e2e\editor-forms-audit.spec.ts:285:9 › field geometry: the edit box sits exactly on the field at every zoom, scrolled, on a rotated page › FORM-01-given-name.pdf
+  -  351 [mobile-chromium] › e2e\editor-forms-audit.spec.ts:285:9 › field geometry: the edit box sits exactly on the field at every zoom, scrolled, on a rotated page › FORM-11-rotated-page.pdf
+  -  352 [mobile-chromium] › e2e\editor-forms-audit.spec.ts:327:7 › HiDPI › the edit box matches the field on a 2x display
+  -  353 [mobile-chromium] › e2e\editor-forms-export.spec.ts:61:7 › export after editing — FORM-01-given-name.pdf
+  -  354 [mobile-chromium] › e2e\editor-forms-export.spec.ts:61:7 › export after editing — FORM-02-sizes.pdf
+  -  355 [mobile-chromium] › e2e\editor-forms-export.spec.ts:61:7 › export after editing — FORM-03-alignment.pdf
+  -  356 [mobile-chromium] › e2e\editor-forms-export.spec.ts:61:7 › export after editing — FORM-04-multiline.pdf
+  -  357 [mobile-chromium] › e2e\editor-forms-export.spec.ts:61:7 › export after editing — FORM-05-choices.pdf
+  -  358 [mobile-chromium] › e2e\editor-forms-export.spec.ts:61:7 › export after editing — FORM-10-fonts-colours.pdf
+  -  359 [mobile-chromium] › e2e\editor-forms-export.spec.ts:61:7 › export after editing — FORM-11-rotated-page.pdf
+  -  360 [mobile-chromium] › e2e\editor-forms-export.spec.ts:85:7 › opening and exporting changes nothing — FORM-01-given-name.pdf
+  -  361 [mobile-chromium] › e2e\editor-forms-export.spec.ts:85:7 › opening and exporting changes nothing — FORM-02-sizes.pdf
+  -  362 [mobile-chromium] › e2e\editor-forms-export.spec.ts:85:7 › opening and exporting changes nothing — FORM-03-alignment.pdf
+  -  363 [mobile-chromium] › e2e\editor-forms-export.spec.ts:85:7 › opening and exporting changes nothing — FORM-04-multiline.pdf
+  -  364 [mobile-chromium] › e2e\editor-forms-export.spec.ts:85:7 › opening and exporting changes nothing — FORM-05-choices.pdf
+  -  365 [mobile-chromium] › e2e\editor-forms-export.spec.ts:85:7 › opening and exporting changes nothing — FORM-08-flattened.pdf
+  -  366 [mobile-chromium] › e2e\editor-forms-export.spec.ts:85:7 › opening and exporting changes nothing — FORM-09-long.pdf
+  -  367 [mobile-chromium] › e2e\editor-forms-export.spec.ts:85:7 › opening and exporting changes nothing — FORM-10-fonts-colours.pdf
+  -  368 [mobile-chromium] › e2e\editor-forms-export.spec.ts:85:7 › opening and exporting changes nothing — FORM-11-rotated-page.pdf
+  -  369 [mobile-chromium] › e2e\editor-forms-export.spec.ts:112:7 › fw9.pdf (public form, pre-filled): untouched export is identical; editing one field changes only that field
+  -  370 [mobile-chromium] › e2e\editor-forms-export.spec.ts:112:7 › f1040es.pdf (public form, pre-filled): untouched export is identical; editing one field changes only that field
+  -  371 [mobile-chromium] › e2e\editor-forms.spec.ts:23:5 › form fields are filled on the page, survive export and reopen, and untouched fields stay as they were
+  -  372 [mobile-chromium] › e2e\editor-forms.spec.ts:60:5 › typing in a field is one undo step; undo restores the value
+  -  373 [mobile-chromium] › e2e\editor-images.spec.ts:39:5 › an existing picture can be selected, moved, resized (proportions kept), turned, replaced and deleted — and each is undoable
+  -  374 [mobile-chromium] › e2e\editor-images.spec.ts:100:5 › a picture can be replaced from the panel and turned with the handle
+  -  375 [mobile-chromium] › e2e\editor-images.spec.ts:130:5 › images in a six-picture gallery: only the one that was touched moves
+  ok 376 [mobile-chromium] › e2e\editor-mobile.spec.ts:8:5 › on a phone: tap text, Edit text, type, Done, export; controls are touch-sized; no horizontal overflow (4.3s)
+  ok 377 [mobile-chromium] › e2e\editor-mobile.spec.ts:47:5 › on a phone: the page rail and properties open as sheets, and add-text by tap works (2.6s)
+  ok 378 [mobile-chromium] › e2e\editor-mobile.spec.ts:63:5 › on a phone: a pre-filled form field shows once, takes a tap and typing, and exports (2.6s)
+  -  379 [mobile-chromium] › e2e\editor-native-matrix.spec.ts:58:7 › EDITOR-01-simple-text.pdf · fix-recieve: recieve → receive
+  -  380 [mobile-chromium] › e2e\editor-native-matrix.spec.ts:58:7 › EDITOR-01-simple-text.pdf · fix-teh: teh → the
+  -  381 [mobile-chromium] › e2e\editor-native-matrix.spec.ts:58:7 › EDITOR-01-simple-text.pdf · fix-seperate: seperate → separate
+  -  382 [mobile-chromium] › e2e\editor-native-matrix.spec.ts:58:7 › EDITOR-01-simple-text.pdf · fix-occured: occured → occurred
+  -  383 [mobile-chromium] › e2e\editor-native-matrix.spec.ts:58:7 › EDITOR-01-simple-text.pdf · fix-definately: definately → definitely
+  -  384 [mobile-chromium] › e2e\editor-native-matrix.spec.ts:58:7 › EDITOR-01-simple-text.pdf · fix-adress: adress → address
+  -  385 [mobile-chromium] › e2e\editor-native-matrix.spec.ts:58:7 › EDITOR-02-resume.pdf · fix-experiance: experiance → experience
+  -  386 [mobile-chromium] › e2e\editor-native-matrix.spec.ts:58:7 › EDITOR-04-invoice.pdf · fix-seperate: seperate → separate
+  -  387 [mobile-chromium] › e2e\editor-native-matrix.spec.ts:58:7 › EDITOR-04-invoice.pdf · fix-buisness: buisness → business
+  -  388 [mobile-chromium] › e2e\editor-native-matrix.spec.ts:58:7 › EDITOR-06-mixed-fonts.pdf · fix-definately: definately → definitely
+  -  389 [mobile-chromium] › e2e\editor-native-matrix.spec.ts:58:7 › EDITOR-06-mixed-fonts.pdf · fix-recieved: recieved → received
+  -  390 [mobile-chromium] › e2e\editor-native-matrix.spec.ts:58:7 › EDITOR-06-mixed-fonts.pdf · fix-wich: wich → which
+  -  391 [mobile-chromium] › e2e\editor-native-matrix.spec.ts:58:7 › EDITOR-06-mixed-fonts.pdf · fix-occured: occured → occurred
+  -  392 [mobile-chromium] › e2e\editor-native-matrix.spec.ts:58:7 › EDITOR-06-mixed-fonts.pdf · fix-teh: teh → the
+  -  393 [mobile-chromium] › e2e\editor-native-matrix.spec.ts:58:7 › EDITOR-07-multi-column.pdf · fix-recieve: recieve → receive
+  -  394 [mobile-chromium] › e2e\editor-native-matrix.spec.ts:58:7 › EDITOR-07-multi-column.pdf · fix-teh: teh → the
+  -  395 [mobile-chromium] › e2e\editor-native-matrix.spec.ts:58:7 › EDITOR-08-images.pdf · fix-teh: teh → the
+  -  396 [mobile-chromium] › e2e\editor-native-matrix.spec.ts:58:7 › EDITOR-20-multi-image.pdf · fix-seperate: seperate → separate
+  -  397 [mobile-chromium] › e2e\editor-native-matrix.spec.ts:58:7 › EDITOR-11-long-document-25-pages.pdf · fix-recieve: recieve → receive
+  -  398 [mobile-chromium] › e2e\editor-native-matrix.spec.ts:58:7 › EDITOR-14-table-heavy.pdf · fix-teh: teh → the
+  -  399 [mobile-chromium] › e2e\editor-native-matrix.spec.ts:58:7 › EDITOR-15-special-characters.pdf · fix-recieve: recieve → receive
+  -  400 [mobile-chromium] › e2e\editor-native-matrix.spec.ts:58:7 › EDITOR-16-header-footer.pdf · fix-recieve: recieve → receive
+  -  401 [mobile-chromium] › e2e\editor-native-matrix.spec.ts:58:7 › EDITOR-03-business-letter.pdf · fix-recieve: recieve → receive
+  -  402 [mobile-chromium] › e2e\editor-native-matrix.spec.ts:58:7 › EDITOR-03-business-letter.pdf · fix-teh: teh → the
+  -  403 [mobile-chromium] › e2e\editor-native-matrix.spec.ts:58:7 › EDITOR-03-business-letter.pdf · fix-seperate: seperate → separate
+  -  404 [mobile-chromium] › e2e\editor-native-matrix.spec.ts:58:7 › EDITOR-03-business-letter.pdf · fix-occured: occured → occurred
+  -  405 [mobile-chromium] › e2e\editor-native-matrix.spec.ts:58:7 › EDITOR-05-form-acroform.pdf · fix-recieve: recieve → receive
+  -  406 [mobile-chromium] › e2e\editor-native-matrix.spec.ts:58:7 › EDITOR-05-form-acroform.pdf · fix-teh: teh → the
+  -  407 [mobile-chromium] › e2e\editor-native-matrix.spec.ts:58:7 › EDITOR-09-rotated-pages.pdf · fix-recieve: recieve → receive
+  -  408 [mobile-chromium] › e2e\editor-native-matrix.spec.ts:58:7 › EDITOR-09-rotated-pages.pdf · fix-teh: teh → the
+  -  409 [mobile-chromium] › e2e\editor-native-matrix.spec.ts:58:7 › EDITOR-10-mixed-page-sizes.pdf · fix-recieve: recieve → receive
+  -  410 [mobile-chromium] › e2e\editor-native-matrix.spec.ts:58:7 › EDITOR-10-mixed-page-sizes.pdf · fix-teh: teh → the
+  -  411 [mobile-chromium] › e2e\editor-native-matrix.spec.ts:58:7 › EDITOR-17-watermark.pdf · fix-recieve: recieve → receive
+  -  412 [mobile-chromium] › e2e\editor-native-matrix.spec.ts:58:7 › EDITOR-17-watermark.pdf · fix-teh: teh → the
+  -  413 [mobile-chromium] › e2e\editor-native-matrix.spec.ts:58:7 › EDITOR-18-annotations.pdf · fix-recieve: recieve → receive
+  -  414 [mobile-chromium] › e2e\editor-native-matrix.spec.ts:58:7 › EDITOR-19-cropbox.pdf · fix-recieve: recieve → receive
+  -  415 [mobile-chromium] › e2e\editor-native-matrix.spec.ts:58:7 › EDITOR-19-cropbox.pdf · fix-teh: teh → the
+  -  416 [mobile-chromium] › e2e\editor-native-matrix.spec.ts:58:7 › EDITOR-01-simple-text.pdf · same-length: teh → the
+  -  417 [mobile-chromium] › e2e\editor-native-matrix.spec.ts:58:7 › EDITOR-01-simple-text.pdf · shorter: recieve → get
+  -  418 [mobile-chromium] › e2e\editor-native-matrix.spec.ts:58:7 › EDITOR-01-simple-text.pdf · longer: recieve → receive in writing
+  -  419 [mobile-chromium] › e2e\editor-native-matrix.spec.ts:58:7 › EDITOR-01-simple-text.pdf · single-char-insert: adress → address
+  -  420 [mobile-chromium] › e2e\editor-native-matrix.spec.ts:58:7 › EDITOR-01-simple-text.pdf · single-char-replace: definately → definitely
+  -  421 [mobile-chromium] › e2e\editor-native-matrix.spec.ts:58:7 › EDITOR-01-simple-text.pdf · single-char-delete: teh chair → te chair
+  -  422 [mobile-chromium] › e2e\editor-native-matrix.spec.ts:58:7 › EDITOR-03-business-letter.pdf · whole-word: committee → board
+  -  423 [mobile-chromium] › e2e\editor-native-matrix.spec.ts:58:7 › EDITOR-03-business-letter.pdf · multiple-words: committee will recieve your suggestions → board will receive all suggestions
+  -  424 [mobile-chromium] › e2e\editor-native-matrix.spec.ts:58:7 › EDITOR-01-simple-text.pdf · line-end: asked → requested
+  -  425 [mobile-chromium] › e2e\editor-native-matrix.spec.ts:58:7 › EDITOR-06-mixed-fonts.pdf · bold: Bold → Strong
+  -  426 [mobile-chromium] › e2e\editor-native-matrix.spec.ts:58:7 › EDITOR-06-mixed-fonts.pdf · italic: Italic → Slanted
+  -  427 [mobile-chromium] › e2e\editor-native-matrix.spec.ts:58:7 › EDITOR-06-mixed-fonts.pdf · colored: wich → which
+  -  428 [mobile-chromium] › e2e\editor-native-matrix.spec.ts:58:7 › EDITOR-01-simple-text.pdf · large-heading: Quarterly Update → Quarterly Updates
+  -  429 [mobile-chromium] › e2e\editor-native-matrix.spec.ts:58:7 › EDITOR-06-mixed-fonts.pdf · small-body: teh → the
+  -  430 [mobile-chromium] › e2e\editor-native-matrix.spec.ts:58:7 › EDITOR-09-rotated-pages.pdf · rotated-p2 · page 2: recieve → receive
+  -  431 [mobile-chromium] › e2e\editor-native-matrix.spec.ts:58:7 › EDITOR-09-rotated-pages.pdf · rotated-p3 · page 3: recieve → receive
+  -  432 [mobile-chromium] › e2e\editor-native-matrix.spec.ts:58:7 › EDITOR-09-rotated-pages.pdf · rotated-p4 · page 4: recieve → receive
+  -  433 [mobile-chromium] › e2e\editor-native-matrix.spec.ts:58:7 › EDITOR-15-special-characters.pdf · special-accent: recieve → receive
+  -  434 [mobile-chromium] › e2e\editor-native-matrix.spec.ts:58:7 › EDITOR-15-special-characters.pdf · special-currency: €120.50 → €125.50
+  -  435 [mobile-chromium] › e2e\editor-native-matrix.spec.ts:58:7 › EDITOR-11-long-document-25-pages.pdf · later-page · page 12: recieve → receive
+  -  436 [mobile-chromium] › e2e\editor-native-matrix.spec.ts:58:7 › public/fw9.pdf · adobe-designer: requester → requestor
+  -  437 [mobile-chromium] › e2e\editor-native-matrix.spec.ts:58:7 › public/f1040es.pdf · antenna-house: method → way
+  -  438 [mobile-chromium] › e2e\editor-native-matrix.spec.ts:58:7 › public/table.pdf · pdfmaker: example → sample
+  -  439 [mobile-chromium] › e2e\editor-native-matrix.spec.ts:58:7 › EDITOR-05-form-acroform.pdf · form-page-text: recieve → receive
+  -  440 [mobile-chromium] › e2e\editor-native-text.spec.ts:6:7 › Native text editing — the user's real flow › fix a spelling mistake in a Chromium PDF: double-click, type, Done, export, reopen
+  -  441 [mobile-chromium] › e2e\editor-robustness.spec.ts:10:5 › manual-typing stress: type straight after the double-click, fast and long, press Done at once — nothing is lost
+  -  442 [mobile-chromium] › e2e\editor-robustness.spec.ts:27:5 › a backgrounded tab: no animation frames, window without focus — editing and export still complete on their own
+  -  443 [mobile-chromium] › e2e\editor-robustness.spec.ts:41:5 › privacy: editing text and pictures and exporting sends nothing off the device
+  -  444 [mobile-chromium] › e2e\editor-robustness.spec.ts:56:5 › performance: a 25-page document opens fast, renders only what is near, and an edit commits quickly
+  -  445 [mobile-chromium] › e2e\editor-scanned.spec.ts:12:7 › EDITOR-12-scanned-form.pdf: a scan says so, does not pretend to be editable text, and still takes everything that works on a picture
+  -  446 [mobile-chromium] › e2e\editor-scanned.spec.ts:12:7 › EDITOR-13-scanned-letter.pdf: a scan says so, does not pretend to be editable text, and still takes everything that works on a picture
+  -  447 [mobile-chromium] › e2e\editor-session.spec.ts:11:5 › undo and redo of text edits; typing one burst is one step; the dirty marker follows
+  -  448 [mobile-chromium] › e2e\editor-session.spec.ts:46:5 › search finds the new text and not the old; copy reads the edit; Escape and Cancel leave the page untouched
+  -  449 [mobile-chromium] › e2e\editor-session.spec.ts:66:5 › keyboard in the text box: Home/End/arrows/Delete/Backspace, Ctrl+A/C/V, Enter in a paragraph
+  -  450 [mobile-chromium] › e2e\editor-session.spec.ts:88:5 › a long uninterrupted session: ten edits across ten pages, then export, with the first page's edit still there
+  -  451 [mobile-chromium] › e2e\editor-session.spec.ts:118:5 › shortcuts pick tools (V E T H U D), never while typing; Escape leaves a tool; controls are named
+  ok 452 [mobile-chromium] › e2e\hands-off.spec.ts:28:9 › one click, then hands off › PDF → Word, a scanned form: finishes by itself, even with no animation frames (2.9s)
+  ok 453 [mobile-chromium] › e2e\hands-off.spec.ts:28:9 › one click, then hands off › PDF → Word, a passport-like scan: finishes by itself, even with no animation frames (2.9s)
+  ok 454 [mobile-chromium] › e2e\hands-off.spec.ts:28:9 › one click, then hands off › PDF → Word, a text PDF: finishes by itself, even with no animation frames (2.1s)
+  ok 455 [mobile-chromium] › e2e\hands-off.spec.ts:28:9 › one click, then hands off › PDF → Image: finishes by itself, even with no animation frames (2.5s)
+  ok 456 [mobile-chromium] › e2e\hands-off.spec.ts:28:9 › one click, then hands off › Word → PDF: finishes by itself, even with no animation frames (2.3s)
+  ok 457 [mobile-chromium] › e2e\hands-off.spec.ts:28:9 › one click, then hands off › Image → Word: finishes by itself, even with no animation frames (1.7s)
+  ok 458 [mobile-chromium] › e2e\hands-off.spec.ts:28:9 › one click, then hands off › Image → PDF: finishes by itself, even with no animation frames (1.4s)
+  ok 459 [mobile-chromium] › e2e\hands-off.spec.ts:28:9 › one click, then hands off › Image Converter: finishes by itself, even with no animation frames (1.1s)
+  ok 460 [mobile-chromium] › e2e\hands-off.spec.ts:28:9 › one click, then hands off › Merge PDF: finishes by itself, even with no animation frames (858ms)
+  ok 461 [mobile-chromium] › e2e\hands-off.spec.ts:28:9 › one click, then hands off › Organize PDF: finishes by itself, even with no animation frames (1.9s)
+  ok 462 [mobile-chromium] › e2e\hands-off.spec.ts:39:7 › one click, then hands off › Compress PDF and Compress Image finish by themselves (5.4s)
+  ok 463 [mobile-chromium] › e2e\hands-off.spec.ts:54:7 › one click, then hands off › PDF Editor: Export finishes by itself (1.4s)
+  ok 464 [mobile-chromium] › e2e\image-to-word.spec.ts:25:7 › Image to Word › a filled-in form PNG becomes one page that is the picture — no text, original bytes, same proportions (2.5s)
+  ok 465 [mobile-chromium] › e2e\image-to-word.spec.ts:43:7 › Image to Word › a wide ID card turns the page sideways instead of shrinking onto a portrait page (1.2s)
+  ok 466 [mobile-chromium] › e2e\image-to-word.spec.ts:50:7 › Image to Word › several images: one per page, in the order added, each as its own file (1.5s)
+  ok 467 [mobile-chromium] › e2e\image-to-word.spec.ts:62:7 › Image to Word › A4 centres the image inside a margin, never clipped or stretched (2.2s)
+  ok 468 [mobile-chromium] › e2e\image-to-word.spec.ts:68:7 › Image to Word › nothing is uploaded and nothing is read from the picture (1.9s)
+  ok 469 [mobile-chromium] › e2e\integrity.spec.ts:36:7 › output integrity › A: an incrementally-updated scan compressed under its target is a valid, openable PDF (2.8s)
+  ok 470 [mobile-chromium] › e2e\integrity.spec.ts:52:7 › output integrity › C: merge, split and organize outputs from the same file pass the strict check (5.1s)
+  ok 471 [mobile-chromium] › e2e\integrity.spec.ts:77:7 › output integrity › D: an editor export of the same file is valid (2.4s)
+  ok 472 [mobile-chromium] › e2e\integrity.spec.ts:90:7 › output integrity › encrypted PDFs are refused with a clear reason instead of producing a broken file (1.2s)
+  ok 473 [mobile-chromium] › e2e\integrity.spec.ts:102:7 › output integrity › E: an image that can't be decoded is reported, never converted into an empty file (1.3s)
+  ok 474 [mobile-chromium] › e2e\integrity.spec.ts:121:7 › output integrity › E: a JPEG cut off halfway (decodes grey in browsers) is refused by Image to PDF and the converter (1.3s)
+  ok 475 [mobile-chromium] › e2e\pdf-editor-advanced.spec.ts:65:7 › PDF Editor: signature › draws a signature, places and resizes it, and it renders at the intended location after export (2.7s)
+  ok 476 [mobile-chromium] › e2e\pdf-editor-advanced.spec.ts:146:7 › PDF Editor: image placement › inserts a real PNG image, preserves aspect ratio, and it renders at the placed location (1.9s)
+  ok 477 [mobile-chromium] › e2e\pdf-editor-advanced.spec.ts:209:7 › PDF Editor: annotations › highlight fills the selected region with a translucent color (2.6s)
+  ok 478 [mobile-chromium] › e2e\pdf-editor-advanced.spec.ts:231:7 › PDF Editor: annotations › underline draws a thin line at the bottom of the region, not a fill (2.0s)
+  ok 479 [mobile-chromium] › e2e\pdf-editor-advanced.spec.ts:248:7 › PDF Editor: annotations › strikethrough draws a thin line through the middle of the region (2.1s)
+  ok 480 [mobile-chromium] › e2e\pdf-editor-advanced.spec.ts:269:7 › PDF Editor: form fill › detects AcroForm fields, edits them, and the values persist in the exported PDF (2.3s)
+  ok 481 [mobile-chromium] › e2e\pdf-editor-advanced.spec.ts:297:7 › PDF Editor: crop › applies a crop box to the current page and it's reflected in the exported PDF's page box (3.1s)
+  ok 482 [mobile-chromium] › e2e\pdf-editor-advanced.spec.ts:343:7 › PDF Editor: header/footer › stamps header/footer text with a page-number token onto every page (2.4s)
+  ok 483 [mobile-chromium] › e2e\pdf-editor-interaction.spec.ts:65:7 › PDF Editor: drag previews follow the pointer › the live preview box sits exactly under the pointer while dragging (not at the page's top-left) (1.7s)
+  ok 484 [mobile-chromium] › e2e\pdf-editor-interaction.spec.ts:87:7 › PDF Editor: drag previews follow the pointer › a drag started on top of the page's text still draws (the text hit-target doesn't swallow it) (1.6s)
+  ok 485 [mobile-chromium] › e2e\pdf-editor-interaction.spec.ts:96:7 › PDF Editor: drag previews follow the pointer › placement is exact (0px) at different zooms, when scrolled, and on a rotated page (5.9s)
+  ok 486 [mobile-chromium] › e2e\pdf-editor-interaction.spec.ts:124:7 › PDF Editor: tools stay armed for repeated use › highlight, underline and strikethrough each work several times in a row without reselecting (3.3s)
+  ok 487 [mobile-chromium] › e2e\pdf-editor-interaction.spec.ts:135:7 › PDF Editor: tools stay armed for repeated use › Escape leaves the tool; a stray click without dragging doesn't create anything or drop the tool (1.5s)
+  ok 488 [mobile-chromium] › e2e\pdf-editor-interaction.spec.ts:148:7 › PDF Editor: freehand drawing › the stroke is visible while the pointer is still down, and the tool stays armed (2.0s)
+  ok 489 [mobile-chromium] › e2e\pdf-editor-interaction.spec.ts:167:7 › PDF Editor: text is edited directly on the page › place text, type a sentence continuously, edit inside it, and it exports where it shows (2.7s)
+  ok 490 [mobile-chromium] › e2e\pdf-editor-interaction.spec.ts:202:7 › PDF Editor: text is edited directly on the page › clicking an already-selected text box (or double-clicking) re-enters editing; typing is one undo step (1.8s)
+  ok 491 [mobile-chromium] › e2e\pdf-editor-interaction.spec.ts:219:7 › PDF Editor: text is edited directly on the page › the selected text's color and size are edited from the panel, and Delete removes it (2.3s)
+  ok 492 [mobile-chromium] › e2e\pdf-editor-interaction.spec.ts:241:7 › PDF Editor: text is edited directly on the page › typing into the properties-panel text box isn't cut off after one character (2.9s)
+  ok 493 [mobile-chromium] › e2e\pdf-editor-interaction.spec.ts:260:7 › PDF Editor: shapes, images, crop, search, pages › a line dragged down-right exports down-right, and matches what's on screen (2.3s)
+  ok 494 [mobile-chromium] › e2e\pdf-editor-interaction.spec.ts:288:7 › PDF Editor: shapes, images, crop, search, pages › a resized picture keeps its proportions (screen and export agree) (2.0s)
+  ok 495 [mobile-chromium] › e2e\pdf-editor-interaction.spec.ts:308:7 › PDF Editor: shapes, images, crop, search, pages › a crop area can be adjusted by its handles, is kept on the page, and applied from the action bar (2.7s)
+  ok 496 [mobile-chromium] › e2e\pdf-editor-interaction.spec.ts:335:7 › PDF Editor: shapes, images, crop, search, pages › search covers every page from the start and Next/Prev jump to the match (2.5s)
+  ok 497 [mobile-chromium] › e2e\pdf-editor-interaction.spec.ts:350:7 › PDF Editor: shapes, images, crop, search, pages › pages can be moved with the Move up/down buttons (works without dragging) (2.6s)
+  ok 498 [mobile-chromium] › e2e\pdf-editor-interaction.spec.ts:361:7 › PDF Editor: shapes, images, crop, search, pages › Whiteout shows the not-secure-redaction warning while it's the active tool (1.8s)
+  ok 499 [mobile-chromium] › e2e\pdf-editor-interaction.spec.ts:371:7 › PDF Editor: added text on a rotated page › keeps its layout (one line, real width) and turns with the page instead of wrapping into a sliver (2.3s)
+  ok 500 [mobile-chromium] › e2e\pdf-editor-interaction.spec.ts:395:7 › PDF Editor: underline and strikethrough as a flat drag › dragging straight along a line (almost no height) still creates the underline / strikethrough (2.4s)
+  ok 501 [mobile-chromium] › e2e\pdf-editor-interaction.spec.ts:415:7 › PDF Editor: typing right after placing text › the first character typed immediately after clicking is not lost (1.5s)
+  ok 502 [mobile-chromium] › e2e\pdf-editor-interaction.spec.ts:424:7 › PDF Editor: typing right after placing text › typing across a pause (e.g. thinking mid-sentence) never loses what was already typed (2.1s)
+  ok 503 [mobile-chromium] › e2e\pdf-editor-interaction.spec.ts:442:7 › PDF Editor: pages that carry a CropBox › the page is laid out on its visible (cropped) area, and the crop survives a round trip (1.5s)
+  ok 504 [mobile-chromium] › e2e\pdf-editor-interaction.spec.ts:462:7 › PDF Editor on a phone › opens fit to the screen, has finger-sized controls, and both drawers can be closed and used (2.5s)
+  ok 505 [mobile-chromium] › e2e\pdf-editor-interaction.spec.ts:491:7 › PDF Editor: a page wider than its viewport › the page keeps its size (and its drawing overlay matches its canvas) and scrolls instead of being squeezed (1.7s)
+  ok 506 [mobile-chromium] › e2e\pdf-editor-interaction.spec.ts:538:7 › PDF Editor on a phone: touch input › tap places text and typing works; highlight/underline stay armed; strokes render live; crop applies (5.3s)
+  ok 507 [mobile-chromium] › e2e\pdf-editor-qa.spec.ts:28:7 › PDF Editor: large document smoke test › handles a 25-page document: thumbnails, navigation, zoom, an annotation, and export (3.5s)
+  ok 508 [mobile-chromium] › e2e\pdf-editor-qa.spec.ts:76:7 › PDF Editor: mobile editing checklist › every core editing action works on a mobile viewport (4.2s)
+  ok 509 [mobile-chromium] › e2e\pdf-editor-qa.spec.ts:150:9 › PDF Editor: responsive QA matrix › no horizontal overflow and core controls are reachable at 390x844 (1.5s)
+  ok 510 [mobile-chromium] › e2e\pdf-editor-qa.spec.ts:150:9 › PDF Editor: responsive QA matrix › no horizontal overflow and core controls are reachable at 768x1024 (1.5s)
+  ok 511 [mobile-chromium] › e2e\pdf-editor-qa.spec.ts:150:9 › PDF Editor: responsive QA matrix › no horizontal overflow and core controls are reachable at 1366x768 (1.5s)
+  ok 512 [mobile-chromium] › e2e\pdf-editor-qa.spec.ts:150:9 › PDF Editor: responsive QA matrix › no horizontal overflow and core controls are reachable at 1440x900 (1.5s)
+  ok 513 [mobile-chromium] › e2e\pdf-editor-qa.spec.ts:150:9 › PDF Editor: responsive QA matrix › no horizontal overflow and core controls are reachable at 1920x1080 (1.4s)
+  ok 514 [mobile-chromium] › e2e\pdf-editor-qa.spec.ts:150:9 › PDF Editor: responsive QA matrix › no horizontal overflow and core controls are reachable at 2560x1440 (1.5s)
+  ok 515 [mobile-chromium] › e2e\pdf-editor-qa.spec.ts:150:9 › PDF Editor: responsive QA matrix › no horizontal overflow and core controls are reachable at 3440x1440 (1.6s)
+  ok 516 [mobile-chromium] › e2e\pdf-editor-qa.spec.ts:180:7 › PDF Editor: privacy regression (signature / image / form / crop / header-footer) › no document bytes, signature/image contents, or third-party requests leave the browser across these flows (5.2s)
+  -  517 [mobile-chromium] › e2e\pdf-editor-rotation.spec.ts:27:5 › text added to a page shown rotated is upright on screen and in the exported PDF
+  -  518 [mobile-chromium] › e2e\pdf-editor-rotation.spec.ts:67:5 › a picture placed on a page shown rotated keeps its shape and exports upright
+  ok 519 [mobile-chromium] › e2e\pdf-editor.spec.ts:50:7 › PDF Editor: native text editing › corrects native text, exports, and the correction is verifiable in the reopened PDF (2.1s)
+  ok 520 [mobile-chromium] › e2e\pdf-editor.spec.ts:73:7 › PDF Editor: add text / shapes / annotations › adds a text box and it appears at export in the reopened PDF (1.7s)
+  ok 521 [mobile-chromium] › e2e\pdf-editor.spec.ts:85:7 › PDF Editor: add text / shapes / annotations › draws a whiteout box and the exported page renders a white-filled region (1.9s)
+  ok 522 [mobile-chromium] › e2e\pdf-editor.spec.ts:109:7 › PDF Editor: add text / shapes / annotations › draws a rectangle shape that survives export (2.4s)
+  ok 523 [mobile-chromium] › e2e\pdf-editor.spec.ts:134:7 › PDF Editor: page management › rotate, duplicate, and delete pages, then export and verify the result (2.5s)
+  ok 524 [mobile-chromium] › e2e\pdf-editor.spec.ts:156:7 › PDF Editor: page management › inserts pages from another PDF after the current page (2.0s)
+  ok 525 [mobile-chromium] › e2e\pdf-editor.spec.ts:175:7 › PDF Editor: undo/redo › Ctrl+Z undoes an added text object and Ctrl+Shift+Z redoes it (1.8s)
+  ok 526 [mobile-chromium] › e2e\pdf-editor.spec.ts:201:7 › PDF Editor: OCR integration › OCR is never fetched until recognition is explicitly requested (2.8s)
+  ok 527 [mobile-chromium] › e2e\pdf-editor.spec.ts:217:7 › PDF Editor: privacy / network › no document content is ever sent off-device while editing and exporting (2.3s)
+  ok 528 [mobile-chromium] › e2e\pdf-editor.spec.ts:238:7 › PDF Editor: security / error handling › a corrupted PDF fails safely with a friendly message (1.0s)
+  ok 529 [mobile-chromium] › e2e\pdf-editor.spec.ts:247:7 › PDF Editor: security / error handling › a zero-byte file is rejected immediately (588ms)
+  ok 530 [mobile-chromium] › e2e\pdf-editor.spec.ts:253:7 › PDF Editor: security / error handling › an unsupported file type shows a friendly error (565ms)
+  ok 531 [mobile-chromium] › e2e\pdf-editor.spec.ts:261:7 › PDF Editor: responsive / mobile › no horizontal overflow and page panels are reachable via toggle buttons at 390px width (1.4s)
+  ok 532 [mobile-chromium] › e2e\pdf-to-word.spec.ts:9:7 › PDF to Word › native PDF: headings, paragraphs, a valid .docx named after the PDF (4.1s)
+  ok 533 [mobile-chromium] › e2e\pdf-to-word.spec.ts:30:7 › PDF to Word › lists become real Word bullet and numbered lists (2.7s)
+  ok 534 [mobile-chromium] › e2e\pdf-to-word.spec.ts:36:7 › PDF to Word › pictures are embedded, decodable and keep their proportions (2.9s)
+  ok 535 [mobile-chromium] › e2e\pdf-to-word.spec.ts:48:7 › PDF to Word › special characters come through unchanged (2.6s)
+  ok 536 [mobile-chromium] › e2e\pdf-to-word.spec.ts:54:7 › PDF to Word › a damaged PDF is refused with a clear message and nothing to download (1.2s)
+  ok 537 [mobile-chromium] › e2e\pdf-to-word.spec.ts:61:7 › PDF to Word › a password-protected PDF is refused with a clear message (1.7s)
+  ok 538 [mobile-chromium] › e2e\release-a11y.spec.ts:25:7 › axe: / has no serious or critical violation (1.9s)
+  ok 539 [mobile-chromium] › e2e\release-a11y.spec.ts:25:7 › axe: /compress-pdf has no serious or critical violation (1.6s)
+  ok 540 [mobile-chromium] › e2e\release-a11y.spec.ts:25:7 › axe: /pdf-to-word has no serious or critical violation (1.6s)
+  ok 541 [mobile-chromium] › e2e\release-a11y.spec.ts:25:7 › axe: /word-to-pdf has no serious or critical violation (1.6s)
+  ok 542 [mobile-chromium] › e2e\release-a11y.spec.ts:25:7 › axe: /pdf-editor has no serious or critical violation (1.6s)
+  ok 543 [mobile-chromium] › e2e\release-a11y.spec.ts:25:7 › axe: /tools has no serious or critical violation (1.5s)
+  ok 544 [mobile-chromium] › e2e\release-a11y.spec.ts:33:5 › axe: the editor with a PDF open (toolbar, rail, canvas, properties) (2.6s)
+  -  545 [mobile-chromium] › e2e\release-a11y.spec.ts:47:5 › keyboard: skip link, Tab reaches the primary controls, Enter activates them
+  -  546 [mobile-chromium] › e2e\release-a11y.spec.ts:72:5 › dialogs: the signature dialog is labelled, takes focus and closes with Escape
+  ok 547 [mobile-chromium] › e2e\release-a11y.spec.ts:86:5 › mobile: the menu opens and closes with its own button; tap targets in the nav and the editor dock are 44 px (1.4s)
+  -  548 [mobile-chromium] › e2e\release-editor-features.spec.ts:22:5 › signature: draw, place, move, resize, delete — and upload; it is labelled a visual signature
+  -  549 [mobile-chromium] › e2e\release-editor-features.spec.ts:66:5 › whiteout is labelled 'not secure redaction' and no redaction is offered
+  -  550 [mobile-chromium] › e2e\release-editor-features.spec.ts:76:5 › crop: exact CropBox on a rotated page and on a page of a different size; other pages are untouched
+  -  551 [mobile-chromium] › e2e\release-editor-features.spec.ts:128:5 › page organization in one session: insert blank, insert from another PDF, rotate, duplicate, reorder, delete
+  -  552 [mobile-chromium] › e2e\release-editor-features.spec.ts:157:5 › undo and redo across text, picture, drawing, crop and page edits
+  -  553 [mobile-chromium] › e2e\release-editor-session.spec.ts:56:5 › a 20+ action editor session: every change survives export and reopen
+  ok 554 [mobile-chromium] › e2e\release-perf.spec.ts:27:7 › /: loads no OCR, pdf.js worker or font files before a file is chosen (1.1s)
+  ok 555 [mobile-chromium] › e2e\release-perf.spec.ts:27:7 › /compress-pdf: loads no OCR, pdf.js worker or font files before a file is chosen (1.0s)
+  ok 556 [mobile-chromium] › e2e\release-perf.spec.ts:27:7 › /pdf-to-word: loads no OCR, pdf.js worker or font files before a file is chosen (1.1s)
+  ok 557 [mobile-chromium] › e2e\release-perf.spec.ts:27:7 › /word-to-pdf: loads no OCR, pdf.js worker or font files before a file is chosen (1.0s)
+  ok 558 [mobile-chromium] › e2e\release-perf.spec.ts:27:7 › /pdf-editor: loads no OCR, pdf.js worker or font files before a file is chosen (1.1s)
+  ok 559 [mobile-chromium] › e2e\release-perf.spec.ts:36:5 › /pdf-editor: the editor's code and pdf.js arrive when a PDF is chosen, not before (1.6s)
+  ok 560 [mobile-chromium] › e2e\release-perf.spec.ts:50:5 › /pdf-to-word: pdf.js and the converter load on demand; OCR assets only if a scan needs them (2.0s)
+  ok 561 [mobile-chromium] › e2e\security.spec.ts:5:7 › Bad input fails safely › a file with a .pdf name but other content can't be merged, and says which one (1.1s)
+  ok 562 [mobile-chromium] › e2e\security.spec.ts:15:7 › Bad input fails safely › a truncated PDF gives a friendly message (711ms)
+  ok 563 [mobile-chromium] › e2e\security.spec.ts:24:7 › Bad input fails safely › the editor explains a PDF it can't open and stays usable (953ms)
+  ok 564 [mobile-chromium] › e2e\security.spec.ts:31:7 › Bad input fails safely › an SVG with scripts and event handlers never executes when converted (755ms)
+  ok 565 [mobile-chromium] › e2e\security.spec.ts:47:7 › Bad input fails safely › an empty file is rejected by name (540ms)
+  ok 566 [mobile-chromium] › e2e\security.spec.ts:53:7 › Bad input fails safely › an unsupported type is rejected with what the tool accepts (584ms)
+  ok 567 [mobile-chromium] › e2e\site.spec.ts:20:7 › Homepage › leads with the headline and an upload you can use immediately (670ms)
+  ok 568 [mobile-chromium] › e2e\site.spec.ts:33:7 › Homepage › a dropped PDF gets PDF actions and hands the file to the chosen tool (1.6s)
+  ok 569 [mobile-chromium] › e2e\site.spec.ts:46:7 › Homepage › an image gets image actions; several images get the multi-file actions (1.3s)
+  ok 570 [mobile-chromium] › e2e\site.spec.ts:56:7 › Homepage › a Word document is offered Word to PDF and handed over; an old .doc is explained (2.8s)
+  ok 571 [mobile-chromium] › e2e\site.spec.ts:73:7 › Homepage › an unsupported file is explained, not accepted (651ms)
+  ok 572 [mobile-chromium] › e2e\site.spec.ts:79:7 › Homepage › shows the popular tools, privacy, how it works and FAQ sections (693ms)
+  -  573 [mobile-chromium] › e2e\site.spec.ts:90:7 › Navigation › desktop menus reach every tool
+  ok 574 [mobile-chromium] › e2e\site.spec.ts:110:7 › Navigation › the phone menu opens as a sheet, lists every tool and closes (1.2s)
+  ok 575 [mobile-chromium] › e2e\site.spec.ts:120:7 › Navigation › All tools lists every launch tool and nothing else (618ms)
+  ok 576 [mobile-chromium] › e2e\site.spec.ts:127:7 › Navigation › old URLs of the kept tools redirect; removed tools are gone (1.8s)
+  ok 577 [mobile-chromium] › e2e\site.spec.ts:145:9 › SEO › Compress PDF has its own title, description, canonical, Open Graph and structured data (610ms)
+  ok 578 [mobile-chromium] › e2e\site.spec.ts:145:9 › SEO › Compress Image has its own title, description, canonical, Open Graph and structured data (588ms)
+  ok 579 [mobile-chromium] › e2e\site.spec.ts:145:9 › SEO › PDF to Word has its own title, description, canonical, Open Graph and structured data (622ms)
+  ok 580 [mobile-chromium] › e2e\site.spec.ts:145:9 › SEO › Word to PDF has its own title, description, canonical, Open Graph and structured data (565ms)
+  ok 581 [mobile-chromium] › e2e\site.spec.ts:145:9 › SEO › PDF to Image has its own title, description, canonical, Open Graph and structured data (561ms)
+  ok 582 [mobile-chromium] › e2e\site.spec.ts:145:9 › SEO › Image to PDF has its own title, description, canonical, Open Graph and structured data (592ms)
+  ok 583 [mobile-chromium] › e2e\site.spec.ts:145:9 › SEO › Image to Word has its own title, description, canonical, Open Graph and structured data (598ms)
+  ok 584 [mobile-chromium] › e2e\site.spec.ts:145:9 › SEO › Image Converter has its own title, description, canonical, Open Graph and structured data (614ms)
+  ok 585 [mobile-chromium] › e2e\site.spec.ts:145:9 › SEO › Merge PDF has its own title, description, canonical, Open Graph and structured data (625ms)
+  ok 586 [mobile-chromium] › e2e\site.spec.ts:145:9 › SEO › Split PDF has its own title, description, canonical, Open Graph and structured data (615ms)
+  ok 587 [mobile-chromium] › e2e\site.spec.ts:145:9 › SEO › Organize PDF has its own title, description, canonical, Open Graph and structured data (615ms)
+  ok 588 [mobile-chromium] › e2e\site.spec.ts:145:9 › SEO › PDF Editor has its own title, description, canonical, Open Graph and structured data (624ms)
+  ok 589 [mobile-chromium] › e2e\site.spec.ts:159:7 › SEO › sitemap lists the home page, tools page and every tool; robots points to it (70ms)
+  ok 590 [mobile-chromium] › e2e\site.spec.ts:170:9 › Responsive layout › / has no sideways scroll (535ms)
+  ok 591 [mobile-chromium] › e2e\site.spec.ts:170:9 › Responsive layout › /tools has no sideways scroll (408ms)
+  ok 592 [mobile-chromium] › e2e\site.spec.ts:170:9 › Responsive layout › /privacy has no sideways scroll (435ms)
+  ok 593 [mobile-chromium] › e2e\site.spec.ts:170:9 › Responsive layout › /compress-pdf has no sideways scroll (527ms)
+  ok 594 [mobile-chromium] › e2e\site.spec.ts:170:9 › Responsive layout › /compress-image has no sideways scroll (496ms)
+  ok 595 [mobile-chromium] › e2e\site.spec.ts:170:9 › Responsive layout › /pdf-to-word has no sideways scroll (474ms)
+  ok 596 [mobile-chromium] › e2e\site.spec.ts:170:9 › Responsive layout › /word-to-pdf has no sideways scroll (500ms)
+  ok 597 [mobile-chromium] › e2e\site.spec.ts:170:9 › Responsive layout › /pdf-to-image has no sideways scroll (522ms)
+  ok 598 [mobile-chromium] › e2e\site.spec.ts:170:9 › Responsive layout › /image-to-pdf has no sideways scroll (470ms)
+  ok 599 [mobile-chromium] › e2e\site.spec.ts:170:9 › Responsive layout › /image-to-word has no sideways scroll (464ms)
+  ok 600 [mobile-chromium] › e2e\site.spec.ts:170:9 › Responsive layout › /convert-image has no sideways scroll (499ms)
+  ok 601 [mobile-chromium] › e2e\site.spec.ts:170:9 › Responsive layout › /merge-pdf has no sideways scroll (459ms)
+  ok 602 [mobile-chromium] › e2e\site.spec.ts:170:9 › Responsive layout › /split-pdf has no sideways scroll (422ms)
+  ok 603 [mobile-chromium] › e2e\site.spec.ts:170:9 › Responsive layout › /organize-pdf has no sideways scroll (446ms)
+  ok 604 [mobile-chromium] › e2e\site.spec.ts:170:9 › Responsive layout › /pdf-editor has no sideways scroll (511ms)
+  ok 605 [mobile-chromium] › e2e\tools.spec.ts:8:7 › Compress Image › reaches a preset target and says so with exact bytes (2.0s)
+  ok 606 [mobile-chromium] › e2e\tools.spec.ts:22:7 › Compress Image › a transparent PNG becomes WebP, keeps transparency and says why (2.0s)
+  ok 607 [mobile-chromium] › e2e\tools.spec.ts:35:7 › Compress Image › an image already under the target comes back untouched (813ms)
+  ok 608 [mobile-chromium] › e2e\tools.spec.ts:43:7 › Compress Image › an invalid custom size can't be submitted (716ms)
+  ok 609 [mobile-chromium] › e2e\tools.spec.ts:54:7 › Image converter › PNG → JPG flattens transparency; SVG → PNG renders at a usable size (1.3s)
+  ok 610 [mobile-chromium] › e2e\tools.spec.ts:70:7 › Image converter › a batch downloads as a ZIP and files already in the target format are skipped (2.2s)
+  ok 611 [mobile-chromium] › e2e\tools.spec.ts:82:7 › PDF → Image › selected pages become PNGs in a ZIP (3.1s)
+  ok 612 [mobile-chromium] › e2e\tools.spec.ts:96:7 › Images → PDF › images become pages in the order set with the move buttons (1.5s)
+  ok 613 [mobile-chromium] › e2e\tools.spec.ts:111:7 › Merge PDF › shows page counts, merges in the chosen order (1.6s)
+  ok 614 [mobile-chromium] › e2e\tools.spec.ts:124:7 › Merge PDF › needs at least two files (558ms)
+  ok 615 [mobile-chromium] › e2e\tools.spec.ts:133:7 › Split PDF › extracts the clicked pages; split-every-page gives a ZIP of single pages (2.8s)
+  ok 616 [mobile-chromium] › e2e\tools.spec.ts:151:7 › Split PDF › a typed range outside the document is refused with a clear message (1.1s)
+  ok 617 [mobile-chromium] › e2e\tools.spec.ts:161:7 › Organize PDF › rotate, delete (with restore) and duplicate pages, then save (1.7s)
+  ok 618 [mobile-chromium] › e2e\word-to-pdf.spec.ts:29:7 › Word to PDF › page, honest copy, and a header/footer document with real page numbers (3.0s)
+  ok 619 [mobile-chromium] › e2e\word-to-pdf.spec.ts:68:7 › Word to PDF › headings, lists, tables and special characters come through as text (7.7s)
+  ok 620 [mobile-chromium] › e2e\word-to-pdf.spec.ts:80:7 › Word to PDF › pictures are embedded and the result offers the next steps (2.5s)
+  ok 621 [mobile-chromium] › e2e\word-to-pdf.spec.ts:91:7 › Word to PDF › damaged, password-protected, fake and empty files are refused; nothing to download (1.9s)
+  ok 622 [mobile-chromium] › e2e\word-to-pdf.spec.ts:113:7 › Word to PDF › a Word file on a PDF tool points to Word to PDF (606ms)
+
+  153 skipped
+  469 passed (22.6m)

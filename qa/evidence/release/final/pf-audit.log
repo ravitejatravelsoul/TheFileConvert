@@ -1,0 +1,91 @@
+PASS  Compress PDF     compress-pdf             normal           cold    1.2 s  extra-click:NO valid:YES ocr:0
+PASS  Compress PDF     compress-pdf             normal           warm    1.2 s  extra-click:NO valid:YES ocr:0
+PASS  Compress Image   compress-image           normal           cold      1 s  extra-click:NO valid:YES ocr:0
+PASS  Compress Image   compress-image           normal           warm    1.1 s  extra-click:NO valid:YES ocr:0
+PASS  PDF → Word       pdf-to-word:form         normal           cold      1 s  extra-click:NO valid:YES ocr:0
+PASS  PDF → Word       pdf-to-word:form         normal           warm    1.1 s  extra-click:NO valid:YES ocr:0
+PASS  PDF → Word       pdf-to-word:form         normal+mobile    cold      1 s  extra-click:NO valid:YES ocr:0
+PASS  PDF → Word       pdf-to-word:form         normal+mobile    warm    1.2 s  extra-click:NO valid:YES ocr:0
+PASS  PDF → Word       pdf-to-word:passport     normal           cold    1.1 s  extra-click:NO valid:YES ocr:0
+PASS  PDF → Word       pdf-to-word:passport     normal           warm    1.2 s  extra-click:NO valid:YES ocr:0
+PASS  PDF → Word       pdf-to-word:certificate  normal           cold      1 s  extra-click:NO valid:YES ocr:0
+PASS  PDF → Word       pdf-to-word:certificate  normal           warm      1 s  extra-click:NO valid:YES ocr:0
+PASS  PDF → Word       pdf-to-word:native       normal           cold    0.4 s  extra-click:NO valid:YES ocr:0
+PASS  PDF → Word       pdf-to-word:native       normal           warm    0.4 s  extra-click:NO valid:YES ocr:0
+PASS  PDF → Word       pdf-to-word:native       normal+mobile    cold    0.4 s  extra-click:NO valid:YES ocr:0
+PASS  PDF → Word       pdf-to-word:native       normal+mobile    warm    0.4 s  extra-click:NO valid:YES ocr:0
+PASS  PDF → Word       pdf-to-word:letter       normal           cold   10.8 s  extra-click:NO valid:YES ocr:3
+PASS  PDF → Word       pdf-to-word:letter       normal           warm   10.9 s  extra-click:NO valid:YES ocr:3
+PASS  PDF → Word       pdf-to-word:letter       normal+mobile    cold     11 s  extra-click:NO valid:YES ocr:3
+PASS  PDF → Word       pdf-to-word:letter       normal+mobile    warm   10.9 s  extra-click:NO valid:YES ocr:3
+PASS  PDF → Word       pdf-to-word:two-pages    normal           cold     19 s  extra-click:NO valid:YES ocr:3
+PASS  PDF → Word       pdf-to-word:two-pages    normal           warm   18.8 s  extra-click:NO valid:YES ocr:3
+PASS  PDF → Word       pdf-to-word:five-mixed   normal           cold    4.6 s  extra-click:NO valid:YES ocr:0
+PASS  PDF → Word       pdf-to-word:five-mixed   normal           warm    4.4 s  extra-click:NO valid:YES ocr:0
+PASS  PDF → Word       pdf-to-word:five-letters normal           cold   52.5 s  extra-click:NO valid:YES ocr:3
+PASS  PDF → Word       pdf-to-word:five-letters normal           warm   50.5 s  extra-click:NO valid:YES ocr:3
+PASS  PDF → Word       pdf-to-word:five-letters normal+mobile    cold   50.2 s  extra-click:NO valid:YES ocr:3
+PASS  PDF → Word       pdf-to-word:five-letters normal+mobile    warm   50.3 s  extra-click:NO valid:YES ocr:3
+PASS  PDF → Word       pdf-to-word:user         normal           cold    2.8 s  extra-click:NO valid:YES ocr:0
+PASS  PDF → Word       pdf-to-word:user         normal           warm    2.8 s  extra-click:NO valid:YES ocr:0
+PASS  Word → PDF       word-to-pdf              normal           cold    0.6 s  extra-click:NO valid:YES ocr:0
+PASS  Word → PDF       word-to-pdf              normal           warm    0.6 s  extra-click:NO valid:YES ocr:0
+PASS  Image → Word     image-to-word            normal           cold    0.6 s  extra-click:NO valid:YES ocr:0
+PASS  Image → Word     image-to-word            normal           warm    0.6 s  extra-click:NO valid:YES ocr:0
+PASS  Image → Word     image-to-word            normal+mobile    cold    0.6 s  extra-click:NO valid:YES ocr:0
+PASS  Image → Word     image-to-word            normal+mobile    warm    0.6 s  extra-click:NO valid:YES ocr:0
+PASS  PDF → Image      pdf-to-image             normal           cold    0.6 s  extra-click:NO valid:YES ocr:0
+PASS  PDF → Image      pdf-to-image             normal           warm    0.6 s  extra-click:NO valid:YES ocr:0
+PASS  Image → PDF      image-to-pdf             normal           cold    2.6 s  extra-click:NO valid:YES ocr:0
+PASS  Image → PDF      image-to-pdf             normal           warm    2.4 s  extra-click:NO valid:YES ocr:0
+PASS  Image Converter  convert-image            normal           cold    0.4 s  extra-click:NO valid:YES ocr:0
+PASS  Image Converter  convert-image            normal           warm    0.4 s  extra-click:NO valid:YES ocr:0
+PASS  Merge PDF        merge-pdf                normal           cold    0.2 s  extra-click:NO valid:YES ocr:0
+PASS  Merge PDF        merge-pdf                normal           warm    0.2 s  extra-click:NO valid:YES ocr:0
+PASS  Split PDF        split-pdf                normal           cold    0.2 s  extra-click:NO valid:YES ocr:0
+PASS  Split PDF        split-pdf                normal           warm    0.2 s  extra-click:NO valid:YES ocr:0
+PASS  Organize PDF     organize-pdf             normal           cold    0.2 s  extra-click:NO valid:YES ocr:0
+PASS  Organize PDF     organize-pdf             normal           warm    0.2 s  extra-click:NO valid:YES ocr:0
+PASS  PDF Editor export pdf-editor               normal           cold    0.1 s  extra-click:NO valid:YES ocr:0
+PASS  PDF Editor export pdf-editor               normal           warm      0 s  extra-click:NO valid:YES ocr:0
+PASS  Compress PDF     compress-pdf             starved          cold    1.1 s  extra-click:NO valid:YES ocr:0
+PASS  Compress PDF     compress-pdf             starved          warm    1.1 s  extra-click:NO valid:YES ocr:0
+PASS  Compress Image   compress-image           starved          cold      1 s  extra-click:NO valid:YES ocr:0
+PASS  Compress Image   compress-image           starved          warm      1 s  extra-click:NO valid:YES ocr:0
+PASS  PDF → Word       pdf-to-word:form         starved          cold    0.9 s  extra-click:NO valid:YES ocr:0
+PASS  PDF → Word       pdf-to-word:form         starved          warm    1.1 s  extra-click:NO valid:YES ocr:0
+PASS  PDF → Word       pdf-to-word:passport     starved          cold      1 s  extra-click:NO valid:YES ocr:0
+PASS  PDF → Word       pdf-to-word:passport     starved          warm      1 s  extra-click:NO valid:YES ocr:0
+PASS  PDF → Word       pdf-to-word:certificate  starved          cold    1.2 s  extra-click:NO valid:YES ocr:0
+PASS  PDF → Word       pdf-to-word:certificate  starved          warm      1 s  extra-click:NO valid:YES ocr:0
+PASS  PDF → Word       pdf-to-word:native       starved          cold    0.4 s  extra-click:NO valid:YES ocr:0
+PASS  PDF → Word       pdf-to-word:native       starved          warm    0.4 s  extra-click:NO valid:YES ocr:0
+PASS  PDF → Word       pdf-to-word:letter       starved          cold   10.7 s  extra-click:NO valid:YES ocr:3
+PASS  PDF → Word       pdf-to-word:letter       starved          warm    9.9 s  extra-click:NO valid:YES ocr:3
+PASS  PDF → Word       pdf-to-word:two-pages    starved          cold   18.7 s  extra-click:NO valid:YES ocr:3
+PASS  PDF → Word       pdf-to-word:two-pages    starved          warm   18.2 s  extra-click:NO valid:YES ocr:3
+PASS  PDF → Word       pdf-to-word:five-mixed   starved          cold    4.2 s  extra-click:NO valid:YES ocr:0
+PASS  PDF → Word       pdf-to-word:five-mixed   starved          warm    4.4 s  extra-click:NO valid:YES ocr:0
+PASS  PDF → Word       pdf-to-word:five-letters starved          cold   50.9 s  extra-click:NO valid:YES ocr:3
+PASS  PDF → Word       pdf-to-word:five-letters starved          warm   50.2 s  extra-click:NO valid:YES ocr:3
+PASS  PDF → Word       pdf-to-word:user         starved          cold    2.9 s  extra-click:NO valid:YES ocr:0
+PASS  PDF → Word       pdf-to-word:user         starved          warm    2.9 s  extra-click:NO valid:YES ocr:0
+PASS  Word → PDF       word-to-pdf              starved          cold    0.6 s  extra-click:NO valid:YES ocr:0
+PASS  Word → PDF       word-to-pdf              starved          warm    0.6 s  extra-click:NO valid:YES ocr:0
+PASS  Image → Word     image-to-word            starved          cold    0.6 s  extra-click:NO valid:YES ocr:0
+PASS  Image → Word     image-to-word            starved          warm    0.6 s  extra-click:NO valid:YES ocr:0
+PASS  PDF → Image      pdf-to-image             starved          cold    0.7 s  extra-click:NO valid:YES ocr:0
+PASS  PDF → Image      pdf-to-image             starved          warm    0.6 s  extra-click:NO valid:YES ocr:0
+PASS  Image → PDF      image-to-pdf             starved          cold    2.5 s  extra-click:NO valid:YES ocr:0
+PASS  Image → PDF      image-to-pdf             starved          warm    2.6 s  extra-click:NO valid:YES ocr:0
+PASS  Image Converter  convert-image            starved          cold    0.4 s  extra-click:NO valid:YES ocr:0
+PASS  Image Converter  convert-image            starved          warm    0.4 s  extra-click:NO valid:YES ocr:0
+PASS  Merge PDF        merge-pdf                starved          cold    0.2 s  extra-click:NO valid:YES ocr:0
+PASS  Merge PDF        merge-pdf                starved          warm    0.3 s  extra-click:NO valid:YES ocr:0
+PASS  Split PDF        split-pdf                starved          cold    0.2 s  extra-click:NO valid:YES ocr:0
+PASS  Split PDF        split-pdf                starved          warm    0.2 s  extra-click:NO valid:YES ocr:0
+PASS  Organize PDF     organize-pdf             starved          cold    0.2 s  extra-click:NO valid:YES ocr:0
+PASS  Organize PDF     organize-pdf             starved          warm    0.3 s  extra-click:NO valid:YES ocr:0
+PASS  PDF Editor export pdf-editor               starved          cold    0.1 s  extra-click:NO valid:YES ocr:0
+PASS  PDF Editor export pdf-editor               starved          warm    0.1 s  extra-click:NO valid:YES ocr:0
+{"PASS":90}

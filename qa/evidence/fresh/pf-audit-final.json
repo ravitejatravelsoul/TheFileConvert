@@ -6,19 +6,31 @@
   "mode": "normal",
   "run": "cold",
   "private": false,
-  "resultSec": 0.6,
+  "resultSec": 1.2,
   "extraInteraction": "NO",
   "stages": [
    [
-    0.2,
+    0.3,
+    "Trying very high quality… Starting with the hi"
+   ],
+   [
+    0.5,
     "Trying high quality… Starting with the highest"
    ],
    [
-    0.4,
+    0.6,
+    "Trying good quality… Starting with the highest"
+   ],
+   [
+    0.8,
+    "Trying 75% quality… Starting with the highest "
+   ],
+   [
+    1,
     "Trying 78% quality… Starting with the highest "
    ],
    [
-    0.6,
+    1.2,
     "Done — 233 KB"
    ]
   ],
@@ -36,19 +48,27 @@
   "mode": "normal",
   "run": "warm",
   "private": false,
-  "resultSec": 0.6,
+  "resultSec": 1.2,
   "extraInteraction": "NO",
   "stages": [
    [
-    0.2,
+    0.3,
+    "Trying very high quality… Starting with the hi"
+   ],
+   [
+    0.5,
     "Trying high quality… Starting with the highest"
    ],
    [
-    0.4,
+    0.7,
+    "Trying 75% quality… Starting with the highest "
+   ],
+   [
+    0.8,
     "Trying 78% quality… Starting with the highest "
    ],
    [
-    0.6,
+    1.2,
     "Done — 233 KB"
    ]
   ],
@@ -66,7 +86,7 @@
   "mode": "normal",
   "run": "cold",
   "private": false,
-  "resultSec": 0.7,
+  "resultSec": 1,
   "extraInteraction": "NO",
   "stages": [
    [
@@ -74,7 +94,7 @@
     "Trying 92% quality… Highest quality first; the"
    ],
    [
-    0.7,
+    0.9,
     "Done — 589 KB"
    ]
   ],
@@ -92,7 +112,7 @@
   "mode": "normal",
   "run": "warm",
   "private": false,
-  "resultSec": 0.5,
+  "resultSec": 1.1,
   "extraInteraction": "NO",
   "stages": [
    [
@@ -100,7 +120,7 @@
     "Trying 92% quality… Highest quality first; the"
    ],
    [
-    0.5,
+    1.1,
     "Done — 589 KB"
    ]
   ],
@@ -118,15 +138,19 @@
   "mode": "normal",
   "run": "cold",
   "private": false,
-  "resultSec": 0.5,
+  "resultSec": 1,
   "extraInteraction": "NO",
   "stages": [
    [
-    0.4,
+    0.3,
+    "Analyzing PDF — page 1 of 1… Everything happen"
+   ],
+   [
+    0.8,
     "Preparing scanned page 1 of 1… Everything happ"
    ],
    [
-    0.5,
+    1,
     "Your Word document is ready"
    ]
   ],
@@ -146,15 +170,23 @@
   "mode": "normal",
   "run": "warm",
   "private": false,
-  "resultSec": 0.5,
+  "resultSec": 1.1,
   "extraInteraction": "NO",
   "stages": [
    [
-    0.3,
+    0.2,
+    "Analyzing PDF — page 1 of 1… Everything happen"
+   ],
+   [
+    0.7,
     "Preparing scanned page 1 of 1… Everything happ"
    ],
    [
-    0.5,
+    0.9,
+    "Building Word document… Everything happens in "
+   ],
+   [
+    1.1,
     "Your Word document is ready"
    ]
   ],
@@ -174,22 +206,26 @@
   "mode": "normal+mobile",
   "run": "cold",
   "private": false,
-  "resultSec": 0.5,
+  "resultSec": 1,
   "extraInteraction": "NO",
   "stages": [
    [
     0.3,
+    "Analyzing PDF — page 1 of 1… Everything happen"
+   ],
+   [
+    0.8,
     "Preparing scanned page 1 of 1… Everything happ"
    ],
    [
-    0.5,
+    1,
     "Your Word document is ready"
    ]
   ],
   "ocrRequests": 0,
   "uploads": 0,
   "outputValid": "YES",
-  "output": "DOCUMENT-02-filled-application.docx (455501 bytes)",
+  "output": "DOCUMENT-02-filled-application.docx (455502 bytes)",
   "classes": "FORM",
   "strategies": "visual",
   "errors": [],
@@ -202,22 +238,30 @@
   "mode": "normal+mobile",
   "run": "warm",
   "private": false,
-  "resultSec": 0.5,
+  "resultSec": 1.2,
   "extraInteraction": "NO",
   "stages": [
    [
     0.3,
+    "Analyzing PDF — page 1 of 1… Everything happen"
+   ],
+   [
+    0.8,
     "Preparing scanned page 1 of 1… Everything happ"
    ],
    [
-    0.5,
+    1,
+    "Checking output… Everything happens in this ta"
+   ],
+   [
+    1.2,
     "Your Word document is ready"
    ]
   ],
   "ocrRequests": 0,
   "uploads": 0,
   "outputValid": "YES",
-  "output": "DOCUMENT-02-filled-application.docx (455500 bytes)",
+  "output": "DOCUMENT-02-filled-application.docx (455501 bytes)",
   "classes": "FORM",
   "strategies": "visual",
   "errors": [],
@@ -230,26 +274,30 @@
   "mode": "normal",
   "run": "cold",
   "private": false,
-  "resultSec": 0.6,
+  "resultSec": 1.1,
   "extraInteraction": "NO",
   "stages": [
    [
-    0.2,
+    0.3,
     "Analyzing PDF — page 1 of 1… Everything happen"
    ],
    [
-    0.4,
+    0.8,
     "Preparing scanned page 1 of 1… Everything happ"
    ],
    [
-    0.6,
+    0.9,
+    "Building Word document… Everything happens in "
+   ],
+   [
+    1.1,
     "Your Word document is ready"
    ]
   ],
   "ocrRequests": 0,
   "uploads": 0,
   "outputValid": "YES",
-  "output": "DOCUMENT-01-passport-scan.docx (482785 bytes)",
+  "output": "DOCUMENT-01-passport-scan.docx (482786 bytes)",
   "classes": "OFFICIAL_DOCUMENT",
   "strategies": "visual",
   "errors": [],
@@ -262,22 +310,30 @@
   "mode": "normal",
   "run": "warm",
   "private": false,
-  "resultSec": 0.5,
+  "resultSec": 1.2,
   "extraInteraction": "NO",
   "stages": [
    [
-    0.3,
+    0.2,
+    "Analyzing PDF — page 1 of 1… Everything happen"
+   ],
+   [
+    0.8,
     "Preparing scanned page 1 of 1… Everything happ"
    ],
    [
-    0.5,
+    1,
+    "Checking output… Everything happens in this ta"
+   ],
+   [
+    1.2,
     "Your Word document is ready"
    ]
   ],
   "ocrRequests": 0,
   "uploads": 0,
   "outputValid": "YES",
-  "output": "DOCUMENT-01-passport-scan.docx (482785 bytes)",
+  "output": "DOCUMENT-01-passport-scan.docx (482786 bytes)",
   "classes": "OFFICIAL_DOCUMENT",
   "strategies": "visual",
   "errors": [],
@@ -290,15 +346,19 @@
   "mode": "normal",
   "run": "cold",
   "private": false,
-  "resultSec": 0.5,
+  "resultSec": 1,
   "extraInteraction": "NO",
   "stages": [
    [
     0.3,
+    "Analyzing PDF — page 1 of 1… Everything happen"
+   ],
+   [
+    0.8,
     "Preparing scanned page 1 of 1… Everything happ"
    ],
    [
-    0.5,
+    1,
     "Your Word document is ready"
    ]
   ],
@@ -318,22 +378,26 @@
   "mode": "normal",
   "run": "warm",
   "private": false,
-  "resultSec": 0.5,
+  "resultSec": 1,
   "extraInteraction": "NO",
   "stages": [
    [
     0.3,
+    "Analyzing PDF — page 1 of 1… Everything happen"
+   ],
+   [
+    0.8,
     "Preparing scanned page 1 of 1… Everything happ"
    ],
    [
-    0.5,
+    1,
     "Your Word document is ready"
    ]
   ],
   "ocrRequests": 0,
   "uploads": 0,
   "outputValid": "YES",
-  "output": "DOCUMENT-03-certificate.docx (553803 bytes)",
+  "output": "DOCUMENT-03-certificate.docx (553804 bytes)",
   "classes": "OFFICIAL_DOCUMENT",
   "strategies": "visual",
   "errors": [],
@@ -346,18 +410,22 @@
   "mode": "normal",
   "run": "cold",
   "private": false,
-  "resultSec": 0.2,
+  "resultSec": 0.4,
   "extraInteraction": "NO",
   "stages": [
    [
-    0.2,
+    0.3,
+    "Analyzing PDF — page 1 of 1… Everything happen"
+   ],
+   [
+    0.4,
     "Your Word document is ready"
    ]
   ],
   "ocrRequests": 0,
   "uploads": 0,
   "outputValid": "YES",
-  "output": "DOCUMENT-06-resume-native.docx (4895 bytes)",
+  "output": "DOCUMENT-06-resume-native.docx (4896 bytes)",
   "classes": "NATIVE_TEXT",
   "strategies": "editable",
   "errors": [],
@@ -370,18 +438,22 @@
   "mode": "normal",
   "run": "warm",
   "private": false,
-  "resultSec": 0.2,
+  "resultSec": 0.4,
   "extraInteraction": "NO",
   "stages": [
    [
     0.2,
+    "Opening your PDF… Everything happens in this t"
+   ],
+   [
+    0.4,
     "Your Word document is ready"
    ]
   ],
   "ocrRequests": 0,
   "uploads": 0,
   "outputValid": "YES",
-  "output": "DOCUMENT-06-resume-native.docx (4895 bytes)",
+  "output": "DOCUMENT-06-resume-native.docx (4896 bytes)",
   "classes": "NATIVE_TEXT",
   "strategies": "editable",
   "errors": [],
@@ -394,18 +466,22 @@
   "mode": "normal+mobile",
   "run": "cold",
   "private": false,
-  "resultSec": 0.2,
+  "resultSec": 0.4,
   "extraInteraction": "NO",
   "stages": [
    [
     0.2,
+    "Analyzing PDF — page 1 of 1… Everything happen"
+   ],
+   [
+    0.4,
     "Your Word document is ready"
    ]
   ],
   "ocrRequests": 0,
   "uploads": 0,
   "outputValid": "YES",
-  "output": "DOCUMENT-06-resume-native.docx (4895 bytes)",
+  "output": "DOCUMENT-06-resume-native.docx (4896 bytes)",
   "classes": "NATIVE_TEXT",
   "strategies": "editable",
   "errors": [],
@@ -418,18 +494,22 @@
   "mode": "normal+mobile",
   "run": "warm",
   "private": false,
-  "resultSec": 0.2,
+  "resultSec": 0.4,
   "extraInteraction": "NO",
   "stages": [
    [
     0.2,
+    "Analyzing PDF — page 1 of 1… Everything happen"
+   ],
+   [
+    0.4,
     "Your Word document is ready"
    ]
   ],
   "ocrRequests": 0,
   "uploads": 0,
   "outputValid": "YES",
-  "output": "DOCUMENT-06-resume-native.docx (4895 bytes)",
+  "output": "DOCUMENT-06-resume-native.docx (4896 bytes)",
   "classes": "NATIVE_TEXT",
   "strategies": "editable",
   "errors": [],
@@ -439,6 +519,286 @@
   "tool": "PDF → Word",
   "case": "pdf-to-word:letter",
   "fixture": "DOCUMENT-07-scanned-letter.pdf (plain scanned letter, 1 page)",
+  "mode": "normal",
+  "run": "cold",
+  "private": false,
+  "resultSec": 10.8,
+  "extraInteraction": "NO",
+  "stages": [
+   [
+    0.3,
+    "Analyzing PDF — page 1 of 1… Everything happen"
+   ],
+   [
+    0.7,
+    "Preparing scanned page 1 of 1… Everything happ"
+   ],
+   [
+    1.1,
+    "Loading text recognition… Only a plain scan of"
+   ],
+   [
+    1.7,
+    "Recognizing page 1 of 1… Reading a plain scan "
+   ],
+   [
+    10.7,
+    "Building Word document… Everything happens in "
+   ],
+   [
+    10.8,
+    "Your Word document is ready"
+   ]
+  ],
+  "ocrRequests": 3,
+  "uploads": 0,
+  "outputValid": "YES",
+  "output": "DOCUMENT-07-scanned-letter.docx (4207 bytes)",
+  "classes": "SCANNED_TEXT",
+  "strategies": "hybrid",
+  "errors": [],
+  "verdict": "PASS"
+ },
+ {
+  "tool": "PDF → Word",
+  "case": "pdf-to-word:letter",
+  "fixture": "DOCUMENT-07-scanned-letter.pdf (plain scanned letter, 1 page)",
+  "mode": "normal",
+  "run": "warm",
+  "private": false,
+  "resultSec": 10.9,
+  "extraInteraction": "NO",
+  "stages": [
+   [
+    0.3,
+    "Analyzing PDF — page 1 of 1… Everything happen"
+   ],
+   [
+    0.7,
+    "Preparing scanned page 1 of 1… Everything happ"
+   ],
+   [
+    1.1,
+    "Loading text recognition… Only a plain scan of"
+   ],
+   [
+    1.4,
+    "Recognizing page 1 of 1… Reading a plain scan "
+   ],
+   [
+    10.7,
+    "Building Word document… Everything happens in "
+   ],
+   [
+    10.9,
+    "Your Word document is ready"
+   ]
+  ],
+  "ocrRequests": 3,
+  "uploads": 0,
+  "outputValid": "YES",
+  "output": "DOCUMENT-07-scanned-letter.docx (4208 bytes)",
+  "classes": "SCANNED_TEXT",
+  "strategies": "hybrid",
+  "errors": [],
+  "verdict": "PASS"
+ },
+ {
+  "tool": "PDF → Word",
+  "case": "pdf-to-word:letter",
+  "fixture": "DOCUMENT-07-scanned-letter.pdf (plain scanned letter, 1 page)",
+  "mode": "normal+mobile",
+  "run": "cold",
+  "private": false,
+  "resultSec": 11,
+  "extraInteraction": "NO",
+  "stages": [
+   [
+    0.3,
+    "Analyzing PDF — page 1 of 1… Everything happen"
+   ],
+   [
+    0.7,
+    "Preparing scanned page 1 of 1… Everything happ"
+   ],
+   [
+    1.1,
+    "Loading text recognition… Only a plain scan of"
+   ],
+   [
+    2.5,
+    "Recognizing page 1 of 1… Reading a plain scan "
+   ],
+   [
+    10.8,
+    "Building Word document… Everything happens in "
+   ],
+   [
+    10.9,
+    "Your Word document is ready"
+   ]
+  ],
+  "ocrRequests": 3,
+  "uploads": 0,
+  "outputValid": "YES",
+  "output": "DOCUMENT-07-scanned-letter.docx (4207 bytes)",
+  "classes": "SCANNED_TEXT",
+  "strategies": "hybrid",
+  "errors": [],
+  "verdict": "PASS"
+ },
+ {
+  "tool": "PDF → Word",
+  "case": "pdf-to-word:letter",
+  "fixture": "DOCUMENT-07-scanned-letter.pdf (plain scanned letter, 1 page)",
+  "mode": "normal+mobile",
+  "run": "warm",
+  "private": false,
+  "resultSec": 10.9,
+  "extraInteraction": "NO",
+  "stages": [
+   [
+    0.3,
+    "Analyzing PDF — page 1 of 1… Everything happen"
+   ],
+   [
+    0.7,
+    "Preparing scanned page 1 of 1… Everything happ"
+   ],
+   [
+    1.1,
+    "Loading text recognition… Only a plain scan of"
+   ],
+   [
+    1.5,
+    "Recognizing page 1 of 1… Reading a plain scan "
+   ],
+   [
+    10.7,
+    "Building Word document… Everything happens in "
+   ],
+   [
+    10.8,
+    "Your Word document is ready"
+   ]
+  ],
+  "ocrRequests": 3,
+  "uploads": 0,
+  "outputValid": "YES",
+  "output": "DOCUMENT-07-scanned-letter.docx (4208 bytes)",
+  "classes": "SCANNED_TEXT",
+  "strategies": "hybrid",
+  "errors": [],
+  "verdict": "PASS"
+ },
+ {
+  "tool": "PDF → Word",
+  "case": "pdf-to-word:two-pages",
+  "fixture": "DOCUMENT-08-signed-contract.pdf (scanned, 2 pages)",
+  "mode": "normal",
+  "run": "cold",
+  "private": false,
+  "resultSec": 19,
+  "extraInteraction": "NO",
+  "stages": [
+   [
+    0.3,
+    "Analyzing PDF — page 1 of 2… Everything happen"
+   ],
+   [
+    0.7,
+    "Preparing scanned page 1 of 2… Everything happ"
+   ],
+   [
+    0.9,
+    "Analyzing PDF — page 2 of 2… Everything happen"
+   ],
+   [
+    1.5,
+    "Preparing scanned page 2 of 2… Everything happ"
+   ],
+   [
+    1.7,
+    "Loading text recognition… Only a plain scan of"
+   ],
+   [
+    2.4,
+    "Recognizing page 1 of 2… Reading a plain scan "
+   ],
+   [
+    11,
+    "Recognizing page 2 of 2… Reading a plain scan "
+   ],
+   [
+    18.9,
+    "Building Word document… Everything happens in "
+   ]
+  ],
+  "ocrRequests": 3,
+  "uploads": 0,
+  "outputValid": "YES",
+  "output": "DOCUMENT-08-signed-contract.docx (848842 bytes)",
+  "classes": "SCANNED_TEXT,SCANNED_TEXT",
+  "strategies": "visual,visual",
+  "errors": [],
+  "verdict": "PASS"
+ },
+ {
+  "tool": "PDF → Word",
+  "case": "pdf-to-word:two-pages",
+  "fixture": "DOCUMENT-08-signed-contract.pdf (scanned, 2 pages)",
+  "mode": "normal",
+  "run": "warm",
+  "private": false,
+  "resultSec": 18.8,
+  "extraInteraction": "NO",
+  "stages": [
+   [
+    0.3,
+    "Analyzing PDF — page 1 of 2… Everything happen"
+   ],
+   [
+    0.7,
+    "Preparing scanned page 1 of 2… Everything happ"
+   ],
+   [
+    1.6,
+    "Preparing scanned page 2 of 2… Everything happ"
+   ],
+   [
+    1.8,
+    "Loading text recognition… Only a plain scan of"
+   ],
+   [
+    2.1,
+    "Recognizing page 1 of 2… Reading a plain scan "
+   ],
+   [
+    10.7,
+    "Recognizing page 2 of 2… Reading a plain scan "
+   ],
+   [
+    18.7,
+    "Building Word document… Everything happens in "
+   ],
+   [
+    18.8,
+    "Your Word document is ready"
+   ]
+  ],
+  "ocrRequests": 3,
+  "uploads": 0,
+  "outputValid": "YES",
+  "output": "DOCUMENT-08-signed-contract.docx (848843 bytes)",
+  "classes": "SCANNED_TEXT,SCANNED_TEXT",
+  "strategies": "visual,visual",
+  "errors": [],
+  "verdict": "PASS"
+ },
+ {
+  "tool": "PDF → Word",
+  "case": "pdf-to-word:five-mixed",
+  "fixture": "five-mixed-scan.pdf (letter + form + invoice + statement + passport, 5 pages)",
   "mode": "normal",
   "run": "cold",
   "private": false,
@@ -447,387 +807,139 @@
   "stages": [
    [
     0.3,
-    "Preparing scanned page 1 of 1… Everything happ"
-   ],
-   [
-    0.4,
-    "Loading text recognition… Only a plain scan of"
-   ],
-   [
-    0.9,
-    "Recognizing page 1 of 1… Reading a plain scan "
-   ],
-   [
-    4.4,
-    "Building Word document… Everything happens in "
-   ],
-   [
-    4.6,
-    "Your Word document is ready"
-   ]
-  ],
-  "ocrRequests": 3,
-  "uploads": 0,
-  "outputValid": "YES",
-  "output": "DOCUMENT-07-scanned-letter.docx (4206 bytes)",
-  "classes": "SCANNED_TEXT",
-  "strategies": "hybrid",
-  "errors": [],
-  "verdict": "PASS"
- },
- {
-  "tool": "PDF → Word",
-  "case": "pdf-to-word:letter",
-  "fixture": "DOCUMENT-07-scanned-letter.pdf (plain scanned letter, 1 page)",
-  "mode": "normal",
-  "run": "warm",
-  "private": false,
-  "resultSec": 4.3,
-  "extraInteraction": "NO",
-  "stages": [
-   [
-    0.3,
-    "Preparing scanned page 1 of 1… Everything happ"
-   ],
-   [
-    0.5,
-    "Loading text recognition… Only a plain scan of"
-   ],
-   [
-    0.9,
-    "Recognizing page 1 of 1… Reading a plain scan "
-   ],
-   [
-    4.3,
-    "Your Word document is ready"
-   ]
-  ],
-  "ocrRequests": 3,
-  "uploads": 0,
-  "outputValid": "YES",
-  "output": "DOCUMENT-07-scanned-letter.docx (4207 bytes)",
-  "classes": "SCANNED_TEXT",
-  "strategies": "hybrid",
-  "errors": [],
-  "verdict": "PASS"
- },
- {
-  "tool": "PDF → Word",
-  "case": "pdf-to-word:letter",
-  "fixture": "DOCUMENT-07-scanned-letter.pdf (plain scanned letter, 1 page)",
-  "mode": "normal+mobile",
-  "run": "cold",
-  "private": false,
-  "resultSec": 6,
-  "extraInteraction": "NO",
-  "stages": [
-   [
-    0.4,
-    "Preparing scanned page 1 of 1… Everything happ"
-   ],
-   [
-    0.6,
-    "Loading text recognition… Only a plain scan of"
-   ],
-   [
-    0.9,
-    "Recognizing page 1 of 1… Reading a plain scan "
-   ],
-   [
-    6,
-    "Your Word document is ready"
-   ]
-  ],
-  "ocrRequests": 3,
-  "uploads": 0,
-  "outputValid": "YES",
-  "output": "DOCUMENT-07-scanned-letter.docx (4207 bytes)",
-  "classes": "SCANNED_TEXT",
-  "strategies": "hybrid",
-  "errors": [],
-  "verdict": "PASS"
- },
- {
-  "tool": "PDF → Word",
-  "case": "pdf-to-word:letter",
-  "fixture": "DOCUMENT-07-scanned-letter.pdf (plain scanned letter, 1 page)",
-  "mode": "normal+mobile",
-  "run": "warm",
-  "private": false,
-  "resultSec": 4.9,
-  "extraInteraction": "NO",
-  "stages": [
-   [
-    0.3,
-    "Preparing scanned page 1 of 1… Everything happ"
-   ],
-   [
-    0.5,
-    "Loading text recognition… Only a plain scan of"
-   ],
-   [
-    0.6,
-    "Recognizing page 1 of 1… Reading a plain scan "
-   ],
-   [
-    4.8,
-    "Building Word document… Everything happens in "
-   ],
-   [
-    4.9,
-    "Your Word document is ready"
-   ]
-  ],
-  "ocrRequests": 3,
-  "uploads": 0,
-  "outputValid": "YES",
-  "output": "DOCUMENT-07-scanned-letter.docx (4207 bytes)",
-  "classes": "SCANNED_TEXT",
-  "strategies": "hybrid",
-  "errors": [],
-  "verdict": "PASS"
- },
- {
-  "tool": "PDF → Word",
-  "case": "pdf-to-word:two-pages",
-  "fixture": "DOCUMENT-08-signed-contract.pdf (scanned, 2 pages)",
-  "mode": "normal",
-  "run": "cold",
-  "private": false,
-  "resultSec": 9.9,
-  "extraInteraction": "NO",
-  "stages": [
-   [
-    0.3,
-    "Preparing scanned page 1 of 2… Everything happ"
-   ],
-   [
-    0.5,
-    "Analyzing PDF — page 2 of 2… Everything happen"
-   ],
-   [
-    0.9,
-    "Preparing scanned page 2 of 2… Everything happ"
-   ],
-   [
-    1,
-    "Loading text recognition… Only a plain scan of"
-   ],
-   [
-    1.4,
-    "Recognizing page 1 of 2… Reading a plain scan "
-   ],
-   [
-    6,
-    "Recognizing page 2 of 2… Reading a plain scan "
-   ],
-   [
-    9.7,
-    "Building Word document… Everything happens in "
-   ],
-   [
-    9.9,
-    "Your Word document is ready"
-   ]
-  ],
-  "ocrRequests": 3,
-  "uploads": 0,
-  "outputValid": "YES",
-  "output": "DOCUMENT-08-signed-contract.docx (848843 bytes)",
-  "classes": "SCANNED_TEXT,SCANNED_TEXT",
-  "strategies": "visual,visual",
-  "errors": [],
-  "verdict": "PASS"
- },
- {
-  "tool": "PDF → Word",
-  "case": "pdf-to-word:two-pages",
-  "fixture": "DOCUMENT-08-signed-contract.pdf (scanned, 2 pages)",
-  "mode": "normal",
-  "run": "warm",
-  "private": false,
-  "resultSec": 9,
-  "extraInteraction": "NO",
-  "stages": [
-   [
-    0.3,
-    "Preparing scanned page 1 of 2… Everything happ"
-   ],
-   [
-    0.7,
-    "Preparing scanned page 2 of 2… Everything happ"
-   ],
-   [
-    0.9,
-    "Loading text recognition… Only a plain scan of"
-   ],
-   [
-    1.3,
-    "Recognizing page 1 of 2… Reading a plain scan "
-   ],
-   [
-    5.1,
-    "Recognizing page 2 of 2… Reading a plain scan "
-   ],
-   [
-    8.8,
-    "Checking output… Everything happens in this ta"
-   ],
-   [
-    9,
-    "Your Word document is ready"
-   ]
-  ],
-  "ocrRequests": 3,
-  "uploads": 0,
-  "outputValid": "YES",
-  "output": "DOCUMENT-08-signed-contract.docx (848843 bytes)",
-  "classes": "SCANNED_TEXT,SCANNED_TEXT",
-  "strategies": "visual,visual",
-  "errors": [],
-  "verdict": "PASS"
- },
- {
-  "tool": "PDF → Word",
-  "case": "pdf-to-word:five-mixed",
-  "fixture": "five-mixed-scan.pdf (letter + form + invoice + statement + passport, 5 pages)",
-  "mode": "normal",
-  "run": "cold",
-  "private": false,
-  "resultSec": 2.3,
-  "extraInteraction": "NO",
-  "stages": [
-   [
-    0.3,
-    "Preparing scanned page 1 of 5… Everything happ"
-   ],
-   [
-    0.5,
-    "Analyzing PDF — page 2 of 5… Everything happen"
-   ],
-   [
-    0.8,
-    "Preparing scanned page 2 of 5… Everything happ"
-   ],
-   [
-    1.2,
-    "Preparing scanned page 3 of 5… Everything happ"
-   ],
-   [
-    1.6,
-    "Preparing scanned page 4 of 5… Everything happ"
-   ],
-   [
-    2,
-    "Preparing scanned page 5 of 5… Everything happ"
-   ],
-   [
-    2.2,
-    "Building Word document… Everything happens in "
-   ],
-   [
-    2.3,
-    "Your Word document is ready"
-   ]
-  ],
-  "ocrRequests": 0,
-  "uploads": 0,
-  "outputValid": "YES",
-  "output": "five-mixed-scan.docx (2301794 bytes)",
-  "classes": "SCANNED_TEXT,FORM,SCANNED_TABLE,SCANNED_TABLE,OFFICIAL_DOCUMENT",
-  "strategies": "visual,visual,visual,visual,visual",
-  "errors": [],
-  "verdict": "PASS"
- },
- {
-  "tool": "PDF → Word",
-  "case": "pdf-to-word:five-mixed",
-  "fixture": "five-mixed-scan.pdf (letter + form + invoice + statement + passport, 5 pages)",
-  "mode": "normal",
-  "run": "warm",
-  "private": false,
-  "resultSec": 2.3,
-  "extraInteraction": "NO",
-  "stages": [
-   [
-    0.3,
-    "Preparing scanned page 1 of 5… Everything happ"
-   ],
-   [
-    0.5,
-    "Preparing scanned page 2 of 5… Everything happ"
-   ],
-   [
-    1.2,
-    "Preparing scanned page 3 of 5… Everything happ"
-   ],
-   [
-    1.6,
-    "Preparing scanned page 4 of 5… Everything happ"
-   ],
-   [
-    2,
-    "Preparing scanned page 5 of 5… Everything happ"
-   ],
-   [
-    2.2,
-    "Checking output… Everything happens in this ta"
-   ],
-   [
-    2.3,
-    "Your Word document is ready"
-   ]
-  ],
-  "ocrRequests": 0,
-  "uploads": 0,
-  "outputValid": "YES",
-  "output": "five-mixed-scan.docx (2301794 bytes)",
-  "classes": "SCANNED_TEXT,FORM,SCANNED_TABLE,SCANNED_TABLE,OFFICIAL_DOCUMENT",
-  "strategies": "visual,visual,visual,visual,visual",
-  "errors": [],
-  "verdict": "PASS"
- },
- {
-  "tool": "PDF → Word",
-  "case": "pdf-to-word:five-letters",
-  "fixture": "five-letter-scan.pdf (5 plain scanned letters)",
-  "mode": "normal",
-  "run": "cold",
-  "private": false,
-  "resultSec": 29.7,
-  "extraInteraction": "NO",
-  "stages": [
-   [
-    0.2,
     "Analyzing PDF — page 1 of 5… Everything happen"
    ],
    [
-    0.4,
+    0.7,
     "Preparing scanned page 1 of 5… Everything happ"
-   ],
-   [
-    1,
-    "Preparing scanned page 2 of 5… Everything happ"
-   ],
-   [
-    1.2,
-    "Analyzing PDF — page 3 of 5… Everything happen"
-   ],
-   [
-    1.5,
-    "Preparing scanned page 3 of 5… Everything happ"
    ],
    [
     1.7,
+    "Preparing scanned page 2 of 5… Everything happ"
+   ],
+   [
+    2.4,
+    "Preparing scanned page 3 of 5… Everything happ"
+   ],
+   [
+    2.6,
     "Analyzing PDF — page 4 of 5… Everything happen"
    ],
    [
-    2,
+    3.2,
     "Preparing scanned page 4 of 5… Everything happ"
    ],
    [
-    2.2,
+    3.4,
+    "Preparing scanned page 5 of 5… Everything happ"
+   ],
+   [
+    4.2,
+    "Building Word document… Everything happens in "
+   ]
+  ],
+  "ocrRequests": 0,
+  "uploads": 0,
+  "outputValid": "YES",
+  "output": "five-mixed-scan.docx (2301794 bytes)",
+  "classes": "SCANNED_TEXT,FORM,SCANNED_TABLE,SCANNED_TABLE,OFFICIAL_DOCUMENT",
+  "strategies": "visual,visual,visual,visual,visual",
+  "errors": [],
+  "verdict": "PASS"
+ },
+ {
+  "tool": "PDF → Word",
+  "case": "pdf-to-word:five-mixed",
+  "fixture": "five-mixed-scan.pdf (letter + form + invoice + statement + passport, 5 pages)",
+  "mode": "normal",
+  "run": "warm",
+  "private": false,
+  "resultSec": 4.4,
+  "extraInteraction": "NO",
+  "stages": [
+   [
+    0.2,
+    "Analyzing PDF — page 1 of 5… Everything happen"
+   ],
+   [
+    0.7,
+    "Preparing scanned page 1 of 5… Everything happ"
+   ],
+   [
+    0.9,
+    "Analyzing PDF — page 2 of 5… Everything happen"
+   ],
+   [
+    1.6,
+    "Preparing scanned page 2 of 5… Everything happ"
+   ],
+   [
+    1.8,
+    "Analyzing PDF — page 3 of 5… Everything happen"
+   ],
+   [
+    2.4,
+    "Preparing scanned page 3 of 5… Everything happ"
+   ],
+   [
+    2.6,
+    "Preparing scanned page 4 of 5… Everything happ"
+   ],
+   [
+    3.3,
     "Analyzing PDF — page 5 of 5… Everything happen"
+   ]
+  ],
+  "ocrRequests": 0,
+  "uploads": 0,
+  "outputValid": "YES",
+  "output": "five-mixed-scan.docx (2301794 bytes)",
+  "classes": "SCANNED_TEXT,FORM,SCANNED_TABLE,SCANNED_TABLE,OFFICIAL_DOCUMENT",
+  "strategies": "visual,visual,visual,visual,visual",
+  "errors": [],
+  "verdict": "PASS"
+ },
+ {
+  "tool": "PDF → Word",
+  "case": "pdf-to-word:five-letters",
+  "fixture": "five-letter-scan.pdf (5 plain scanned letters)",
+  "mode": "normal",
+  "run": "cold",
+  "private": false,
+  "resultSec": 52.5,
+  "extraInteraction": "NO",
+  "stages": [
+   [
+    0.3,
+    "Analyzing PDF — page 1 of 5… Everything happen"
+   ],
+   [
+    0.7,
+    "Preparing scanned page 1 of 5… Everything happ"
+   ],
+   [
+    0.9,
+    "Analyzing PDF — page 2 of 5… Everything happen"
+   ],
+   [
+    1.6,
+    "Preparing scanned page 2 of 5… Everything happ"
+   ],
+   [
+    2.5,
+    "Preparing scanned page 3 of 5… Everything happ"
+   ],
+   [
+    3.3,
+    "Preparing scanned page 4 of 5… Everything happ"
+   ],
+   [
+    4.3,
+    "Preparing scanned page 5 of 5… Everything happ"
+   ],
+   [
+    4.7,
+    "Loading text recognition… Only a plain scan of"
    ]
   ],
   "ocrRequests": 3,
@@ -846,19 +958,19 @@
   "mode": "normal",
   "run": "warm",
   "private": false,
-  "resultSec": 45,
+  "resultSec": 50.5,
   "extraInteraction": "NO",
   "stages": [
    [
-    0.2,
+    0.3,
     "Analyzing PDF — page 1 of 5… Everything happen"
    ],
    [
-    0.6,
+    0.7,
     "Preparing scanned page 1 of 5… Everything happ"
    ],
    [
-    1.4,
+    1.5,
     "Preparing scanned page 2 of 5… Everything happ"
    ],
    [
@@ -874,11 +986,11 @@
     "Preparing scanned page 4 of 5… Everything happ"
    ],
    [
-    4,
+    4.2,
     "Preparing scanned page 5 of 5… Everything happ"
    ],
    [
-    4.4,
+    4.6,
     "Loading text recognition… Only a plain scan of"
    ]
   ],
@@ -898,46 +1010,46 @@
   "mode": "normal+mobile",
   "run": "cold",
   "private": false,
-  "resultSec": 40.3,
+  "resultSec": 50.2,
   "extraInteraction": "NO",
   "stages": [
    [
-    0.2,
+    0.3,
     "Analyzing PDF — page 1 of 5… Everything happen"
    ],
    [
-    0.5,
+    0.8,
     "Preparing scanned page 1 of 5… Everything happ"
    ],
    [
-    0.6,
-    "Analyzing PDF — page 2 of 5… Everything happen"
-   ],
-   [
-    1.1,
+    1.6,
     "Preparing scanned page 2 of 5… Everything happ"
    ],
    [
-    1.8,
+    2.6,
     "Preparing scanned page 3 of 5… Everything happ"
    ],
    [
-    2,
+    2.8,
     "Analyzing PDF — page 4 of 5… Everything happen"
    ],
    [
-    2.4,
+    3.4,
     "Preparing scanned page 4 of 5… Everything happ"
    ],
    [
-    2.6,
-    "Analyzing PDF — page 5 of 5… Everything happen"
+    4.3,
+    "Preparing scanned page 5 of 5… Everything happ"
+   ],
+   [
+    4.6,
+    "Loading text recognition… Only a plain scan of"
    ]
   ],
   "ocrRequests": 3,
   "uploads": 0,
   "outputValid": "YES",
-  "output": "five-letter-scan.docx (4391 bytes)",
+  "output": "five-letter-scan.docx (4392 bytes)",
   "classes": "SCANNED_TEXT,SCANNED_TEXT,SCANNED_TEXT,SCANNED_TEXT,SCANNED_TEXT",
   "strategies": "hybrid,hybrid,hybrid,hybrid,hybrid",
   "errors": [],
@@ -950,40 +1062,40 @@
   "mode": "normal+mobile",
   "run": "warm",
   "private": false,
-  "resultSec": 45,
+  "resultSec": 50.3,
   "extraInteraction": "NO",
   "stages": [
    [
-    0.2,
+    0.3,
     "Analyzing PDF — page 1 of 5… Everything happen"
    ],
    [
-    0.5,
+    0.7,
     "Preparing scanned page 1 of 5… Everything happ"
    ],
    [
-    0.7,
-    "Analyzing PDF — page 2 of 5… Everything happen"
-   ],
-   [
-    1.2,
+    1.5,
     "Preparing scanned page 2 of 5… Everything happ"
    ],
    [
-    1.4,
-    "Analyzing PDF — page 3 of 5… Everything happen"
-   ],
-   [
-    1.8,
+    2.5,
     "Preparing scanned page 3 of 5… Everything happ"
    ],
    [
-    2.5,
+    3.3,
     "Preparing scanned page 4 of 5… Everything happ"
    ],
    [
-    3.2,
+    4.3,
     "Preparing scanned page 5 of 5… Everything happ"
+   ],
+   [
+    4.7,
+    "Loading text recognition… Only a plain scan of"
+   ],
+   [
+    5,
+    "Recognizing page 1 of 5… Reading a plain scan "
    ]
   ],
   "ocrRequests": 3,
@@ -1002,7 +1114,7 @@
   "mode": "normal",
   "run": "cold",
   "private": true,
-  "resultSec": 2.2,
+  "resultSec": 2.8,
   "extraInteraction": "NO",
   "stages": [
    [
@@ -1014,19 +1126,19 @@
     "Preparing scanned page 1 of 2… Everything happ"
    ],
    [
-    1,
+    1.3,
     "Analyzing PDF — page 2 of 2… Everything happen"
    ],
    [
-    1.9,
+    1.8,
     "Preparing scanned page 2 of 2… Everything happ"
    ],
    [
-    2.1,
+    2.6,
     "Building Word document… Everything happens in "
    ],
    [
-    2.2,
+    2.8,
     "Your Word document is ready"
    ]
   ],
@@ -1046,7 +1158,7 @@
   "mode": "normal",
   "run": "warm",
   "private": true,
-  "resultSec": 2.2,
+  "resultSec": 2.8,
   "extraInteraction": "NO",
   "stages": [
    [
@@ -1054,23 +1166,23 @@
     "Analyzing PDF — page 1 of 2… Everything happen"
    ],
    [
-    0.8,
+    0.6,
     "Preparing scanned page 1 of 2… Everything happ"
    ],
    [
-    1,
+    1.3,
     "Analyzing PDF — page 2 of 2… Everything happen"
    ],
    [
-    1.5,
+    1.8,
     "Preparing scanned page 2 of 2… Everything happ"
    ],
    [
-    2.1,
+    2.6,
     "Building Word document… Everything happens in "
    ],
    [
-    2.2,
+    2.8,
     "Your Word document is ready"
    ]
   ],
@@ -1090,15 +1202,15 @@
   "mode": "normal",
   "run": "cold",
   "private": false,
-  "resultSec": 0.5,
+  "resultSec": 0.6,
   "extraInteraction": "NO",
   "stages": [
    [
-    0.3,
+    0.4,
     "Drawing page 2 of 2… Everything happens in thi"
    ],
    [
-    0.5,
+    0.6,
     "Your PDF is ready"
    ]
   ],
@@ -1116,22 +1228,22 @@
   "mode": "normal",
   "run": "warm",
   "private": false,
-  "resultSec": 0.4,
+  "resultSec": 0.6,
   "extraInteraction": "NO",
   "stages": [
    [
-    0.3,
+    0.4,
     "Drawing page 2 of 2… Everything happens in thi"
    ],
    [
-    0.4,
+    0.6,
     "Your PDF is ready"
    ]
   ],
   "ocrRequests": 0,
   "uploads": 0,
   "outputValid": "YES",
-  "output": "DOCUMENT-16-complex-word-report.pdf (45585 bytes)",
+  "output": "DOCUMENT-16-complex-word-report.pdf (45584 bytes)",
   "errors": [],
   "verdict": "PASS"
  },
@@ -1142,7 +1254,7 @@
   "mode": "normal",
   "run": "cold",
   "private": false,
-  "resultSec": 0.4,
+  "resultSec": 0.6,
   "extraInteraction": "NO",
   "stages": [
    [
@@ -1150,14 +1262,14 @@
     "Building your Word document…"
    ],
    [
-    0.4,
+    0.6,
     "Your Word document is ready"
    ]
   ],
   "ocrRequests": 0,
   "uploads": 0,
   "outputValid": "YES",
-  "output": "DOCUMENT-10-filled-form.docx (2357102 bytes)",
+  "output": "DOCUMENT-10-filled-form.docx (2357103 bytes)",
   "errors": [],
   "verdict": "PASS"
  },
@@ -1168,7 +1280,7 @@
   "mode": "normal",
   "run": "warm",
   "private": false,
-  "resultSec": 0.4,
+  "resultSec": 0.6,
   "extraInteraction": "NO",
   "stages": [
    [
@@ -1176,14 +1288,14 @@
     "Building your Word document…"
    ],
    [
-    0.4,
+    0.6,
     "Your Word document is ready"
    ]
   ],
   "ocrRequests": 0,
   "uploads": 0,
   "outputValid": "YES",
-  "output": "DOCUMENT-10-filled-form.docx (2357102 bytes)",
+  "output": "DOCUMENT-10-filled-form.docx (2357103 bytes)",
   "errors": [],
   "verdict": "PASS"
  },
@@ -1198,7 +1310,7 @@
   "extraInteraction": "NO",
   "stages": [
    [
-    0.2,
+    0.3,
     "Building your Word document…"
    ],
    [
@@ -1209,7 +1321,7 @@
   "ocrRequests": 0,
   "uploads": 0,
   "outputValid": "YES",
-  "output": "DOCUMENT-10-filled-form.docx (2357102 bytes)",
+  "output": "DOCUMENT-10-filled-form.docx (2357103 bytes)",
   "errors": [],
   "verdict": "PASS"
  },
@@ -1224,7 +1336,7 @@
   "extraInteraction": "NO",
   "stages": [
    [
-    0.2,
+    0.3,
     "Building your Word document…"
    ],
    [
@@ -1235,7 +1347,7 @@
   "ocrRequests": 0,
   "uploads": 0,
   "outputValid": "YES",
-  "output": "DOCUMENT-10-filled-form.docx (2357102 bytes)",
+  "output": "DOCUMENT-10-filled-form.docx (2357103 bytes)",
   "errors": [],
   "verdict": "PASS"
  },
@@ -1252,10 +1364,6 @@
    [
     0.2,
     "Rendering page 1 of 2…"
-   ],
-   [
-    0.4,
-    "Rendering page 2 of 2…"
    ],
    [
     0.6,
@@ -1276,7 +1384,7 @@
   "mode": "normal",
   "run": "warm",
   "private": false,
-  "resultSec": 0.5,
+  "resultSec": 0.6,
   "extraInteraction": "NO",
   "stages": [
    [
@@ -1284,11 +1392,7 @@
     "Rendering page 1 of 2…"
    ],
    [
-    0.4,
-    "Rendering page 2 of 2…"
-   ],
-   [
-    0.5,
+    0.6,
     "2 pages saved as PNG"
    ]
   ],
@@ -1306,15 +1410,15 @@
   "mode": "normal",
   "run": "cold",
   "private": false,
-  "resultSec": 2.2,
+  "resultSec": 2.6,
   "extraInteraction": "NO",
   "stages": [
    [
-    0.2,
+    0.3,
     "Building your PDF…"
    ],
    [
-    2.2,
+    2.6,
     "Your PDF is ready"
    ]
   ],
@@ -1332,11 +1436,11 @@
   "mode": "normal",
   "run": "warm",
   "private": false,
-  "resultSec": 2,
+  "resultSec": 2.4,
   "extraInteraction": "NO",
   "stages": [
    [
-    2,
+    0.3,
     "Building your PDF…"
    ]
   ],
@@ -1354,11 +1458,15 @@
   "mode": "normal",
   "run": "cold",
   "private": false,
-  "resultSec": 0.2,
+  "resultSec": 0.4,
   "extraInteraction": "NO",
   "stages": [
    [
     0.2,
+    "Converting 1 of 1…"
+   ],
+   [
+    0.4,
     "1 image converted to JPG"
    ]
   ],
@@ -1376,11 +1484,15 @@
   "mode": "normal",
   "run": "warm",
   "private": false,
-  "resultSec": 0.2,
+  "resultSec": 0.4,
   "extraInteraction": "NO",
   "stages": [
    [
     0.2,
+    "Converting 1 of 1…"
+   ],
+   [
+    0.4,
     "1 image converted to JPG"
    ]
   ],
@@ -1398,7 +1510,7 @@
   "mode": "normal",
   "run": "cold",
   "private": false,
-  "resultSec": 0.3,
+  "resultSec": 0.2,
   "extraInteraction": "NO",
   "stages": [
    [
@@ -1453,7 +1565,7 @@
   "ocrRequests": 0,
   "uploads": 0,
   "outputValid": "YES",
-  "output": "DOCUMENT-05-bank-statement-pages-2.pdf (477429 bytes)",
+  "output": "DOCUMENT-05-bank-statement-pages-2.pdf (477430 bytes)",
   "errors": [],
   "verdict": "PASS"
  },
@@ -1536,7 +1648,7 @@
   "ocrRequests": 0,
   "uploads": 0,
   "outputValid": "YES",
-  "output": "DOCUMENT-02-filled-application-edited.pdf (454091 bytes)",
+  "output": "DOCUMENT-02-filled-application-edited.pdf (454088 bytes)",
   "errors": [],
   "verdict": "PASS"
  },
@@ -1547,13 +1659,13 @@
   "mode": "normal",
   "run": "warm",
   "private": false,
-  "resultSec": 0.1,
+  "resultSec": 0,
   "extraInteraction": "NO",
   "stages": [],
   "ocrRequests": 0,
   "uploads": 0,
   "outputValid": "YES",
-  "output": "DOCUMENT-02-filled-application-edited.pdf (454092 bytes)",
+  "output": "DOCUMENT-02-filled-application-edited.pdf (454089 bytes)",
   "errors": [],
   "verdict": "PASS"
  },
@@ -1564,7 +1676,7 @@
   "mode": "starved",
   "run": "cold",
   "private": false,
-  "resultSec": 0.8,
+  "resultSec": 1.1,
   "extraInteraction": "NO",
   "stages": [
    [
@@ -1573,14 +1685,18 @@
    ],
    [
     0.4,
-    "Trying good quality… Starting with the highest"
+    "Trying high quality… Starting with the highest"
    ],
    [
     0.6,
-    "Trying 78% quality… Starting with the highest "
+    "Trying good quality… Starting with the highest"
    ],
    [
     0.8,
+    "Trying 75% quality… Starting with the highest "
+   ],
+   [
+    1.1,
     "Done — 233 KB"
    ]
   ],
@@ -1598,23 +1714,27 @@
   "mode": "starved",
   "run": "warm",
   "private": false,
-  "resultSec": 0.8,
+  "resultSec": 1.1,
   "extraInteraction": "NO",
   "stages": [
    [
-    0.2,
+    0.3,
     "Trying very high quality… Starting with the hi"
    ],
    [
     0.5,
-    "Trying good quality… Starting with the highest"
+    "Trying high quality… Starting with the highest"
    ],
    [
-    0.6,
-    "Trying 78% quality… Starting with the highest "
+    0.7,
+    "Trying 75% quality… Starting with the highest "
    ],
    [
     0.8,
+    "Trying 78% quality… Starting with the highest "
+   ],
+   [
+    1.1,
     "Done — 233 KB"
    ]
   ],
@@ -1632,7 +1752,7 @@
   "mode": "starved",
   "run": "cold",
   "private": false,
-  "resultSec": 0.9,
+  "resultSec": 1,
   "extraInteraction": "NO",
   "stages": [
    [
@@ -1658,7 +1778,7 @@
   "mode": "starved",
   "run": "warm",
   "private": false,
-  "resultSec": 0.7,
+  "resultSec": 1,
   "extraInteraction": "NO",
   "stages": [
    [
@@ -1666,7 +1786,7 @@
     "Trying 92% quality… Highest quality first; the"
    ],
    [
-    0.7,
+    1,
     "Done — 589 KB"
    ]
   ],
@@ -1684,26 +1804,26 @@
   "mode": "starved",
   "run": "cold",
   "private": false,
-  "resultSec": 0.8,
+  "resultSec": 0.9,
   "extraInteraction": "NO",
   "stages": [
    [
-    0.2,
+    0.3,
     "Analyzing PDF — page 1 of 1… Everything happen"
    ],
    [
-    0.6,
+    0.7,
     "Preparing scanned page 1 of 1… Everything happ"
    ],
    [
-    0.8,
+    0.9,
     "Your Word document is ready"
    ]
   ],
   "ocrRequests": 0,
   "uploads": 0,
   "outputValid": "YES",
-  "output": "DOCUMENT-02-filled-application.docx (455501 bytes)",
+  "output": "DOCUMENT-02-filled-application.docx (455502 bytes)",
   "classes": "FORM",
   "strategies": "visual",
   "errors": [],
@@ -1716,26 +1836,30 @@
   "mode": "starved",
   "run": "warm",
   "private": false,
-  "resultSec": 0.8,
+  "resultSec": 1.1,
   "extraInteraction": "NO",
   "stages": [
    [
-    0.2,
+    0.3,
     "Analyzing PDF — page 1 of 1… Everything happen"
    ],
    [
-    0.6,
+    0.8,
     "Preparing scanned page 1 of 1… Everything happ"
    ],
    [
-    0.8,
+    1,
+    "Checking output… Everything happens in this ta"
+   ],
+   [
+    1.1,
     "Your Word document is ready"
    ]
   ],
   "ocrRequests": 0,
   "uploads": 0,
   "outputValid": "YES",
-  "output": "DOCUMENT-02-filled-application.docx (455501 bytes)",
+  "output": "DOCUMENT-02-filled-application.docx (455502 bytes)",
   "classes": "FORM",
   "strategies": "visual",
   "errors": [],
@@ -1748,19 +1872,19 @@
   "mode": "starved",
   "run": "cold",
   "private": false,
-  "resultSec": 0.7,
+  "resultSec": 1,
   "extraInteraction": "NO",
   "stages": [
    [
-    0.2,
+    0.3,
     "Analyzing PDF — page 1 of 1… Everything happen"
    ],
    [
-    0.6,
+    0.8,
     "Preparing scanned page 1 of 1… Everything happ"
    ],
    [
-    0.7,
+    1,
     "Your Word document is ready"
    ]
   ],
@@ -1780,19 +1904,19 @@
   "mode": "starved",
   "run": "warm",
   "private": false,
-  "resultSec": 0.8,
+  "resultSec": 1,
   "extraInteraction": "NO",
   "stages": [
    [
-    0.2,
+    0.3,
     "Analyzing PDF — page 1 of 1… Everything happen"
    ],
    [
-    0.6,
+    0.7,
     "Preparing scanned page 1 of 1… Everything happ"
    ],
    [
-    0.8,
+    1,
     "Your Word document is ready"
    ]
   ],
@@ -1812,19 +1936,23 @@
   "mode": "starved",
   "run": "cold",
   "private": false,
-  "resultSec": 0.8,
+  "resultSec": 1.2,
   "extraInteraction": "NO",
   "stages": [
    [
-    0.2,
+    0.3,
     "Analyzing PDF — page 1 of 1… Everything happen"
    ],
    [
-    0.6,
+    0.9,
     "Preparing scanned page 1 of 1… Everything happ"
    ],
    [
-    0.8,
+    1.1,
+    "Building Word document… Everything happens in "
+   ],
+   [
+    1.2,
     "Your Word document is ready"
    ]
   ],
@@ -1844,7 +1972,7 @@
   "mode": "starved",
   "run": "warm",
   "private": false,
-  "resultSec": 0.8,
+  "resultSec": 1,
   "extraInteraction": "NO",
   "stages": [
    [
@@ -1852,11 +1980,11 @@
     "Analyzing PDF — page 1 of 1… Everything happen"
    ],
    [
-    0.6,
+    0.8,
     "Preparing scanned page 1 of 1… Everything happ"
    ],
    [
-    0.8,
+    1,
     "Your Word document is ready"
    ]
   ],
@@ -1881,7 +2009,7 @@
   "stages": [
    [
     0.2,
-    "Building Word document… Everything happens in "
+    "Analyzing PDF — page 1 of 1… Everything happen"
    ],
    [
     0.4,
@@ -1891,7 +2019,7 @@
   "ocrRequests": 0,
   "uploads": 0,
   "outputValid": "YES",
-  "output": "DOCUMENT-06-resume-native.docx (4895 bytes)",
+  "output": "DOCUMENT-06-resume-native.docx (4896 bytes)",
   "classes": "NATIVE_TEXT",
   "strategies": "editable",
   "errors": [],
@@ -1909,7 +2037,7 @@
   "stages": [
    [
     0.2,
-    "Building Word document… Everything happens in "
+    "Analyzing PDF — page 1 of 1… Everything happen"
    ],
    [
     0.4,
@@ -1919,7 +2047,7 @@
   "ocrRequests": 0,
   "uploads": 0,
   "outputValid": "YES",
-  "output": "DOCUMENT-06-resume-native.docx (4895 bytes)",
+  "output": "DOCUMENT-06-resume-native.docx (4896 bytes)",
   "classes": "NATIVE_TEXT",
   "strategies": "editable",
   "errors": [],
@@ -1932,19 +2060,19 @@
   "mode": "starved",
   "run": "cold",
   "private": false,
-  "resultSec": 10.3,
+  "resultSec": 10.7,
   "extraInteraction": "NO",
   "stages": [
    [
-    0.2,
+    0.3,
     "Analyzing PDF — page 1 of 1… Everything happen"
    ],
    [
-    0.5,
+    0.7,
     "Preparing scanned page 1 of 1… Everything happ"
    ],
    [
-    0.9,
+    1.1,
     "Loading text recognition… Only a plain scan of"
    ],
    [
@@ -1952,18 +2080,18 @@
     "Recognizing page 1 of 1… Reading a plain scan "
    ],
    [
-    10.1,
+    10.5,
     "Building Word document… Everything happens in "
    ],
    [
-    10.2,
+    10.7,
     "Your Word document is ready"
    ]
   ],
   "ocrRequests": 3,
   "uploads": 0,
   "outputValid": "YES",
-  "output": "DOCUMENT-07-scanned-letter.docx (4207 bytes)",
+  "output": "DOCUMENT-07-scanned-letter.docx (4208 bytes)",
   "classes": "SCANNED_TEXT",
   "strategies": "hybrid",
   "errors": [],
@@ -1976,7 +2104,7 @@
   "mode": "starved",
   "run": "warm",
   "private": false,
-  "resultSec": 10.6,
+  "resultSec": 9.9,
   "extraInteraction": "NO",
   "stages": [
    [
@@ -1988,19 +2116,19 @@
     "Preparing scanned page 1 of 1… Everything happ"
    ],
    [
-    1.1,
+    0.8,
     "Loading text recognition… Only a plain scan of"
    ],
    [
-    1.4,
+    1,
     "Recognizing page 1 of 1… Reading a plain scan "
    ],
    [
-    10.4,
+    9.8,
     "Building Word document… Everything happens in "
    ],
    [
-    10.6,
+    9.9,
     "Your Word document is ready"
    ]
   ],
@@ -2020,39 +2148,39 @@
   "mode": "starved",
   "run": "cold",
   "private": false,
-  "resultSec": 18.6,
+  "resultSec": 18.7,
   "extraInteraction": "NO",
   "stages": [
    [
-    0.2,
+    0.3,
     "Analyzing PDF — page 1 of 2… Everything happen"
    ],
    [
-    0.6,
+    0.7,
     "Preparing scanned page 1 of 2… Everything happ"
    ],
    [
-    1.4,
+    1.5,
     "Preparing scanned page 2 of 2… Everything happ"
    ],
    [
-    1.6,
+    1.7,
     "Loading text recognition… Only a plain scan of"
    ],
    [
-    2.2,
+    2.4,
     "Recognizing page 1 of 2… Reading a plain scan "
    ],
    [
-    10.5,
+    10.8,
     "Recognizing page 2 of 2… Reading a plain scan "
    ],
    [
-    18.4,
+    18.5,
     "Building Word document… Everything happens in "
    ],
    [
-    18.6,
+    18.7,
     "Your Word document is ready"
    ]
   ],
@@ -2072,46 +2200,46 @@
   "mode": "starved",
   "run": "warm",
   "private": false,
-  "resultSec": 18.6,
+  "resultSec": 18.2,
   "extraInteraction": "NO",
   "stages": [
    [
-    0.2,
+    0.3,
     "Analyzing PDF — page 1 of 2… Everything happen"
    ],
    [
-    0.6,
+    0.7,
     "Preparing scanned page 1 of 2… Everything happ"
    ],
    [
-    1.4,
+    1.5,
     "Preparing scanned page 2 of 2… Everything happ"
    ],
    [
-    1.6,
+    1.8,
     "Loading text recognition… Only a plain scan of"
    ],
    [
-    2,
+    2.1,
     "Recognizing page 1 of 2… Reading a plain scan "
    ],
    [
-    10.5,
+    10.3,
     "Recognizing page 2 of 2… Reading a plain scan "
    ],
    [
-    18.4,
+    18,
     "Building Word document… Everything happens in "
    ],
    [
-    18.6,
+    18.2,
     "Your Word document is ready"
    ]
   ],
   "ocrRequests": 3,
   "uploads": 0,
   "outputValid": "YES",
-  "output": "DOCUMENT-08-signed-contract.docx (848842 bytes)",
+  "output": "DOCUMENT-08-signed-contract.docx (848844 bytes)",
   "classes": "SCANNED_TEXT,SCANNED_TEXT",
   "strategies": "visual,visual",
   "errors": [],
@@ -2124,46 +2252,46 @@
   "mode": "starved",
   "run": "cold",
   "private": false,
-  "resultSec": 4.6,
+  "resultSec": 4.2,
   "extraInteraction": "NO",
   "stages": [
    [
-    0.2,
+    0.3,
     "Analyzing PDF — page 1 of 5… Everything happen"
    ],
    [
-    0.6,
+    0.7,
     "Preparing scanned page 1 of 5… Everything happ"
    ],
    [
-    1,
+    0.9,
+    "Analyzing PDF — page 2 of 5… Everything happen"
+   ],
+   [
+    1.6,
     "Preparing scanned page 2 of 5… Everything happ"
    ],
    [
-    1.8,
-    "Analyzing PDF — page 3 of 5… Everything happen"
-   ],
-   [
-    2.5,
+    2.3,
     "Preparing scanned page 3 of 5… Everything happ"
    ],
    [
-    3.2,
+    2.5,
     "Preparing scanned page 4 of 5… Everything happ"
    ],
    [
-    4.1,
-    "Preparing scanned page 5 of 5… Everything happ"
+    3.2,
+    "Analyzing PDF — page 5 of 5… Everything happen"
    ],
    [
-    4.2,
-    "Building Word document… Everything happens in "
+    3.7,
+    "Preparing scanned page 5 of 5… Everything happ"
    ]
   ],
   "ocrRequests": 0,
   "uploads": 0,
   "outputValid": "YES",
-  "output": "five-mixed-scan.docx (2301793 bytes)",
+  "output": "five-mixed-scan.docx (2301794 bytes)",
   "classes": "SCANNED_TEXT,FORM,SCANNED_TABLE,SCANNED_TABLE,OFFICIAL_DOCUMENT",
   "strategies": "visual,visual,visual,visual,visual",
   "errors": [],
@@ -2184,32 +2312,32 @@
     "Analyzing PDF — page 1 of 5… Everything happen"
    ],
    [
-    0.6,
+    0.7,
     "Preparing scanned page 1 of 5… Everything happ"
    ],
    [
-    1.5,
+    1.6,
     "Preparing scanned page 2 of 5… Everything happ"
    ],
    [
-    1.7,
+    1.8,
+    "Analyzing PDF — page 3 of 5… Everything happen"
+   ],
+   [
+    2.4,
     "Preparing scanned page 3 of 5… Everything happ"
    ],
    [
-    3,
+    3.1,
     "Preparing scanned page 4 of 5… Everything happ"
    ],
    [
-    3.8,
+    3.9,
     "Preparing scanned page 5 of 5… Everything happ"
    ],
    [
-    4,
+    4.1,
     "Building Word document… Everything happens in "
-   ],
-   [
-    4.2,
-    "Checking output… Everything happens in this ta"
    ]
   ],
   "ocrRequests": 0,
@@ -2228,39 +2356,39 @@
   "mode": "starved",
   "run": "cold",
   "private": false,
-  "resultSec": 51.9,
+  "resultSec": 50.9,
   "extraInteraction": "NO",
   "stages": [
    [
-    0.2,
+    0.3,
     "Analyzing PDF — page 1 of 5… Everything happen"
    ],
    [
-    0.6,
+    0.7,
     "Preparing scanned page 1 of 5… Everything happ"
    ],
    [
-    0.8,
-    "Analyzing PDF — page 2 of 5… Everything happen"
-   ],
-   [
-    1.4,
+    1.5,
     "Preparing scanned page 2 of 5… Everything happ"
    ],
    [
-    2.3,
+    2.5,
     "Preparing scanned page 3 of 5… Everything happ"
    ],
    [
-    3,
+    3.3,
     "Preparing scanned page 4 of 5… Everything happ"
    ],
    [
-    4,
+    3.5,
+    "Analyzing PDF — page 5 of 5… Everything happen"
+   ],
+   [
+    4.2,
     "Preparing scanned page 5 of 5… Everything happ"
    ],
    [
-    4.4,
+    4.6,
     "Loading text recognition… Only a plain scan of"
    ]
   ],
@@ -2280,7 +2408,7 @@
   "mode": "starved",
   "run": "warm",
   "private": false,
-  "resultSec": 51.4,
+  "resultSec": 50.2,
   "extraInteraction": "NO",
   "stages": [
    [
@@ -2296,30 +2424,30 @@
     "Preparing scanned page 2 of 5… Everything happ"
    ],
    [
-    1.8,
-    "Analyzing PDF — page 3 of 5… Everything happen"
-   ],
-   [
-    2.3,
+    2.4,
     "Preparing scanned page 3 of 5… Everything happ"
    ],
    [
-    3.1,
+    2.7,
+    "Analyzing PDF — page 4 of 5… Everything happen"
+   ],
+   [
+    3.3,
     "Preparing scanned page 4 of 5… Everything happ"
    ],
    [
-    4.1,
+    4.2,
     "Preparing scanned page 5 of 5… Everything happ"
    ],
    [
-    4.5,
+    4.6,
     "Loading text recognition… Only a plain scan of"
    ]
   ],
   "ocrRequests": 3,
   "uploads": 0,
   "outputValid": "YES",
-  "output": "five-letter-scan.docx (4392 bytes)",
+  "output": "five-letter-scan.docx (4393 bytes)",
   "classes": "SCANNED_TEXT,SCANNED_TEXT,SCANNED_TEXT,SCANNED_TEXT,SCANNED_TEXT",
   "strategies": "hybrid,hybrid,hybrid,hybrid,hybrid",
   "errors": [],
@@ -2332,7 +2460,7 @@
   "mode": "starved",
   "run": "cold",
   "private": true,
-  "resultSec": 2.7,
+  "resultSec": 2.9,
   "extraInteraction": "NO",
   "stages": [
    [
@@ -2344,19 +2472,19 @@
     "Preparing scanned page 1 of 2… Everything happ"
    ],
    [
-    1.2,
+    1.3,
     "Analyzing PDF — page 2 of 2… Everything happen"
    ],
    [
-    1.7,
+    1.8,
     "Preparing scanned page 2 of 2… Everything happ"
    ],
    [
-    2.5,
+    2.7,
     "Building Word document… Everything happens in "
    ],
    [
-    2.7,
+    2.9,
     "Your Word document is ready"
    ]
   ],
@@ -2376,7 +2504,7 @@
   "mode": "starved",
   "run": "warm",
   "private": true,
-  "resultSec": 2.6,
+  "resultSec": 2.9,
   "extraInteraction": "NO",
   "stages": [
    [
@@ -2388,26 +2516,26 @@
     "Preparing scanned page 1 of 2… Everything happ"
    ],
    [
-    1.1,
+    1.3,
     "Analyzing PDF — page 2 of 2… Everything happen"
    ],
    [
-    2.2,
+    2.5,
     "Preparing scanned page 2 of 2… Everything happ"
    ],
    [
-    2.5,
+    2.7,
     "Building Word document… Everything happens in "
    ],
    [
-    2.6,
+    2.9,
     "Your Word document is ready"
    ]
   ],
   "ocrRequests": 0,
   "uploads": 0,
   "outputValid": "YES",
-  "output": "TheFileConvert_Scanned_OCR_Test.docx (332272 bytes)",
+  "output": "TheFileConvert_Scanned_OCR_Test.docx (332271 bytes)",
   "classes": "FORM,OFFICIAL_DOCUMENT",
   "strategies": "visual,visual",
   "errors": [],
@@ -2420,7 +2548,7 @@
   "mode": "starved",
   "run": "cold",
   "private": false,
-  "resultSec": 0.5,
+  "resultSec": 0.6,
   "extraInteraction": "NO",
   "stages": [
    [
@@ -2428,7 +2556,7 @@
     "Drawing page 2 of 2… Everything happens in thi"
    ],
    [
-    0.5,
+    0.6,
     "Your PDF is ready"
    ]
   ],
@@ -2446,15 +2574,15 @@
   "mode": "starved",
   "run": "warm",
   "private": false,
-  "resultSec": 0.5,
+  "resultSec": 0.6,
   "extraInteraction": "NO",
   "stages": [
    [
     0.3,
-    "Drawing page 2 of 2… Everything happens in thi"
+    "Loading fonts… Everything happens in this tab."
    ],
    [
-    0.5,
+    0.6,
     "Your PDF is ready"
    ]
   ],
@@ -2502,7 +2630,7 @@
   "extraInteraction": "NO",
   "stages": [
    [
-    0.2,
+    0.3,
     "Building your Word document…"
    ],
    [
@@ -2524,7 +2652,7 @@
   "mode": "starved",
   "run": "cold",
   "private": false,
-  "resultSec": 0.6,
+  "resultSec": 0.7,
   "extraInteraction": "NO",
   "stages": [
    [
@@ -2532,11 +2660,7 @@
     "Rendering page 1 of 2…"
    ],
    [
-    0.4,
-    "Rendering page 2 of 2…"
-   ],
-   [
-    0.6,
+    0.7,
     "2 pages saved as PNG"
    ]
   ],
@@ -2584,6 +2708,28 @@
   "mode": "starved",
   "run": "cold",
   "private": false,
+  "resultSec": 2.5,
+  "extraInteraction": "NO",
+  "stages": [
+   [
+    0.3,
+    "Building your PDF…"
+   ]
+  ],
+  "ocrRequests": 0,
+  "uploads": 0,
+  "outputValid": "YES",
+  "output": "images.pdf (3424500 bytes)",
+  "errors": [],
+  "verdict": "PASS"
+ },
+ {
+  "tool": "Image → PDF",
+  "case": "image-to-pdf",
+  "fixture": "DOCUMENT-09 + 10 + 11 (ID PNG, form PNG, receipt JPG)",
+  "mode": "starved",
+  "run": "warm",
+  "private": false,
   "resultSec": 2.6,
   "extraInteraction": "NO",
   "stages": [
@@ -2599,33 +2745,7 @@
   "ocrRequests": 0,
   "uploads": 0,
   "outputValid": "YES",
-  "output": "images.pdf (3424501 bytes)",
-  "errors": [],
-  "verdict": "PASS"
- },
- {
-  "tool": "Image → PDF",
-  "case": "image-to-pdf",
-  "fixture": "DOCUMENT-09 + 10 + 11 (ID PNG, form PNG, receipt JPG)",
-  "mode": "starved",
-  "run": "warm",
-  "private": false,
-  "resultSec": 2.7,
-  "extraInteraction": "NO",
-  "stages": [
-   [
-    0.3,
-    "Building your PDF…"
-   ],
-   [
-    2.7,
-    "Your PDF is ready"
-   ]
-  ],
-  "ocrRequests": 0,
-  "uploads": 0,
-  "outputValid": "YES",
-  "output": "images.pdf (3424501 bytes)",
+  "output": "images.pdf (3424500 bytes)",
   "errors": [],
   "verdict": "PASS"
  },
@@ -2636,11 +2756,15 @@
   "mode": "starved",
   "run": "cold",
   "private": false,
-  "resultSec": 0.2,
+  "resultSec": 0.4,
   "extraInteraction": "NO",
   "stages": [
    [
     0.2,
+    "Converting 1 of 1…"
+   ],
+   [
+    0.4,
     "1 image converted to JPG"
    ]
   ],
@@ -2695,7 +2819,7 @@
   "ocrRequests": 0,
   "uploads": 0,
   "outputValid": "YES",
-  "output": "merged.pdf (1420274 bytes)",
+  "output": "merged.pdf (1420275 bytes)",
   "errors": [],
   "verdict": "PASS"
  },
@@ -2706,11 +2830,11 @@
   "mode": "starved",
   "run": "warm",
   "private": false,
-  "resultSec": 0.2,
+  "resultSec": 0.3,
   "extraInteraction": "NO",
   "stages": [
    [
-    0.2,
+    0.3,
     "Merged into one PDF"
    ]
   ],
@@ -2761,7 +2885,7 @@
   "ocrRequests": 0,
   "uploads": 0,
   "outputValid": "YES",
-  "output": "DOCUMENT-05-bank-statement-pages-2.pdf (477430 bytes)",
+  "output": "DOCUMENT-05-bank-statement-pages-2.pdf (477429 bytes)",
   "errors": [],
   "verdict": "PASS"
  },
@@ -2783,7 +2907,7 @@
   "ocrRequests": 0,
   "uploads": 0,
   "outputValid": "YES",
-  "output": "DOCUMENT-08-signed-contract-organized.pdf (855937 bytes)",
+  "output": "DOCUMENT-08-signed-contract-organized.pdf (855938 bytes)",
   "errors": [],
   "verdict": "PASS"
  },
@@ -2794,18 +2918,18 @@
   "mode": "starved",
   "run": "warm",
   "private": false,
-  "resultSec": 0.2,
+  "resultSec": 0.3,
   "extraInteraction": "NO",
   "stages": [
    [
-    0.2,
+    0.3,
     "Your organized PDF is ready"
    ]
   ],
   "ocrRequests": 0,
   "uploads": 0,
   "outputValid": "YES",
-  "output": "DOCUMENT-08-signed-contract-organized.pdf (855937 bytes)",
+  "output": "DOCUMENT-08-signed-contract-organized.pdf (855938 bytes)",
   "errors": [],
   "verdict": "PASS"
  },
@@ -2822,7 +2946,7 @@
   "ocrRequests": 0,
   "uploads": 0,
   "outputValid": "YES",
-  "output": "DOCUMENT-02-filled-application-edited.pdf (454092 bytes)",
+  "output": "DOCUMENT-02-filled-application-edited.pdf (454088 bytes)",
   "errors": [],
   "verdict": "PASS"
  },
@@ -2839,7 +2963,7 @@
   "ocrRequests": 0,
   "uploads": 0,
   "outputValid": "YES",
-  "output": "DOCUMENT-02-filled-application-edited.pdf (454091 bytes)",
+  "output": "DOCUMENT-02-filled-application-edited.pdf (454088 bytes)",
   "errors": [],
   "verdict": "PASS"
  }
