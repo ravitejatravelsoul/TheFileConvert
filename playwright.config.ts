@@ -1,6 +1,8 @@
 import { defineConfig, devices } from "@playwright/test";
 
 const OCR_HEAVY_SPECS = /(ocr|pdf-editor-ocr)\.spec\.ts$/;
+// run only against the live site (playwright.prod.config.ts)
+const PRODUCTION_ONLY = /production-smoke\.spec\.ts$/;
 
 export default defineConfig({
   testDir: "./e2e",
@@ -45,10 +47,10 @@ export default defineConfig({
     // project or worker process it's in, without any risk of skipping tests.
     { name: "chromium-ocr", testMatch: OCR_HEAVY_SPECS, fullyParallel: false, use: { ...devices["Desktop Chrome"] } },
     { name: "mobile-chromium-ocr", testMatch: OCR_HEAVY_SPECS, fullyParallel: false, use: { ...devices["Pixel 7"] } },
-    { name: "chromium", testIgnore: OCR_HEAVY_SPECS, use: { ...devices["Desktop Chrome"] } },
+    { name: "chromium", testIgnore: [OCR_HEAVY_SPECS, PRODUCTION_ONLY], use: { ...devices["Desktop Chrome"] } },
     {
       name: "mobile-chromium",
-      testIgnore: OCR_HEAVY_SPECS,
+      testIgnore: [OCR_HEAVY_SPECS, PRODUCTION_ONLY],
       use: { ...devices["Pixel 7"] },
     },
   ],
