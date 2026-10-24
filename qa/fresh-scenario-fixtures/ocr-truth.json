@@ -1,0 +1,93 @@
+[
+ {
+  "id": "OCR-A",
+  "name": "OCR-A-clean-300dpi.pdf",
+  "truth": [
+   "The committee met on Tuesday to review the budget.",
+   "Invoice number 48213 was paid on 03/14/2026.",
+   "Please return the signed form to Jordan Smith.",
+   "Total amount due: 1,250.00 dollars.",
+   "Delivery is scheduled for the morning of Friday.",
+   "Contact the office at extension 4417 for details."
+  ],
+  "lang": "eng"
+ },
+ {
+  "id": "OCR-B",
+  "name": "OCR-B-low-res-100dpi.pdf",
+  "truth": [
+   "The committee met on Tuesday to review the budget.",
+   "Invoice number 48213 was paid on 03/14/2026.",
+   "Please return the signed form to Jordan Smith.",
+   "Total amount due: 1,250.00 dollars.",
+   "Delivery is scheduled for the morning of Friday.",
+   "Contact the office at extension 4417 for details."
+  ],
+  "lang": "eng"
+ },
+ {
+  "id": "OCR-C",
+  "name": "OCR-C-low-contrast.pdf",
+  "truth": [
+   "The committee met on Tuesday to review the budget.",
+   "Invoice number 48213 was paid on 03/14/2026.",
+   "Please return the signed form to Jordan Smith.",
+   "Total amount due: 1,250.00 dollars.",
+   "Delivery is scheduled for the morning of Friday.",
+   "Contact the office at extension 4417 for details."
+  ],
+  "lang": "eng"
+ },
+ {
+  "id": "OCR-D",
+  "name": "OCR-D-rotated.pdf",
+  "truth": [
+   "The committee met on Tuesday to review the budget.",
+   "Invoice number 48213 was paid on 03/14/2026.",
+   "Please return the signed form to Jordan Smith.",
+   "Total amount due: 1,250.00 dollars.",
+   "Delivery is scheduled for the morning of Friday.",
+   "Contact the office at extension 4417 for details."
+  ],
+  "lang": "eng"
+ },
+ {
+  "id": "OCR-E",
+  "name": "OCR-E-spanish.pdf",
+  "truth": [
+   "El informe anual muestra que la producción aumentó.",
+   "La reunión será el miércoles a las diez de la mañana.",
+   "Por favor, envíe el formulario firmado a la oficina.",
+   "El pago total fue de mil doscientos euros."
+  ],
+  "lang": "spa"
+ },
+ {
+  "id": "OCR-F",
+  "name": "OCR-F-mixed-native-scan.pdf",
+  "truth": [
+   "The committee met on Tuesday to review the budget.",
+   "Invoice number 48213 was paid on 03/14/2026.",
+   "Please return the signed form to Jordan Smith.",
+   "Total amount due: 1,250.00 dollars.",
+   "Delivery is scheduled for the morning of Friday.",
+   "Contact the office at extension 4417 for details."
+  ],
+  "lang": "eng"
+ },
+ {
+  "id": "OCR-G",
+  "name": "OCR-G-multipage.pdf",
+  "truth": [
+   "The committee met on Tuesday to review the budget.",
+   "Invoice number 48213 was paid on 03/14/2026.",
+   "Please return the signed form to Jordan Smith.",
+   "Total amount due: 1,250.00 dollars.",
+   "Delivery is scheduled for the morning of Friday.",
+   "Contact the office at extension 4417 for details.",
+   "El informe anual muestra que la produccion aumento.",
+   "La reunion sera el miercoles a las diez de la manana."
+  ],
+  "lang": "eng"
+ }
+]

@@ -1,0 +1,18 @@
+{
+ "checks": [
+  {
+   "id": "images:chart",
+   "kind": "pictures",
+   "min": 1,
+   "max": 3
+  },
+  {
+   "id": "images:caption-right-column",
+   "kind": "present",
+   "page": 1,
+   "phrase": "Figure 1.",
+   "x_min": 300,
+   "y_max": 420
+  }
+ ]
+}

@@ -1,0 +1,173 @@
+[
+ {
+  "tool": "PDF → Image",
+  "test": "1-page scan → PNG",
+  "verdict": "PASS",
+  "fixture": "OCR-A-clean-300dpi.pdf",
+  "images": 1,
+  "dims": "1224x1584",
+  "aspectOk": true,
+  "nonBlank": true,
+  "ms": 912,
+  "integrity": [
+   {
+    "file": "fs-p2i-OCR-A-OCR-A-clean-300dpi-page-1.png",
+    "bytes": 2170336,
+    "ok": true,
+    "kind": "png",
+    "w": 1224,
+    "h": 1584,
+    "alpha": false
+   }
+  ]
+ },
+ {
+  "tool": "PDF → Image",
+  "test": "10-page text+image → JPG ZIP",
+  "verdict": "PASS",
+  "fixture": "PDF-H-multipage-text-image.pdf",
+  "images": 10,
+  "dims": "1224x1584 1224x1584 1224x1584 1224x1584 1224x1584 1224x1584 1224x1584 1224x1584 1224x1584 1224x1584",
+  "aspectOk": true,
+  "nonBlank": true,
+  "ms": 1430,
+  "integrity": [
+   {
+    "file": "fs-p2i-PDF-H-PDF-H-multipage-text-image-images.zip",
+    "bytes": 2611907,
+    "ok": true,
+    "kind": "zip",
+    "entries": 10
+   }
+  ]
+ },
+ {
+  "tool": "PDF → Image",
+  "test": "rotated pages (0/90/180/270) → PNG",
+  "verdict": "PASS",
+  "fixture": "PDF-I-rotated.pdf",
+  "images": 4,
+  "dims": "1224x1584 1584x1224 1224x1584 1584x1224",
+  "aspectOk": true,
+  "nonBlank": true,
+  "ms": 926,
+  "integrity": [
+   {
+    "file": "fs-p2i-PDF-I-PDF-I-rotated-images.zip",
+    "bytes": 4334937,
+    "ok": true,
+    "kind": "zip",
+    "entries": 4
+   }
+  ]
+ },
+ {
+  "tool": "PDF → Image",
+  "test": "mixed page sizes → JPG",
+  "verdict": "PASS",
+  "fixture": "PDF-J-mixed-page-sizes.pdf",
+  "images": 6,
+  "dims": "1224x1584 1190x1684 1224x2016 1190x840 1584x2448 452x1200",
+  "aspectOk": true,
+  "nonBlank": true,
+  "ms": 915,
+  "integrity": [
+   {
+    "file": "fs-p2i-PDF-J-PDF-J-mixed-page-sizes-images.zip",
+    "bytes": 177176,
+    "ok": true,
+    "kind": "zip",
+    "entries": 6
+   }
+  ]
+ },
+ {
+  "tool": "PDF → Image",
+  "test": "scanned (incremental update) → JPG",
+  "verdict": "PASS",
+  "fixture": "PDF-C-scan-3.8mb-incremental.pdf",
+  "images": 2,
+  "dims": "1190x1684 1190x1684",
+  "aspectOk": true,
+  "nonBlank": true,
+  "ms": 1484,
+  "integrity": [
+   {
+    "file": "fs-p2i-PDF-C-PDF-C-scan-3.8mb-incremental-images.zip",
+    "bytes": 1276585,
+    "ok": true,
+    "kind": "zip",
+    "entries": 2
+   }
+  ]
+ },
+ {
+  "tool": "PDF → Image",
+  "test": "native text → PNG",
+  "verdict": "PASS",
+  "fixture": "PDF-K-native-text.pdf",
+  "images": 2,
+  "dims": "1224x1584 1224x1584",
+  "aspectOk": true,
+  "nonBlank": true,
+  "ms": 403,
+  "integrity": [
+   {
+    "file": "fs-p2i-PDF-K-PDF-K-native-text-images.zip",
+    "bytes": 309379,
+    "ok": true,
+    "kind": "zip",
+    "entries": 2
+   }
+  ]
+ },
+ {
+  "tool": "PDF → Image",
+  "test": "owner-password-only encrypted → JPG (pdf.js can decrypt)",
+  "verdict": "PASS",
+  "fixture": "PDF-Q-owner-password-only.pdf",
+  "images": 6,
+  "dims": "1224x1584 1224x1584 1224x1584 1224x1584 1224x1584 1224x1584",
+  "aspectOk": true,
+  "nonBlank": true,
+  "ms": 923,
+  "integrity": [
+   {
+    "file": "fs-p2i-PDF-Q-PDF-Q-owner-password-only-images.zip",
+    "bytes": 1912007,
+    "ok": true,
+    "kind": "zip",
+    "entries": 6
+   }
+  ]
+ },
+ {
+  "tool": "PDF → Image",
+  "test": "selected pages 2 and 9 of 10 → PNG",
+  "verdict": "PASS",
+  "names": [
+   "PDF-H-multipage-text-image-page-2.png",
+   "PDF-H-multipage-text-image-page-9.png"
+  ],
+  "integrity": [
+   {
+    "file": "fs-p2i-sel-PDF-H-multipage-text-image-images.zip",
+    "bytes": 1546678,
+    "ok": true,
+    "kind": "zip",
+    "entries": 2
+   }
+  ]
+ },
+ {
+  "tool": "PDF → Image",
+  "test": "password-protected PDF → clear message",
+  "verdict": "PASS",
+  "message": "This PDF couldn't be opened. It may be damaged or password-protected."
+ },
+ {
+  "tool": "All tools",
+  "test": "console errors / unexpected dialogs",
+  "verdict": "PASS"
+ }
+]

@@ -1,7 +1,9 @@
-import { PDFDocument, PDFTextField, PDFCheckBox, PDFRadioGroup, PDFDropdown } from "pdf-lib";
-import { generateUuidV4 } from "@/lib/processors/data";
-import type { EditorDocument, EditorPage, FormFieldValue } from "./types";
+import { PDFDocument, PDFTextField, PDFCheckBox, PDFRadioGroup, PDFDropdown, type PDFField } from "pdf-lib";
+import { appearanceText, hasNormalAppearance, needAppearances, radioLabel, widgetStyle } from "./formPdf";
+import { generateUuidV4 } from "@/lib/id";
+import type { EditorDocument, EditorPage, FormFieldValue, FormWidget } from "./types";
 import type { Rotation } from "./coordinates";
+import { EncryptedPdfError, loadPdfForEditing } from "@/lib/pdf/load";
 
 export class EditorDocumentError extends Error {}
 
@@ -13,8 +15,9 @@ function normalizeRotation(angle: number): Rotation {
 async function parsePdf(file: File): Promise<PDFDocument> {
   const bytes = await file.arrayBuffer();
   try {
-    return await PDFDocument.load(bytes, { ignoreEncryption: true });
-  } catch {
+    return await loadPdfForEditing(bytes);
+  } catch (e) {
+    if (e instanceof EncryptedPdfError) throw new EditorDocumentError(e.message);
     throw new EditorDocumentError("We couldn't read this PDF. It may be damaged, encrypted, or incomplete.");
   }
 }
@@ -51,22 +54,68 @@ function pagesFromParsedDoc(parsed: PDFDocument, sourceFileId: string): EditorPa
 
 /** Best-effort form field inventory — only fields pdf-lib can identify and read a
  * current value for are listed; anything unusual is skipped rather than failing. */
-function extractFormFields(parsed: PDFDocument): FormFieldValue[] {
+function widgetsOf(parsed: PDFDocument, field: PDFField, sourceFileId: string): FormWidget[] {
+  const out: FormWidget[] = [];
+  const pages = parsed.getPages();
+  for (const w of field.acroField.getWidgets()) {
+    let pageIndex = pages.findIndex((p) => p.ref === w.P());
+    if (pageIndex < 0) {
+      pageIndex = pages.findIndex((p) => (p.node.Annots()?.asArray() ?? []).some((r) => parsed.context.lookup(r) === w.dict));
+    }
+    if (pageIndex < 0) continue;
+    const r = w.getRectangle();
+    let onValue: string | undefined;
+    try {
+      const state = w.getOnValue()?.decodeText();
+      onValue = state === undefined ? undefined : radioLabel(w.dict, state);
+    } catch {
+      onValue = undefined;
+    }
+    const st = widgetStyle(w.dict, parsed);
+    out.push({ sourceFileId, pageIndex, rect: { x: r.x, y: r.y, width: r.width, height: r.height }, onValue, style: { fontSize: st.fontSize, family: st.family, color: st.color, align: st.align, borderWidth: st.borderWidth, background: st.background, borderColor: st.borderColor, rotation: st.rotation } });
+  }
+  return out;
+}
+
+/** The file's appearance of a text or choice field can't be trusted: it is missing, the form asks viewers to redraw
+ * (/NeedAppearances), or it draws something other than the field's value. */
+function staleAppearance(parsed: PDFDocument, field: PDFField, value: string): boolean {
+  const widgets = field.acroField.getWidgets();
+  if (!widgets.length) return false;
+  if (needAppearances(parsed)) return true;
+  const norm = (t: string) => t.replace(/\s+/g, "");
+  return widgets.some((w) => {
+    if (!hasNormalAppearance(w.dict)) return value !== "";
+    const drawn = appearanceText(w.dict);
+    return drawn !== null && norm(drawn) !== norm(value);
+  });
+}
+
+function extractFormFields(parsed: PDFDocument, sourceFileId: string): FormFieldValue[] {
   const fields: FormFieldValue[] = [];
   try {
     const form = parsed.getForm();
     for (const field of form.getFields()) {
       const name = field.getName();
       try {
+        const common = { name, widgets: widgetsOf(parsed, field, sourceFileId), readOnly: field.isReadOnly() };
         if (field instanceof PDFTextField) {
-          fields.push({ name, kind: "text", value: field.getText() ?? "" });
+          const value = field.getText() ?? "";
+          const ff = field.acroField.getFlags();
+          const unsupported = field.isPassword() ? "password field" : field.isCombed() ? "comb field" : field.isRichFormatted() ? "formatted (rich text) field" : common.widgets.some((w) => w.style?.rotation) ? "rotated field" : undefined;
+          void ff;
+          fields.push({ ...common, kind: "text", value, initial: value, multiline: field.isMultiline(), maxLength: field.getMaxLength(), regen: staleAppearance(parsed, field, value), unsupported });
         } else if (field instanceof PDFCheckBox) {
-          fields.push({ name, kind: "checkbox", value: field.isChecked() ? "true" : "false" });
+          const value = field.isChecked() ? "true" : "false";
+          fields.push({ ...common, kind: "checkbox", value, initial: value });
         } else if (field instanceof PDFRadioGroup) {
-          fields.push({ name, kind: "radio", value: field.getSelected() ?? "", options: field.getOptions() });
+          const value = field.getSelected() ?? "";
+          fields.push({ ...common, kind: "radio", value, initial: value, options: field.getOptions() });
         } else if (field instanceof PDFDropdown) {
           const selected: string[] = field.getSelected() ?? [];
-          fields.push({ name, kind: "dropdown", value: selected[0] ?? "", options: field.getOptions() });
+          const dropValue = selected[0] ?? "";
+          const unsupported = field.isEditable() ? "editable (type-in) dropdown" : common.widgets.some((w) => w.style?.rotation) ? "rotated field" : undefined;
+          fields.push({ ...common, kind: "dropdown", value: dropValue, initial: dropValue, options: field.getOptions(), regen: staleAppearance(parsed, field, dropValue), unsupported });
         }
       } catch {
         // A field pdf-lib can enumerate but not read cleanly — skip it rather than fail
@@ -96,7 +145,7 @@ export async function loadEditorDocument(file: File): Promise<EditorDocument> {
     sourceFiles: { [sourceFileId]: file },
     pages: pagesFromParsedDoc(parsed, sourceFileId),
     objects: [],
-    formFields: extractFormFields(parsed),
+    formFields: extractFormFields(parsed, sourceFileId),
   };
 }
 

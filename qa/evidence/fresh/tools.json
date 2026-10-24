@@ -1,0 +1,188 @@
+[
+ {
+  "tool": "Image Converter",
+  "test": "FL-IMG-08-portrait.jpg → PNG",
+  "verdict": "PASS",
+  "output": 4337922,
+  "format": "png",
+  "dims": "1200x1800",
+  "alpha": false,
+  "name": "conv-png-FL-IMG-08-portrait.png"
+ },
+ {
+  "tool": "Image Converter",
+  "test": "FL-IMG-08-portrait.jpg → WebP",
+  "verdict": "PASS",
+  "output": 845040,
+  "format": "webp",
+  "dims": "1200x1800",
+  "alpha": false,
+  "name": "conv-webp-FL-IMG-08-portrait.webp"
+ },
+ {
+  "tool": "Image Converter",
+  "test": "FL-IMG-03-transparent.png → JPG",
+  "verdict": "PASS",
+  "output": 658290,
+  "format": "jpeg",
+  "dims": "2400x1800",
+  "alpha": false,
+  "name": "conv-jpeg-FL-IMG-03-transparent.jpg"
+ },
+ {
+  "tool": "Image Converter",
+  "test": "FL-IMG-03-transparent.png → WebP",
+  "verdict": "PASS",
+  "output": 925142,
+  "format": "webp",
+  "dims": "2400x1800",
+  "alpha": true,
+  "name": "conv-webp-FL-IMG-03-transparent.webp"
+ },
+ {
+  "tool": "Image Converter",
+  "test": "FL-IMG-05-photo.webp → JPG",
+  "verdict": "PASS",
+  "output": 1305456,
+  "format": "jpeg",
+  "dims": "2000x1500",
+  "alpha": false,
+  "name": "conv-jpeg-FL-IMG-05-photo.jpg"
+ },
+ {
+  "tool": "Image Converter",
+  "test": "FL-IMG-05-photo.webp → PNG",
+  "verdict": "PASS",
+  "output": 6793502,
+  "format": "png",
+  "dims": "2000x1500",
+  "alpha": false,
+  "name": "conv-png-FL-IMG-05-photo.png"
+ },
+ {
+  "tool": "Image Converter",
+  "test": "FL-IMG-06-vector.svg → PNG",
+  "verdict": "PASS",
+  "output": 40134,
+  "format": "png",
+  "dims": "1024x640",
+  "alpha": true,
+  "name": "conv-png-FL-IMG-06-vector.png"
+ },
+ {
+  "tool": "Image Converter",
+  "test": "batch of 3 → ZIP",
+  "verdict": "PASS",
+  "entries": [
+   "FL-IMG-08-portrait.png",
+   "FL-IMG-05-photo.png"
+  ],
+  "skipped": 1
+ },
+ {
+  "tool": "PDF → Image",
+  "test": "all pages → JPG (ZIP)",
+  "verdict": "PASS",
+  "entries": 12,
+  "page7": "1224x1584 jpeg"
+ },
+ {
+  "tool": "PDF → Image",
+  "test": "selected pages 2 and 5 → PNG",
+  "verdict": "PASS",
+  "names": [
+   "FL-PDF-05-multipage-page-2.png",
+   "FL-PDF-05-multipage-page-5.png"
+  ]
+ },
+ {
+  "tool": "Images → PDF",
+  "test": "3 images, reordered by drag, fit-to-image",
+  "verdict": "PASS",
+  "order": [
+   "Page 1: FL-IMG-03-transparent.png",
+   "Page 2: FL-IMG-08-portrait.jpg",
+   "Page 3: FL-IMG-05-photo.webp"
+  ],
+  "pageSizes": [
+   "1800x1350",
+   "900x1350",
+   "1500x1125"
+  ],
+  "output": 6357264
+ },
+ {
+  "tool": "Images → PDF",
+  "test": "A4 with landscape auto-orientation",
+  "verdict": "PASS",
+  "pageSizes": [
+   "595x842",
+   "842x595"
+  ]
+ },
+ {
+  "tool": "Merge PDF",
+  "test": "3 PDFs, reordered, merged",
+  "verdict": "PASS",
+  "pages": 9,
+  "order": [
+   "CHARLIE — Page 1 of 4",
+   "CHARLIE — Page 2 of 4",
+   "CHARLIE — Page 3 of 4",
+   "CHARLIE — Page 4 of 4",
+   "ALPHA — Page 1 of 3",
+   "ALPHA — Page 2 of 3",
+   "ALPHA — Page 3 of 3",
+   "BRAVO — Page 1 of 2",
+   "BRAVO — Page 2 of 2"
+  ]
+ },
+ {
+  "tool": "Split PDF",
+  "test": "extract selected pages 2, 3, 7",
+  "verdict": "PASS",
+  "pages": 3,
+  "labels": [
+   "2",
+   "3",
+   "7"
+  ],
+  "name": "split-sel-FL-PDF-05-multipage-pages-2-3_7.pdf"
+ },
+ {
+  "tool": "Split PDF",
+  "test": "typed range 10-12",
+  "verdict": "PASS",
+  "labels": [
+   "10",
+   "11",
+   "12"
+  ]
+ },
+ {
+  "tool": "Split PDF",
+  "test": "split every page → ZIP",
+  "verdict": "PASS",
+  "files": 12,
+  "first": "FL-PDF-05-multipage-page-1.pdf"
+ },
+ {
+  "tool": "Organize PDF",
+  "test": "reorder (drag), rotate, delete, duplicate, save",
+  "verdict": "PASS",
+  "labels": "4,1,1,2,3,5,6,7,8,9,10,11",
+  "rotations": "0,0,0,90,0,0,0,0,0,0,0,0",
+  "page4": "317x245"
+ },
+ {
+  "tool": "Organize PDF",
+  "test": "rotated source keeps its own rotation and adds to it",
+  "verdict": "PASS",
+  "rotations": "0,180,180,270"
+ },
+ {
+  "tool": "All tools",
+  "test": "console errors",
+  "verdict": "PASS"
+ }
+]

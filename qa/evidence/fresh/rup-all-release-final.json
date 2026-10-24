@@ -1,0 +1,1866 @@
+[
+ {
+  "tool": "PDF → Word",
+  "test": "DOCUMENT-01-passport-scan",
+  "verdict": "PASS",
+  "fixture": "DOCUMENT-01-passport-scan.pdf",
+  "represents": "a scanned travel-document page: portrait photo, labelled fields, handwriting-style fill-in, stamp, machine-readable lines",
+  "journey": "B",
+  "expectation": "VISUAL: the page looks like the scan (borders, fill-ins, signatures, stamps, photos) — no OCR retyping.",
+  "steps": "open /pdf-to-word → add file → Convert to Word → Download .docx → open in LibreOffice (independent renderer) → compare with the source",
+  "output": "DOCUMENT-01-passport-scan.docx — classes OFFICIAL_DOCUMENT · strategies visual · 1189 ms",
+  "uploads": 0,
+  "ocrRequests": 0,
+  "screen": "Your Word document is ready Scanned pages keep the look of the original. Open it in Word, Google Docs, Pages or LibreOffice and check it against your PDF. W DOCUMENT-01-passport-scan.docx 483 KB · 1 page · 1 kept as an image of the original",
+  "visual": "render vs scan: SSIM 0.985 (min over pages), PSNR 41.78 dB, 0.076% changed, aligned by [[0,-1]]",
+  "structural": "1 section(s) of 1 page(s), page sizes kept=true, text characters=0, pictures=1, picture 182 dpi, 482786 bytes",
+  "difference": "none visible; not editable by design (the page is a picture)",
+  "checks": {
+   "strategy": "PASS",
+   "pagesKept": "PASS",
+   "pageSizes": "PASS",
+   "noTextLayer": "PASS",
+   "onePicturePerPage": "PASS",
+   "resolution": "PASS",
+   "weight": "PASS",
+   "look": "PASS",
+   "ocrOnlyToJudge": "PASS"
+  },
+  "minSsim": 0.985,
+  "dpi": 182,
+  "integrity": [
+   {
+    "file": "rup-DOCUMENT-01-passport-scan-DOCUMENT-01-passport-scan.docx",
+    "bytes": 482786,
+    "ok": true,
+    "kind": "docx",
+    "pages": 1,
+    "paragraphs": 0,
+    "tables": 0,
+    "pictures": 0
+   }
+  ]
+ },
+ {
+  "tool": "PDF → Word",
+  "test": "DOCUMENT-02-filled-application",
+  "verdict": "PASS",
+  "fixture": "DOCUMENT-02-filled-application.pdf",
+  "represents": "a scanned application form filled in by hand: field lines, ticked check boxes, signature and date",
+  "journey": "A",
+  "expectation": "VISUAL: the page looks like the scan (borders, fill-ins, signatures, stamps, photos) — no OCR retyping.",
+  "steps": "open /pdf-to-word → add file → Convert to Word → Download .docx → open in LibreOffice (independent renderer) → compare with the source",
+  "output": "DOCUMENT-02-filled-application.docx — classes FORM · strategies visual · 1167 ms",
+  "uploads": 0,
+  "ocrRequests": 0,
+  "screen": "Your Word document is ready Scanned pages keep the look of the original. Open it in Word, Google Docs, Pages or LibreOffice and check it against your PDF. W DOCUMENT-02-filled-application.docx 456 KB · 1 page · 1 kept as an image of the ori",
+  "visual": "render vs scan: SSIM 0.9834 (min over pages), PSNR 36.43 dB, 0.645% changed, aligned by [[0,-1]]",
+  "structural": "1 section(s) of 1 page(s), page sizes kept=true, text characters=0, pictures=1, picture 182 dpi, 455501 bytes",
+  "difference": "none visible; not editable by design (the page is a picture)",
+  "checks": {
+   "strategy": "PASS",
+   "pagesKept": "PASS",
+   "pageSizes": "PASS",
+   "noTextLayer": "PASS",
+   "onePicturePerPage": "PASS",
+   "resolution": "PASS",
+   "weight": "PASS",
+   "look": "PASS",
+   "ocrOnlyToJudge": "PASS"
+  },
+  "minSsim": 0.9834,
+  "dpi": 182,
+  "integrity": [
+   {
+    "file": "rup-DOCUMENT-02-filled-application-DOCUMENT-02-filled-application.docx",
+    "bytes": 455501,
+    "ok": true,
+    "kind": "docx",
+    "pages": 1,
+    "paragraphs": 0,
+    "tables": 0,
+    "pictures": 0
+   }
+  ]
+ },
+ {
+  "tool": "PDF → Word",
+  "test": "DOCUMENT-03-certificate",
+  "verdict": "PASS",
+  "fixture": "DOCUMENT-03-certificate.pdf",
+  "represents": "a scanned landscape certificate with a decorative border, seal and signatures",
+  "expectation": "VISUAL: the page looks like the scan (borders, fill-ins, signatures, stamps, photos) — no OCR retyping.",
+  "steps": "open /pdf-to-word → add file → Convert to Word → Download .docx → open in LibreOffice (independent renderer) → compare with the source",
+  "output": "DOCUMENT-03-certificate.docx — classes OFFICIAL_DOCUMENT · strategies visual · 1172 ms",
+  "uploads": 0,
+  "ocrRequests": 0,
+  "screen": "Your Word document is ready Scanned pages keep the look of the original. Open it in Word, Google Docs, Pages or LibreOffice and check it against your PDF. W DOCUMENT-03-certificate.docx 554 KB · 1 page · 1 kept as an image of the original ·",
+  "visual": "render vs scan: SSIM 0.9816 (min over pages), PSNR 36.26 dB, 0.885% changed, aligned by [[0,-1]]",
+  "structural": "1 section(s) of 1 page(s), page sizes kept=true, text characters=0, pictures=1, picture 182 dpi, 553804 bytes",
+  "difference": "none visible; not editable by design (the page is a picture)",
+  "checks": {
+   "strategy": "PASS",
+   "pagesKept": "PASS",
+   "pageSizes": "PASS",
+   "noTextLayer": "PASS",
+   "onePicturePerPage": "PASS",
+   "resolution": "PASS",
+   "weight": "PASS",
+   "look": "PASS",
+   "ocrOnlyToJudge": "PASS"
+  },
+  "minSsim": 0.9816,
+  "dpi": 182,
+  "integrity": [
+   {
+    "file": "rup-DOCUMENT-03-certificate-DOCUMENT-03-certificate.docx",
+    "bytes": 553804,
+    "ok": true,
+    "kind": "docx",
+    "pages": 1,
+    "paragraphs": 0,
+    "tables": 0,
+    "pictures": 0
+   }
+  ]
+ },
+ {
+  "tool": "PDF → Word",
+  "test": "DOCUMENT-04-invoice",
+  "verdict": "PASS",
+  "fixture": "DOCUMENT-04-invoice.pdf",
+  "represents": "a scanned invoice: letterhead, line-item table, totals, a stamped PAID mark",
+  "expectation": "VISUAL: the page looks like the scan (borders, fill-ins, signatures, stamps, photos) — no OCR retyping.",
+  "steps": "open /pdf-to-word → add file → Convert to Word → Download .docx → open in LibreOffice (independent renderer) → compare with the source",
+  "output": "DOCUMENT-04-invoice.docx — classes SCANNED_TABLE · strategies visual · 1147 ms",
+  "uploads": 0,
+  "ocrRequests": 0,
+  "screen": "Your Word document is ready Scanned pages keep the look of the original. Open it in Word, Google Docs, Pages or LibreOffice and check it against your PDF. W DOCUMENT-04-invoice.docx 446 KB · 1 page · 1 kept as an image of the original · 0.7",
+  "visual": "render vs scan: SSIM 0.9847 (min over pages), PSNR 39.74 dB, 0.23% changed, aligned by [[0,-1]]",
+  "structural": "1 section(s) of 1 page(s), page sizes kept=true, text characters=0, pictures=1, picture 182 dpi, 445875 bytes",
+  "difference": "none visible; not editable by design (the page is a picture)",
+  "checks": {
+   "strategy": "PASS",
+   "pagesKept": "PASS",
+   "pageSizes": "PASS",
+   "noTextLayer": "PASS",
+   "onePicturePerPage": "PASS",
+   "resolution": "PASS",
+   "weight": "PASS",
+   "look": "PASS",
+   "ocrOnlyToJudge": "PASS"
+  },
+  "minSsim": 0.9847,
+  "dpi": 182,
+  "integrity": [
+   {
+    "file": "rup-DOCUMENT-04-invoice-DOCUMENT-04-invoice.docx",
+    "bytes": 445875,
+    "ok": true,
+    "kind": "docx",
+    "pages": 1,
+    "paragraphs": 0,
+    "tables": 0,
+    "pictures": 0
+   }
+  ]
+ },
+ {
+  "tool": "PDF → Word",
+  "test": "DOCUMENT-05-bank-statement",
+  "verdict": "PASS",
+  "fixture": "DOCUMENT-05-bank-statement.pdf",
+  "represents": "a two-page scanned bank statement: account box, transaction table, running balance",
+  "expectation": "VISUAL: the page looks like the scan (borders, fill-ins, signatures, stamps, photos) — no OCR retyping.",
+  "steps": "open /pdf-to-word → add file → Convert to Word → Download .docx → open in LibreOffice (independent renderer) → compare with the source",
+  "output": "DOCUMENT-05-bank-statement.docx — classes SCANNED_TABLE,SCANNED_TABLE · strategies visual,visual · 1851 ms",
+  "uploads": 0,
+  "ocrRequests": 0,
+  "screen": "Your Word document is ready Scanned pages keep the look of the original. Open it in Word, Google Docs, Pages or LibreOffice and check it against your PDF. W DOCUMENT-05-bank-statement.docx 963 KB · 2 pages · 2 kept as images of the original",
+  "visual": "render vs scan: SSIM 0.9783 (min over pages), PSNR 34.19 dB, 0.446% changed, aligned by [[0,-1],[0,-1]]",
+  "structural": "2 section(s) of 2 page(s), page sizes kept=true, text characters=0, pictures=2, picture 182 dpi, 962574 bytes",
+  "difference": "none visible; not editable by design (the page is a picture)",
+  "checks": {
+   "strategy": "PASS",
+   "pagesKept": "PASS",
+   "pageSizes": "PASS",
+   "noTextLayer": "PASS",
+   "onePicturePerPage": "PASS",
+   "resolution": "PASS",
+   "weight": "PASS",
+   "look": "PASS",
+   "ocrOnlyToJudge": "PASS"
+  },
+  "minSsim": 0.9783,
+  "dpi": 182,
+  "integrity": [
+   {
+    "file": "rup-DOCUMENT-05-bank-statement-DOCUMENT-05-bank-statement.docx",
+    "bytes": 962574,
+    "ok": true,
+    "kind": "docx",
+    "pages": 2,
+    "paragraphs": 0,
+    "tables": 0,
+    "pictures": 0
+   }
+  ]
+ },
+ {
+  "tool": "PDF → Word",
+  "test": "DOCUMENT-08-signed-contract",
+  "verdict": "PASS",
+  "fixture": "DOCUMENT-08-signed-contract.pdf",
+  "represents": "a two-page scanned agreement with clauses, a signature block and handwritten signatures",
+  "expectation": "VISUAL: the page looks like the scan (borders, fill-ins, signatures, stamps, photos) — no OCR retyping.",
+  "steps": "open /pdf-to-word → add file → Convert to Word → Download .docx → open in LibreOffice (independent renderer) → compare with the source",
+  "output": "DOCUMENT-08-signed-contract.docx — classes SCANNED_TEXT,SCANNED_TEXT · strategies visual,visual · 14815 ms",
+  "uploads": 0,
+  "ocrRequests": 3,
+  "screen": "Your Word document is ready Scanned pages keep the look of the original. Open it in Word, Google Docs, Pages or LibreOffice and check it against your PDF. W DOCUMENT-08-signed-contract.docx 849 KB · 2 pages · 2 kept as images of the origina",
+  "visual": "render vs scan: SSIM 0.9857 (min over pages), PSNR 40.68 dB, 0.133% changed, aligned by [[0,-1],[0,-1]]",
+  "structural": "2 section(s) of 2 page(s), page sizes kept=true, text characters=0, pictures=2, picture 182 dpi, 848843 bytes",
+  "difference": "none visible; not editable by design (the page is a picture)",
+  "checks": {
+   "strategy": "PASS",
+   "pagesKept": "PASS",
+   "pageSizes": "PASS",
+   "noTextLayer": "PASS",
+   "onePicturePerPage": "PASS",
+   "resolution": "PASS",
+   "weight": "PASS",
+   "look": "PASS",
+   "ocrOnlyToJudge": "PASS"
+  },
+  "minSsim": 0.9857,
+  "dpi": 182,
+  "integrity": [
+   {
+    "file": "rup-DOCUMENT-08-signed-contract-DOCUMENT-08-signed-contract.docx",
+    "bytes": 848843,
+    "ok": true,
+    "kind": "docx",
+    "pages": 2,
+    "paragraphs": 0,
+    "tables": 0,
+    "pictures": 0
+   }
+  ]
+ },
+ {
+  "tool": "PDF → Word",
+  "test": "DOCUMENT-07-scanned-letter",
+  "verdict": "PASS",
+  "fixture": "DOCUMENT-07-scanned-letter.pdf",
+  "represents": "a scanned plain business letter — running text, no pictures, no form fields",
+  "expectation": "HYBRID only if text is reliably recognised; otherwise VISUAL.",
+  "steps": "open /pdf-to-word → add file → Convert to Word → Download .docx → open in LibreOffice (independent renderer) → compare with the source",
+  "output": "DOCUMENT-07-scanned-letter.docx — classes SCANNED_TEXT · strategies hybrid · 8963 ms",
+  "uploads": 0,
+  "ocrRequests": 3,
+  "screen": "Your Word document is ready Open it in Word, Google Docs, Pages or LibreOffice and check the layout — complex pages may need small touch-ups. W DOCUMENT-07-scanned-letter.docx 4.2 KB · 1 page · 8.4 s Download .docx Convert another PDF Edite",
+  "visual": "render vs scan: SSIM 0.8683",
+  "structural": "hybrid page: 687 editable characters, 12 paragraphs; text recall against the letter's own words 100%",
+  "difference": "editable text matches the letter; the page looks like the scan",
+  "checks": {
+   "strategy": "PASS",
+   "textRight": "PASS",
+   "looksLike": "PASS",
+   "pagesKept": "PASS"
+  },
+  "integrity": [
+   {
+    "file": "rup-DOCUMENT-07-scanned-letter-DOCUMENT-07-scanned-letter.docx",
+    "bytes": 4207,
+    "ok": true,
+    "kind": "docx",
+    "pages": 1,
+    "paragraphs": 12,
+    "tables": 0,
+    "pictures": 0
+   }
+  ]
+ },
+ {
+  "tool": "PDF → Word",
+  "test": "DOCUMENT-06-resume-native",
+  "verdict": "LIMITED",
+  "fixture": "DOCUMENT-06-resume-native.pdf",
+  "represents": "a native PDF résumé: headings, bullet lists, bold role titles",
+  "journey": "C",
+  "expectation": "EDITABLE: real Word text, headings, tables and lists that look like the PDF.",
+  "steps": "open /pdf-to-word → add file → Convert to Word → Download .docx → open in LibreOffice (independent renderer) → compare with the source",
+  "output": "DOCUMENT-06-resume-native.docx — classes NATIVE_TEXT · strategies editable · 375 ms",
+  "uploads": 0,
+  "ocrRequests": 0,
+  "screen": "Your Word document is ready Open it in Word, Google Docs, Pages or LibreOffice and check the layout — complex pages may need small touch-ups. W DOCUMENT-06-resume-native.docx 4.9 KB · 1 page · 0.2 s Download .docx Convert another PDF Edited",
+  "visual": "render vs PDF: SSIM 0.8922, 9.609% changed",
+  "structural": "23 paragraphs, 1 table(s), 0 picture(s), text recall 100%, 100% of words within 36 pt, reading order 100%, pictures 0/0, page tone +11.4 grey levels vs the original",
+  "difference": "fillsKept=LIMITED",
+  "checks": {
+   "strategy": "PASS",
+   "pagesKept": "PASS",
+   "isText": "PASS",
+   "textKept": "PASS",
+   "looksLike": "PASS",
+   "positions": "PASS",
+   "readingOrder": "PASS",
+   "pictures": "n/a",
+   "tables": "n/a",
+   "fillsKept": "LIMITED"
+  },
+  "textRecall": 100,
+  "minSsim": 0.8922,
+  "integrity": [
+   {
+    "file": "rup-DOCUMENT-06-resume-native-DOCUMENT-06-resume-native.docx",
+    "bytes": 4896,
+    "ok": true,
+    "kind": "docx",
+    "pages": 1,
+    "paragraphs": 16,
+    "tables": 1,
+    "pictures": 0
+   }
+  ]
+ },
+ {
+  "tool": "PDF → Word",
+  "test": "DOCUMENT-04b-invoice-native",
+  "verdict": "PASS",
+  "fixture": "DOCUMENT-04b-invoice-native.pdf",
+  "represents": "the same invoice as a native (born-digital) PDF with real text and a table",
+  "expectation": "EDITABLE: real Word text, headings, tables and lists that look like the PDF.",
+  "steps": "open /pdf-to-word → add file → Convert to Word → Download .docx → open in LibreOffice (independent renderer) → compare with the source",
+  "output": "DOCUMENT-04b-invoice-native.docx — classes NATIVE_TEXT · strategies editable · 348 ms",
+  "uploads": 0,
+  "ocrRequests": 0,
+  "screen": "Your Word document is ready Open it in Word, Google Docs, Pages or LibreOffice and check the layout — complex pages may need small touch-ups. W DOCUMENT-04b-invoice-native.docx 4.9 KB · 1 page · 0.2 s Download .docx Convert another PDF Edit",
+  "visual": "render vs PDF: SSIM 0.9212, 5.023% changed",
+  "structural": "47 paragraphs, 4 table(s), 0 picture(s), text recall 100%, 97.8% of words within 36 pt, reading order 94.6%, pictures 0/0, page tone +4.7 grey levels vs the original",
+  "difference": "text, tables and layout rebuilt as editable Word content; minor spacing differences only",
+  "checks": {
+   "strategy": "PASS",
+   "pagesKept": "PASS",
+   "isText": "PASS",
+   "textKept": "PASS",
+   "looksLike": "PASS",
+   "positions": "PASS",
+   "readingOrder": "PASS",
+   "pictures": "n/a",
+   "tables": "n/a",
+   "fillsKept": "PASS"
+  },
+  "textRecall": 100,
+  "minSsim": 0.9212,
+  "integrity": [
+   {
+    "file": "rup-DOCUMENT-04b-invoice-native-DOCUMENT-04b-invoice-native.docx",
+    "bytes": 4882,
+    "ok": true,
+    "kind": "docx",
+    "pages": 1,
+    "paragraphs": 9,
+    "tables": 4,
+    "pictures": 0
+   }
+  ]
+ },
+ {
+  "tool": "PDF → Word",
+  "test": "DOCUMENT-12-table-report",
+  "verdict": "PASS",
+  "fixture": "DOCUMENT-12-table-report.pdf",
+  "represents": "a native PDF report with a data table and a chart",
+  "expectation": "EDITABLE: real Word text, headings, tables and lists that look like the PDF.",
+  "steps": "open /pdf-to-word → add file → Convert to Word → Download .docx → open in LibreOffice (independent renderer) → compare with the source",
+  "output": "DOCUMENT-12-table-report.docx — classes NATIVE_TEXT · strategies editable · 250 ms",
+  "uploads": 0,
+  "ocrRequests": 0,
+  "screen": "Your Word document is ready Open it in Word, Google Docs, Pages or LibreOffice and check the layout — complex pages may need small touch-ups. W DOCUMENT-12-table-report.docx 4.9 KB · 1 page · 0.2 s Download .docx Convert another PDF Edited ",
+  "visual": "render vs PDF: SSIM 0.9277, 4.242% changed",
+  "structural": "51 paragraphs, 2 table(s), 0 picture(s), text recall 100%, 100% of words within 36 pt, reading order 100%, pictures 0/0, page tone -0.4 grey levels vs the original",
+  "difference": "text, tables and layout rebuilt as editable Word content; minor spacing differences only",
+  "checks": {
+   "strategy": "PASS",
+   "pagesKept": "PASS",
+   "isText": "PASS",
+   "textKept": "PASS",
+   "looksLike": "PASS",
+   "positions": "PASS",
+   "readingOrder": "PASS",
+   "pictures": "n/a",
+   "tables": "PASS",
+   "fillsKept": "PASS"
+  },
+  "textRecall": 100,
+  "minSsim": 0.9277,
+  "integrity": [
+   {
+    "file": "rup-DOCUMENT-12-table-report-DOCUMENT-12-table-report.docx",
+    "bytes": 4853,
+    "ok": true,
+    "kind": "docx",
+    "pages": 1,
+    "paragraphs": 8,
+    "tables": 2,
+    "pictures": 0
+   }
+  ]
+ },
+ {
+  "tool": "PDF → Word",
+  "test": "DOCUMENT-13-brochure",
+  "verdict": "LIMITED",
+  "fixture": "DOCUMENT-13-brochure.pdf",
+  "represents": "a native two-column brochure with headings, a picture and a call-out",
+  "expectation": "EDITABLE: real Word text, headings, tables and lists that look like the PDF.",
+  "steps": "open /pdf-to-word → add file → Convert to Word → Download .docx → open in LibreOffice (independent renderer) → compare with the source",
+  "output": "DOCUMENT-13-brochure.docx — classes MIXED · strategies editable · 340 ms",
+  "uploads": 0,
+  "ocrRequests": 0,
+  "screen": "Your Word document is ready Open it in Word, Google Docs, Pages or LibreOffice and check the layout — complex pages may need small touch-ups. W DOCUMENT-13-brochure.docx 192 KB · 1 page · 0.3 s Download .docx Convert another PDF Edited it a",
+  "visual": "render vs PDF: SSIM 0.8036, 14.572% changed",
+  "structural": "19 paragraphs, 1 table(s), 2 picture(s), text recall 100%, 100% of words within 36 pt, reading order 66.7%, pictures 2/2, page tone +10.5 grey levels vs the original",
+  "difference": "readingOrder=LIMITED, fillsKept=LIMITED",
+  "checks": {
+   "strategy": "PASS",
+   "pagesKept": "PASS",
+   "isText": "PASS",
+   "textKept": "PASS",
+   "looksLike": "PASS",
+   "positions": "PASS",
+   "readingOrder": "LIMITED",
+   "pictures": "PASS",
+   "tables": "n/a",
+   "fillsKept": "LIMITED"
+  },
+  "textRecall": 100,
+  "minSsim": 0.8036,
+  "integrity": [
+   {
+    "file": "rup-DOCUMENT-13-brochure-DOCUMENT-13-brochure.docx",
+    "bytes": 192480,
+    "ok": true,
+    "kind": "docx",
+    "pages": 1,
+    "paragraphs": 5,
+    "tables": 1,
+    "pictures": 1
+   }
+  ]
+ },
+ {
+  "tool": "PDF → Word",
+  "test": "REAL-user-scan",
+  "verdict": "PASS",
+  "fixture": "TheFileConvert_Scanned_OCR_Test.pdf",
+  "represents": "your own scanned test PDF (kept private, nothing from it is committed)",
+  "expectation": "VISUAL: the page looks like the scan (borders, fill-ins, signatures, stamps, photos) — no OCR retyping.",
+  "steps": "open /pdf-to-word → add file → Convert to Word → Download .docx → open in LibreOffice (independent renderer) → compare with the source",
+  "output": "REAL-user-scan.docx — classes FORM,OFFICIAL_DOCUMENT · strategies visual,visual · 2625 ms",
+  "uploads": 0,
+  "ocrRequests": 0,
+  "screen": "Your Word document is ready Scanned pages keep the look of the original. Open it in Word, Google Docs, Pages or LibreOffice and check it against your PDF. W TheFileConvert_Scanned_OCR_Test.docx 332 KB · 2 pages · 2 kept as images of the ori",
+  "visual": "render vs scan: SSIM 0.9875 (min over pages), PSNR 38.1 dB, 0.499% changed, aligned by [[0,-1],[0,-1]]",
+  "structural": "2 section(s) of 2 page(s), page sizes kept=true, text characters=0, pictures=2, picture 182 dpi, 332272 bytes",
+  "difference": "none visible; not editable by design (the page is a picture)",
+  "checks": {
+   "strategy": "PASS",
+   "pagesKept": "PASS",
+   "pageSizes": "PASS",
+   "noTextLayer": "PASS",
+   "onePicturePerPage": "PASS",
+   "resolution": "PASS",
+   "weight": "PASS",
+   "look": "PASS",
+   "ocrOnlyToJudge": "PASS"
+  },
+  "minSsim": 0.9875,
+  "dpi": 182,
+  "integrity": [
+   {
+    "file": "rup-REAL-user-scan-TheFileConvert_Scanned_OCR_Test.docx",
+    "bytes": 332272,
+    "ok": true,
+    "kind": "docx",
+    "pages": 2,
+    "paragraphs": 0,
+    "tables": 0,
+    "pictures": 0
+   }
+  ]
+ },
+ {
+  "tool": "Image → Word",
+  "test": "filled form PNG",
+  "verdict": "PASS",
+  "fixture": "DOCUMENT-10-filled-form.png",
+  "represents": "a filled-in application form photographed/scanned to PNG, check boxes and signature",
+  "journey": "D",
+  "expectation": "The document looks like the image: right proportions, centred, nothing clipped or stretched, no recognised text.",
+  "steps": "open /image-to-word → add 1 image(s) → Fit to image → Create Word document → Download .docx → LibreOffice render → compare",
+  "output": "i2w-filled-form-PNG.docx — 1 page(s), 2357102 bytes, page(s) 612×792 pt",
+  "visual": "render vs image: SSIM 0.8708",
+  "structural": "text characters=0, pictures=1, image bytes identical to the source=true",
+  "difference": "none (the image is the page content; nothing was recognised or retyped)",
+  "checks": {
+   "onePagePerImage": "PASS",
+   "noText": "PASS",
+   "noOcrRun": "PASS",
+   "noUpload": "PASS",
+   "pageShape": "PASS",
+   "untouchedBytes": "PASS",
+   "inPageNotClipped": "PASS",
+   "proportions": "PASS",
+   "looksLike": "PASS"
+  },
+  "integrity": [
+   {
+    "file": "rup-i2w-filled-form-PNG-DOCUMENT-10-filled-form.docx",
+    "bytes": 2357102,
+    "ok": true,
+    "kind": "docx",
+    "pages": 1,
+    "paragraphs": 0,
+    "tables": 0,
+    "pictures": 0
+   }
+  ]
+ },
+ {
+  "tool": "Image → Word",
+  "test": "ID card PNG (wide)",
+  "verdict": "PASS",
+  "fixture": "DOCUMENT-09-id-card-image.png",
+  "represents": "a photo-style identity card (wide), portrait and fields, PNG",
+  "expectation": "The document looks like the image: right proportions, centred, nothing clipped or stretched, no recognised text.",
+  "steps": "open /image-to-word → add 1 image(s) → Fit to image → Create Word document → Download .docx → LibreOffice render → compare",
+  "output": "i2w-ID-card-PNG-wide-.docx — 1 page(s), 676826 bytes, page(s) 792×500 pt",
+  "visual": "render vs image: SSIM 0.923",
+  "structural": "text characters=0, pictures=1, image bytes identical to the source=true",
+  "difference": "none (the image is the page content; nothing was recognised or retyped)",
+  "checks": {
+   "onePagePerImage": "PASS",
+   "noText": "PASS",
+   "noOcrRun": "PASS",
+   "noUpload": "PASS",
+   "pageShape": "PASS",
+   "untouchedBytes": "PASS",
+   "inPageNotClipped": "PASS",
+   "proportions": "PASS",
+   "looksLike": "PASS"
+  },
+  "integrity": [
+   {
+    "file": "rup-i2w-ID-card-PNG-wide--DOCUMENT-09-id-card-image.docx",
+    "bytes": 676826,
+    "ok": true,
+    "kind": "docx",
+    "pages": 1,
+    "paragraphs": 0,
+    "tables": 0,
+    "pictures": 0
+   }
+  ]
+ },
+ {
+  "tool": "Image → Word",
+  "test": "receipt JPG (long, narrow)",
+  "verdict": "PASS",
+  "fixture": "DOCUMENT-11-receipt.jpg",
+  "represents": "a long, narrow till receipt photo (JPG)",
+  "expectation": "The document looks like the image: right proportions, centred, nothing clipped or stretched, no recognised text.",
+  "steps": "open /image-to-word → add 1 image(s) → Fit to image → Create Word document → Download .docx → LibreOffice render → compare",
+  "output": "i2w-receipt-JPG-long-narrow-.docx — 1 page(s), 138605 bytes, page(s) 506×792 pt",
+  "visual": "render vs image: SSIM 0.93",
+  "structural": "text characters=0, pictures=1, image bytes identical to the source=true",
+  "difference": "none (the image is the page content; nothing was recognised or retyped)",
+  "checks": {
+   "onePagePerImage": "PASS",
+   "noText": "PASS",
+   "noOcrRun": "PASS",
+   "noUpload": "PASS",
+   "pageShape": "PASS",
+   "untouchedBytes": "PASS",
+   "inPageNotClipped": "PASS",
+   "proportions": "PASS",
+   "looksLike": "PASS"
+  },
+  "integrity": [
+   {
+    "file": "rup-i2w-receipt-JPG-long-narrow--DOCUMENT-11-receipt.docx",
+    "bytes": 138605,
+    "ok": true,
+    "kind": "docx",
+    "pages": 1,
+    "paragraphs": 0,
+    "tables": 0,
+    "pictures": 0
+   }
+  ]
+ },
+ {
+  "tool": "Image → Word",
+  "test": "screenshot (wide)",
+  "verdict": "PASS",
+  "fixture": "DOCUMENT-17-screenshot.png",
+  "represents": "a wide desktop-style screenshot (PNG)",
+  "expectation": "The document looks like the image: right proportions, centred, nothing clipped or stretched, no recognised text.",
+  "steps": "open /image-to-word → add 1 image(s) → Fit to image → Create Word document → Download .docx → LibreOffice render → compare",
+  "output": "i2w-screenshot-wide-.docx — 1 page(s), 36161 bytes, page(s) 792×495 pt",
+  "visual": "render vs image: SSIM 0.9769",
+  "structural": "text characters=0, pictures=1, image bytes identical to the source=true",
+  "difference": "none (the image is the page content; nothing was recognised or retyped)",
+  "checks": {
+   "onePagePerImage": "PASS",
+   "noText": "PASS",
+   "noOcrRun": "PASS",
+   "noUpload": "PASS",
+   "pageShape": "PASS",
+   "untouchedBytes": "PASS",
+   "inPageNotClipped": "PASS",
+   "proportions": "PASS",
+   "looksLike": "PASS"
+  },
+  "integrity": [
+   {
+    "file": "rup-i2w-screenshot-wide--DOCUMENT-17-screenshot.docx",
+    "bytes": 36161,
+    "ok": true,
+    "kind": "docx",
+    "pages": 1,
+    "paragraphs": 0,
+    "tables": 0,
+    "pictures": 0
+   }
+  ]
+ },
+ {
+  "tool": "Image → Word",
+  "test": "photo with text",
+  "verdict": "PASS",
+  "fixture": "DOCUMENT-14-photo-with-text.png",
+  "represents": "a photograph with a sign / caption text in it (PNG)",
+  "expectation": "The document looks like the image: right proportions, centred, nothing clipped or stretched, no recognised text.",
+  "steps": "open /image-to-word → add 1 image(s) → Fit to image → Create Word document → Download .docx → LibreOffice render → compare",
+  "output": "i2w-photo-with-text.docx — 1 page(s), 1392214 bytes, page(s) 792×528 pt",
+  "visual": "render vs image: SSIM 0.9851",
+  "structural": "text characters=0, pictures=1, image bytes identical to the source=true",
+  "difference": "none (the image is the page content; nothing was recognised or retyped)",
+  "checks": {
+   "onePagePerImage": "PASS",
+   "noText": "PASS",
+   "noOcrRun": "PASS",
+   "noUpload": "PASS",
+   "pageShape": "PASS",
+   "untouchedBytes": "PASS",
+   "inPageNotClipped": "PASS",
+   "proportions": "PASS",
+   "looksLike": "PASS"
+  },
+  "integrity": [
+   {
+    "file": "rup-i2w-photo-with-text-DOCUMENT-14-photo-with-text.docx",
+    "bytes": 1392214,
+    "ok": true,
+    "kind": "docx",
+    "pages": 1,
+    "paragraphs": 0,
+    "tables": 0,
+    "pictures": 0
+   }
+  ]
+ },
+ {
+  "tool": "Image → Word",
+  "test": "table image",
+  "verdict": "PASS",
+  "fixture": "DOCUMENT-18-table-image.png",
+  "represents": "a picture of a table (PNG)",
+  "expectation": "The document looks like the image: right proportions, centred, nothing clipped or stretched, no recognised text.",
+  "steps": "open /image-to-word → add 1 image(s) → Fit to image → Create Word document → Download .docx → LibreOffice render → compare",
+  "output": "i2w-table-image.docx — 1 page(s), 42493 bytes, page(s) 792×430 pt",
+  "visual": "render vs image: SSIM 0.9722",
+  "structural": "text characters=0, pictures=1, image bytes identical to the source=true",
+  "difference": "none (the image is the page content; nothing was recognised or retyped)",
+  "checks": {
+   "onePagePerImage": "PASS",
+   "noText": "PASS",
+   "noOcrRun": "PASS",
+   "noUpload": "PASS",
+   "pageShape": "PASS",
+   "untouchedBytes": "PASS",
+   "inPageNotClipped": "PASS",
+   "proportions": "PASS",
+   "looksLike": "PASS"
+  },
+  "integrity": [
+   {
+    "file": "rup-i2w-table-image-DOCUMENT-18-table-image.docx",
+    "bytes": 42493,
+    "ok": true,
+    "kind": "docx",
+    "pages": 1,
+    "paragraphs": 0,
+    "tables": 0,
+    "pictures": 0
+   }
+  ]
+ },
+ {
+  "tool": "Image → Word",
+  "test": "filled form on A4",
+  "verdict": "PASS",
+  "fixture": "DOCUMENT-10-filled-form.png",
+  "represents": "a filled-in application form photographed/scanned to PNG, check boxes and signature",
+  "expectation": "The document looks like the image: right proportions, centred, nothing clipped or stretched, no recognised text.",
+  "steps": "open /image-to-word → add 1 image(s) → A4 → Create Word document → Download .docx → LibreOffice render → compare",
+  "output": "i2w-filled-form-on-A4.docx — 1 page(s), 2357118 bytes, page(s) 595×842 pt",
+  "visual": "render vs image: SSIM 0.9029",
+  "structural": "text characters=0, pictures=1, image bytes identical to the source=true",
+  "difference": "none (the image is the page content; nothing was recognised or retyped)",
+  "checks": {
+   "onePagePerImage": "PASS",
+   "noText": "PASS",
+   "noOcrRun": "PASS",
+   "noUpload": "PASS",
+   "pageShape": "n/a",
+   "untouchedBytes": "PASS",
+   "inPageNotClipped": "PASS",
+   "proportions": "PASS",
+   "looksLike": "PASS"
+  },
+  "integrity": [
+   {
+    "file": "rup-i2w-filled-form-on-A4-DOCUMENT-10-filled-form.docx",
+    "bytes": 2357118,
+    "ok": true,
+    "kind": "docx",
+    "pages": 1,
+    "paragraphs": 0,
+    "tables": 0,
+    "pictures": 0
+   }
+  ]
+ },
+ {
+  "tool": "Image → Word",
+  "test": "ID card on Letter",
+  "verdict": "PASS",
+  "fixture": "DOCUMENT-09-id-card-image.png",
+  "represents": "a photo-style identity card (wide), portrait and fields, PNG",
+  "expectation": "The document looks like the image: right proportions, centred, nothing clipped or stretched, no recognised text.",
+  "steps": "open /image-to-word → add 1 image(s) → Letter → Create Word document → Download .docx → LibreOffice render → compare",
+  "output": "i2w-ID-card-on-Letter.docx — 1 page(s), 676835 bytes, page(s) 792×612 pt",
+  "visual": "render vs image: SSIM 0.9414",
+  "structural": "text characters=0, pictures=1, image bytes identical to the source=true",
+  "difference": "none (the image is the page content; nothing was recognised or retyped)",
+  "checks": {
+   "onePagePerImage": "PASS",
+   "noText": "PASS",
+   "noOcrRun": "PASS",
+   "noUpload": "PASS",
+   "pageShape": "n/a",
+   "untouchedBytes": "PASS",
+   "inPageNotClipped": "PASS",
+   "proportions": "PASS",
+   "looksLike": "PASS"
+  },
+  "integrity": [
+   {
+    "file": "rup-i2w-ID-card-on-Letter-DOCUMENT-09-id-card-image.docx",
+    "bytes": 676835,
+    "ok": true,
+    "kind": "docx",
+    "pages": 1,
+    "paragraphs": 0,
+    "tables": 0,
+    "pictures": 0
+   }
+  ]
+ },
+ {
+  "tool": "Image → Word",
+  "test": "four images in order, Letter",
+  "verdict": "PASS",
+  "fixture": "DOCUMENT-09-id-card-image.png + DOCUMENT-10-filled-form.png + DOCUMENT-11-receipt.jpg + DOCUMENT-17-screenshot.png",
+  "represents": "a photo-style identity card (wide), portrait and fields, PNG; a filled-in application form photographed/scanned to PNG, check boxes and signature; a long, narrow till receipt photo (JPG); a wide desktop-style screenshot (PNG)",
+  "expectation": "The document looks like the image: right proportions, centred, nothing clipped or stretched, no recognised text.",
+  "steps": "open /image-to-word → add 4 image(s) → Letter → Create Word document → Download .docx → LibreOffice render → compare",
+  "output": "i2w-four-images-in-order-Letter.docx — 4 page(s), 3197167 bytes, page(s) 792×612 612×792 612×792 792×612 pt",
+  "visual": "render vs image: SSIM 0.9414 / 0.9029 / 0.9727 / 0.9951",
+  "structural": "text characters=0, pictures=4, image bytes identical to the source=true",
+  "difference": "none (the image is the page content; nothing was recognised or retyped)",
+  "checks": {
+   "onePagePerImage": "PASS",
+   "noText": "PASS",
+   "noOcrRun": "PASS",
+   "noUpload": "PASS",
+   "pageShape": "n/a",
+   "untouchedBytes": "PASS",
+   "inPageNotClipped": "PASS",
+   "proportions": "PASS",
+   "looksLike": "PASS"
+  },
+  "integrity": [
+   {
+    "file": "rup-i2w-four-images-in-order-Letter-images.docx",
+    "bytes": 3197167,
+    "ok": true,
+    "kind": "docx",
+    "pages": 4,
+    "paragraphs": 0,
+    "tables": 0,
+    "pictures": 0
+   }
+  ]
+ },
+ {
+  "tool": "PDF → Image",
+  "test": "DOCUMENT-01-passport-scan.pdf → PNG",
+  "verdict": "PASS",
+  "fixture": "DOCUMENT-01-passport-scan.pdf",
+  "journey": "F",
+  "represents": "a scanned travel-document page: portrait photo, labelled fields, handwriting-style fill-in, stamp, machine-readable lines",
+  "expectation": "A picture of each page exactly as it looks, one image per page, readable at normal zoom; nothing recognised or rewritten.",
+  "steps": "open /pdf-to-image → add file → choose format → Convert → download → compare the picture with the page rendered independently",
+  "output": "1 image(s) 1224×1584",
+  "visual": "SSIM 0.9947, 144 dpi",
+  "structural": "aspect kept=PASS, images=1/1",
+  "difference": "none (re-rendered; anti-aliasing only)",
+  "checks": {
+   "look": "PASS",
+   "aspect": "PASS",
+   "count": "PASS",
+   "noOcr": "PASS",
+   "resolution": "PASS"
+  },
+  "integrity": [
+   {
+    "file": "rup-p2i-01-DOCUMENT-01-passport-scan-page-1.png",
+    "bytes": 2480597,
+    "ok": true,
+    "kind": "png",
+    "w": 1224,
+    "h": 1584,
+    "alpha": false
+   }
+  ]
+ },
+ {
+  "tool": "PDF → Image",
+  "test": "DOCUMENT-02-filled-application.pdf → JPG",
+  "verdict": "PASS",
+  "fixture": "DOCUMENT-02-filled-application.pdf",
+  "journey": "",
+  "represents": "a scanned application form filled in by hand: field lines, ticked check boxes, signature and date",
+  "expectation": "A picture of each page exactly as it looks, one image per page, readable at normal zoom; nothing recognised or rewritten.",
+  "steps": "open /pdf-to-image → add file → choose format → Convert → download → compare the picture with the page rendered independently",
+  "output": "1 image(s) 1224×1584",
+  "visual": "SSIM 0.9774, 144 dpi",
+  "structural": "aspect kept=PASS, images=1/1",
+  "difference": "none (re-rendered; anti-aliasing only)",
+  "checks": {
+   "look": "PASS",
+   "aspect": "PASS",
+   "count": "PASS",
+   "noOcr": "PASS",
+   "resolution": "PASS"
+  },
+  "integrity": [
+   {
+    "file": "rup-p2i-02-DOCUMENT-02-filled-application-page-1.jpg",
+    "bytes": 288514,
+    "ok": true,
+    "kind": "jpeg",
+    "w": 1224,
+    "h": 1584,
+    "alpha": false
+   }
+  ]
+ },
+ {
+  "tool": "PDF → Image",
+  "test": "DOCUMENT-03-certificate.pdf → PNG",
+  "verdict": "PASS",
+  "fixture": "DOCUMENT-03-certificate.pdf",
+  "journey": "",
+  "represents": "a scanned landscape certificate with a decorative border, seal and signatures",
+  "expectation": "A picture of each page exactly as it looks, one image per page, readable at normal zoom; nothing recognised or rewritten.",
+  "steps": "open /pdf-to-image → add file → choose format → Convert → download → compare the picture with the page rendered independently",
+  "output": "1 image(s) 1584×1224",
+  "visual": "SSIM 0.9949, 144 dpi",
+  "structural": "aspect kept=PASS, images=1/1",
+  "difference": "none (re-rendered; anti-aliasing only)",
+  "checks": {
+   "look": "PASS",
+   "aspect": "PASS",
+   "count": "PASS",
+   "noOcr": "PASS",
+   "resolution": "PASS"
+  },
+  "integrity": [
+   {
+    "file": "rup-p2i-03-DOCUMENT-03-certificate-page-1.png",
+    "bytes": 2907816,
+    "ok": true,
+    "kind": "png",
+    "w": 1584,
+    "h": 1224,
+    "alpha": false
+   }
+  ]
+ },
+ {
+  "tool": "PDF → Image",
+  "test": "DOCUMENT-05-bank-statement.pdf → PNG",
+  "verdict": "PASS",
+  "fixture": "DOCUMENT-05-bank-statement.pdf",
+  "journey": "",
+  "represents": "a two-page scanned bank statement: account box, transaction table, running balance",
+  "expectation": "A picture of each page exactly as it looks, one image per page, readable at normal zoom; nothing recognised or rewritten.",
+  "steps": "open /pdf-to-image → add file → choose format → Convert → download → compare the picture with the page rendered independently",
+  "output": "2 image(s) 1224×1584 1224×1584",
+  "visual": "SSIM 0.9947, 144 dpi",
+  "structural": "aspect kept=PASS, images=2/2",
+  "difference": "none (re-rendered; anti-aliasing only)",
+  "checks": {
+   "look": "PASS",
+   "aspect": "PASS",
+   "count": "PASS",
+   "noOcr": "PASS",
+   "resolution": "PASS"
+  },
+  "integrity": [
+   {
+    "file": "rup-p2i-05-DOCUMENT-05-bank-statement-images.zip",
+    "bytes": 4439143,
+    "ok": true,
+    "kind": "zip",
+    "entries": 2
+   }
+  ]
+ },
+ {
+  "tool": "PDF → Image",
+  "test": "DOCUMENT-06-resume-native.pdf → PNG",
+  "verdict": "PASS",
+  "fixture": "DOCUMENT-06-resume-native.pdf",
+  "journey": "",
+  "represents": "a native PDF résumé: headings, bullet lists, bold role titles",
+  "expectation": "A picture of each page exactly as it looks, one image per page, readable at normal zoom; nothing recognised or rewritten.",
+  "steps": "open /pdf-to-image → add file → choose format → Convert → download → compare the picture with the page rendered independently",
+  "output": "1 image(s) 1224×1584",
+  "visual": "SSIM 0.987, 144 dpi",
+  "structural": "aspect kept=PASS, images=1/1",
+  "difference": "none (re-rendered; anti-aliasing only)",
+  "checks": {
+   "look": "PASS",
+   "aspect": "PASS",
+   "count": "PASS",
+   "noOcr": "PASS",
+   "resolution": "PASS"
+  },
+  "integrity": [
+   {
+    "file": "rup-p2i-06-DOCUMENT-06-resume-native-page-1.png",
+    "bytes": 164595,
+    "ok": true,
+    "kind": "png",
+    "w": 1224,
+    "h": 1584,
+    "alpha": false
+   }
+  ]
+ },
+ {
+  "tool": "PDF → Image",
+  "test": "DOCUMENT-12-table-report.pdf → JPG",
+  "verdict": "PASS",
+  "fixture": "DOCUMENT-12-table-report.pdf",
+  "journey": "",
+  "represents": "a native PDF report with a data table and a chart",
+  "expectation": "A picture of each page exactly as it looks, one image per page, readable at normal zoom; nothing recognised or rewritten.",
+  "steps": "open /pdf-to-image → add file → choose format → Convert → download → compare the picture with the page rendered independently",
+  "output": "1 image(s) 1224×1584",
+  "visual": "SSIM 0.9875, 144 dpi",
+  "structural": "aspect kept=PASS, images=1/1",
+  "difference": "none (re-rendered; anti-aliasing only)",
+  "checks": {
+   "look": "PASS",
+   "aspect": "PASS",
+   "count": "PASS",
+   "noOcr": "PASS",
+   "resolution": "PASS"
+  },
+  "integrity": [
+   {
+    "file": "rup-p2i-12-DOCUMENT-12-table-report-page-1.jpg",
+    "bytes": 121375,
+    "ok": true,
+    "kind": "jpeg",
+    "w": 1224,
+    "h": 1584,
+    "alpha": false
+   }
+  ]
+ },
+ {
+  "tool": "Images → PDF",
+  "test": "ID card PNG, fit to image",
+  "verdict": "PASS",
+  "fixture": "DOCUMENT-09-id-card-image.png",
+  "represents": "a photo-style identity card (wide), portrait and fields, PNG",
+  "expectation": "Each image becomes one page, looking exactly like the image; JPG/PNG are embedded, not recompressed; no text added.",
+  "steps": "open /image-to-pdf → add image(s) → page size → Create PDF → Download PDF → compare each page with its image",
+  "output": "1 page(s) 758×479",
+  "visual": "rendered SSIM 0.9993; embedded SSIM 1",
+  "structural": "bytes identical=false, text characters in PDF=0",
+  "difference": "none",
+  "checks": {
+   "pages": "PASS",
+   "embedded": "PASS",
+   "bytesUntouched": "PASS",
+   "proportions": "PASS",
+   "inPage": "PASS",
+   "noText": "PASS",
+   "noOcrRun": "PASS"
+  },
+  "integrity": [
+   {
+    "file": "rup-i2p-IDcard-DOCUMENT-09-id-card-image.pdf",
+    "bytes": 771189,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 1
+   }
+  ]
+ },
+ {
+  "tool": "Images → PDF",
+  "test": "filled form PNG on A4",
+  "verdict": "PASS",
+  "fixture": "DOCUMENT-10-filled-form.png",
+  "journey": "E",
+  "represents": "a filled-in application form photographed/scanned to PNG, check boxes and signature",
+  "expectation": "Each image becomes one page, looking exactly like the image; JPG/PNG are embedded, not recompressed; no text added.",
+  "steps": "open /image-to-pdf → add image(s) → page size → Create PDF → Download PDF → compare each page with its image",
+  "output": "1 page(s) 595×842",
+  "visual": "rendered SSIM 0.9351; embedded SSIM 1",
+  "structural": "bytes identical=false, text characters in PDF=0",
+  "difference": "none",
+  "checks": {
+   "pages": "PASS",
+   "embedded": "PASS",
+   "bytesUntouched": "PASS",
+   "proportions": "PASS",
+   "inPage": "PASS",
+   "noText": "PASS",
+   "noOcrRun": "PASS"
+  },
+  "integrity": [
+   {
+    "file": "rup-i2p-filledf-DOCUMENT-10-filled-form.pdf",
+    "bytes": 2517661,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 1
+   }
+  ]
+ },
+ {
+  "tool": "Images → PDF",
+  "test": "receipt JPG, fit to image",
+  "verdict": "PASS",
+  "fixture": "DOCUMENT-11-receipt.jpg",
+  "represents": "a long, narrow till receipt photo (JPG)",
+  "expectation": "Each image becomes one page, looking exactly like the image; JPG/PNG are embedded, not recompressed; no text added.",
+  "steps": "open /image-to-pdf → add image(s) → page size → Create PDF → Download PDF → compare each page with its image",
+  "output": "1 page(s) 480×752",
+  "visual": "rendered SSIM 0.9999; embedded SSIM 1",
+  "structural": "bytes identical=true, text characters in PDF=0",
+  "difference": "none",
+  "checks": {
+   "pages": "PASS",
+   "embedded": "PASS",
+   "bytesUntouched": "PASS",
+   "proportions": "PASS",
+   "inPage": "PASS",
+   "noText": "PASS",
+   "noOcrRun": "PASS"
+  },
+  "integrity": [
+   {
+    "file": "rup-i2p-receipt-DOCUMENT-11-receipt.pdf",
+    "bytes": 136820,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 1
+   }
+  ]
+ },
+ {
+  "tool": "Images → PDF",
+  "test": "three images in order on Letter",
+  "verdict": "PASS",
+  "fixture": "DOCUMENT-11-receipt.jpg + DOCUMENT-09-id-card-image.png + DOCUMENT-17-screenshot.png",
+  "represents": "a long, narrow till receipt photo (JPG); a photo-style identity card (wide), portrait and fields, PNG; a wide desktop-style screenshot (PNG)",
+  "expectation": "Each image becomes one page, looking exactly like the image; JPG/PNG are embedded, not recompressed; no text added.",
+  "steps": "open /image-to-pdf → add image(s) → page size → Create PDF → Download PDF → compare each page with its image",
+  "output": "3 page(s) 612×792 792×612 792×612",
+  "visual": "rendered SSIM 0.9595 / 0.9619 / 0.9886; embedded SSIM 1 / 1 / 1",
+  "structural": "bytes identical=true/false/false, text characters in PDF=0",
+  "difference": "none",
+  "checks": {
+   "pages": "PASS",
+   "embedded": "PASS",
+   "bytesUntouched": "PASS",
+   "proportions": "PASS",
+   "inPage": "PASS",
+   "noText": "PASS",
+   "noOcrRun": "PASS"
+  },
+  "integrity": [
+   {
+    "file": "rup-i2p-threeim-images.pdf",
+    "bytes": 952950,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 3
+   }
+  ]
+ },
+ {
+  "tool": "Word → PDF",
+  "test": "DOCUMENT-15-native-business-letter.docx",
+  "verdict": "PASS",
+  "fixture": "DOCUMENT-15-native-business-letter.docx",
+  "journey": "G",
+  "represents": "a native business letter (letterhead, justified paragraphs, signature block)",
+  "expectation": "The PDF looks like the document in a word processor: same pages, fonts, tables and pictures; text stays selectable.",
+  "steps": "open /word-to-pdf → add .docx → Convert to PDF → Download PDF → compare with LibreOffice's own rendering of the same file",
+  "output": "1 page(s) vs 1 in the reference",
+  "visual": "SSIM 0.9041 (min over pages) vs the LibreOffice rendering",
+  "structural": "selectable text recall 100%, page sizes kept=true",
+  "difference": "layout engine differences only (line breaks within a few points)",
+  "checks": {
+   "pagesKept": "PASS",
+   "sizes": "PASS",
+   "text": "PASS",
+   "look": "PASS"
+  },
+  "integrity": [
+   {
+    "file": "rup-w2p-15-DOCUMENT-15-native-business-letter.pdf",
+    "bytes": 21281,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 1
+   }
+  ]
+ },
+ {
+  "tool": "Word → PDF",
+  "test": "DOCUMENT-16-complex-word-report.docx",
+  "verdict": "LIMITED",
+  "fixture": "DOCUMENT-16-complex-word-report.docx",
+  "represents": "a complex report: headings, tables, a list, a picture, header/footer, page numbers",
+  "expectation": "The PDF looks like the document in a word processor: same pages, fonts, tables and pictures; text stays selectable.",
+  "steps": "open /word-to-pdf → add .docx → Convert to PDF → Download PDF → compare with LibreOffice's own rendering of the same file",
+  "output": "2 page(s) vs 2 in the reference",
+  "visual": "SSIM 0.8373 (min over pages) vs the LibreOffice rendering",
+  "structural": "selectable text recall 100%, page sizes kept=true",
+  "difference": "look=LIMITED",
+  "checks": {
+   "pagesKept": "PASS",
+   "sizes": "PASS",
+   "text": "PASS",
+   "look": "LIMITED"
+  },
+  "integrity": [
+   {
+    "file": "rup-w2p-16-DOCUMENT-16-complex-word-report.pdf",
+    "bytes": 45584,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 2
+   }
+  ]
+ },
+ {
+  "tool": "Compress PDF",
+  "test": "DOCUMENT-01-passport-scan.pdf → 250 KB",
+  "verdict": "PASS",
+  "fixture": "DOCUMENT-01-passport-scan.pdf",
+  "represents": "a scanned travel-document page: portrait photo, labelled fields, handwriting-style fill-in, stamp, machine-readable lines",
+  "expectation": "Smaller file, same pages, still looks like the original (text, stamps and signatures readable), no surprise conversions.",
+  "steps": "open /compress-pdf → add → Custom target → Compress → Download → compare",
+  "output": "470549 → 196804 bytes (58% smaller)",
+  "visual": "SSIM 0.9838, PSNR 45.59",
+  "structural": "pages 1/1, sizes kept=true",
+  "difference": "image re-encoding only",
+  "screen": "Done — 197 KB",
+  "checks": {
+   "look": "PASS",
+   "pages": "PASS",
+   "smaller": "PASS",
+   "target": "PASS"
+  },
+  "integrity": [
+   {
+    "file": "rup-cpdf-01-DOCUMENT-01-passport-scan-compressed.pdf",
+    "bytes": 196804,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 1
+   }
+  ]
+ },
+ {
+  "tool": "Compress PDF",
+  "test": "DOCUMENT-02-filled-application.pdf → 250 KB",
+  "verdict": "PASS",
+  "fixture": "DOCUMENT-02-filled-application.pdf",
+  "represents": "a scanned application form filled in by hand: field lines, ticked check boxes, signature and date",
+  "expectation": "Smaller file, same pages, still looks like the original (text, stamps and signatures readable), no surprise conversions.",
+  "steps": "open /compress-pdf → add → Custom target → Compress → Download → compare",
+  "output": "453581 → 232529 bytes (49% smaller)",
+  "visual": "SSIM 0.9873, PSNR 45.36",
+  "structural": "pages 1/1, sizes kept=true",
+  "difference": "image re-encoding only",
+  "screen": "Done — 233 KB",
+  "checks": {
+   "look": "PASS",
+   "pages": "PASS",
+   "smaller": "PASS",
+   "target": "PASS"
+  },
+  "integrity": [
+   {
+    "file": "rup-cpdf-02-DOCUMENT-02-filled-application-compressed.pdf",
+    "bytes": 232529,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 1
+   }
+  ]
+ },
+ {
+  "tool": "Compress PDF",
+  "test": "DOCUMENT-08-signed-contract.pdf → 300 KB",
+  "verdict": "PASS",
+  "fixture": "DOCUMENT-08-signed-contract.pdf",
+  "represents": "a two-page scanned agreement with clauses, a signature block and handwritten signatures",
+  "expectation": "Smaller file, same pages, still looks like the original (text, stamps and signatures readable), no surprise conversions.",
+  "steps": "open /compress-pdf → add → Custom target → Compress → Download → compare",
+  "output": "856115 → 267719 bytes (69% smaller)",
+  "visual": "SSIM 0.9814, PSNR 44.63",
+  "structural": "pages 2/2, sizes kept=true",
+  "difference": "image re-encoding only",
+  "screen": "Done — 268 KB",
+  "checks": {
+   "look": "PASS",
+   "pages": "PASS",
+   "smaller": "PASS",
+   "target": "PASS"
+  },
+  "integrity": [
+   {
+    "file": "rup-cpdf-08-DOCUMENT-08-signed-contract-compressed.pdf",
+    "bytes": 267719,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 2
+   }
+  ]
+ },
+ {
+  "tool": "Compress PDF",
+  "test": "DOCUMENT-05-bank-statement.pdf → 400 KB",
+  "verdict": "PASS",
+  "fixture": "DOCUMENT-05-bank-statement.pdf",
+  "represents": "a two-page scanned bank statement: account box, transaction table, running balance",
+  "expectation": "Smaller file, same pages, still looks like the original (text, stamps and signatures readable), no surprise conversions.",
+  "steps": "open /compress-pdf → add → Custom target → Compress → Download → compare",
+  "output": "952443 → 352355 bytes (63% smaller)",
+  "visual": "SSIM 0.9835, PSNR 44.21",
+  "structural": "pages 2/2, sizes kept=true",
+  "difference": "image re-encoding only",
+  "screen": "Done — 352 KB",
+  "checks": {
+   "look": "PASS",
+   "pages": "PASS",
+   "smaller": "PASS",
+   "target": "PASS"
+  },
+  "integrity": [
+   {
+    "file": "rup-cpdf-05-DOCUMENT-05-bank-statement-compressed.pdf",
+    "bytes": 352355,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 2
+   }
+  ]
+ },
+ {
+  "tool": "Compress Image",
+  "test": "DOCUMENT-10-filled-form.png → 600 KB",
+  "verdict": "PASS",
+  "fixture": "DOCUMENT-10-filled-form.png",
+  "represents": "a filled-in application form photographed/scanned to PNG, check boxes and signature",
+  "expectation": "Smaller image that looks the same at normal size; text in it stays readable; any resizing is stated.",
+  "steps": "open /compress-image → add → Custom target → Compress → Download → compare",
+  "output": "2352930 → 589130 bytes, 1445×1870 → 1445×1870",
+  "visual": "PSNR 42.89 dB, SSIM 0.9692",
+  "structural": "dimensions kept=true",
+  "difference": "lossy re-encode within tolerance",
+  "screen": "WebP · 1445 × 1870px · quality 92% · 0.8 s",
+  "checks": {
+   "look": "PASS",
+   "dimensions": "PASS",
+   "target": "PASS"
+  },
+  "integrity": [
+   {
+    "file": "rup-cimg-10-DOCUMENT-10-filled-form-compressed.webp",
+    "bytes": 589130,
+    "ok": true,
+    "kind": "webp",
+    "w": 1445,
+    "h": 1870,
+    "alpha": false
+   }
+  ]
+ },
+ {
+  "tool": "Compress Image",
+  "test": "DOCUMENT-14-photo-with-text.png → 400 KB",
+  "verdict": "PASS",
+  "fixture": "DOCUMENT-14-photo-with-text.png",
+  "represents": "a photograph with a sign / caption text in it (PNG)",
+  "expectation": "Smaller image that looks the same at normal size; text in it stays readable; any resizing is stated.",
+  "steps": "open /compress-image → add → Custom target → Compress → Download → compare",
+  "output": "1388247 → 87262 bytes, 1600×1066 → 1600×1066",
+  "visual": "PSNR 48.25 dB, SSIM 0.9872",
+  "structural": "dimensions kept=true",
+  "difference": "lossy re-encode within tolerance",
+  "screen": "WebP · 1600 × 1066px · quality 92% · 0.4 s",
+  "checks": {
+   "look": "PASS",
+   "dimensions": "PASS",
+   "target": "PASS"
+  },
+  "integrity": [
+   {
+    "file": "rup-cimg-14-DOCUMENT-14-photo-with-text-compressed.webp",
+    "bytes": 87262,
+    "ok": true,
+    "kind": "webp",
+    "w": 1600,
+    "h": 1066,
+    "alpha": false
+   }
+  ]
+ },
+ {
+  "tool": "Compress Image",
+  "test": "DOCUMENT-11-receipt.jpg → 80 KB",
+  "verdict": "PASS",
+  "fixture": "DOCUMENT-11-receipt.jpg",
+  "represents": "a long, narrow till receipt photo (JPG)",
+  "expectation": "Smaller image that looks the same at normal size; text in it stays readable; any resizing is stated.",
+  "steps": "open /compress-image → add → Custom target → Compress → Download → compare",
+  "output": "135871 → 71934 bytes, 640×1002 → 640×1002",
+  "visual": "PSNR 37.6 dB, SSIM 0.9167",
+  "structural": "dimensions kept=true",
+  "difference": "lossy re-encode within tolerance",
+  "screen": "JPG · 640 × 1002px · quality 74% · 0.2 s",
+  "checks": {
+   "look": "PASS",
+   "dimensions": "PASS",
+   "target": "PASS"
+  },
+  "integrity": [
+   {
+    "file": "rup-cimg-11-DOCUMENT-11-receipt-compressed.jpg",
+    "bytes": 71934,
+    "ok": true,
+    "kind": "jpeg",
+    "w": 640,
+    "h": 1002,
+    "alpha": false
+   }
+  ]
+ },
+ {
+  "tool": "Compress Image",
+  "test": "DOCUMENT-09-id-card-image.png → 250 KB",
+  "verdict": "PASS",
+  "fixture": "DOCUMENT-09-id-card-image.png",
+  "represents": "a photo-style identity card (wide), portrait and fields, PNG",
+  "expectation": "Smaller image that looks the same at normal size; text in it stays readable; any resizing is stated.",
+  "steps": "open /compress-image → add → Custom target → Compress → Download → compare",
+  "output": "672573 → 122938 bytes, 1011×638 → 1011×638",
+  "visual": "PSNR 42.65 dB, SSIM 0.9677",
+  "structural": "dimensions kept=true",
+  "difference": "lossy re-encode within tolerance",
+  "screen": "WebP · 1011 × 638px · quality 92% · 0.2 s",
+  "checks": {
+   "look": "PASS",
+   "dimensions": "PASS",
+   "target": "PASS"
+  },
+  "integrity": [
+   {
+    "file": "rup-cimg-09-DOCUMENT-09-id-card-image-compressed.webp",
+    "bytes": 122938,
+    "ok": true,
+    "kind": "webp",
+    "w": 1011,
+    "h": 638,
+    "alpha": false
+   }
+  ]
+ },
+ {
+  "tool": "Merge PDF",
+  "test": "four documents, in order",
+  "verdict": "PASS",
+  "fixture": "DOCUMENT-06-resume-native.pdf + DOCUMENT-12-table-report.pdf + DOCUMENT-02-filled-application.pdf + DOCUMENT-05-bank-statement.pdf",
+  "represents": "native and scanned documents of different kinds joined into one file",
+  "expectation": "All pages in the chosen order, each identical to its source — nothing re-rendered, rotated or compressed.",
+  "steps": "open /merge-pdf → add four PDFs → Merge → Download → compare every page with its source",
+  "output": "5 pages (expected 5)",
+  "visual": "DOCUMENT-06 SSIM 1; DOCUMENT-12 SSIM 1; DOCUMENT-02 SSIM 1; DOCUMENT-05 SSIM 1",
+  "structural": "order and page sizes kept; text recall 100/100//",
+  "difference": "none (identical pages)",
+  "checks": {
+   "count": "PASS",
+   "parts": [
+    "PASS",
+    "PASS",
+    "PASS",
+    "PASS"
+   ]
+  },
+  "integrity": [
+   {
+    "file": "rup-merge-merged.pdf",
+    "bytes": 1420274,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 5
+   }
+  ]
+ },
+ {
+  "tool": "Split PDF",
+  "test": "page 2 of the scanned statement",
+  "verdict": "PASS",
+  "fixture": "DOCUMENT-05-bank-statement.pdf",
+  "represents": "a two-page scanned bank statement: account box, transaction table, running balance",
+  "expectation": "A PDF with just the chosen page, identical to it in the original.",
+  "steps": "open /split-pdf → add → tick Page 2 → Extract → Download → compare with the original page 2",
+  "output": "1 page(s)",
+  "visual": "SSIM 1, 0% changed",
+  "structural": "page size kept=true",
+  "difference": "none",
+  "checks": {
+   "identity": "PASS"
+  },
+  "integrity": [
+   {
+    "file": "rup-split-DOCUMENT-05-bank-statement-pages-2.pdf",
+    "bytes": 477430,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 1
+   }
+  ]
+ },
+ {
+  "tool": "Split PDF",
+  "test": "every page of the signed contract → ZIP",
+  "verdict": "PASS",
+  "fixture": "DOCUMENT-08-signed-contract.pdf",
+  "represents": "a two-page scanned agreement with clauses, a signature block and handwritten signatures",
+  "expectation": "One single-page PDF per page, each identical to its page.",
+  "steps": "open /split-pdf → Split every page → Split into 2 PDFs → Download all (ZIP) → compare each file",
+  "output": "2 files",
+  "visual": "PASS/PASS",
+  "structural": "page sizes kept",
+  "difference": "none",
+  "checks": {
+   "grades": [
+    "PASS",
+    "PASS"
+   ]
+  },
+  "integrity": [
+   {
+    "file": "rup-split-every-DOCUMENT-08-signed-contract-pages.zip",
+    "bytes": 859318,
+    "ok": true,
+    "kind": "zip",
+    "entries": 2
+   }
+  ]
+ },
+ {
+  "tool": "Organize PDF",
+  "test": "reverse the contract and turn the first page",
+  "verdict": "PASS",
+  "fixture": "DOCUMENT-08-signed-contract.pdf",
+  "represents": "a two-page scanned agreement with clauses, a signature block and handwritten signatures",
+  "expectation": "Pages in the new order, the rotated one turned, everything else untouched.",
+  "steps": "open /organize-pdf → add → rotate page 2 right → drag page 2 first → Save PDF → Download → compare",
+  "output": "2 pages",
+  "visual": "SSIM 1, 0% changed",
+  "structural": "order and rotation checked against the source",
+  "difference": "none",
+  "checks": {
+   "identity": "PASS"
+  },
+  "integrity": [
+   {
+    "file": "rup-org-DOCUMENT-08-signed-contract-organized.pdf",
+    "bytes": 855938,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 2
+   }
+  ]
+ },
+ {
+  "tool": "PDF Editor",
+  "test": "export with no edits (DOCUMENT-02)",
+  "verdict": "PASS",
+  "fixture": "DOCUMENT-02-filled-application.pdf",
+  "represents": "a scanned application form filled in by hand: field lines, ticked check boxes, signature and date",
+  "expectation": "The edit appears; the rest of the page is untouched (no re-rendering of a scan, no lost text).",
+  "steps": "open /pdf-editor → add → make the edit → Export PDF → compare with the original",
+  "output": "1 page(s)",
+  "visual": "identical to the source: SSIM 1, 0% changed",
+  "structural": "page size kept=true, text recall n/a",
+  "difference": "only the edit differs",
+  "checks": {
+   "verdict": "PASS"
+  },
+  "integrity": [
+   {
+    "file": "rup-edit-export-with-no-edits-DOCUMENT-02-filled-application-edited.pdf",
+    "bytes": 453657,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 1
+   }
+  ]
+ },
+ {
+  "tool": "PDF Editor",
+  "test": "add a typed note on the form (DOCUMENT-02)",
+  "verdict": "PASS",
+  "fixture": "DOCUMENT-02-filled-application.pdf",
+  "represents": "a scanned application form filled in by hand: field lines, ticked check boxes, signature and date",
+  "expectation": "The edit appears; the rest of the page is untouched (no re-rendering of a scan, no lost text).",
+  "steps": "open /pdf-editor → add → make the edit → Export PDF → compare with the original",
+  "output": "1 page(s)",
+  "visual": "5.23% changed inside the edit, 0% outside",
+  "structural": "page size kept=true, text recall n/a",
+  "difference": "only the edit differs",
+  "checks": {
+   "verdict": "PASS"
+  },
+  "integrity": [
+   {
+    "file": "rup-edit-add-a-typed-note-on-the--DOCUMENT-02-filled-application-edited.pdf",
+    "bytes": 454081,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 1
+   }
+  ]
+ },
+ {
+  "tool": "PDF Editor",
+  "test": "highlight a line on the form (DOCUMENT-02)",
+  "verdict": "PASS",
+  "fixture": "DOCUMENT-02-filled-application.pdf",
+  "represents": "a scanned application form filled in by hand: field lines, ticked check boxes, signature and date",
+  "expectation": "The edit appears; the rest of the page is untouched (no re-rendering of a scan, no lost text).",
+  "steps": "open /pdf-editor → add → make the edit → Export PDF → compare with the original",
+  "output": "1 page(s)",
+  "visual": "0.75% changed inside the edit, 0% outside",
+  "structural": "page size kept=true, text recall n/a",
+  "difference": "only the edit differs",
+  "checks": {
+   "verdict": "PASS"
+  },
+  "integrity": [
+   {
+    "file": "rup-edit-highlight-a-line-on-the--DOCUMENT-02-filled-application-edited.pdf",
+    "bytes": 454088,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 1
+   }
+  ]
+ },
+ {
+  "tool": "PDF Editor",
+  "test": "correct a word in the native résumé (DOCUMENT-06)",
+  "verdict": "PASS",
+  "fixture": "DOCUMENT-06-resume-native.pdf",
+  "represents": "a native PDF résumé: headings, bullet lists, bold role titles",
+  "expectation": "The edit appears; the rest of the page is untouched (no re-rendering of a scan, no lost text).",
+  "steps": "open /pdf-editor → add → make the edit → Export PDF → compare with the original",
+  "output": "1 page(s)",
+  "visual": "19.54% changed inside the edit, 0% outside; the cover differs from the background it sits on by 0/255 grey",
+  "structural": "page size kept=true, text recall 99.07",
+  "difference": "only the edit differs",
+  "checks": {
+   "verdict": "PASS"
+  },
+  "integrity": [
+   {
+    "file": "rup-edit-correct-a-word-in-the-na-DOCUMENT-06-resume-native-edited.pdf",
+    "bytes": 7614,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 1
+   }
+  ]
+ },
+ {
+  "tool": "OCR (Recognize text)",
+  "test": "DOCUMENT-07-scanned-letter.pdf",
+  "verdict": "PASS",
+  "fixture": "DOCUMENT-07-scanned-letter.pdf",
+  "journey": "H",
+  "represents": "a scanned plain business letter — running text, no pictures, no form fields",
+  "expectation": "Only when asked: the scan looks exactly as before and gains an invisible text layer — searchable and selectable. The scan itself is not edited as text.",
+  "steps": "open /pdf-editor → add the scan → Recognize text → Export PDF → compare, then read the PDF's text",
+  "output": "148 words in the PDF text layer; 0 words offered for editing",
+  "visual": "unchanged: SSIM 1, 0% changed",
+  "structural": "searchable 100% of the document's words",
+  "difference": "text layer added, pixels unchanged",
+  "checks": {
+   "ranOnlyBecauseAsked": "PASS",
+   "looksUnchanged": "PASS",
+   "pagesKept": "PASS",
+   "searchable": "PASS",
+   "noEditSurface": "PASS"
+  },
+  "integrity": [
+   {
+    "file": "rup-ocr-07-DOCUMENT-07-scanned-letter-edited.pdf",
+    "bytes": 450908,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 1
+   }
+  ]
+ },
+ {
+  "tool": "OCR (Recognize text)",
+  "test": "DOCUMENT-02-filled-application.pdf",
+  "verdict": "PASS",
+  "fixture": "DOCUMENT-02-filled-application.pdf",
+  "journey": "",
+  "represents": "a scanned application form filled in by hand: field lines, ticked check boxes, signature and date",
+  "expectation": "Only when asked: the scan looks exactly as before and gains an invisible text layer — searchable and selectable. The scan itself is not edited as text.",
+  "steps": "open /pdf-editor → add the scan → Recognize text → Export PDF → compare, then read the PDF's text",
+  "output": "160 words in the PDF text layer; 0 words offered for editing",
+  "visual": "unchanged: SSIM 1, 0% changed",
+  "structural": "searchable 90.3% of the document's words",
+  "difference": "text layer added, pixels unchanged",
+  "checks": {
+   "ranOnlyBecauseAsked": "PASS",
+   "looksUnchanged": "PASS",
+   "pagesKept": "PASS",
+   "searchable": "PASS",
+   "noEditSurface": "PASS"
+  },
+  "integrity": [
+   {
+    "file": "rup-ocr-02-DOCUMENT-02-filled-application-edited.pdf",
+    "bytes": 455953,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 1
+   }
+  ]
+ },
+ {
+  "tool": "OCR (Recognize text)",
+  "test": "DOCUMENT-04-invoice.pdf",
+  "verdict": "PASS",
+  "fixture": "DOCUMENT-04-invoice.pdf",
+  "journey": "",
+  "represents": "a scanned invoice: letterhead, line-item table, totals, a stamped PAID mark",
+  "expectation": "Only when asked: the scan looks exactly as before and gains an invisible text layer — searchable and selectable. The scan itself is not edited as text.",
+  "steps": "open /pdf-editor → add the scan → Recognize text → Export PDF → compare, then read the PDF's text",
+  "output": "89 words in the PDF text layer; 0 words offered for editing",
+  "visual": "unchanged: SSIM 1, 0% changed",
+  "structural": "searchable 92.5% of the document's words",
+  "difference": "text layer added, pixels unchanged",
+  "checks": {
+   "ranOnlyBecauseAsked": "PASS",
+   "looksUnchanged": "PASS",
+   "pagesKept": "PASS",
+   "searchable": "PASS",
+   "noEditSurface": "PASS"
+  },
+  "integrity": [
+   {
+    "file": "rup-ocr-04-DOCUMENT-04-invoice-edited.pdf",
+    "bytes": 446450,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 1
+   }
+  ]
+ },
+ {
+  "tool": "PDF → Word [mobile]",
+  "test": "DOCUMENT-01-passport-scan [mobile]",
+  "verdict": "PASS",
+  "fixture": "DOCUMENT-01-passport-scan.pdf",
+  "represents": "a scanned travel-document page: portrait photo, labelled fields, handwriting-style fill-in, stamp, machine-readable lines",
+  "journey": "B",
+  "expectation": "Phone gives the same result as desktop.",
+  "desktop": "visual",
+  "mobile": "visual",
+  "output": "482786 bytes",
+  "difference": "none",
+  "integrity": [
+   {
+    "file": "rup-DOCUMENT-01-passport-scan-m-DOCUMENT-01-passport-scan.docx",
+    "bytes": 482786,
+    "ok": true,
+    "kind": "docx",
+    "pages": 1,
+    "paragraphs": 0,
+    "tables": 0,
+    "pictures": 0
+   }
+  ]
+ },
+ {
+  "tool": "PDF → Word [mobile]",
+  "test": "DOCUMENT-02-filled-application [mobile]",
+  "verdict": "PASS",
+  "fixture": "DOCUMENT-02-filled-application.pdf",
+  "represents": "a scanned application form filled in by hand: field lines, ticked check boxes, signature and date",
+  "journey": "A",
+  "expectation": "Phone gives the same result as desktop.",
+  "desktop": "visual",
+  "mobile": "visual",
+  "output": "455501 bytes",
+  "difference": "none",
+  "integrity": [
+   {
+    "file": "rup-DOCUMENT-02-filled-application-m-DOCUMENT-02-filled-application.docx",
+    "bytes": 455501,
+    "ok": true,
+    "kind": "docx",
+    "pages": 1,
+    "paragraphs": 0,
+    "tables": 0,
+    "pictures": 0
+   }
+  ]
+ },
+ {
+  "tool": "PDF → Word [mobile]",
+  "test": "DOCUMENT-06-resume-native [mobile]",
+  "verdict": "PASS",
+  "fixture": "DOCUMENT-06-resume-native.pdf",
+  "represents": "a native PDF résumé: headings, bullet lists, bold role titles",
+  "journey": "C",
+  "expectation": "Phone gives the same result as desktop.",
+  "desktop": "editable",
+  "mobile": "editable",
+  "output": "4896 bytes",
+  "difference": "none",
+  "integrity": [
+   {
+    "file": "rup-DOCUMENT-06-resume-native-m-DOCUMENT-06-resume-native.docx",
+    "bytes": 4896,
+    "ok": true,
+    "kind": "docx",
+    "pages": 1,
+    "paragraphs": 16,
+    "tables": 1,
+    "pictures": 0
+   }
+  ]
+ },
+ {
+  "tool": "Image → Word",
+  "test": "filled form PNG [mobile]",
+  "verdict": "PASS",
+  "fixture": "DOCUMENT-10-filled-form.png",
+  "represents": "a filled-in application form photographed/scanned to PNG, check boxes and signature",
+  "journey": "D",
+  "expectation": "The document looks like the image: right proportions, centred, nothing clipped or stretched, no recognised text.",
+  "steps": "open /image-to-word → add 1 image(s) → Fit to image → Create Word document → Download .docx → LibreOffice render → compare",
+  "output": "i2w-filled-form-PNG-m.docx — 1 page(s), 2357102 bytes, page(s) 612×792 pt",
+  "visual": "render vs image: SSIM 0.8708",
+  "structural": "text characters=0, pictures=1, image bytes identical to the source=true",
+  "difference": "none (the image is the page content; nothing was recognised or retyped)",
+  "checks": {
+   "onePagePerImage": "PASS",
+   "noText": "PASS",
+   "noOcrRun": "PASS",
+   "noUpload": "PASS",
+   "pageShape": "PASS",
+   "untouchedBytes": "PASS",
+   "inPageNotClipped": "PASS",
+   "proportions": "PASS",
+   "looksLike": "PASS"
+  },
+  "integrity": [
+   {
+    "file": "rup-i2w-filled-form-PNG-m-DOCUMENT-10-filled-form.docx",
+    "bytes": 2357102,
+    "ok": true,
+    "kind": "docx",
+    "pages": 1,
+    "paragraphs": 0,
+    "tables": 0,
+    "pictures": 0
+   }
+  ]
+ },
+ {
+  "tool": "PDF → Word [mobile]",
+  "test": "console errors",
+  "verdict": "PASS",
+  "errors": [],
+  "fixture": "(all mobile steps)",
+  "represents": "-",
+  "expectation": "No console errors on a phone."
+ },
+ {
+  "tool": "All tools",
+  "test": "no third-party requests, no uploads",
+  "verdict": "PASS",
+  "leaked": [],
+  "fixture": "(whole run)",
+  "represents": "-",
+  "expectation": "Everything happens in the browser."
+ },
+ {
+  "tool": "All tools",
+  "test": "console errors (desktop)",
+  "verdict": "PASS",
+  "count": 0,
+  "errors": [],
+  "fixture": "(whole run)",
+  "represents": "-",
+  "expectation": "No console errors."
+ }
+]

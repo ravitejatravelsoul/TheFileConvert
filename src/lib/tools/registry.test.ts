@@ -1,128 +1,61 @@
 import { describe, expect, it } from "vitest";
-import {
-  allTools,
-  liveTools,
-  getToolById,
-  getToolByHref,
-  getToolsByCategory,
-  getRelatedTools,
-  getToolsAcceptingExtension,
-  searchTools,
-  getPopularTools,
-} from "./registry";
+import { TOOLS, entryKindFor, entryKindForAll, getTool, suggestionsFor, toolsInCategory } from "./registry";
 
-describe("tool registry integrity", () => {
-  it("has unique tool ids", () => {
-    const ids = allTools.map((t) => t.id);
-    expect(new Set(ids).size).toBe(ids.length);
-  });
-
-  it("has unique hrefs", () => {
-    const hrefs = allTools.map((t) => t.href);
-    expect(new Set(hrefs).size).toBe(hrefs.length);
-  });
-
-  it("only marks tools as available when processing mode is local or server-assisted consistently", () => {
-    for (const tool of allTools) {
-      if (tool.status === "coming-soon") {
-        expect(tool.processingMode).not.toBe("local");
-      }
+describe("tool registry", () => {
+  it("has exactly the first-launch tools, each with a matching route and FAQ", () => {
+    expect(TOOLS.map((t) => t.id)).toEqual(["compress-pdf", "compress-image", "pdf-to-word", "word-to-pdf", "pdf-to-image", "image-to-pdf", "image-to-word", "convert-image", "merge-pdf", "split-pdf", "organize-pdf", "pdf-editor"]);
+    for (const t of TOOLS) {
+      expect(t.href).toBe(`/${t.id}`);
+      expect(t.faq.length).toBeGreaterThanOrEqual(2);
+      expect(t.seoDescription.length).toBeGreaterThan(60);
     }
   });
 
-  it("every related tool id resolves to a real tool", () => {
-    for (const tool of allTools) {
-      for (const relatedId of tool.relatedToolIds ?? []) {
-        expect(getToolById(relatedId), `${tool.id} references missing tool ${relatedId}`).toBeDefined();
-      }
-    }
+  it("names conversions one way: “X to Y”, and every conversion has its reverse", () => {
+    const convert = toolsInCategory("convert").map((t) => t.name);
+    expect(convert).toEqual(["PDF to Word", "Word to PDF", "PDF to Image", "Image to PDF", "Image to Word", "Image Converter"]);
+    expect(new Set(TOOLS.map((t) => t.seoTitle)).size).toBe(TOOLS.length);
   });
 
-  it("popular tools all resolve and are live", () => {
-    const popular = getPopularTools();
-    expect(popular.length).toBeGreaterThan(0);
-    for (const tool of popular) {
-      expect(tool.status).not.toBe("coming-soon");
-    }
-  });
-});
-
-describe("getToolById / getToolByHref", () => {
-  it("finds a known tool by id", () => {
-    expect(getToolById("pdf-merge")?.name).toBe("Merge PDF");
+  it("groups every tool into exactly one category", () => {
+    const grouped = (["compress", "convert", "organize", "edit"] as const).flatMap((c) => toolsInCategory(c));
+    expect(grouped).toHaveLength(TOOLS.length);
   });
 
-  it("finds a known tool by href", () => {
-    expect(getToolByHref("/pdf/merge")?.id).toBe("pdf-merge");
-  });
-
-  it("returns undefined for unknown ids", () => {
-    expect(getToolById("does-not-exist")).toBeUndefined();
+  it("throws for an unknown tool id", () => {
+    // @ts-expect-error — deliberately invalid
+    expect(() => getTool("zip")).toThrow();
   });
 });
 
-describe("getToolsByCategory", () => {
-  it("returns only tools in that category", () => {
-    const tools = getToolsByCategory("pdf");
-    expect(tools.length).toBeGreaterThan(0);
-    expect(tools.every((t) => t.category === "pdf")).toBe(true);
-  });
-});
-
-describe("getRelatedTools", () => {
-  it("never includes coming-soon tools", () => {
-    const tool = getToolById("pdf-merge")!;
-    const related = getRelatedTools(tool);
-    expect(related.every((t) => t.status !== "coming-soon")).toBe(true);
+describe("smart file entry", () => {
+  it("classifies files by type and extension", () => {
+    expect(entryKindFor({ name: "a.PDF", type: "" })).toBe("pdf");
+    expect(entryKindFor({ name: "a.webp", type: "image/webp" })).toBe("image");
+    expect(entryKindFor({ name: "logo.svg", type: "" })).toBe("svg");
+    expect(entryKindFor({ name: "Resume.DOCX", type: "" })).toBe("word");
+    expect(entryKindFor({ name: "old.doc", type: "application/msword" })).toBe("unsupported");
+    expect(entryKindFor({ name: "notes.txt", type: "text/plain" })).toBe("unsupported");
   });
 
-  it("never includes the tool itself", () => {
-    const tool = getToolById("pdf-merge")!;
-    const related = getRelatedTools(tool);
-    expect(related.some((t) => t.id === tool.id)).toBe(false);
-  });
-});
-
-describe("getToolsAcceptingExtension", () => {
-  it("finds live tools that accept a given extension", () => {
-    const tools = getToolsAcceptingExtension("pdf");
-    expect(tools.some((t) => t.id === "pdf-merge")).toBe(true);
-    expect(tools.every((t) => t.status !== "coming-soon")).toBe(true);
+  it("refuses to mix PDFs with images, or accept anything unsupported", () => {
+    expect(entryKindForAll([{ name: "a.pdf", type: "" }, { name: "b.jpg", type: "" }])).toBe("unsupported");
+    expect(entryKindForAll([{ name: "a.jpg", type: "" }, { name: "b.txt", type: "" }])).toBe("unsupported");
+    expect(entryKindForAll([{ name: "a.jpg", type: "" }, { name: "b.svg", type: "" }])).toBe("svg");
+    expect(entryKindForAll([])).toBe("unsupported");
+    expect(entryKindForAll([{ name: "a.docx", type: "" }, { name: "b.pdf", type: "" }])).toBe("unsupported");
   });
 
-  it("is case-insensitive", () => {
-    expect(getToolsAcceptingExtension("PDF").length).toBe(getToolsAcceptingExtension("pdf").length);
-  });
-});
-
-describe("searchTools", () => {
-  it("returns an exact name match first", () => {
-    const results = searchTools("merge pdf");
-    expect(results[0]?.id).toBe("pdf-merge");
-  });
-
-  it("matches by keyword", () => {
-    const results = searchTools("shrink pdf");
-    expect(results.some((t) => t.id === "pdf-compress")).toBe(true);
-  });
-
-  it("returns nothing for an empty query", () => {
-    expect(searchTools("")).toEqual([]);
-  });
-
-  it("excludes coming-soon tools by default", () => {
-    const results = searchTools("password protect pdf");
-    expect(results.every((t) => t.status !== "coming-soon")).toBe(true);
-  });
-
-  it("can include coming-soon tools when asked", () => {
-    const results = searchTools("password protect pdf", { includeComingSoon: true });
-    expect(results.some((t) => t.id === "pdf-protect")).toBe(true);
-  });
-});
-
-describe("liveTools", () => {
-  it("excludes every coming-soon tool", () => {
-    expect(liveTools.every((t) => t.status !== "coming-soon")).toBe(true);
+  it("offers PDF tools for a PDF, and only multi-file tools for several files", () => {
+    expect(suggestionsFor("pdf", 1)[0]).toBe("compress-pdf");
+    expect(suggestionsFor("pdf", 1)).toContain("pdf-editor");
+    expect(suggestionsFor("pdf", 1)).toContain("pdf-to-word");
+    expect(suggestionsFor("pdf", 3)).toEqual(["merge-pdf"]);
+    expect(suggestionsFor("image", 1)).toEqual(["compress-image", "convert-image", "image-to-pdf", "image-to-word"]);
+    expect(suggestionsFor("image", 2)).toEqual(["image-to-pdf", "image-to-word", "convert-image"]);
+    expect(suggestionsFor("svg", 1)).toEqual(["convert-image"]);
+    expect(suggestionsFor("word", 1)).toEqual(["word-to-pdf"]);
+    expect(suggestionsFor("word", 2)).toEqual([]);
+    expect(suggestionsFor("unsupported", 1)).toEqual([]);
   });
 });

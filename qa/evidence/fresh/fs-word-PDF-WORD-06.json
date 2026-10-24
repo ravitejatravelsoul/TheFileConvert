@@ -1,0 +1,55 @@
+[
+ {
+  "tool": "PDF to Word",
+  "test": "PDF-WORD-06 A 3-column, 5-row bordered table between paragraphs",
+  "verdict": "FAIL",
+  "fixture": "PDF-WORD-06",
+  "kind": "native",
+  "inputPages": 1,
+  "input": 39069,
+  "meta": "39 KB · 1 page · Text PDF",
+  "ocrNote": false,
+  "progress": [
+   "Building your Word document…"
+  ],
+  "ms": 390,
+  "output": 4518,
+  "docxValid": true,
+  "problems": [],
+  "paragraphs": 3,
+  "tables": 1,
+  "pictures": 0,
+  "sections": 1,
+  "recall": 100,
+  "order": 83.9,
+  "paragraphsIntact": "8/8",
+  "merged": 0,
+  "separation": 100,
+  "structure": {
+   "table": true,
+   "pageBreaks": true
+  },
+  "mammoth": {
+   "ok": false,
+   "error": "Error: Command failed: npx.cmd -y mammoth@1.8.0 C:\\Users\\ravit\\Desktop\\my projects\\thefileconvert\\qa\\evidence\\fresh\\out\\word-PDFWORD06-PDF-WORD-06-table.docx C:\\Users\\ravit\\Desktop\\my projects\\thefile"
+  },
+  "uploads": [],
+  "integrity": [
+   {
+    "file": "word-PDFWORD06-PDF-WORD-06-table.docx",
+    "bytes": 4518,
+    "ok": true,
+    "kind": "docx",
+    "pages": 1,
+    "paragraphs": 3,
+    "tables": 1,
+    "pictures": 0
+   }
+  ]
+ },
+ {
+  "tool": "PDF to Word",
+  "test": "console errors",
+  "verdict": "PASS"
+ }
+]

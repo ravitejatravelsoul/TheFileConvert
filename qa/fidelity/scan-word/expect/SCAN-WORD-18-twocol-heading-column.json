@@ -1,0 +1,27 @@
+{
+ "checks": [
+  {
+   "id": "layout:findings-right",
+   "kind": "present",
+   "page": 1,
+   "phrase": "2. Findings",
+   "x_min": 300
+  },
+  {
+   "id": "layout:limits-left",
+   "kind": "present",
+   "page": 1,
+   "phrase": "3. Limits",
+   "x_max": 120
+  },
+  {
+   "id": "order:columns",
+   "kind": "docorder",
+   "phrases": [
+    "1. Methods",
+    "3. Limits",
+    "2. Findings"
+   ]
+  }
+ ]
+}

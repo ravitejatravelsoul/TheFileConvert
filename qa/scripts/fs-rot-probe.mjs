@@ -1,0 +1,28 @@
+// Adds text + a rectangle to a /Rotate 90 page in the editor, exports, and renders the result.
+import { launch, open, addPaths, download, sx, pdfInfo, renderPage, OUT, fs, path } from "./fl-lib.mjs";
+const { browser, page } = await launch();
+await open(page, "/pdf-editor");
+await addPaths(page, [sx(process.argv[2] ?? "PDF-I-rotated.pdf")]);
+await page.getByTestId("page-surface").first().waitFor();
+const pageNo = Number(process.argv[3] ?? 2);
+await page.getByRole("button", { name: `Go to page ${pageNo}`, exact: true }).click();
+await page.waitForTimeout(800);
+const surf = page.getByTestId("page-surface").first();
+await surf.scrollIntoViewIfNeeded();
+const b = await surf.boundingBox();
+await page.screenshot({ path: path.join(OUT, "rot-probe-editor-before.png") });
+await page.getByRole("button", { name: "Add text", exact: true }).click();
+await page.mouse.click(b.x + b.width * 0.15, b.y + b.height * 0.15);
+await page.keyboard.type("UPRIGHT TEXT");
+await page.keyboard.press("Escape");
+await page.getByRole("button", { name: "Shapes", exact: true }).click();
+await page.getByRole("menuitemradio", { name: "Rectangle" }).click();
+await page.mouse.move(b.x + b.width * 0.15, b.y + b.height * 0.3);
+await page.mouse.down();
+await page.mouse.move(b.x + b.width * 0.6, b.y + b.height * 0.4, { steps: 6 });
+await page.mouse.up();
+await page.screenshot({ path: path.join(OUT, "rot-probe-editor.png") });
+const out = await download(page, page.getByRole("button", { name: "Export PDF" }), "rot-probe");
+const img = await renderPage((await pdfInfo(out)).doc, pageNo, 0.6);
+fs.writeFileSync(path.join(OUT, "rot-probe-export.png"), img.c.toBuffer("image/png"));
+await browser.close();

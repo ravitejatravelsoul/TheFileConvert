@@ -1,0 +1,50 @@
+{
+ "checks": [
+  {
+   "id": "near-top",
+   "kind": "near_top",
+   "page": 1,
+   "phrase": "Urban Heat and Tree Cover:"
+  },
+  {
+   "id": "layout:right-column",
+   "kind": "present",
+   "page": 1,
+   "phrase": "4. Discussion",
+   "x_min": 300
+  },
+  {
+   "id": "layout:left-column",
+   "kind": "present",
+   "page": 1,
+   "phrase": "2. Method",
+   "x_max": 120
+  },
+  {
+   "id": "images:chart",
+   "kind": "pictures",
+   "min": 1,
+   "max": 3
+  },
+  {
+   "id": "images:chart-in-right-column",
+   "kind": "present",
+   "page": 1,
+   "phrase": "Figure 1.",
+   "x_min": 300,
+   "y_max": 420
+  },
+  {
+   "id": "order:columns",
+   "kind": "docorder",
+   "phrases": [
+    "Urban Heat and Tree Cover:",
+    "1. Introduction",
+    "2. Method",
+    "3. Results",
+    "Figure 1.",
+    "4. Discussion"
+   ]
+  }
+ ]
+}

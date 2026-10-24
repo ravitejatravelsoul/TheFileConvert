@@ -1,0 +1,19 @@
+{
+ "checks": [
+  {
+   "id": "images:stamp-signature",
+   "kind": "pictures",
+   "min": 2,
+   "max": 6
+  },
+  {
+   "id": "order:letter",
+   "kind": "docorder",
+   "phrases": [
+    "CRESTVIEW ARCHITECTS",
+    "Dear Ms. Chen",
+    "Sincerely"
+   ]
+  }
+ ]
+}

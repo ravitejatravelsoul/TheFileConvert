@@ -1,4 +1,7 @@
-import { PDFDict, PDFDocument, PDFName, StandardFonts, degrees, rgb, type PDFFont, type PDFPage } from "pdf-lib";
+import { savePdfChecked } from "@/lib/pdf/save";
+import { PDFDocument, StandardFonts, degrees, rgb, type PDFFont, type PDFPage } from "pdf-lib";
+import { EncryptedPdfError, loadPdfForEditing } from "@/lib/pdf/load";
+import { isCompleteImage } from "./image-integrity";
 
 export interface NamedBlob {
   name: string;
@@ -10,65 +13,13 @@ export class ProcessorError extends Error {}
 async function loadPdf(file: File): Promise<PDFDocument> {
   const bytes = await file.arrayBuffer();
   try {
-    return await PDFDocument.load(bytes, { ignoreEncryption: true });
-  } catch {
+    return await loadPdfForEditing(bytes);
+  } catch (e) {
+    if (e instanceof EncryptedPdfError) throw new ProcessorError(e.message);
     throw new ProcessorError(
       "We couldn't read this PDF. It may be damaged, encrypted, or incomplete."
     );
   }
-}
-
-export async function getPdfPageCount(file: File): Promise<number> {
-  const doc = await loadPdf(file);
-  return doc.getPageCount();
-}
-
-export interface PdfBasicMetadata {
-  title: string;
-  author: string;
-  subject: string;
-  keywords: string;
-  creator: string;
-  producer: string;
-  pageCount: number;
-}
-
-export async function getPdfMetadata(file: File): Promise<PdfBasicMetadata> {
-  const doc = await loadPdf(file);
-  return {
-    title: doc.getTitle() ?? "",
-    author: doc.getAuthor() ?? "",
-    subject: doc.getSubject() ?? "",
-    keywords: doc.getKeywords() ?? "",
-    creator: doc.getCreator() ?? "",
-    producer: doc.getProducer() ?? "",
-    pageCount: doc.getPageCount(),
-  };
-}
-
-export async function removePdfMetadata(file: File): Promise<Blob> {
-  const bytes0 = await file.arrayBuffer();
-  let doc: PDFDocument;
-  try {
-    // updateMetadata: false — don't let the library stamp its own producer/date onto the file.
-    doc = await PDFDocument.load(bytes0, { ignoreEncryption: true, updateMetadata: false });
-  } catch {
-    throw new ProcessorError("We couldn't read this PDF. It may be damaged, encrypted, or incomplete.");
-  }
-  // Remove every document-information entry (not just blank the common ones) and the XMP metadata
-  // stream, which carries its own copy of title/author/dates.
-  const info = doc.context.lookup(doc.context.trailerInfo.Info);
-  if (info instanceof PDFDict) for (const key of [...info.keys()]) info.delete(key);
-  doc.catalog.delete(PDFName.of("Metadata"));
-  const bytes = await doc.save({ updateFieldAppearances: false });
-  return new Blob([bytes as BlobPart], { type: "application/pdf" });
-}
-
-/** Lossless re-save with compressed cross-reference streams. Real, modest savings; safe on any PDF. */
-export async function compressPdf(file: File): Promise<Blob> {
-  const doc = await loadPdf(file);
-  const bytes = await doc.save({ useObjectStreams: true });
-  return new Blob([bytes as BlobPart], { type: "application/pdf" });
 }
 
 export async function mergePdfs(files: File[]): Promise<Blob> {
@@ -81,7 +32,7 @@ export async function mergePdfs(files: File[]): Promise<Blob> {
     const pages = await merged.copyPages(doc, doc.getPageIndices());
     pages.forEach((page) => merged.addPage(page));
   }
-  const bytes = await merged.save();
+  const bytes = await savePdfChecked(merged);
   return new Blob([bytes as BlobPart], { type: "application/pdf" });
 }
 
@@ -123,24 +74,7 @@ export async function extractPages(file: File, pageRanges: string): Promise<Blob
   const out = await PDFDocument.create();
   const pages = await out.copyPages(source, indices);
   pages.forEach((p) => out.addPage(p));
-  const bytes = await out.save();
-  return new Blob([bytes as BlobPart], { type: "application/pdf" });
-}
-
-export async function deletePages(file: File, pageRanges: string): Promise<Blob> {
-  const source = await loadPdf(file);
-  const pageCount = source.getPageCount();
-  const toDelete = new Set(parsePageRanges(pageRanges, pageCount));
-  if (toDelete.size >= pageCount) {
-    throw new ProcessorError("You can't delete every page in the document.");
-  }
-  const keep = Array.from({ length: pageCount }, (_, i) => i).filter(
-    (i) => !toDelete.has(i)
-  );
-  const out = await PDFDocument.create();
-  const pages = await out.copyPages(source, keep);
-  pages.forEach((p) => out.addPage(p));
-  const bytes = await out.save();
+  const bytes = await savePdfChecked(out);
   return new Blob([bytes as BlobPart], { type: "application/pdf" });
 }
 
@@ -156,7 +90,7 @@ export async function splitPdfEveryNPages(file: File, n: number): Promise<NamedB
     const indices = Array.from({ length: end - start }, (_, i) => start + i);
     const pages = await out.copyPages(source, indices);
     pages.forEach((p) => out.addPage(p));
-    const bytes = await out.save();
+    const bytes = await savePdfChecked(out);
     results.push({
       name: `part-${partNumber}.pdf`,
       blob: new Blob([bytes as BlobPart], { type: "application/pdf" }),
@@ -166,41 +100,28 @@ export async function splitPdfEveryNPages(file: File, n: number): Promise<NamedB
   return results;
 }
 
-export async function rotatePages(
-  file: File,
-  rotationDegrees: 90 | 180 | 270,
-  pageRanges?: string
-): Promise<Blob> {
-  const doc = await loadPdf(file);
-  const pageCount = doc.getPageCount();
-  const targetIndices = pageRanges
-    ? new Set(parsePageRanges(pageRanges, pageCount))
-    : new Set(Array.from({ length: pageCount }, (_, i) => i));
-
-  doc.getPages().forEach((page, i) => {
-    if (targetIndices.has(i)) {
-      const current = page.getRotation().angle;
-      page.setRotation(degrees((current + rotationDegrees) % 360));
-    }
-  });
-  const bytes = await doc.save();
-  return new Blob([bytes as BlobPart], { type: "application/pdf" });
+export interface PagePlan {
+  /** 0-based page index in the source PDF. The same index may appear more than once (a duplicate). */
+  index: number;
+  /** Extra clockwise rotation, added to the page's own. */
+  rotate: 0 | 90 | 180 | 270;
 }
 
-export async function reorderPages(file: File, newOrder: number[]): Promise<Blob> {
+/** Builds a new PDF from an ordered list of source pages — reorder, rotate, duplicate and drop in one pass.
+ * Pages are copied, not re-rendered, so text and images are untouched. */
+export async function buildPdfFromPages(file: File, plan: PagePlan[]): Promise<Blob> {
+  if (plan.length === 0) throw new ProcessorError("Keep at least one page.");
   const source = await loadPdf(file);
-  const pageCount = source.getPageCount();
-  if (
-    newOrder.length !== pageCount ||
-    new Set(newOrder).size !== pageCount ||
-    newOrder.some((i) => i < 0 || i >= pageCount)
-  ) {
-    throw new ProcessorError("The new page order must include every page exactly once.");
-  }
+  const count = source.getPageCount();
+  if (plan.some((p) => p.index < 0 || p.index >= count)) throw new ProcessorError("That page doesn't exist in this PDF.");
   const out = await PDFDocument.create();
-  const pages = await out.copyPages(source, newOrder);
-  pages.forEach((p) => out.addPage(p));
-  const bytes = await out.save();
+  const pages = await out.copyPages(source, plan.map((p) => p.index));
+  pages.forEach((page, i) => {
+    const turn = plan[i].rotate;
+    if (turn) page.setRotation(degrees((((page.getRotation().angle + turn) % 360) + 360) % 360));
+    out.addPage(page);
+  });
+  const bytes = await savePdfChecked(out);
   return new Blob([bytes as BlobPart], { type: "application/pdf" });
 }
 
@@ -219,9 +140,18 @@ export async function imagesToPdf(files: File[], options: ImagesToPdfOptions): P
   const doc = await PDFDocument.create();
 
   for (const file of files) {
-    const bytes = await file.arrayBuffer();
-    const isPng = file.type === "image/png" || file.name.toLowerCase().endsWith(".png");
-    const image = isPng ? await doc.embedPng(bytes) : await doc.embedJpg(bytes);
+    const bytes = new Uint8Array(await file.arrayBuffer());
+    // Decide by content, not by name: a ".jpg" that is really a PNG still embeds correctly.
+    const isPng = bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4e && bytes[3] === 0x47;
+    const isJpeg = bytes[0] === 0xff && bytes[1] === 0xd8;
+    if (!isPng && !isJpeg) throw new ProcessorError(`"${file.name}" isn't a JPG or PNG image.`);
+    if (!isCompleteImage(bytes)) throw new ProcessorError(`"${file.name}" couldn't be read. It may be damaged.`);
+    let image;
+    try {
+      image = isPng ? await doc.embedPng(bytes) : await doc.embedJpg(bytes);
+    } catch {
+      throw new ProcessorError(`"${file.name}" couldn't be read. It may be damaged.`);
+    }
 
     if (options.pageSize === "fit") {
       // Pixels at the standard 96 dpi -> points (x0.75), so a 1600 px image is a 12-inch page, not a 22-inch one.
@@ -232,7 +162,9 @@ export async function imagesToPdf(files: File[], options: ImagesToPdfOptions): P
       continue;
     }
 
-    const [pageWidth, pageHeight] = PAGE_SIZES[options.pageSize];
+    // Landscape images get a landscape page, so they aren't shrunk to fit a portrait one.
+    const [shortSide, longSide] = PAGE_SIZES[options.pageSize];
+    const [pageWidth, pageHeight] = image.width > image.height ? [longSide, shortSide] : [shortSide, longSide];
     const page = doc.addPage([pageWidth, pageHeight]);
     const margin = options.margin;
     const maxWidth = pageWidth - margin * 2;
@@ -248,7 +180,7 @@ export async function imagesToPdf(files: File[], options: ImagesToPdfOptions): P
     });
   }
 
-  const bytes = await doc.save();
+  const bytes = await savePdfChecked(doc);
   return new Blob([bytes as BlobPart], { type: "application/pdf" });
 }
 
@@ -313,7 +245,7 @@ export async function addWatermark(file: File, options: WatermarkOptions): Promi
       rotate: degrees(options.rotationDegrees + shown.angle),
     });
   }
-  const bytes = await doc.save();
+  const bytes = await savePdfChecked(doc);
   return new Blob([bytes as BlobPart], { type: "application/pdf" });
 }
 
@@ -376,7 +308,7 @@ export async function addPageNumbers(file: File, options: PageNumberOptions): Pr
     const { x, y } = shown.toPage(at.x, at.y);
     page.drawText(label, { x, y, size: options.fontSize, font, color: rgb(0.2, 0.2, 0.2), rotate: degrees(shown.angle) });
   });
-  const bytes = await doc.save();
+  const bytes = await savePdfChecked(doc);
   return new Blob([bytes as BlobPart], { type: "application/pdf" });
 }
 
@@ -411,31 +343,55 @@ export async function addHeaderFooter(file: File, options: HeaderFooterOptions):
     const { x, y } = shown.toPage(dx, dy);
     page.drawText(label, { x, y, size: options.fontSize, font, color: rgb(0.2, 0.2, 0.2), rotate: degrees(shown.angle) });
   });
-  const bytes = await doc.save();
+  const bytes = await savePdfChecked(doc);
   return new Blob([bytes as BlobPart], { type: "application/pdf" });
 }
 
-export async function pdfToImages(
-  file: File,
-  format: "png" | "jpeg",
-  scale: number
-): Promise<NamedBlob[]> {
+export interface PdfToImagesOptions {
+  /** 0-based page indices to render, in order. All pages when omitted. */
+  pages?: number[];
+  /** Base for output names: "<base>-page-3.jpg". */
+  baseName?: string;
+  onPage?: (done: number, total: number) => void;
+}
+
+export async function pdfToImages(file: File, format: "png" | "jpeg", scale: number, options: PdfToImagesOptions = {}): Promise<NamedBlob[]> {
   const { loadPdfJsDocument, renderPageToCanvas } = await import("./pdfjs-utils");
   const doc = await loadPdfJsDocument(file);
+  const indices = options.pages ?? Array.from({ length: doc.numPages }, (_, i) => i);
+  const prefix = options.baseName ? `${options.baseName}-page` : "page";
   const results: NamedBlob[] = [];
 
-  for (let pageNum = 1; pageNum <= doc.numPages; pageNum++) {
-    const canvas = await renderPageToCanvas(doc, pageNum, scale);
-    const mime = format === "png" ? "image/png" : "image/jpeg";
-    const blob: Blob = await new Promise((resolve, reject) => {
-      canvas.toBlob(
-        (b) => (b ? resolve(b) : reject(new ProcessorError("Rendering failed for this page."))),
-        mime,
-        0.92
-      );
-    });
-    results.push({ name: `page-${pageNum}.${format === "png" ? "png" : "jpg"}`, blob });
+  for (const [n, index] of indices.entries()) {
+    if (index < 0 || index >= doc.numPages) throw new ProcessorError(`Page ${index + 1} doesn't exist in this PDF.`);
+    const canvas = await renderPageToCanvas(doc, index + 1, scale, undefined, 1, true);
+    if (format === "jpeg") {
+      // JPEG has no transparency: pages with a transparent background would otherwise turn black.
+      const flat = document.createElement("canvas");
+      flat.width = canvas.width;
+      flat.height = canvas.height;
+      const ctx = flat.getContext("2d");
+      if (ctx) {
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0, 0, flat.width, flat.height);
+        ctx.drawImage(canvas, 0, 0);
+      }
+      canvas.width = 0;
+      results.push({ name: `${prefix}-${index + 1}.jpg`, blob: await canvasBlob(flat, "image/jpeg") });
+      flat.width = 0;
+    } else {
+      results.push({ name: `${prefix}-${index + 1}.png`, blob: await canvasBlob(canvas, "image/png") });
+      canvas.width = 0;
+    }
+    options.onPage?.(n + 1, indices.length);
   }
 
   return results;
+}
+
+async function canvasBlob(canvas: HTMLCanvasElement, mime: string): Promise<Blob> {
+  const { encodeCanvas } = await import("./canvas-blob");
+  const blob = await encodeCanvas(canvas, mime, 0.92);
+  if (!blob) throw new ProcessorError("Rendering failed for this page.");
+  return blob;
 }

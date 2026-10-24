@@ -1,0 +1,110 @@
+[
+ {
+  "tool": "OCR",
+  "test": "OCR-A-clean-300dpi.pdf",
+  "verdict": "PASS",
+  "look": "PASS",
+  "recognitionAccuracy": 100,
+  "exportSearchable": 100,
+  "pages": "1/1",
+  "minSsim": 1,
+  "meanSsim": 1,
+  "minPsnr": 99,
+  "maxChangedPct": 0,
+  "sizesKept": true,
+  "minTextRecall": null,
+  "integrity": [
+   {
+    "file": "fid-ocr-OCR-A-OCR-A-clean-300dpi-edited.pdf",
+    "bytes": 860344,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 1
+   }
+  ]
+ },
+ {
+  "tool": "OCR",
+  "test": "OCR-B-low-res-100dpi.pdf",
+  "verdict": "PASS",
+  "look": "PASS",
+  "recognitionAccuracy": 100,
+  "exportSearchable": 100,
+  "pages": "1/1",
+  "minSsim": 1,
+  "meanSsim": 1,
+  "minPsnr": 99,
+  "maxChangedPct": 0,
+  "sizesKept": true,
+  "minTextRecall": null,
+  "integrity": [
+   {
+    "file": "fid-ocr-OCR-B-OCR-B-low-res-100dpi-edited.pdf",
+    "bytes": 112024,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 1
+   }
+  ]
+ },
+ {
+  "tool": "OCR",
+  "test": "OCR-D-rotated.pdf",
+  "verdict": "PASS",
+  "look": "PASS",
+  "recognitionAccuracy": 100,
+  "exportSearchable": 100,
+  "pages": "1/1",
+  "minSsim": 1,
+  "meanSsim": 1,
+  "minPsnr": 99,
+  "maxChangedPct": 0,
+  "sizesKept": true,
+  "minTextRecall": null,
+  "integrity": [
+   {
+    "file": "fid-ocr-OCR-D-OCR-D-rotated-edited.pdf",
+    "bytes": 865410,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 1
+   }
+  ]
+ },
+ {
+  "tool": "OCR",
+  "test": "OCR-G-multipage.pdf",
+  "verdict": "PASS",
+  "look": "PASS",
+  "recognitionAccuracy": 100,
+  "exportSearchable": 100,
+  "pages": "3/3",
+  "minSsim": 1,
+  "meanSsim": 1,
+  "minPsnr": 99,
+  "maxChangedPct": 0,
+  "sizesKept": true,
+  "minTextRecall": null,
+  "integrity": [
+   {
+    "file": "fid-ocr-OCR-G-OCR-G-multipage-edited.pdf",
+    "bytes": 2433650,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 3
+   }
+  ]
+ },
+ {
+  "tool": "Fidelity tools",
+  "test": "no third-party requests",
+  "verdict": "PASS",
+  "leaked": []
+ },
+ {
+  "tool": "Fidelity tools",
+  "test": "console errors (all steps)",
+  "verdict": "PASS",
+  "count": 0
+ }
+]

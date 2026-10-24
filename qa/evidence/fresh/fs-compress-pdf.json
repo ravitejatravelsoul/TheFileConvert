@@ -1,0 +1,903 @@
+[
+ {
+  "tool": "Compress PDF",
+  "test": "PDF-A 290 KB → 250 KB",
+  "verdict": "PASS",
+  "fixture": "PDF-A",
+  "input": 290011,
+  "target": 250000,
+  "output": 45258,
+  "achieved": true,
+  "opened": true,
+  "pages": "28/28",
+  "allPagesRender": true,
+  "text": "88669/88669 chars",
+  "psnr": 99,
+  "ssim": 1,
+  "quality": "Quality setting: Lossless · finished in 0.0 s",
+  "headline": "Done — 45 KB",
+  "ms": 134,
+  "integrity": [
+   {
+    "file": "fs-cpdf-PDFA-250000-PDF-A-text-heavy-300k-compressed.pdf",
+    "bytes": 45258,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 28
+   }
+  ]
+ },
+ {
+  "tool": "Compress PDF",
+  "test": "PDF-A 290 KB → 200 KB",
+  "verdict": "PASS",
+  "fixture": "PDF-A",
+  "input": 290011,
+  "target": 200000,
+  "output": 45258,
+  "achieved": true,
+  "opened": true,
+  "pages": "28/28",
+  "allPagesRender": true,
+  "text": "88669/88669 chars",
+  "psnr": 99,
+  "ssim": 1,
+  "quality": "Quality setting: Lossless · finished in 0.1 s",
+  "headline": "Done — 45 KB",
+  "ms": 133,
+  "integrity": [
+   {
+    "file": "fs-cpdf-PDFA-200000-PDF-A-text-heavy-300k-compressed.pdf",
+    "bytes": 45258,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 28
+   }
+  ]
+ },
+ {
+  "tool": "Compress PDF",
+  "test": "PDF-A 290 KB → 150 KB",
+  "verdict": "PASS",
+  "fixture": "PDF-A",
+  "input": 290011,
+  "target": 150000,
+  "output": 45258,
+  "achieved": true,
+  "opened": true,
+  "pages": "28/28",
+  "allPagesRender": true,
+  "text": "88669/88669 chars",
+  "psnr": 99,
+  "ssim": 1,
+  "quality": "Quality setting: Lossless · finished in 0.1 s",
+  "headline": "Done — 45 KB",
+  "ms": 141,
+  "integrity": [
+   {
+    "file": "fs-cpdf-PDFA-150000-PDF-A-text-heavy-300k-compressed.pdf",
+    "bytes": 45258,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 28
+   }
+  ]
+ },
+ {
+  "tool": "Compress PDF",
+  "test": "PDF-A 290 KB → 500 KB",
+  "verdict": "PASS",
+  "fixture": "PDF-A",
+  "input": 290011,
+  "target": 500000,
+  "output": 290011,
+  "achieved": true,
+  "opened": true,
+  "pages": "28/28",
+  "allPagesRender": true,
+  "text": "88669/88669 chars",
+  "psnr": 99,
+  "ssim": 1,
+  "quality": "Quality setting: Original · finished in 0.0 s",
+  "headline": "Already under your target",
+  "ms": 88,
+  "integrity": [
+   {
+    "file": "fs-cpdf-PDFA-500000-PDF-A-text-heavy-300k.pdf",
+    "bytes": 290011,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 28
+   }
+  ]
+ },
+ {
+  "tool": "Compress PDF",
+  "test": "PDF-B 751.9 KB → 700 KB",
+  "verdict": "PASS",
+  "fixture": "PDF-B",
+  "input": 751881,
+  "target": 700000,
+  "output": 620214,
+  "achieved": true,
+  "opened": true,
+  "pages": "6/6",
+  "allPagesRender": true,
+  "text": "3270/3270 chars",
+  "psnr": 38.75,
+  "ssim": 0.9936,
+  "quality": "Quality setting: Maximum · finished in 0.3 s",
+  "headline": "Done — 620 KB",
+  "ms": 453,
+  "integrity": [
+   {
+    "file": "fs-cpdf-PDFB-700000-PDF-B-mixed-800k-compressed.pdf",
+    "bytes": 620214,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 6
+   }
+  ]
+ },
+ {
+  "tool": "Compress PDF",
+  "test": "PDF-B 751.9 KB → 500 KB",
+  "verdict": "PASS",
+  "fixture": "PDF-B",
+  "input": 751881,
+  "target": 500000,
+  "output": 403602,
+  "achieved": true,
+  "opened": true,
+  "pages": "6/6",
+  "allPagesRender": true,
+  "text": "3270/3270 chars",
+  "psnr": 33.83,
+  "ssim": 0.9826,
+  "quality": "Quality setting: 42% · finished in 2.8 s",
+  "headline": "Done — 404 KB",
+  "ms": 3051,
+  "integrity": [
+   {
+    "file": "fs-cpdf-PDFB-500000-PDF-B-mixed-800k-compressed.pdf",
+    "bytes": 403602,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 6
+   }
+  ]
+ },
+ {
+  "tool": "Compress PDF",
+  "test": "PDF-B 751.9 KB → 300 KB",
+  "verdict": "PASS",
+  "fixture": "PDF-B",
+  "input": 751881,
+  "target": 300000,
+  "output": 294575,
+  "achieved": true,
+  "opened": true,
+  "pages": "6/6",
+  "allPagesRender": true,
+  "text": "3270/3270 chars",
+  "psnr": 33.37,
+  "ssim": 0.9824,
+  "quality": "Quality setting: 35% · finished in 2.8 s",
+  "headline": "Done — 295 KB",
+  "ms": 3047,
+  "integrity": [
+   {
+    "file": "fs-cpdf-PDFB-300000-PDF-B-mixed-800k-compressed.pdf",
+    "bytes": 294575,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 6
+   }
+  ]
+ },
+ {
+  "tool": "Compress PDF",
+  "test": "PDF-C 3.62 MB → 2 MB",
+  "verdict": "PASS",
+  "fixture": "PDF-C",
+  "input": 3624648,
+  "target": 2000000,
+  "output": 1769047,
+  "achieved": true,
+  "opened": true,
+  "pages": "2/2",
+  "allPagesRender": true,
+  "text": "n/a (scan)",
+  "psnr": 25.17,
+  "ssim": 0.9125,
+  "quality": "Quality setting: 83% · finished in 3.8 s",
+  "headline": "Done — 1.77 MB",
+  "ms": 4289,
+  "integrity": [
+   {
+    "file": "fs-cpdf-PDFC-2000000-PDF-C-scan-38mb-incremental-compressed.pdf",
+    "bytes": 1769047,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 2
+   }
+  ]
+ },
+ {
+  "tool": "Compress PDF",
+  "test": "PDF-C 3.62 MB → 1 MB",
+  "verdict": "PASS",
+  "fixture": "PDF-C",
+  "input": 3624648,
+  "target": 1000000,
+  "output": 887121,
+  "achieved": true,
+  "opened": true,
+  "pages": "2/2",
+  "allPagesRender": true,
+  "text": "n/a (scan)",
+  "psnr": 24.83,
+  "ssim": 0.8973,
+  "quality": "Quality setting: 73% · finished in 4.4 s",
+  "headline": "Done — 887 KB",
+  "ms": 4750,
+  "integrity": [
+   {
+    "file": "fs-cpdf-PDFC-1000000-PDF-C-scan-38mb-incremental-compressed.pdf",
+    "bytes": 887121,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 2
+   }
+  ]
+ },
+ {
+  "tool": "Compress PDF",
+  "test": "PDF-C 3.62 MB → 500 KB",
+  "verdict": "PASS",
+  "fixture": "PDF-C",
+  "input": 3624648,
+  "target": 500000,
+  "output": 456972,
+  "achieved": true,
+  "opened": true,
+  "pages": "2/2",
+  "allPagesRender": true,
+  "text": "n/a (scan)",
+  "psnr": 22.29,
+  "ssim": 0.8493,
+  "quality": "Quality setting: Medium · finished in 4.4 s",
+  "headline": "Done — 457 KB",
+  "ms": 4947,
+  "integrity": [
+   {
+    "file": "fs-cpdf-PDFC-500000-PDF-C-scan-38mb-incremental-compressed.pdf",
+    "bytes": 456972,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 2
+   }
+  ]
+ },
+ {
+  "tool": "Compress PDF",
+  "test": "PDF-D 4.94 MB → 3 MB",
+  "verdict": "PASS",
+  "fixture": "PDF-D",
+  "input": 4942531,
+  "target": 3000000,
+  "output": 2698346,
+  "achieved": true,
+  "opened": true,
+  "pages": "5/5",
+  "allPagesRender": true,
+  "text": "60/60 chars",
+  "psnr": 27.63,
+  "ssim": 0.8579,
+  "quality": "Quality setting: 75% · finished in 6.5 s",
+  "headline": "Done — 2.7 MB",
+  "ms": 6863,
+  "integrity": [
+   {
+    "file": "fs-cpdf-PDFD-3000000-PDF-D-photo-heavy-5mb-compressed.pdf",
+    "bytes": 2698346,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 5
+   }
+  ]
+ },
+ {
+  "tool": "Compress PDF",
+  "test": "PDF-D 4.94 MB → 2 MB",
+  "verdict": "PASS",
+  "fixture": "PDF-D",
+  "input": 4942531,
+  "target": 2000000,
+  "output": 1860364,
+  "achieved": true,
+  "opened": true,
+  "pages": "5/5",
+  "allPagesRender": true,
+  "text": "60/60 chars",
+  "psnr": 28.09,
+  "ssim": 0.875,
+  "quality": "Quality setting: Good · finished in 5.5 s",
+  "headline": "Done — 1.86 MB",
+  "ms": 5744,
+  "integrity": [
+   {
+    "file": "fs-cpdf-PDFD-2000000-PDF-D-photo-heavy-5mb-compressed.pdf",
+    "bytes": 1860364,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 5
+   }
+  ]
+ },
+ {
+  "tool": "Compress PDF",
+  "test": "PDF-D 4.94 MB → 1 MB",
+  "verdict": "PASS",
+  "fixture": "PDF-D",
+  "input": 4942531,
+  "target": 1000000,
+  "output": 947082,
+  "achieved": true,
+  "opened": true,
+  "pages": "5/5",
+  "allPagesRender": true,
+  "text": "60/60 chars",
+  "psnr": 28.17,
+  "ssim": 0.8756,
+  "quality": "Quality setting: Medium · finished in 6.4 s",
+  "headline": "Done — 947 KB",
+  "ms": 6738,
+  "integrity": [
+   {
+    "file": "fs-cpdf-PDFD-1000000-PDF-D-photo-heavy-5mb-compressed.pdf",
+    "bytes": 947082,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 5
+   }
+  ]
+ },
+ {
+  "tool": "Compress PDF",
+  "test": "PDF-E 9.9 MB → 5 MB",
+  "verdict": "PASS",
+  "fixture": "PDF-E",
+  "input": 9897854,
+  "target": 5000000,
+  "output": 4483101,
+  "achieved": true,
+  "opened": true,
+  "pages": "4/4",
+  "allPagesRender": true,
+  "text": "n/a (scan)",
+  "psnr": 23.51,
+  "ssim": 0.8866,
+  "quality": "Quality setting: 83% · finished in 8.6 s",
+  "headline": "Done — 4.48 MB",
+  "ms": 8727,
+  "integrity": [
+   {
+    "file": "fs-cpdf-PDFE-5000000-PDF-E-scan-10mb-compressed.pdf",
+    "bytes": 4483101,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 4
+   }
+  ]
+ },
+ {
+  "tool": "Compress PDF",
+  "test": "PDF-E 9.9 MB → 2 MB",
+  "verdict": "PASS",
+  "fixture": "PDF-E",
+  "input": 9897854,
+  "target": 2000000,
+  "output": 1806355,
+  "achieved": true,
+  "opened": true,
+  "pages": "4/4",
+  "allPagesRender": true,
+  "text": "n/a (scan)",
+  "psnr": 25.91,
+  "ssim": 0.9217,
+  "quality": "Quality setting: Good · finished in 9.0 s",
+  "headline": "Done — 1.81 MB",
+  "ms": 9296,
+  "integrity": [
+   {
+    "file": "fs-cpdf-PDFE-2000000-PDF-E-scan-10mb-compressed.pdf",
+    "bytes": 1806355,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 4
+   }
+  ]
+ },
+ {
+  "tool": "Compress PDF",
+  "test": "PDF-E 9.9 MB → 1 MB",
+  "verdict": "PASS",
+  "fixture": "PDF-E",
+  "input": 9897854,
+  "target": 1000000,
+  "output": 922367,
+  "achieved": true,
+  "opened": true,
+  "pages": "4/4",
+  "allPagesRender": true,
+  "text": "n/a (scan)",
+  "psnr": 22.55,
+  "ssim": 0.8691,
+  "quality": "Quality setting: 56% · finished in 10.0 s",
+  "headline": "Done — 922 KB",
+  "ms": 10075,
+  "integrity": [
+   {
+    "file": "fs-cpdf-PDFE-1000000-PDF-E-scan-10mb-compressed.pdf",
+    "bytes": 922367,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 4
+   }
+  ]
+ },
+ {
+  "tool": "Compress PDF",
+  "test": "PDF-F 19.69 MB → 10 MB",
+  "verdict": "PASS",
+  "fixture": "PDF-F",
+  "input": 19692949,
+  "target": 10000000,
+  "output": 8955615,
+  "achieved": true,
+  "opened": true,
+  "pages": "8/8",
+  "allPagesRender": true,
+  "text": "88/88 chars",
+  "psnr": 27.27,
+  "ssim": 0.8729,
+  "quality": "Quality setting: 85% · finished in 15.8 s",
+  "headline": "Done — 8.96 MB",
+  "ms": 16249,
+  "integrity": [
+   {
+    "file": "fs-cpdf-PDFF-10000000-PDF-F-photo-heavy-20mb-compressed.pdf",
+    "bytes": 8955615,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 8
+   }
+  ]
+ },
+ {
+  "tool": "Compress PDF",
+  "test": "PDF-F 19.69 MB → 5 MB",
+  "verdict": "PASS",
+  "fixture": "PDF-F",
+  "input": 19692949,
+  "target": 5000000,
+  "output": 4847997,
+  "achieved": true,
+  "opened": true,
+  "pages": "8/8",
+  "allPagesRender": true,
+  "text": "88/88 chars",
+  "psnr": 27.47,
+  "ssim": 0.8808,
+  "quality": "Quality setting: 78% · finished in 16.8 s",
+  "headline": "Done — 4.85 MB",
+  "ms": 16903,
+  "integrity": [
+   {
+    "file": "fs-cpdf-PDFF-5000000-PDF-F-photo-heavy-20mb-compressed.pdf",
+    "bytes": 4847997,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 8
+   }
+  ]
+ },
+ {
+  "tool": "Compress PDF",
+  "test": "PDF-F 19.69 MB → 2 MB",
+  "verdict": "PASS",
+  "fixture": "PDF-F",
+  "input": 19692949,
+  "target": 2000000,
+  "output": 1746843,
+  "achieved": true,
+  "opened": true,
+  "pages": "8/8",
+  "allPagesRender": true,
+  "text": "88/88 chars",
+  "psnr": 37.37,
+  "ssim": 0.9742,
+  "quality": "Quality setting: 65% · finished in 17.8 s",
+  "headline": "Done — 1.75 MB",
+  "ms": 18150,
+  "integrity": [
+   {
+    "file": "fs-cpdf-PDFF-2000000-PDF-F-photo-heavy-20mb-compressed.pdf",
+    "bytes": 1746843,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 8
+   }
+  ]
+ },
+ {
+  "tool": "Compress PDF",
+  "test": "PDF-G 140.2 KB → 200 KB",
+  "verdict": "PASS",
+  "fixture": "PDF-G",
+  "input": 140166,
+  "target": 200000,
+  "output": 140166,
+  "achieved": true,
+  "opened": true,
+  "pages": "3/3",
+  "allPagesRender": true,
+  "text": "1608/1608 chars",
+  "psnr": 99,
+  "ssim": 1,
+  "quality": "Quality setting: Original · finished in 0.0 s",
+  "headline": "Already under your target",
+  "ms": 88,
+  "integrity": [
+   {
+    "file": "fs-cpdf-PDFG-200000-PDF-G-already-optimized.pdf",
+    "bytes": 140166,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 3
+   }
+  ]
+ },
+ {
+  "tool": "Compress PDF",
+  "test": "PDF-G 140.2 KB → 130 KB",
+  "verdict": "PASS",
+  "fixture": "PDF-G",
+  "input": 140166,
+  "target": 130000,
+  "output": 126724,
+  "achieved": true,
+  "opened": true,
+  "pages": "3/3",
+  "allPagesRender": true,
+  "text": "1608/1608 chars",
+  "psnr": 42.85,
+  "ssim": 0.997,
+  "quality": "Quality setting: Low · finished in 1.1 s",
+  "headline": "Done — 127 KB",
+  "ms": 1484,
+  "integrity": [
+   {
+    "file": "fs-cpdf-PDFG-130000-PDF-G-already-optimized-compressed.pdf",
+    "bytes": 126724,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 3
+   }
+  ]
+ },
+ {
+  "tool": "Compress PDF",
+  "test": "PDF-G 140.2 KB → 15 KB",
+  "verdict": "LIMITED",
+  "fixture": "PDF-G",
+  "input": 140166,
+  "target": 15000,
+  "output": 61897,
+  "achieved": false,
+  "opened": true,
+  "pages": "3/3",
+  "allPagesRender": true,
+  "text": "1608/1608 chars",
+  "psnr": 28.7,
+  "ssim": 0.9343,
+  "quality": "Quality setting: Lowest · finished in 0.9 s",
+  "headline": "Target not reached",
+  "ms": 1454,
+  "integrity": [
+   {
+    "file": "fs-cpdf-PDFG-15000-PDF-G-already-optimized-compressed.pdf",
+    "bytes": 61897,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 3
+   }
+  ]
+ },
+ {
+  "tool": "Compress PDF",
+  "test": "PDF-H 5.32 MB → 2 MB",
+  "verdict": "PASS",
+  "fixture": "PDF-H",
+  "input": 5315233,
+  "target": 2000000,
+  "output": 921883,
+  "achieved": true,
+  "opened": true,
+  "pages": "10/10",
+  "allPagesRender": true,
+  "text": "5532/5532 chars",
+  "psnr": 46.01,
+  "ssim": 0.9993,
+  "quality": "Quality setting: Maximum · finished in 0.4 s",
+  "headline": "Done — 922 KB",
+  "ms": 912,
+  "integrity": [
+   {
+    "file": "fs-cpdf-PDFH-2000000-PDF-H-multipage-text-image-compressed.pdf",
+    "bytes": 921883,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 10
+   }
+  ]
+ },
+ {
+  "tool": "Compress PDF",
+  "test": "PDF-H 5.32 MB → 1 MB",
+  "verdict": "PASS",
+  "fixture": "PDF-H",
+  "input": 5315233,
+  "target": 1000000,
+  "output": 921883,
+  "achieved": true,
+  "opened": true,
+  "pages": "10/10",
+  "allPagesRender": true,
+  "text": "5532/5532 chars",
+  "psnr": 46.01,
+  "ssim": 0.9993,
+  "quality": "Quality setting: Maximum · finished in 0.4 s",
+  "headline": "Done — 922 KB",
+  "ms": 1003,
+  "integrity": [
+   {
+    "file": "fs-cpdf-PDFH-1000000-PDF-H-multipage-text-image-compressed.pdf",
+    "bytes": 921883,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 10
+   }
+  ]
+ },
+ {
+  "tool": "Compress PDF",
+  "test": "PDF-L 4.45 MB → 2 MB",
+  "verdict": "PASS",
+  "fixture": "PDF-L",
+  "input": 4449622,
+  "target": 2000000,
+  "output": 1812478,
+  "achieved": true,
+  "opened": true,
+  "pages": "2/2",
+  "allPagesRender": true,
+  "text": "n/a (scan)",
+  "psnr": 48.85,
+  "ssim": 0.9976,
+  "quality": "Quality setting: Maximum · finished in 0.6 s",
+  "headline": "Done — 1.81 MB",
+  "ms": 1156,
+  "integrity": [
+   {
+    "file": "fs-cpdf-PDFL-2000000-PDF-L-image-only-scan-gray-a85-compressed.pdf",
+    "bytes": 1812478,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 2
+   }
+  ]
+ },
+ {
+  "tool": "Compress PDF",
+  "test": "PDF-L 4.45 MB → 1 MB",
+  "verdict": "PASS",
+  "fixture": "PDF-L",
+  "input": 4449622,
+  "target": 1000000,
+  "output": 999448,
+  "achieved": true,
+  "opened": true,
+  "pages": "2/2",
+  "allPagesRender": true,
+  "text": "n/a (scan)",
+  "psnr": 45.83,
+  "ssim": 0.9952,
+  "quality": "Quality setting: 78% · finished in 2.3 s",
+  "headline": "Done — 999 KB",
+  "ms": 2630,
+  "integrity": [
+   {
+    "file": "fs-cpdf-PDFL-1000000-PDF-L-image-only-scan-gray-a85-compressed.pdf",
+    "bytes": 999448,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 2
+   }
+  ]
+ },
+ {
+  "tool": "Compress PDF",
+  "test": "PDF-I 646 KB → 300 KB",
+  "verdict": "PASS",
+  "fixture": "PDF-I",
+  "input": 646007,
+  "target": 300000,
+  "output": 297772,
+  "achieved": true,
+  "opened": true,
+  "pages": "4/4",
+  "allPagesRender": true,
+  "text": "2193/2193 chars",
+  "psnr": 44.4,
+  "ssim": 0.9988,
+  "quality": "Quality setting: Medium · finished in 1.1 s",
+  "headline": "Done — 298 KB",
+  "ms": 1458,
+  "integrity": [
+   {
+    "file": "fs-cpdf-PDFI-300000-PDF-I-rotated-compressed.pdf",
+    "bytes": 297772,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 4
+   }
+  ]
+ },
+ {
+  "tool": "Compress PDF",
+  "test": "PDF-M 4.8 KB → 100 KB",
+  "verdict": "PASS",
+  "fixture": "PDF-M",
+  "input": 4798,
+  "target": 100000,
+  "output": 4798,
+  "achieved": true,
+  "opened": true,
+  "pages": "1/1",
+  "allPagesRender": true,
+  "text": "59/59 chars",
+  "psnr": 99,
+  "ssim": 1,
+  "quality": "Quality setting: Original · finished in 0.0 s",
+  "headline": "Already under your target",
+  "ms": 64,
+  "integrity": [
+   {
+    "file": "fs-cpdf-PDFM-100000-PDF-M-acroform.pdf",
+    "bytes": 4798,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 1
+   }
+  ]
+ },
+ {
+  "tool": "Compress PDF",
+  "test": "PDF-N 3.7 KB → 100 KB",
+  "verdict": "PASS",
+  "fixture": "PDF-N",
+  "input": 3682,
+  "target": 100000,
+  "output": 3682,
+  "achieved": true,
+  "opened": true,
+  "pages": "3/3",
+  "allPagesRender": true,
+  "text": "1626/1626 chars",
+  "psnr": 99,
+  "ssim": 1,
+  "quality": "Quality setting: Original · finished in 0.0 s",
+  "headline": "Already under your target",
+  "ms": 93,
+  "integrity": [
+   {
+    "file": "fs-cpdf-PDFN-100000-PDF-N-metadata-rich.pdf",
+    "bytes": 3682,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 3
+   }
+  ]
+ },
+ {
+  "tool": "Compress PDF",
+  "test": "REAL user scan 3.98 MB → 1 MB",
+  "verdict": "PASS",
+  "fixture": "REAL user scan",
+  "input": 3982736,
+  "target": 1000000,
+  "output": 928322,
+  "achieved": true,
+  "opened": true,
+  "pages": "2/2",
+  "allPagesRender": true,
+  "text": "n/a (scan)",
+  "psnr": 50.77,
+  "ssim": 0.9985,
+  "quality": "Quality setting: Maximum · finished in 1.0 s",
+  "headline": "Done — 928 KB",
+  "ms": 1411,
+  "integrity": [
+   {
+    "file": "fs-cpdf-REALuserscan-1000000-TheFileConvert_Scanned_OCR_Test-compressed.pdf",
+    "bytes": 928322,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 2
+   }
+  ]
+ },
+ {
+  "tool": "Compress PDF",
+  "test": "REAL user scan 3.98 MB → 2 MB",
+  "verdict": "PASS",
+  "fixture": "REAL user scan",
+  "input": 3982736,
+  "target": 2000000,
+  "output": 928322,
+  "achieved": true,
+  "opened": true,
+  "pages": "2/2",
+  "allPagesRender": true,
+  "text": "n/a (scan)",
+  "psnr": 50.77,
+  "ssim": 0.9985,
+  "quality": "Quality setting: Maximum · finished in 1.1 s",
+  "headline": "Done — 928 KB",
+  "ms": 1374,
+  "integrity": [
+   {
+    "file": "fs-cpdf-REALuserscan-2000000-TheFileConvert_Scanned_OCR_Test-compressed.pdf",
+    "bytes": 928322,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 2
+   }
+  ]
+ },
+ {
+  "tool": "Compress PDF",
+  "test": "REAL user scan 3.98 MB → 500 KB",
+  "verdict": "PASS",
+  "fixture": "REAL user scan",
+  "input": 3982736,
+  "target": 500000,
+  "output": 457690,
+  "achieved": true,
+  "opened": true,
+  "pages": "2/2",
+  "allPagesRender": true,
+  "text": "n/a (scan)",
+  "psnr": 31.57,
+  "ssim": 0.9456,
+  "quality": "Quality setting: Very high · finished in 4.1 s",
+  "headline": "Done — 458 KB",
+  "ms": 4538,
+  "integrity": [
+   {
+    "file": "fs-cpdf-REALuserscan-500000-TheFileConvert_Scanned_OCR_Test-compressed.pdf",
+    "bytes": 457690,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 2
+   }
+  ]
+ },
+ {
+  "tool": "Compress PDF",
+  "test": "console errors during matrix",
+  "verdict": "PASS"
+ }
+]

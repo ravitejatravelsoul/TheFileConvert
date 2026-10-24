@@ -1,0 +1,5 @@
+PASS    Privacy :: no request carries a body (no uploads) across all 9 tools — requests=267 withBody=[]
+PASS    Privacy :: every request goes to the site's own origin — foreign=[]
+PASS    Privacy :: no cookies, nothing written to local/session storage or IndexedDB — cookies=0 storage={"local":0,"session":0,"idb":[]}
+PASS    Privacy :: OCR engine and model load from the site itself — ocrAssets=["/tesseract/worker.min.js","/tesseract/tesseract-core-lstm.wasm.js","/tesseract/lang-data/eng.traineddata.gz"]
+PASS    Privacy :: requests per flow (page code, fonts, pdf.js worker, OCR assets only) — byTool={"compress-pdf":26,"compress-image":25,"convert-image":24,"pdf-to-image":32,"image-to-pdf":28,"merge-pdf":31,"split-pdf":30,"organize-pdf":30,"pdf-editor (OCR + export)":41}

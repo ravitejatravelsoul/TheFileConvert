@@ -1,0 +1,55 @@
+[
+ {
+  "tool": "PDF to Word",
+  "test": "PDF-WORD-01 One page: a title and three paragraphs",
+  "verdict": "FAIL",
+  "fixture": "PDF-WORD-01",
+  "kind": "native",
+  "inputPages": 1,
+  "input": 35839,
+  "meta": "36 KB · 1 page · Text PDF",
+  "ocrNote": false,
+  "progress": [
+   "Building your Word document…"
+  ],
+  "ms": 415,
+  "output": 4367,
+  "docxValid": true,
+  "problems": [],
+  "paragraphs": 4,
+  "tables": 0,
+  "pictures": 0,
+  "sections": 1,
+  "recall": 100,
+  "order": 100,
+  "paragraphsIntact": "4/4",
+  "merged": 0,
+  "separation": 100,
+  "structure": {
+   "headings": true,
+   "pageBreaks": true
+  },
+  "mammoth": {
+   "ok": false,
+   "error": "Error: Command failed: npx.cmd -y mammoth@1.8.0 C:\\Users\\ravit\\Desktop\\my projects\\thefileconvert\\qa\\evidence\\fresh\\out\\word-PDFWORD01-PDF-WORD-01-simple-text.docx C:\\Users\\ravit\\Desktop\\my projects\\t"
+  },
+  "uploads": [],
+  "integrity": [
+   {
+    "file": "word-PDFWORD01-PDF-WORD-01-simple-text.docx",
+    "bytes": 4367,
+    "ok": true,
+    "kind": "docx",
+    "pages": 1,
+    "paragraphs": 4,
+    "tables": 0,
+    "pictures": 0
+   }
+  ]
+ },
+ {
+  "tool": "PDF to Word",
+  "test": "console errors",
+  "verdict": "PASS"
+ }
+]

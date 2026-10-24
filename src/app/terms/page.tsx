@@ -1,64 +1,59 @@
 import type { Metadata } from "next";
+import { LegalPage } from "@/components/layout/LegalPage";
 import { pageMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = pageMetadata({
-  title: "Terms of Use",
-  description: "Basic terms for using TheFileConvert's free file tools.",
+  title: "Terms of use",
+  description: "The terms for using TheFileConvert's free, in-browser file tools.",
   path: "/terms",
 });
 
 export default function Page() {
   return (
-    <div className="container-page py-14 sm:py-20">
-      <div className="mx-auto max-w-2xl">
-        <h1 className="text-3xl font-semibold tracking-tight text-[var(--foreground)] sm:text-4xl">Terms of Use</h1>
-        <p className="mt-4 text-sm text-[var(--foreground-muted)]">Last updated: 2026</p>
-
-        <div className="mt-8 space-y-8 text-[var(--foreground-muted)]">
-          <section>
-            <h2 className="text-lg font-semibold text-[var(--foreground)]">Using this site</h2>
-            <p className="mt-2">
-              TheFileConvert provides free file conversion and utility tools on an &ldquo;as is&rdquo;
-              basis, with no account required. You&apos;re responsible for the files you process and
-              for having the rights to process them.
+    <LegalPage
+      title="Terms of use"
+      updated="September 2026"
+      sections={[
+        {
+          heading: "Using this site",
+          body: (
+            <p>
+              TheFileConvert provides free file tools on an &ldquo;as is&rdquo; basis, with no account required. You&rsquo;re responsible for the files you
+              process and for having the right to process them.
             </p>
-          </section>
-
-          <section>
-            <h2 className="text-lg font-semibold text-[var(--foreground)]">No warranty</h2>
-            <p className="mt-2">
-              We do our best to keep every tool marked &ldquo;Available&rdquo; working correctly, and
-              we test them before launch. That said, tools are provided without warranty of any
-              kind, and you should keep a backup of any important file before converting it.
+          ),
+        },
+        {
+          heading: "No warranty",
+          body: (
+            <p>
+              We test every tool before it goes live and do our best to keep them working correctly. Even so, tools are provided without warranty of any
+              kind. Keep a copy of any important file before you change it — your original is never modified, but the output is yours to check.
             </p>
-          </section>
-
-          <section>
-            <h2 className="text-lg font-semibold text-[var(--foreground)]">Acceptable use</h2>
-            <p className="mt-2">
-              Don&apos;t use this site to process content you don&apos;t have the right to use, or to
-              attempt to abuse, disrupt, or reverse-engineer the service in a way that harms other
-              users.
+          ),
+        },
+        {
+          heading: "Signatures and whiteout",
+          body: (
+            <p>
+              Signatures added in the PDF editor are visual signatures — an image placed on the page — not cryptographic digital signatures. Whiteout
+              visually covers content; it is not secure redaction, and the covered content remains in the file.
             </p>
-          </section>
-
-          <section>
-            <h2 className="text-lg font-semibold text-[var(--foreground)]">Changes</h2>
-            <p className="mt-2">
-              We may update these terms as the site evolves. Material changes will be reflected on
-              this page with an updated revision date.
-            </p>
-          </section>
-
-          <section>
-            <h2 className="text-lg font-semibold text-[var(--foreground)]">Limitation of liability</h2>
-            <p className="mt-2">
-              To the fullest extent permitted by law, TheFileConvert is not liable for any loss or
-              damage arising from the use of, or inability to use, this site or its tools.
-            </p>
-          </section>
-        </div>
-      </div>
-    </div>
+          ),
+        },
+        {
+          heading: "Acceptable use",
+          body: <p>Don&rsquo;t use this site to process content you don&rsquo;t have the right to use, or to disrupt or abuse the service.</p>,
+        },
+        {
+          heading: "Limitation of liability",
+          body: <p>To the fullest extent permitted by law, TheFileConvert is not liable for any loss or damage arising from the use of, or inability to use, this site or its tools.</p>,
+        },
+        {
+          heading: "Changes",
+          body: <p>We may update these terms as the site evolves. Changes will appear on this page with a new date.</p>,
+        },
+      ]}
+    />
   );
 }

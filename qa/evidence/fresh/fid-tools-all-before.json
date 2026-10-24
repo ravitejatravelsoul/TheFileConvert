@@ -1,0 +1,1623 @@
+[
+ {
+  "tool": "Compress PDF",
+  "test": "PDF-A (text) → 200 KB",
+  "verdict": "PASS",
+  "visual": "PASS",
+  "text": "PASS",
+  "structure": "PASS",
+  "targetMet": true,
+  "input": 290011,
+  "output": 45258,
+  "reduction": "84%",
+  "headline": "Done — 45 KB",
+  "pages": "28/28",
+  "minSsim": 1,
+  "meanSsim": 1,
+  "minPsnr": 99,
+  "maxChangedPct": 0,
+  "sizesKept": true,
+  "minTextRecall": 100,
+  "integrity": [
+   {
+    "file": "fid-cpdf-PDF-A-PDF-A-text-heavy-300k-compressed.pdf",
+    "bytes": 45258,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 28
+   }
+  ]
+ },
+ {
+  "tool": "Compress PDF",
+  "test": "PDF-B (mixed) → 400 KB",
+  "verdict": "PASS",
+  "visual": "PASS",
+  "text": "PASS",
+  "structure": "PASS",
+  "targetMet": true,
+  "input": 751881,
+  "output": 351297,
+  "reduction": "53%",
+  "headline": "Done — 351 KB",
+  "pages": "6/6",
+  "minSsim": 0.9709,
+  "meanSsim": 0.9736,
+  "minPsnr": 38.45,
+  "maxChangedPct": 0.121,
+  "sizesKept": true,
+  "minTextRecall": 100,
+  "integrity": [
+   {
+    "file": "fid-cpdf-PDF-B-PDF-B-mixed-800k-compressed.pdf",
+    "bytes": 351297,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 6
+   }
+  ]
+ },
+ {
+  "tool": "Compress PDF",
+  "test": "PDF-D (photo) → 2000 KB",
+  "verdict": "PASS",
+  "visual": "PASS",
+  "text": "PASS",
+  "structure": "PASS",
+  "targetMet": true,
+  "input": 4942531,
+  "output": 1860364,
+  "reduction": "62%",
+  "headline": "Done — 1.86 MB",
+  "pages": "5/5",
+  "minSsim": 0.967,
+  "meanSsim": 0.9677,
+  "minPsnr": 40.9,
+  "maxChangedPct": 0.001,
+  "sizesKept": true,
+  "minTextRecall": 100,
+  "integrity": [
+   {
+    "file": "fid-cpdf-PDF-D-PDF-D-photo-heavy-5mb-compressed.pdf",
+    "bytes": 1860364,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 5
+   }
+  ]
+ },
+ {
+  "tool": "Compress PDF",
+  "test": "PDF-H (mixed) → 1000 KB",
+  "verdict": "PASS",
+  "visual": "PASS",
+  "text": "PASS",
+  "structure": "PASS",
+  "targetMet": true,
+  "input": 5315233,
+  "output": 921883,
+  "reduction": "83%",
+  "headline": "Done — 922 KB",
+  "pages": "10/10",
+  "minSsim": 0.9922,
+  "meanSsim": 0.9929,
+  "minPsnr": 47.28,
+  "maxChangedPct": 0,
+  "sizesKept": true,
+  "minTextRecall": 100,
+  "integrity": [
+   {
+    "file": "fid-cpdf-PDF-H-PDF-H-multipage-text-image-compressed.pdf",
+    "bytes": 921883,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 10
+   }
+  ]
+ },
+ {
+  "tool": "Compress PDF",
+  "test": "PDF-I (text) → 300 KB",
+  "verdict": "PASS",
+  "visual": "PASS",
+  "text": "PASS",
+  "structure": "PASS",
+  "targetMet": true,
+  "input": 646007,
+  "output": 297772,
+  "reduction": "54%",
+  "headline": "Done — 298 KB",
+  "pages": "4/4",
+  "minSsim": 0.985,
+  "meanSsim": 0.9854,
+  "minPsnr": 42.42,
+  "maxChangedPct": 0,
+  "sizesKept": true,
+  "minTextRecall": 100,
+  "integrity": [
+   {
+    "file": "fid-cpdf-PDF-I-PDF-I-rotated-compressed.pdf",
+    "bytes": 297772,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 4
+   }
+  ]
+ },
+ {
+  "tool": "Compress PDF",
+  "test": "PDF-J (text) → 100 KB",
+  "verdict": "PASS",
+  "visual": "PASS",
+  "text": "PASS",
+  "structure": "PASS",
+  "targetMet": true,
+  "input": 2515,
+  "output": 2515,
+  "reduction": "0%",
+  "headline": "Already under your target",
+  "pages": "6/6",
+  "minSsim": 1,
+  "meanSsim": 1,
+  "minPsnr": 99,
+  "maxChangedPct": 0,
+  "sizesKept": true,
+  "minTextRecall": 100,
+  "integrity": [
+   {
+    "file": "fid-cpdf-PDF-J-PDF-J-mixed-page-sizes.pdf",
+    "bytes": 2515,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 6
+   }
+  ]
+ },
+ {
+  "tool": "Compress PDF",
+  "test": "PDF-M (text) → 100 KB",
+  "verdict": "PASS",
+  "visual": "PASS",
+  "text": "PASS",
+  "structure": "PASS",
+  "targetMet": true,
+  "input": 4798,
+  "output": 4798,
+  "reduction": "0%",
+  "headline": "Already under your target",
+  "pages": "1/1",
+  "minSsim": 1,
+  "meanSsim": 1,
+  "minPsnr": 99,
+  "maxChangedPct": 0,
+  "sizesKept": true,
+  "minTextRecall": 100,
+  "integrity": [
+   {
+    "file": "fid-cpdf-PDF-M-PDF-M-acroform.pdf",
+    "bytes": 4798,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 1
+   }
+  ]
+ },
+ {
+  "tool": "Compress PDF",
+  "test": "PDF-C (scan) → 1000 KB",
+  "verdict": "PASS",
+  "visual": "PASS",
+  "text": "n/a",
+  "structure": "PASS",
+  "targetMet": true,
+  "input": 3624648,
+  "output": 887121,
+  "reduction": "76%",
+  "headline": "Done — 887 KB",
+  "pages": "2/2",
+  "minSsim": 0.9711,
+  "meanSsim": 0.9711,
+  "minPsnr": 36.32,
+  "maxChangedPct": 0.102,
+  "sizesKept": true,
+  "minTextRecall": null,
+  "integrity": [
+   {
+    "file": "fid-cpdf-PDF-C-PDF-C-scan-38mb-incremental-compressed.pdf",
+    "bytes": 887121,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 2
+   }
+  ]
+ },
+ {
+  "tool": "Compress PDF",
+  "test": "REAL-user-scan (scan) → 1000 KB",
+  "verdict": "PASS",
+  "visual": "PASS",
+  "text": "n/a",
+  "structure": "PASS",
+  "targetMet": true,
+  "input": 3982736,
+  "output": 928322,
+  "reduction": "77%",
+  "headline": "Done — 928 KB",
+  "pages": "2/2",
+  "minSsim": 0.9971,
+  "meanSsim": 0.9972,
+  "minPsnr": 49.99,
+  "maxChangedPct": 0,
+  "sizesKept": true,
+  "minTextRecall": null,
+  "integrity": [
+   {
+    "file": "fid-cpdf-REAL-user-scan-TheFileConvert_Scanned_OCR_Test-compressed.pdf",
+    "bytes": 928322,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 2
+   }
+  ]
+ },
+ {
+  "tool": "Compress Image",
+  "test": "IMAGE-B-photo-500k.jpg → 250 KB",
+  "verdict": "LIMITED",
+  "visual": "PASS",
+  "alpha": "n/a",
+  "dims": "LIMITED",
+  "targetMet": true,
+  "ssim": 0.8071,
+  "psnr": 32.17,
+  "changedPct": 0.083,
+  "sizeSrc": "2400x1600",
+  "sizeOut": "1426x950",
+  "input": 498577,
+  "output": 244707,
+  "details": "JPG · 1426 × 950px (resized to 59%) · quality 75% · 1.0 s",
+  "integrity": [
+   {
+    "file": "fid-cimg-IMAGE-B-p-IMAGE-B-photo-500k-compressed.jpg",
+    "bytes": 244707,
+    "ok": true,
+    "kind": "jpeg",
+    "w": 1426,
+    "h": 950,
+    "alpha": false
+   }
+  ]
+ },
+ {
+  "tool": "Compress Image",
+  "test": "IMAGE-C-photo-3mb.jpg → 1000 KB",
+  "verdict": "LIMITED",
+  "visual": "LIMITED",
+  "alpha": "n/a",
+  "dims": "LIMITED",
+  "targetMet": true,
+  "ssim": 0.712,
+  "psnr": 29.4,
+  "changedPct": 0.669,
+  "sizeSrc": "4000x3000",
+  "sizeOut": "2244x1683",
+  "input": 2975516,
+  "output": 792315,
+  "details": "JPG · 2244 × 1683px (resized to 56%) · quality 75% · 2.8 s",
+  "integrity": [
+   {
+    "file": "fid-cimg-IMAGE-C-p-IMAGE-C-photo-3mb-compressed.jpg",
+    "bytes": 792315,
+    "ok": true,
+    "kind": "jpeg",
+    "w": 2244,
+    "h": 1683,
+    "alpha": false
+   }
+  ]
+ },
+ {
+  "tool": "Compress Image",
+  "test": "IMAGE-E-photo-15mb.jpg → 2000 KB",
+  "verdict": "FAIL",
+  "visual": "FAIL",
+  "alpha": "n/a",
+  "dims": "LIMITED",
+  "targetMet": true,
+  "ssim": 0.5046,
+  "psnr": 25.71,
+  "changedPct": 6.44,
+  "sizeSrc": "8000x6000",
+  "sizeOut": "2874x2156",
+  "input": 14688976,
+  "output": 1583971,
+  "details": "JPG · 2874 × 2156px (resized to 36%) · quality 75% · 9.1 s",
+  "integrity": [
+   {
+    "file": "fid-cimg-IMAGE-E-p-IMAGE-E-photo-15mb-compressed.jpg",
+    "bytes": 1583971,
+    "ok": true,
+    "kind": "jpeg",
+    "w": 2874,
+    "h": 2156,
+    "alpha": false
+   }
+  ]
+ },
+ {
+  "tool": "Compress Image",
+  "test": "IMAGE-F-transparent.png → 300 KB",
+  "verdict": "PASS",
+  "visual": "PASS",
+  "alpha": "PASS",
+  "dims": "PASS",
+  "targetMet": true,
+  "ssim": 0.9587,
+  "psnr": 41.32,
+  "changedPct": 0,
+  "sizeSrc": "1800x1400",
+  "sizeOut": "1800x1400",
+  "input": 3280825,
+  "output": 273164,
+  "details": "WebP · 1800 × 1400px · quality 74% · 2.2 s",
+  "integrity": [
+   {
+    "file": "fid-cimg-IMAGE-F-t-IMAGE-F-transparent-compressed.webp",
+    "bytes": 273164,
+    "ok": true,
+    "kind": "webp",
+    "w": 1800,
+    "h": 1400,
+    "alpha": true
+   }
+  ]
+ },
+ {
+  "tool": "Compress Image",
+  "test": "IMAGE-G-large-photo.png → 1000 KB",
+  "verdict": "LIMITED",
+  "visual": "PASS",
+  "alpha": "n/a",
+  "dims": "LIMITED",
+  "targetMet": true,
+  "ssim": 0.8144,
+  "psnr": 32.21,
+  "changedPct": 0.047,
+  "sizeSrc": "3000x2000",
+  "sizeOut": "2894x1929",
+  "input": 8311892,
+  "output": 775130,
+  "details": "WebP · 2894 × 1929px (resized to 96%) · quality 75% · 7.3 s",
+  "integrity": [
+   {
+    "file": "fid-cimg-IMAGE-G-l-IMAGE-G-large-photo-compressed.webp",
+    "bytes": 775130,
+    "ok": true,
+    "kind": "webp",
+    "w": 2894,
+    "h": 1929,
+    "alpha": false
+   }
+  ]
+ },
+ {
+  "tool": "Compress Image",
+  "test": "IMAGE-H-photo.webp → 100 KB",
+  "verdict": "LIMITED",
+  "visual": "PASS",
+  "alpha": "n/a",
+  "dims": "LIMITED",
+  "targetMet": true,
+  "ssim": 0.7835,
+  "psnr": 31.63,
+  "changedPct": 0.496,
+  "sizeSrc": "2400x1600",
+  "sizeOut": "823x548",
+  "input": 1167856,
+  "output": 80606,
+  "details": "WebP · 823 × 548px (resized to 34%) · quality 75% · 3.8 s",
+  "integrity": [
+   {
+    "file": "fid-cimg-IMAGE-H-p-IMAGE-H-photo-compressed.webp",
+    "bytes": 80606,
+    "ok": true,
+    "kind": "webp",
+    "w": 823,
+    "h": 548,
+    "alpha": false
+   }
+  ]
+ },
+ {
+  "tool": "Compress Image",
+  "test": "IMAGE-K-exif-rich.jpg → 150 KB",
+  "verdict": "LIMITED",
+  "visual": "PASS",
+  "alpha": "n/a",
+  "dims": "LIMITED",
+  "targetMet": true,
+  "ssim": 0.8203,
+  "psnr": 32.88,
+  "changedPct": 0.105,
+  "sizeSrc": "1200x1600",
+  "sizeOut": "760x1013",
+  "input": 679943,
+  "output": 133276,
+  "details": "JPG · 760 × 1013px (resized to 63%) · quality 75% · 0.5 s",
+  "integrity": [
+   {
+    "file": "fid-cimg-IMAGE-K-e-IMAGE-K-exif-rich-compressed.jpg",
+    "bytes": 133276,
+    "ok": true,
+    "kind": "jpeg",
+    "w": 760,
+    "h": 1013,
+    "alpha": false
+   }
+  ]
+ },
+ {
+  "tool": "Compress Image",
+  "test": "X-transparent.webp → 20 KB",
+  "verdict": "LIMITED",
+  "visual": "PASS",
+  "alpha": "PASS",
+  "dims": "LIMITED",
+  "targetMet": true,
+  "ssim": 0.9681,
+  "psnr": 39.41,
+  "changedPct": 0.008,
+  "sizeSrc": "900x700",
+  "sizeOut": "480x373",
+  "input": 136976,
+  "output": 16956,
+  "details": "WebP · 480 × 373px (resized to 53%) · quality 50% · 0.9 s",
+  "integrity": [
+   {
+    "file": "fid-cimg-X-transpa-X-transparent-compressed.webp",
+    "bytes": 16956,
+    "ok": true,
+    "kind": "webp",
+    "w": 480,
+    "h": 373,
+    "alpha": true
+   }
+  ]
+ },
+ {
+  "tool": "Image Converter",
+  "test": "IMAGE-B-photo-500k.jpg → PNG",
+  "verdict": "PASS",
+  "visual": "PASS",
+  "alpha": "n/a",
+  "dims": "PASS",
+  "ssim": 1,
+  "psnr": 99,
+  "changedPct": 0,
+  "size": "2400x1600→2400x1600",
+  "integrity": [
+   {
+    "file": "fid-conv-IMAGE-B-p-PNG-IMAGE-B-photo-500k.png",
+    "bytes": 7725439,
+    "ok": true,
+    "kind": "png",
+    "w": 2400,
+    "h": 1600,
+    "alpha": false
+   }
+  ]
+ },
+ {
+  "tool": "Image Converter",
+  "test": "IMAGE-B-photo-500k.jpg → WebP",
+  "verdict": "PASS",
+  "visual": "PASS",
+  "alpha": "n/a",
+  "dims": "PASS",
+  "ssim": 0.978,
+  "psnr": 40.16,
+  "changedPct": 0,
+  "size": "2400x1600→2400x1600",
+  "integrity": [
+   {
+    "file": "fid-conv-IMAGE-B-p-WebP-IMAGE-B-photo-500k.webp",
+    "bytes": 920226,
+    "ok": true,
+    "kind": "webp",
+    "w": 2400,
+    "h": 1600,
+    "alpha": false
+   }
+  ]
+ },
+ {
+  "tool": "Image Converter",
+  "test": "X-portrait-1200x1800.jpg → WebP",
+  "verdict": "PASS",
+  "visual": "PASS",
+  "alpha": "n/a",
+  "dims": "PASS",
+  "ssim": 0.9679,
+  "psnr": 38.8,
+  "changedPct": 0,
+  "size": "1200x1800→1200x1800",
+  "integrity": [
+   {
+    "file": "fid-conv-X-portrai-WebP-X-portrait-1200x1800.webp",
+    "bytes": 643258,
+    "ok": true,
+    "kind": "webp",
+    "w": 1200,
+    "h": 1800,
+    "alpha": false
+   }
+  ]
+ },
+ {
+  "tool": "Image Converter",
+  "test": "IMAGE-F-transparent.png → JPG",
+  "verdict": "PASS",
+  "visual": "PASS",
+  "alpha": "PASS (flattened on white, by design)",
+  "dims": "PASS",
+  "ssim": 0.96,
+  "psnr": 41.61,
+  "changedPct": 0,
+  "size": "1800x1400→1800x1400",
+  "integrity": [
+   {
+    "file": "fid-conv-IMAGE-F-t-JPG-IMAGE-F-transparent.jpg",
+    "bytes": 442969,
+    "ok": true,
+    "kind": "jpeg",
+    "w": 1800,
+    "h": 1400,
+    "alpha": false
+   }
+  ]
+ },
+ {
+  "tool": "Image Converter",
+  "test": "IMAGE-F-transparent.png → WebP",
+  "verdict": "PASS",
+  "visual": "PASS",
+  "alpha": "PASS",
+  "dims": "PASS",
+  "ssim": 0.9847,
+  "psnr": 45.56,
+  "changedPct": 0,
+  "alphaMeanDiff": 0,
+  "size": "1800x1400→1800x1400",
+  "integrity": [
+   {
+    "file": "fid-conv-IMAGE-F-t-WebP-IMAGE-F-transparent.webp",
+    "bytes": 429154,
+    "ok": true,
+    "kind": "webp",
+    "w": 1800,
+    "h": 1400,
+    "alpha": true
+   }
+  ]
+ },
+ {
+  "tool": "Image Converter",
+  "test": "X-odd-1001x777.png → JPG",
+  "verdict": "LIMITED",
+  "visual": "LIMITED",
+  "alpha": "n/a",
+  "dims": "PASS",
+  "ssim": 0.9464,
+  "psnr": 38.56,
+  "changedPct": 0,
+  "size": "1001x777→1001x777",
+  "integrity": [
+   {
+    "file": "fid-conv-X-odd-100-JPG-X-odd-1001x777.jpg",
+    "bytes": 297255,
+    "ok": true,
+    "kind": "jpeg",
+    "w": 1001,
+    "h": 777,
+    "alpha": false
+   }
+  ]
+ },
+ {
+  "tool": "Image Converter",
+  "test": "IMAGE-H-photo.webp → JPG",
+  "verdict": "PASS",
+  "visual": "PASS",
+  "alpha": "n/a",
+  "dims": "PASS",
+  "ssim": 0.9637,
+  "psnr": 38.29,
+  "changedPct": 0,
+  "size": "2400x1600→2400x1600",
+  "integrity": [
+   {
+    "file": "fid-conv-IMAGE-H-p-JPG-IMAGE-H-photo.jpg",
+    "bytes": 1603537,
+    "ok": true,
+    "kind": "jpeg",
+    "w": 2400,
+    "h": 1600,
+    "alpha": false
+   }
+  ]
+ },
+ {
+  "tool": "Image Converter",
+  "test": "IMAGE-H-photo.webp → PNG",
+  "verdict": "PASS",
+  "visual": "PASS",
+  "alpha": "n/a",
+  "dims": "PASS",
+  "ssim": 1,
+  "psnr": 99,
+  "changedPct": 0,
+  "size": "2400x1600→2400x1600",
+  "integrity": [
+   {
+    "file": "fid-conv-IMAGE-H-p-PNG-IMAGE-H-photo.png",
+    "bytes": 8844896,
+    "ok": true,
+    "kind": "png",
+    "w": 2400,
+    "h": 1600,
+    "alpha": false
+   }
+  ]
+ },
+ {
+  "tool": "Image Converter",
+  "test": "X-transparent.webp → PNG",
+  "verdict": "PASS",
+  "visual": "PASS",
+  "alpha": "PASS",
+  "dims": "PASS",
+  "ssim": 0.9985,
+  "psnr": 53.3,
+  "changedPct": 0,
+  "alphaMeanDiff": 0,
+  "size": "900x700→900x700",
+  "integrity": [
+   {
+    "file": "fid-conv-X-transpa-PNG-X-transparent.png",
+    "bytes": 906494,
+    "ok": true,
+    "kind": "png",
+    "w": 900,
+    "h": 700,
+    "alpha": true
+   }
+  ]
+ },
+ {
+  "tool": "Image Converter",
+  "test": "IMAGE-K-exif-rich.jpg → PNG",
+  "verdict": "PASS",
+  "visual": "PASS",
+  "alpha": "n/a",
+  "dims": "PASS",
+  "ssim": 1,
+  "psnr": 99,
+  "changedPct": 0,
+  "size": "1200x1600→1200x1600",
+  "integrity": [
+   {
+    "file": "fid-conv-IMAGE-K-e-PNG-IMAGE-K-exif-rich.png",
+    "bytes": 4364762,
+    "ok": true,
+    "kind": "png",
+    "w": 1200,
+    "h": 1600,
+    "alpha": false
+   }
+  ]
+ },
+ {
+  "tool": "Image Converter",
+  "test": "IMAGE-G-large-photo.png → JPG",
+  "verdict": "PASS",
+  "visual": "PASS",
+  "alpha": "n/a",
+  "dims": "PASS",
+  "ssim": 0.9684,
+  "psnr": 38.29,
+  "changedPct": 0,
+  "size": "3000x2000→3000x2000",
+  "integrity": [
+   {
+    "file": "fid-conv-IMAGE-G-l-JPG-IMAGE-G-large-photo.jpg",
+    "bytes": 2579433,
+    "ok": true,
+    "kind": "jpeg",
+    "w": 3000,
+    "h": 2000,
+    "alpha": false
+   }
+  ]
+ },
+ {
+  "tool": "PDF → Image",
+  "test": "PDF-K-native-text.pdf → PNG",
+  "verdict": "PASS",
+  "images": 2,
+  "minSsim": 0.983,
+  "meanSsim": 0.9891,
+  "minPsnr": 27.65,
+  "dpi": 144,
+  "aspect": "PASS",
+  "sizes": "1224x1584 1224x1584",
+  "integrity": [
+   {
+    "file": "fid-p2i-PDF-K-PDF-K-native-text-images.zip",
+    "bytes": 309379,
+    "ok": true,
+    "kind": "zip",
+    "entries": 2
+   }
+  ]
+ },
+ {
+  "tool": "PDF → Image",
+  "test": "PDF-H-multipage-text-image.pdf → JPG",
+  "verdict": "PASS",
+  "images": 10,
+  "minSsim": 0.9691,
+  "meanSsim": 0.9731,
+  "minPsnr": 27.59,
+  "dpi": 144,
+  "aspect": "PASS",
+  "sizes": "1224x1584 1224x1584 1224x1584 1224x1584 1224x1584 1224x1584 1224x1584 1224x1584 1224x1584 1224x1584",
+  "integrity": [
+   {
+    "file": "fid-p2i-PDF-H-PDF-H-multipage-text-image-images.zip",
+    "bytes": 2611907,
+    "ok": true,
+    "kind": "zip",
+    "entries": 10
+   }
+  ]
+ },
+ {
+  "tool": "PDF → Image",
+  "test": "PDF-I-rotated.pdf → PNG",
+  "verdict": "PASS",
+  "images": 4,
+  "minSsim": 0.9911,
+  "meanSsim": 0.9919,
+  "minPsnr": 28.78,
+  "dpi": 144,
+  "aspect": "PASS",
+  "sizes": "1224x1584 1584x1224 1224x1584 1584x1224",
+  "integrity": [
+   {
+    "file": "fid-p2i-PDF-I-PDF-I-rotated-images.zip",
+    "bytes": 4334937,
+    "ok": true,
+    "kind": "zip",
+    "entries": 4
+   }
+  ]
+ },
+ {
+  "tool": "PDF → Image",
+  "test": "PDF-J-mixed-page-sizes.pdf → JPG",
+  "verdict": "PASS",
+  "images": 6,
+  "minSsim": 0.9965,
+  "meanSsim": 0.9985,
+  "minPsnr": 32.14,
+  "dpi": 144,
+  "aspect": "PASS",
+  "sizes": "1224x1584 1190x1684 1224x2016 1190x840 1584x2448 452x1200",
+  "integrity": [
+   {
+    "file": "fid-p2i-PDF-J-PDF-J-mixed-page-sizes-images.zip",
+    "bytes": 177176,
+    "ok": true,
+    "kind": "zip",
+    "entries": 6
+   }
+  ]
+ },
+ {
+  "tool": "PDF → Image",
+  "test": "OCR-A-clean-300dpi.pdf → PNG",
+  "verdict": "PASS",
+  "images": 1,
+  "minSsim": 0.9912,
+  "meanSsim": 0.9912,
+  "minPsnr": 43.35,
+  "dpi": 144,
+  "aspect": "PASS",
+  "sizes": "1224x1584",
+  "integrity": [
+   {
+    "file": "fid-p2i-OCR-A-OCR-A-clean-300dpi-page-1.png",
+    "bytes": 2170336,
+    "ok": true,
+    "kind": "png",
+    "w": 1224,
+    "h": 1584,
+    "alpha": false
+   }
+  ]
+ },
+ {
+  "tool": "Images → PDF",
+  "test": "fit to image",
+  "verdict": "PASS",
+  "pages": 2,
+  "embeddedSsim": [
+   1,
+   1
+  ],
+  "bytesIdentical": [
+   true,
+   true
+  ],
+  "renderedSsim": [
+   0.9967,
+   0.9961
+  ],
+  "aspect": "PASS",
+  "inside": "PASS",
+  "alpha": "n/a",
+  "placed": "1800x1200:0,0,1800,1200 900x1350:0,0,900,1350",
+  "integrity": [
+   {
+    "file": "fid-i2p-fittoi-images.pdf",
+    "bytes": 1205812,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 2
+   }
+  ]
+ },
+ {
+  "tool": "Images → PDF",
+  "test": "A4 (auto-orientation)",
+  "verdict": "PASS",
+  "pages": 2,
+  "embeddedSsim": [
+   1,
+   1
+  ],
+  "bytesIdentical": [
+   true,
+   true
+  ],
+  "renderedSsim": [
+   0.8121,
+   0.8852
+  ],
+  "aspect": "PASS",
+  "inside": "PASS",
+  "alpha": "n/a",
+  "placed": "595.3x841.9:33,24,562,818 841.9x595.3:24,33,818,562",
+  "integrity": [
+   {
+    "file": "fid-i2p-A4auto-images.pdf",
+    "bytes": 1205863,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 2
+   }
+  ]
+ },
+ {
+  "tool": "Images → PDF",
+  "test": "transparent PNG on Letter",
+  "verdict": "PASS",
+  "pages": 1,
+  "embeddedSsim": [
+   1
+  ],
+  "bytesIdentical": [
+   false
+  ],
+  "renderedSsim": [
+   0.941
+  ],
+  "aspect": "PASS",
+  "inside": "PASS",
+  "alpha": "PASS",
+  "placed": "792x612:33,24,759,588",
+  "integrity": [
+   {
+    "file": "fid-i2p-transpar-IMAGE-F-transparent.pdf",
+    "bytes": 2685027,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 1
+   }
+  ]
+ },
+ {
+  "tool": "Images → PDF",
+  "test": "EXIF-rotated photo",
+  "verdict": "PASS",
+  "pages": 1,
+  "embeddedSsim": [
+   0.9873
+  ],
+  "bytesIdentical": [
+   false
+  ],
+  "renderedSsim": [
+   0.9852
+  ],
+  "aspect": "PASS",
+  "inside": "PASS",
+  "alpha": "n/a",
+  "placed": "900x1200:0,0,900,1200",
+  "integrity": [
+   {
+    "file": "fid-i2p-EXIFrot-IMAGE-K-exif-rich.pdf",
+    "bytes": 779701,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 1
+   }
+  ]
+ },
+ {
+  "tool": "Images → PDF",
+  "test": "odd size + tiny + WebP",
+  "verdict": "LIMITED",
+  "pages": 3,
+  "embeddedSsim": [
+   1,
+   1,
+   0.9637
+  ],
+  "bytesIdentical": [
+   false,
+   false,
+   false
+  ],
+  "renderedSsim": [
+   0.8705,
+   0.8995,
+   0.8053
+  ],
+  "aspect": "PASS",
+  "inside": "PASS",
+  "alpha": "n/a",
+  "placed": "841.9x595.3:68,24,774,571 841.9x595.3:389,274,453,322 841.9x595.3:24,33,818,562",
+  "integrity": [
+   {
+    "file": "fid-i2p-oddsize-images.pdf",
+    "bytes": 3171577,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 3
+   }
+  ]
+ },
+ {
+  "tool": "Merge PDF",
+  "test": "3 PDFs: text, metadata, mixed sizes",
+  "verdict": "PASS",
+  "pages": "11/11",
+  "parts": [
+   {
+    "file": "PDF-K-native-text.pdf",
+    "grade": "PASS",
+    "pages": "11/2",
+    "minSsim": 1,
+    "meanSsim": 1,
+    "minPsnr": 99,
+    "maxChangedPct": 0,
+    "sizesKept": true,
+    "minTextRecall": 100
+   },
+   {
+    "file": "PDF-N-metadata-rich.pdf",
+    "grade": "PASS",
+    "pages": "11/3",
+    "minSsim": 1,
+    "meanSsim": 1,
+    "minPsnr": 99,
+    "maxChangedPct": 0,
+    "sizesKept": true,
+    "minTextRecall": 100
+   },
+   {
+    "file": "PDF-J-mixed-page-sizes.pdf",
+    "grade": "PASS",
+    "pages": "11/6",
+    "minSsim": 1,
+    "meanSsim": 1,
+    "minPsnr": 99,
+    "maxChangedPct": 0,
+    "sizesKept": true,
+    "minTextRecall": 100
+   }
+  ],
+  "integrity": [
+   {
+    "file": "fid-merge-3PDFs-merged.pdf",
+    "bytes": 6348,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 11
+   }
+  ]
+ },
+ {
+  "tool": "Merge PDF",
+  "test": "rotated + form + scan",
+  "verdict": "PASS",
+  "pages": "7/7",
+  "parts": [
+   {
+    "file": "PDF-I-rotated.pdf",
+    "grade": "PASS",
+    "pages": "7/4",
+    "minSsim": 1,
+    "meanSsim": 1,
+    "minPsnr": 99,
+    "maxChangedPct": 0,
+    "sizesKept": true,
+    "minTextRecall": 100
+   },
+   {
+    "file": "PDF-M-acroform.pdf",
+    "grade": "PASS",
+    "pages": "7/1",
+    "minSsim": 1,
+    "meanSsim": 1,
+    "minPsnr": 99,
+    "maxChangedPct": 0,
+    "sizesKept": true,
+    "minTextRecall": 100
+   },
+   {
+    "file": "PDF-C-scan-3.8mb-incremental.pdf",
+    "grade": "PASS",
+    "pages": "7/2",
+    "minSsim": 1,
+    "meanSsim": 1,
+    "minPsnr": 99,
+    "maxChangedPct": 0,
+    "sizesKept": true,
+    "minTextRecall": null
+   }
+  ],
+  "integrity": [
+   {
+    "file": "fid-merge-rotate-merged.pdf",
+    "bytes": 4272293,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 7
+   }
+  ]
+ },
+ {
+  "tool": "Merge PDF",
+  "test": "photo-heavy + multipage",
+  "verdict": "PASS",
+  "pages": "15/15",
+  "parts": [
+   {
+    "file": "PDF-D-photo-heavy-5mb.pdf",
+    "grade": "PASS",
+    "pages": "15/5",
+    "minSsim": 1,
+    "meanSsim": 1,
+    "minPsnr": 99,
+    "maxChangedPct": 0,
+    "sizesKept": true,
+    "minTextRecall": 100
+   },
+   {
+    "file": "PDF-H-multipage-text-image.pdf",
+    "grade": "PASS",
+    "pages": "15/10",
+    "minSsim": 1,
+    "meanSsim": 1,
+    "minPsnr": 99,
+    "maxChangedPct": 0,
+    "sizesKept": true,
+    "minTextRecall": 100
+   }
+  ],
+  "integrity": [
+   {
+    "file": "fid-merge-photo-merged.pdf",
+    "bytes": 10257069,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 15
+   }
+  ]
+ },
+ {
+  "tool": "Split PDF",
+  "test": "pages 2, 5, 9",
+  "verdict": "PASS",
+  "pages": "3/3",
+  "minSsim": 1,
+  "meanSsim": 1,
+  "minPsnr": 99,
+  "maxChangedPct": 0,
+  "sizesKept": true,
+  "minTextRecall": 100,
+  "integrity": [
+   {
+    "file": "fid-split-2_5_9-PDF-H-multipage-text-image-pages-2_5_9.pdf",
+    "bytes": 1601564,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 3
+   }
+  ]
+ },
+ {
+  "tool": "Split PDF",
+  "test": "first and last",
+  "verdict": "PASS",
+  "pages": "2/2",
+  "minSsim": 1,
+  "meanSsim": 1,
+  "minPsnr": 99,
+  "maxChangedPct": 0,
+  "sizesKept": true,
+  "minTextRecall": 100,
+  "integrity": [
+   {
+    "file": "fid-split-1_10-PDF-H-multipage-text-image-pages-1_10.pdf",
+    "bytes": 1052058,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 2
+   }
+  ]
+ },
+ {
+  "tool": "Split PDF",
+  "test": "every page of the rotated PDF → ZIP",
+  "verdict": "PASS",
+  "files": 4,
+  "grades": [
+   {
+    "page": 1,
+    "grade": "PASS",
+    "ssim": 1,
+    "rotation": 0,
+    "sizeKept": true
+   },
+   {
+    "page": 2,
+    "grade": "PASS",
+    "ssim": 1,
+    "rotation": 90,
+    "sizeKept": true
+   },
+   {
+    "page": 3,
+    "grade": "PASS",
+    "ssim": 1,
+    "rotation": 180,
+    "sizeKept": true
+   },
+   {
+    "page": 4,
+    "grade": "PASS",
+    "ssim": 1,
+    "rotation": 270,
+    "sizeKept": true
+   }
+  ],
+  "integrity": [
+   {
+    "file": "fid-split-every-PDF-I-rotated-pages.zip",
+    "bytes": 648608,
+    "ok": true,
+    "kind": "zip",
+    "entries": 4
+   }
+  ]
+ },
+ {
+  "tool": "Organize PDF",
+  "test": "move page 4 first, rotate page 2 right, delete page 10",
+  "verdict": "PASS",
+  "pages": "9/9",
+  "minSsim": 1,
+  "meanSsim": 1,
+  "minPsnr": 99,
+  "maxChangedPct": 0,
+  "sizesKept": true,
+  "minTextRecall": 100,
+  "integrity": [
+   {
+    "file": "fid-org-PDF-H-multipage-text-image-organized.pdf",
+    "bytes": 4805665,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 9
+   }
+  ]
+ },
+ {
+  "tool": "Organize PDF",
+  "test": "already-rotated source: rotate pages 2 and 4 right",
+  "verdict": "PASS",
+  "pages": "4/4",
+  "minSsim": 1,
+  "meanSsim": 1,
+  "minPsnr": 99,
+  "maxChangedPct": 0,
+  "sizesKept": true,
+  "minTextRecall": 100,
+  "integrity": [
+   {
+    "file": "fid-org-rot-PDF-I-rotated-organized.pdf",
+    "bytes": 645995,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 4
+   }
+  ]
+ },
+ {
+  "tool": "PDF Editor",
+  "test": "export with no edits",
+  "verdict": "PASS",
+  "pages": "1/1",
+  "minSsim": 1,
+  "meanSsim": 1,
+  "minPsnr": 99,
+  "maxChangedPct": 0,
+  "sizesKept": true,
+  "minTextRecall": 100,
+  "integrity": [
+   {
+    "file": "fid-edit-export-with-no-edits-FL-PDF-07-native-text-edited.pdf",
+    "bytes": 1525,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 1
+   }
+  ]
+ },
+ {
+  "tool": "PDF Editor",
+  "test": "add text",
+  "verdict": "PASS",
+  "changedOutsidePct": 0,
+  "maxDiffOutside": 0,
+  "changedInsidePct": 7.66,
+  "otherPagesUnchanged": "PASS",
+  "area": [
+   50,
+   540,
+   260,
+   575
+  ],
+  "textRecallP1": 100,
+  "integrity": [
+   {
+    "file": "fid-edit-add-text-FL-PDF-07-native-text-edited.pdf",
+    "bytes": 1922,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 1
+   }
+  ]
+ },
+ {
+  "tool": "PDF Editor",
+  "test": "highlight",
+  "verdict": "PASS",
+  "changedOutsidePct": 0,
+  "maxDiffOutside": 0,
+  "changedInsidePct": 7.82,
+  "otherPagesUnchanged": "PASS",
+  "area": [
+   55,
+   298,
+   305,
+   320
+  ],
+  "textRecallP1": 100,
+  "integrity": [
+   {
+    "file": "fid-edit-highlight-FL-PDF-07-native-text-edited.pdf",
+    "bytes": 1937,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 1
+   }
+  ]
+ },
+ {
+  "tool": "PDF Editor",
+  "test": "underline",
+  "verdict": "PASS",
+  "changedOutsidePct": 0,
+  "maxDiffOutside": 0,
+  "changedInsidePct": 7.28,
+  "otherPagesUnchanged": "PASS",
+  "area": [
+   55,
+   298,
+   305,
+   322
+  ],
+  "textRecallP1": 100,
+  "integrity": [
+   {
+    "file": "fid-edit-underline-FL-PDF-07-native-text-edited.pdf",
+    "bytes": 1875,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 1
+   }
+  ]
+ },
+ {
+  "tool": "PDF Editor",
+  "test": "strikethrough",
+  "verdict": "PASS",
+  "changedOutsidePct": 0,
+  "maxDiffOutside": 0,
+  "changedInsidePct": 4.38,
+  "otherPagesUnchanged": "PASS",
+  "area": [
+   55,
+   298,
+   305,
+   320
+  ],
+  "textRecallP1": 100,
+  "integrity": [
+   {
+    "file": "fid-edit-strikethrough-FL-PDF-07-native-text-edited.pdf",
+    "bytes": 1873,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 1
+   }
+  ]
+ },
+ {
+  "tool": "PDF Editor",
+  "test": "draw",
+  "verdict": "PASS",
+  "changedOutsidePct": 0,
+  "maxDiffOutside": 0,
+  "changedInsidePct": 3.95,
+  "otherPagesUnchanged": "PASS",
+  "area": [
+   350,
+   590,
+   530,
+   650
+  ],
+  "textRecallP1": 100,
+  "integrity": [
+   {
+    "file": "fid-edit-draw-FL-PDF-07-native-text-edited.pdf",
+    "bytes": 3185,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 1
+   }
+  ]
+ },
+ {
+  "tool": "PDF Editor",
+  "test": "rectangle",
+  "verdict": "PASS",
+  "changedOutsidePct": 0,
+  "maxDiffOutside": 0,
+  "changedInsidePct": 9.41,
+  "otherPagesUnchanged": "PASS",
+  "area": [
+   54,
+   634,
+   206,
+   706
+  ],
+  "textRecallP1": 100,
+  "integrity": [
+   {
+    "file": "fid-edit-rectangle-FL-PDF-07-native-text-edited.pdf",
+    "bytes": 1902,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 1
+   }
+  ]
+ },
+ {
+  "tool": "PDF Editor",
+  "test": "arrow",
+  "verdict": "PASS",
+  "changedOutsidePct": 0,
+  "maxDiffOutside": 0,
+  "changedInsidePct": 4.73,
+  "otherPagesUnchanged": "PASS",
+  "area": [
+   222,
+   712,
+   338,
+   778
+  ],
+  "textRecallP1": 100,
+  "integrity": [
+   {
+    "file": "fid-edit-arrow-FL-PDF-07-native-text-edited.pdf",
+    "bytes": 1934,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 1
+   }
+  ]
+ },
+ {
+  "tool": "PDF Editor",
+  "test": "whiteout",
+  "verdict": "PASS",
+  "changedOutsidePct": 0,
+  "maxDiffOutside": 0,
+  "changedInsidePct": 10.93,
+  "otherPagesUnchanged": "PASS",
+  "area": [
+   52,
+   497,
+   473,
+   518
+  ],
+  "textRecallP1": 100,
+  "integrity": [
+   {
+    "file": "fid-edit-whiteout-FL-PDF-07-native-text-edited.pdf",
+    "bytes": 1899,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 1
+   }
+  ]
+ },
+ {
+  "tool": "PDF Editor",
+  "test": "edit existing text",
+  "verdict": "PASS",
+  "changedOutsidePct": 0,
+  "maxDiffOutside": 0,
+  "changedInsidePct": 5.61,
+  "otherPagesUnchanged": "PASS",
+  "area": [
+   196,
+   112.94999694824219,
+   322.4739685058594,
+   140.18600463867188
+  ],
+  "textRecallP1": 100,
+  "integrity": [
+   {
+    "file": "fid-edit-edit-existing-text-FL-PDF-07-native-text-edited.pdf",
+    "bytes": 1949,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 1
+   }
+  ]
+ },
+ {
+  "tool": "OCR",
+  "test": "OCR-A-clean-300dpi.pdf",
+  "verdict": "PASS",
+  "look": "PASS",
+  "recognitionAccuracy": 100,
+  "exportSearchable": 0,
+  "pages": "1/1",
+  "minSsim": 1,
+  "meanSsim": 1,
+  "minPsnr": 99,
+  "maxChangedPct": 0,
+  "sizesKept": true,
+  "minTextRecall": null,
+  "integrity": [
+   {
+    "file": "fid-ocr-OCR-A-OCR-A-clean-300dpi-edited.pdf",
+    "bytes": 859444,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 1
+   }
+  ]
+ },
+ {
+  "tool": "OCR",
+  "test": "OCR-B-low-res-100dpi.pdf",
+  "verdict": "PASS",
+  "look": "PASS",
+  "recognitionAccuracy": 100,
+  "exportSearchable": 0,
+  "pages": "1/1",
+  "minSsim": 1,
+  "meanSsim": 1,
+  "minPsnr": 99,
+  "maxChangedPct": 0,
+  "sizesKept": true,
+  "minTextRecall": null,
+  "integrity": [
+   {
+    "file": "fid-ocr-OCR-B-OCR-B-low-res-100dpi-edited.pdf",
+    "bytes": 111123,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 1
+   }
+  ]
+ },
+ {
+  "tool": "OCR",
+  "test": "OCR-D-rotated.pdf",
+  "verdict": "PASS",
+  "look": "PASS",
+  "recognitionAccuracy": 100,
+  "exportSearchable": 0,
+  "pages": "1/1",
+  "minSsim": 1,
+  "meanSsim": 1,
+  "minPsnr": 99,
+  "maxChangedPct": 0,
+  "sizesKept": true,
+  "minTextRecall": null,
+  "integrity": [
+   {
+    "file": "fid-ocr-OCR-D-OCR-D-rotated-edited.pdf",
+    "bytes": 864476,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 1
+   }
+  ]
+ },
+ {
+  "tool": "OCR",
+  "test": "OCR-G-multipage.pdf",
+  "verdict": "PASS",
+  "look": "PASS",
+  "recognitionAccuracy": 100,
+  "exportSearchable": 0,
+  "pages": "3/3",
+  "minSsim": 1,
+  "meanSsim": 1,
+  "minPsnr": 99,
+  "maxChangedPct": 0,
+  "sizesKept": true,
+  "minTextRecall": null,
+  "integrity": [
+   {
+    "file": "fid-ocr-OCR-G-OCR-G-multipage-edited.pdf",
+    "bytes": 2432202,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 3
+   }
+  ]
+ },
+ {
+  "tool": "Fidelity tools",
+  "test": "no third-party requests",
+  "verdict": "PASS",
+  "leaked": []
+ },
+ {
+  "tool": "Fidelity tools",
+  "test": "console errors (all steps)",
+  "verdict": "PASS",
+  "count": 0
+ }
+]

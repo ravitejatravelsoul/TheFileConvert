@@ -1,0 +1,58 @@
+{
+ "checks": [
+  {
+   "id": "left-meta",
+   "kind": "same_line",
+   "page": 1,
+   "phrases": [
+    "Invoice number",
+    "INV-5521"
+   ],
+   "tol": 8
+  },
+  {
+   "id": "right-meta",
+   "kind": "same_line",
+   "page": 1,
+   "phrases": [
+    "Due date",
+    "16/10/2026"
+   ],
+   "tol": 8
+  },
+  {
+   "id": "layout:right-meta-right",
+   "kind": "present",
+   "page": 1,
+   "phrase": "Purchase order",
+   "x_min": 300
+  },
+  {
+   "id": "tables:count",
+   "kind": "ntables",
+   "min": 1
+  },
+  {
+   "id": "totals",
+   "kind": "same_line",
+   "page": 1,
+   "phrases": [
+    "Amount due",
+    "£183.60"
+   ],
+   "tol": 8
+  },
+  {
+   "id": "order:zones",
+   "kind": "docorder",
+   "phrases": [
+    "Tax Invoice",
+    "Invoice number",
+    "Ship to",
+    "Product",
+    "Subtotal",
+    "Amount due"
+   ]
+  }
+ ]
+}

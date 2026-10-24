@@ -1,0 +1,29 @@
+[
+ {
+  "tool": "Compress PDF",
+  "test": "user scan → 1000 KB (before)",
+  "verdict": "FAIL",
+  "input": 3982736,
+  "target": 1000000,
+  "output": 471312,
+  "headline": "Done — 471 KB",
+  "check": {
+   "file": "C:\\Users\\ravit\\Desktop\\my projects\\thefileconvert\\qa\\evidence\\fresh\\out\\before-real-1000-TheFileConvert_Scanned_OCR_Test-compressed.pdf",
+   "ok": false,
+   "problems": [
+    "qpdf open: C:\\Users\\ravit\\Desktop\\my projects\\thefileconvert\\qa\\evidence\\fresh\\out\\before-real-1000-TheFileConvert_Scanned_OCR_Test-compressed.pdf: unable to find /Root dictionary",
+    "mupdf: file was damaged and had to be repaired",
+    "mupdf warnings: Trailer Size is off-by-one. Ignoring. | format error: invalid reference to an objstm that does not exist: 14 (1 0 R) | trying to repair broken xref"
+   ],
+   "mupdf_pages": 2,
+   "blank_pages": [],
+   "text_chars": 0,
+   "mupdf_warnings": [
+    "Trailer Size is off-by-one. Ignoring.",
+    "format error: invalid reference to an objstm that does not exist: 14 (1 0 R)",
+    "trying to repair broken xref",
+    "repairing PDF document"
+   ]
+  }
+ }
+]

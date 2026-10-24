@@ -1,0 +1,165 @@
+[
+ {
+  "tool": "PDF Editor",
+  "test": "native long session: edit, add text, 3× highlight, 3× underline, 3× strikethrough, draw, rectangle/ellipse/line/arrow, image, signature, whiteout, undo/redo, search, blank page add+delete, reorder, rotate, crop, export, reopen",
+  "verdict": "PASS",
+  "steps": [
+   "region:\"Jordan Smith\"",
+   "edit-existing",
+   "add-text:\"Approved for payment\"",
+   "markup-armed:true",
+   "live-stroke:true",
+   "undo:19->18->19",
+   "search:1 of 1",
+   "blank+delete:1",
+   "pages:blank+move+rotate+crop"
+  ],
+  "types": {
+   "native-text-replacement": 1,
+   "added-text": 1,
+   "annotation": 9,
+   "drawing": 1,
+   "shape": 4,
+   "image": 1,
+   "signature": 1,
+   "whiteout": 1
+  },
+  "checks": {
+   "pages": true,
+   "rotation": true,
+   "editedText": true,
+   "addedText": true,
+   "highlights": true,
+   "underlines": true,
+   "drawing": true,
+   "rectangle": true,
+   "ellipse": true,
+   "line": true,
+   "arrow": true,
+   "strikethroughs": true,
+   "search": true,
+   "deletePage": true,
+   "image": true,
+   "signature": true,
+   "whiteout": true,
+   "originalLine11Intact": true,
+   "crop": true
+  },
+  "output": 657613,
+  "integrity": [
+   {
+    "file": "editor-native-FL-PDF-07-native-text-edited.pdf",
+    "bytes": 657613,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 2
+   }
+  ]
+ },
+ {
+  "tool": "PDF Editor",
+  "test": "scanned session (condensed): OCR 6.0s, 12/20/2026→12/20/2028, Jordan→Morgan, Consultation→Consultations, add text, highlight, draw, signature, export, reopen",
+  "verdict": "PASS",
+  "edits": [
+   {
+    "word": "12/20/2026",
+    "replacement": "12/20/2028",
+    "current": "12/20/2026",
+    "overflow": true,
+    "forced": false
+   },
+   {
+    "word": "Jordan",
+    "replacement": "Morgan",
+    "current": "Jordan",
+    "overflow": false,
+    "forced": false
+   },
+   {
+    "word": "Consultation",
+    "replacement": "Consultations",
+    "current": "Consultation",
+    "overflow": false,
+    "forced": false
+   }
+  ],
+  "textLayer": "Checked on device  Name: Morgan Smith  Date: 12/20/2028  Service: Consultations  Amount: 1250.00  Thank you for your visit. Reference number 4410. Thank you for your visit. Reference number 4413. Than",
+  "changedPct": 1.19,
+  "pages": "1/1",
+  "integrity": [
+   {
+    "file": "editor-scan-condensed-FL-PDF-08b-scanned-condensed-edited.pdf",
+    "bytes": 729246,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 1
+   }
+  ]
+ },
+ {
+  "tool": "PDF Editor",
+  "test": "scanned session (fixture): OCR 7.6s, 12/20/2026→12/20/2028, Jordan→Morgan, Consultation→Consultations, add text, highlight, draw, signature, export, reopen",
+  "verdict": "PASS",
+  "edits": [
+   {
+    "word": "12/20/2026",
+    "replacement": "12/20/2028",
+    "current": "12/20/2026",
+    "overflow": false,
+    "forced": false
+   },
+   {
+    "word": "Jordan",
+    "replacement": "Morgan",
+    "current": "Jordan",
+    "overflow": false,
+    "forced": false
+   },
+   {
+    "word": "Consultation",
+    "replacement": "Consultations",
+    "current": "Consultation",
+    "overflow": true,
+    "forced": false
+   }
+  ],
+  "textLayer": "Checked on device  Name: Morgan Smith  Date: 12/20/2028  Service: Consultations  Amount: 1250.00  Thank you for your visit. Reference number 4410. Thank you for your visit. Reference number 4413. Than",
+  "changedPct": 1.27,
+  "pages": "1/1",
+  "integrity": [
+   {
+    "file": "editor-scan-fixture-FL-PDF-08-scanned-text-edited.pdf",
+    "bytes": 765809,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 1
+   }
+  ]
+ },
+ {
+  "tool": "PDF Editor",
+  "test": "scanned session (user-supplied): OCR 5.6s, 12/20/2026→12/20/2028, add text, highlight, draw, signature, export, reopen",
+  "verdict": "PASS",
+  "edits": [
+   {
+    "word": "12/20/2026",
+    "replacement": "12/20/2028",
+    "current": "12/20/2026",
+    "overflow": false,
+    "forced": false
+   }
+  ],
+  "textLayer": "Checked on device  OFFICIAL RECORD - SCANNED COPY  Student Information  Name: John Smith  This certifies that the requirements for the award of the degree  VALID FROM 02/08/2026 UNTIL 12/20/2028  Acco",
+  "changedPct": 1.02,
+  "pages": "2/2",
+  "integrity": [
+   {
+    "file": "editor-scan-user-supplied-TheFileConvert_Scanned_OCR_Test-edited.pdf",
+    "bytes": 3963324,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 2
+   }
+  ]
+ }
+]

@@ -1,0 +1,19 @@
+{
+ "checks": [
+  {
+   "id": "tables:count",
+   "kind": "ntables",
+   "min": 4
+  },
+  {
+   "id": "order:terms",
+   "kind": "docorder",
+   "phrases": [
+    "Autumn 2024",
+    "Spring 2025",
+    "Autumn 2025",
+    "Cumulative GPA"
+   ]
+  }
+ ]
+}

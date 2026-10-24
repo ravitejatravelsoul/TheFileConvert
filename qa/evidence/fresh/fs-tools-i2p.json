@@ -1,0 +1,140 @@
+[
+ {
+  "tool": "Images → PDF",
+  "test": "2 images (landscape + portrait), fit to image",
+  "verdict": "PASS",
+  "pages": 2,
+  "sizes": "1800x1200 900x1350",
+  "corner": null,
+  "output": 1205812,
+  "ms": 250,
+  "integrity": [
+   {
+    "file": "fs-i2p-2-Fittoimage-images.pdf",
+    "bytes": 1205812,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 2
+   }
+  ]
+ },
+ {
+  "tool": "Images → PDF",
+  "test": "portrait + landscape on A4 (auto-orientation)",
+  "verdict": "PASS",
+  "pages": 2,
+  "sizes": "595x842 842x595",
+  "corner": null,
+  "output": 1205863,
+  "ms": 191,
+  "integrity": [
+   {
+    "file": "fs-i2p-2-A4-images.pdf",
+    "bytes": 1205863,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 2
+   }
+  ]
+ },
+ {
+  "tool": "Images → PDF",
+  "test": "transparent PNG on Letter (renders on white)",
+  "verdict": "PASS",
+  "pages": 1,
+  "sizes": "792x612",
+  "corner": [
+   255,
+   255,
+   255
+  ],
+  "output": 2685027,
+  "ms": 1230,
+  "integrity": [
+   {
+    "file": "fs-i2p-1-Letter-IMAGE-F-transparent.pdf",
+    "bytes": 2685027,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 1
+   }
+  ]
+ },
+ {
+  "tool": "Images → PDF",
+  "test": "large images (15 MB + 8 MB JPG)",
+  "verdict": "PASS",
+  "pages": 2,
+  "sizes": "842x595 842x595",
+  "corner": null,
+  "output": 22685405,
+  "ms": 1471,
+  "integrity": [
+   {
+    "file": "fs-i2p-2-A4-images.pdf",
+    "bytes": 22685405,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 2
+   }
+  ]
+ },
+ {
+  "tool": "Images → PDF",
+  "test": "EXIF Orientation 6 photo comes out upright",
+  "verdict": "PASS",
+  "pages": 1,
+  "sizes": "900x1200",
+  "corner": null,
+  "output": 779701,
+  "ms": 266,
+  "integrity": [
+   {
+    "file": "fs-i2p-1-Fittoimage-IMAGE-K-exif-rich.pdf",
+    "bytes": 779701,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 1
+   }
+  ]
+ },
+ {
+  "tool": "Images → PDF",
+  "test": "10 mixed images (JPG, PNG, WebP, transparent, odd, tiny)",
+  "verdict": "PASS",
+  "pages": 10,
+  "sizes": "842x595 842x595 842x595 842x595 595x842 842x595 595x842 842x595 842x595 842x595",
+  "corner": null,
+  "output": 11090176,
+  "ms": 3300,
+  "integrity": [
+   {
+    "file": "fs-i2p-10-A4-images.pdf",
+    "bytes": 11090176,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 10
+   }
+  ]
+ },
+ {
+  "tool": "Images → PDF",
+  "test": "reordered with Move buttons (3 images)",
+  "verdict": "PASS",
+  "sizes": "751x583 1800x1200 900x1350",
+  "integrity": [
+   {
+    "file": "fs-i2p-reorder-images.pdf",
+    "bytes": 2766799,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 3
+   }
+  ]
+ },
+ {
+  "tool": "All tools",
+  "test": "console errors / unexpected dialogs",
+  "verdict": "PASS"
+ }
+]

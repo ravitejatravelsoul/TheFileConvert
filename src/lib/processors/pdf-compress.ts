@@ -1,5 +1,9 @@
-import { PDFArray, PDFDict, PDFDocument, PDFName, PDFNumber, PDFRawStream, PDFRef, type PDFObject } from "pdf-lib";
-import { decodeFlateImage, filterChain, isFlateChain, type RawImage } from "./pdf-image-decode";
+import { savePdfChecked } from "@/lib/pdf/save";
+import { PDFArray, PDFDict, PDFDocument, PDFName, PDFNumber, PDFRawStream, PDFRef, type PDFContext, type PDFObject } from "pdf-lib";
+import { colorChannels, decodeFlateImage, filterChain, isFlateChain, type RawImage } from "./pdf-image-decode";
+import { loadPdfForEditing, replaceReferences } from "@/lib/pdf/load";
+import { deflate } from "@/lib/pdf/zlib";
+import { encodeCanvas } from "./canvas-blob";
 
 /**
  * Browser-local PDF size reduction, in three honest levels:
@@ -48,6 +52,8 @@ export interface PdfImageAnalysis {
   /** Images whose bytes are identical to an earlier one (mergeable without any quality change). */
   duplicateCount: number;
   duplicateBytes: number;
+  /** Bytes in streams stored with no compression at all (typically page text) — shrinkable losslessly. */
+  unfilteredBytes?: number;
 }
 
 interface ImageEntry {
@@ -76,9 +82,44 @@ function collectImages(doc: PDFDocument): ImageEntry[] {
     if (!(obj instanceof PDFRawStream)) continue;
     if (nameOf(obj.dict.get(PDFName.of("Subtype"))) !== "Image") continue;
     const isJpeg = filterOf(obj.dict) === "DCTDecode";
-    out.push({ ref, stream: obj, isJpeg, isFlate: !isJpeg && isFlateChain(filterChain(obj.dict)) && isRecompressible(obj.dict), bytes: obj.contents });
+    out.push({ ref, stream: obj, isJpeg, isFlate: !isJpeg && isFlateChain(filterChain(obj.dict)) && isRecompressible(obj.dict, doc.context), bytes: obj.contents });
   }
   return out;
+}
+
+/** Streams stored with no /Filter that are worth compressing: page content, fonts, forms, raw images.
+ * XMP metadata stays readable as-is (archival profiles expect that); cross-reference and object streams
+ * are rebuilt by the writer. */
+function unfilteredStreams(doc: PDFDocument): [PDFRef, PDFRawStream][] {
+  const out: [PDFRef, PDFRawStream][] = [];
+  for (const [ref, obj] of doc.context.enumerateIndirectObjects()) {
+    if (!(obj instanceof PDFRawStream) || obj.dict.has(PDFName.of("Filter"))) continue;
+    const type = nameOf(obj.dict.get(PDFName.of("Type")));
+    if (type === "Metadata" || type === "XRef" || type === "ObjStm") continue;
+    if (obj.contents.length >= 256) out.push([ref, obj]);
+  }
+  return out;
+}
+
+/** Lossless: Flate-compresses every uncompressed stream where that actually saves space. */
+async function deflateUnfilteredStreams(doc: PDFDocument): Promise<number> {
+  let count = 0;
+  for (const [ref, stream] of unfilteredStreams(doc)) {
+    let packed: Uint8Array;
+    try {
+      packed = await deflate(stream.contents);
+    } catch {
+      continue;
+    }
+    if (packed.length > stream.contents.length * 0.9) continue;
+    const dict = stream.dict.clone(doc.context);
+    dict.set(PDFName.of("Filter"), PDFName.of("FlateDecode"));
+    dict.delete(PDFName.of("DecodeParms"));
+    dict.set(PDFName.of("Length"), PDFNumber.of(packed.length));
+    doc.context.assign(ref, PDFRawStream.of(dict, packed));
+    count++;
+  }
+  return count;
 }
 
 function fingerprint(e: ImageEntry): string {
@@ -117,7 +158,7 @@ function findDuplicates(images: ImageEntry[]): Map<PDFRef, PDFRef> {
 
 export async function analyzePdfImages(bytes: ArrayBuffer | Uint8Array): Promise<PdfImageAnalysis> {
   const data = bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes);
-  const doc = await PDFDocument.load(data, { ignoreEncryption: true, updateMetadata: false });
+  const doc = await loadPdfForEditing(data, { updateMetadata: false });
   const images = collectImages(doc);
   const dups = findDuplicates(images);
   const byRef = new Map(images.map((i) => [i.ref, i]));
@@ -126,40 +167,41 @@ export async function analyzePdfImages(bytes: ArrayBuffer | Uint8Array): Promise
   return {
     totalBytes: data.length,
     imageCount: images.length,
-    jpegCount: images.filter((i) => i.isJpeg).length,
+    // Only JPEGs this tool can actually re-encode (CMYK and other colour spaces are kept as they are).
+    jpegCount: images.filter((i) => i.isJpeg && isRecompressible(i.stream.dict, doc.context)).length,
     imageBytes: images.reduce((s, i) => s + i.bytes.length, 0),
     jpegBytes: images.filter((i) => i.isJpeg).reduce((s, i) => s + i.bytes.length, 0),
     flateCount: images.filter((i) => i.isFlate).length,
     flateBytes: images.filter((i) => i.isFlate).reduce((s, i) => s + i.bytes.length, 0),
     duplicateCount: dups.size,
     duplicateBytes,
+    unfilteredBytes: unfilteredStreams(doc).reduce((sum, [, st]) => sum + st.contents.length, 0),
   };
 }
 
-/** What the analysis means for the user, before they press anything. */
-export function describeAnalysis(a: PdfImageAnalysis): { headline: string; advice: string; suggestLossy: boolean } {
+export type CompressionOutlook = "text-only" | "little-room" | "unsupported-images" | "good-room";
+
+/** What the analysis means for the user before they pick a target, in one sentence. */
+export function compressionOutlook(a: PdfImageAnalysis): { kind: CompressionOutlook; text: string } {
   const share = a.totalBytes > 0 ? a.imageBytes / a.totalBytes : 0;
-  const pct = Math.round(share * 100);
+  const recompressible = a.jpegCount + (a.flateCount ?? 0);
+  const repeats = a.duplicateCount > 0 ? ` ${a.duplicateCount} repeated image${a.duplicateCount === 1 ? "" : "s"} can be merged for free.` : "";
+  const unfilteredShare = a.totalBytes > 0 ? (a.unfilteredBytes ?? 0) / a.totalBytes : 0;
   if (a.imageCount === 0) {
-    return { headline: "This PDF has no embedded images — it is text and vector content.", advice: "Lossless optimization is all that applies here, and it usually saves only a few percent (often nothing if the file was already optimized).", suggestLossy: false };
+    if (unfilteredShare >= 0.25)
+      return { kind: "good-room", text: `Text only, but ${Math.round(unfilteredShare * 100)}% of the file is stored uncompressed — it can shrink a lot with no change to how it looks.` };
+    return { kind: "text-only", text: "Text and vector content only, so there is little to shrink — expect a small saving at most." };
   }
-  const dup = a.duplicateCount > 0 ? ` ${a.duplicateCount} of them are exact repeats that can be merged with no quality loss.` : "";
+  if (share < 0.25 && unfilteredShare >= 0.25) {
+    return { kind: "good-room", text: `Mostly text, and ${Math.round(unfilteredShare * 100)}% of the file is stored uncompressed — it can shrink with no change to how it looks.${repeats}` };
+  }
   if (share < 0.25) {
-    return { headline: `${a.imageCount} embedded image${a.imageCount === 1 ? "" : "s"} (${pct}% of the file).${dup}`, advice: "Mostly text: expect little from lossless optimization.", suggestLossy: false };
+    return { kind: "little-room", text: `Mostly text: images are ${Math.round(share * 100)}% of the file, so savings will be modest.${repeats}` };
   }
-  const flate = a.flateCount ?? 0;
-  if (a.jpegCount + flate === 0) {
-    return { headline: `${a.imageCount} embedded image${a.imageCount === 1 ? "" : "s"} (${pct}% of the file), none in a format this tool can recompress.${dup}`, advice: "This tool can only recompress JPEG and lossless (Flate) RGB/grayscale images. Other image encodings (such as black-and-white JBIG2/CCITT, CMYK or indexed colour) are kept exactly as they are, so savings will be small.", suggestLossy: false };
+  if (recompressible === 0) {
+    return { kind: "unsupported-images", text: `Images make up ${Math.round(share * 100)}% of the file, but in encodings that are kept as they are (such as black-and-white fax or CMYK), so savings will be small.${repeats}` };
   }
-  if (a.jpegCount === 0 && flate > 0) {
-    return { headline: `${a.imageCount} embedded image${a.imageCount === 1 ? "" : "s"} ${a.imageCount === 1 ? "makes" : "make"} up ${pct}% of this file — stored losslessly (uncompressed-quality scan data).${dup}`, advice: "Lossless optimization cannot shrink this kind of scan without changing it. Balanced or Smallest re-encode the pages as JPEG, which usually cuts the size by a large factor (this lowers image quality).", suggestLossy: true };
-  }
-  const dupShare = a.totalBytes > 0 ? a.duplicateBytes / a.totalBytes : 0;
-  const headline = `${a.imageCount} embedded image${a.imageCount === 1 ? "" : "s"} ${a.imageCount === 1 ? "makes" : "make"} up ${pct}% of this file.${dup}`;
-  if (dupShare >= 0.1) {
-    return { headline, advice: `Lossless mode should still help: merging the repeated images alone saves roughly ${Math.round(dupShare * 100)}% with no quality loss. Balanced or Smallest go further by lowering image quality.`, suggestLossy: true };
-  }
-  return { headline, advice: "Lossless optimization will barely change a file like this. To actually shrink it, choose Balanced or Smallest below (this lowers image quality).", suggestLossy: true };
+  return { kind: "good-room", text: `Images make up ${Math.round(share * 100)}% of the file — there is real room to shrink it.${repeats}` };
 }
 
 export interface CompressResult {
@@ -194,7 +236,7 @@ export const canvasReencoder: JpegReencoder = async (jpeg, { quality, maxLongSid
     if (!ctx) return null;
     ctx.imageSmoothingQuality = "high";
     ctx.drawImage(bitmap, 0, 0, w, h);
-    const out = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/jpeg", quality));
+    const out = await encodeCanvas(canvas, "image/jpeg", quality);
     if (!out) return null;
     return { bytes: new Uint8Array(await out.arrayBuffer()), width: w, height: h };
   } finally {
@@ -229,14 +271,13 @@ export const canvasRawReencoder: RawReencoder = async (img, { quality, maxLongSi
     tctx.imageSmoothingQuality = "high";
     tctx.drawImage(src, 0, 0, w, h);
   }
-  const out = await new Promise<Blob | null>((resolve) => target.toBlob(resolve, "image/jpeg", quality));
+  const out = await encodeCanvas(target, "image/jpeg", quality);
   if (!out) return null;
   return { bytes: new Uint8Array(await out.arrayBuffer()), width: w, height: h };
 };
 
-function isRecompressible(dict: PDFDict): boolean {
-  const cs = nameOf(dict.get(PDFName.of("ColorSpace")));
-  if (cs !== "DeviceRGB" && cs !== "DeviceGray") return false;
+function isRecompressible(dict: PDFDict, context: PDFContext): boolean {
+  if (!colorChannels(dict.get(PDFName.of("ColorSpace")), context)) return false;
   const bpc = (dict.get(PDFName.of("BitsPerComponent")) as PDFNumber | undefined)?.asNumber();
   if (bpc !== 8) return false;
   if (dict.get(PDFName.of("Decode")) || dict.get(PDFName.of("ImageMask")) || dict.get(PDFName.of("Mask"))) return false;
@@ -251,7 +292,7 @@ async function compressCore(
   reencode: JpegReencoder,
   reencodeRaw: RawReencoder
 ): Promise<CompressResult> {
-  const doc = await PDFDocument.load(input, { ignoreEncryption: true, updateMetadata: false });
+  const doc = await loadPdfForEditing(input, { updateMetadata: false });
   const images = collectImages(doc);
   let duplicatesMerged = 0;
   let imagesRecompressed = 0;
@@ -260,27 +301,25 @@ async function compressCore(
   // 1. Merge exact duplicate images (lossless): point every reference at the first copy, drop the rest.
   const dups = findDuplicates(images);
   if (dups.size > 0) {
-    for (const page of doc.getPages()) {
-      const res = page.node.Resources();
-      const xobjects = res?.lookupMaybe(PDFName.of("XObject"), PDFDict);
-      if (!xobjects) continue;
-      for (const key of xobjects.keys()) {
-        const v = xobjects.get(key);
-        if (v instanceof PDFRef && dups.has(v)) xobjects.set(key, dups.get(v)!);
-      }
-    }
+    // Repoint every reference in the document — pages, form XObjects, annotation appearances, shared
+    // resource dictionaries — not just each page's own image list, so nothing is left pointing at a
+    // deleted duplicate.
+    replaceReferences(doc.context, dups);
     for (const dupRef of dups.keys()) {
       doc.context.delete(dupRef);
       duplicatesMerged++;
     }
   }
 
-  // 2. Optional lossy recompression.
+  // 2. Lossless: compress streams that were stored with no compression at all.
+  const streamsCompressed = await deflateUnfilteredStreams(doc);
+
+  // 3. Optional lossy recompression.
   if (settings) {
     const { quality, maxLongSide } = settings;
     for (const img of images) {
       if (dups.has(img.ref)) continue;
-      if ((!img.isJpeg && !img.isFlate) || !isRecompressible(img.stream.dict)) {
+      if ((!img.isJpeg && !img.isFlate) || !isRecompressible(img.stream.dict, doc.context)) {
         imagesSkipped++;
         continue;
       }
@@ -289,7 +328,7 @@ async function compressCore(
         if (img.isJpeg) {
           result = await reencode(img.bytes, { quality, maxLongSide });
         } else {
-          const raw = await decodeFlateImage(img.stream.dict, img.bytes);
+          const raw = await decodeFlateImage(img.stream.dict, img.bytes, doc.context);
           result = raw ? await reencodeRaw(raw, { quality, maxLongSide }) : null;
         }
       } catch {
@@ -303,6 +342,9 @@ async function compressCore(
       dict.set(PDFName.of("Width"), PDFNumber.of(result.width));
       dict.set(PDFName.of("Height"), PDFNumber.of(result.height));
       dict.set(PDFName.of("ColorSpace"), PDFName.of("DeviceRGB")); // canvas output is always RGB
+      // A browser-encoded JPEG is ordinary YCbCr; an inherited /ColorTransform 0 (Chrome writes it) would
+      // tell viewers to skip the colour conversion and show the photo in the wrong colours.
+      dict.delete(PDFName.of("ColorTransform"));
       dict.set(PDFName.of("Filter"), PDFName.of("DCTDecode"));
       dict.delete(PDFName.of("DecodeParms"));
       dict.delete(PDFName.of("DP"));
@@ -312,10 +354,11 @@ async function compressCore(
     }
   }
 
-  const bytes = await doc.save({ useObjectStreams: true });
+  const bytes = await savePdfChecked(doc, { useObjectStreams: true });
   const parts: string[] = [];
   if (imagesRecompressed > 0) parts.push(`re-encoded ${imagesRecompressed} image${imagesRecompressed === 1 ? "" : "s"} at reduced quality`);
   if (duplicatesMerged > 0) parts.push(`merged ${duplicatesMerged} duplicate image${duplicatesMerged === 1 ? "" : "s"}`);
+  if (streamsCompressed > 0) parts.push(`compressed ${streamsCompressed} uncompressed stream${streamsCompressed === 1 ? "" : "s"} (no quality change)`);
   parts.push("optimized the file structure");
   return {
     blob: new Blob([bytes as BlobPart], { type: "application/pdf" }),
@@ -346,6 +389,8 @@ export async function compressPdfDocument(
  * steps (rather than a continuous search) keep this fast and predictable: most files hit their target
  * within the first one or two rungs, and the search always stops at the first success. */
 const TARGET_LADDER: { label: string; quality: number; maxLongSide: number }[] = [
+  // Full resolution for 300 dpi Letter/A4 pages (3300–3508 px): a generous target shouldn't cost pixels.
+  { label: "maximum quality", quality: 0.92, maxLongSide: 3600 },
   { label: "very high quality", quality: 0.9, maxLongSide: 2600 },
   { label: "high quality", quality: 0.8, maxLongSide: 2200 },
   { label: "good quality", quality: 0.7, maxLongSide: 1800 },
@@ -354,6 +399,9 @@ const TARGET_LADDER: { label: string; quality: number; maxLongSide: number }[] =
   { label: "low quality", quality: 0.32, maxLongSide: 1000 },
   { label: "lowest quality", quality: 0.22, maxLongSide: 800 },
 ];
+
+/** Bisection steps between the last rung that missed the target and the first that met it. */
+const REFINE_STEPS = 2;
 
 export interface TargetCompressAttempt {
   label: string;
@@ -388,6 +436,26 @@ export async function compressPdfToTarget(
   reencodeRaw: RawReencoder = canvasRawReencoder,
   onProgress?: (label: string) => void
 ): Promise<TargetCompressResult> {
+  // Already at or under the target: nothing to do, and a re-save could only change bytes the user
+  // didn't ask to change. The original comes back untouched.
+  if (input.length <= targetBytes) {
+    // Only a real, readable PDF can be "already under your target" — a damaged file or a non-PDF with a
+    // .pdf name must be reported, not handed back as a success.
+    const doc = await loadPdfForEditing(input, { updateMetadata: false });
+    if (doc.getPageCount() < 1) throw new Error("This PDF has no pages.");
+    return {
+      blob: new Blob([input as BlobPart], { type: "application/pdf" }),
+      originalBytes: input.length,
+      newBytes: input.length,
+      targetBytes,
+      targetAchieved: true,
+      rungLabel: "original (already under the target)",
+      imagesRecompressed: 0,
+      duplicatesMerged: 0,
+      attempts: [],
+    };
+  }
+
   onProgress?.("lossless (no quality loss)");
   const lossless = await compressCore(input, null, reencode, reencodeRaw);
   const attempts: TargetCompressAttempt[] = [{ label: "lossless (no quality loss)", bytes: lossless.newBytes }];
@@ -412,15 +480,37 @@ export async function compressPdfToTarget(
     attempts.push({ label: rung.label, bytes: result.newBytes });
     if (result.newBytes < best.newBytes) best = result;
     if (result.newBytes <= targetBytes) {
+      // The fixed rungs are coarse: the one above this may have missed the target by a little. Search
+      // the gap between them so the result uses as much of the target as possible — higher quality —
+      // while still fitting. Only kept if it fits; the passing rung is the fallback.
+      let winner = { result, label: rung.label };
+      const index = TARGET_LADDER.indexOf(rung);
+      if (index > 0) {
+        let lo = { quality: rung.quality, maxLongSide: rung.maxLongSide };
+        let hi = TARGET_LADDER[index - 1];
+        for (let step = 0; step < REFINE_STEPS; step++) {
+          const mid = { quality: (lo.quality + hi.quality) / 2, maxLongSide: Math.round((lo.maxLongSide + hi.maxLongSide) / 2) };
+          const label = `${Math.round(mid.quality * 100)}% quality`;
+          onProgress?.(label);
+          const tried = await compressCore(input, mid, reencode, reencodeRaw);
+          attempts.push({ label, bytes: tried.newBytes });
+          if (tried.newBytes <= targetBytes) {
+            if (tried.newBytes > winner.result.newBytes) winner = { result: tried, label };
+            lo = mid;
+          } else {
+            hi = { ...hi, ...mid };
+          }
+        }
+      }
       return {
-        blob: result.blob,
+        blob: winner.result.blob,
         originalBytes: input.length,
-        newBytes: result.newBytes,
+        newBytes: winner.result.newBytes,
         targetBytes,
         targetAchieved: true,
-        rungLabel: rung.label,
-        imagesRecompressed: result.imagesRecompressed,
-        duplicatesMerged: result.duplicatesMerged,
+        rungLabel: winner.label,
+        imagesRecompressed: winner.result.imagesRecompressed,
+        duplicatesMerged: winner.result.duplicatesMerged,
         attempts,
       };
     }

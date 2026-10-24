@@ -1,0 +1,46 @@
+{
+ "checks": [
+  {
+   "id": "forms:checkboxes",
+   "kind": "checkboxes",
+   "total": 11,
+   "checked": 4
+  },
+  {
+   "id": "forms:choices-after-label",
+   "kind": "same_line",
+   "page": 1,
+   "phrases": [
+    "Yes",
+    "No",
+    "Maybe"
+   ],
+   "tol": 8
+  },
+  {
+   "id": "forms:sessions-row",
+   "kind": "same_line",
+   "page": 1,
+   "phrases": [
+    "Keynote",
+    "Workshop A",
+    "Workshop B",
+    "Panel"
+   ],
+   "tol": 8
+  },
+  {
+   "id": "order:questions",
+   "kind": "docorder",
+   "phrases": [
+    "Event Feedback Survey",
+    "How did you hear about us?",
+    "Friend or colleague",
+    "Other",
+    "Would you attend again?",
+    "Which sessions",
+    "Comments"
+   ]
+  }
+ ]
+}

@@ -18,8 +18,8 @@ const PIXEL_SCALE = RENDER_SCALE / EDITOR_BASE_SCALE;
 // enough that even unrelated, non-OCR assertions elsewhere can miss their timeout.
 
 async function openFile(page: Page, filePath: string) {
-  await page.goto("/pdf/editor");
-  await page.locator('input[type="file"]').setInputFiles(filePath);
+  await page.goto("/pdf-editor");
+  await page.getByTestId("file-input").first().setInputFiles(filePath);
   await expect(page.locator('[data-testid="page-surface"]').first()).toBeVisible({ timeout: 15_000 });
   await page.getByRole("button", { name: "Actual size (100%)" }).click(); // these tests assume 100% (a phone opens fit to width)
 }
@@ -27,7 +27,7 @@ async function openFile(page: Page, filePath: string) {
 async function openMobilePanel(page: Page, isMobile: boolean, panel: "Pages" | "Properties") {
   if (!isMobile) return;
   await page.keyboard.press("Escape");
-  const label = panel === "Pages" ? /Pages \(/ : "Properties";
+  const label = panel;
   await page.getByRole("button", { name: label }).click();
 }
 
@@ -134,13 +134,16 @@ async function verifyWordEditIsLocalized(
   expect(diff.changedPixelCount).toBeGreaterThan(0);
 }
 
+const OCR_EDITING = process.env.TFC_OCR_EDITING === "1";
+
 test.describe.configure({ timeout: 150_000 });
 
 test.describe("PDF Editor: OCR integration", () => {
+  test.skip(!OCR_EDITING, "Editing recognized words is experimental and off by default (build with NEXT_PUBLIC_TFC_OCR_EDITING=1 and run with TFC_OCR_EDITING=1).");
   test("recognizes a scanned page inside a mixed document and lets you correct the text", async ({ page, isMobile }) => {
     await openFile(page, path.join(OCR_FIXTURES, "mixed-native-scanned.pdf"));
     await openMobilePanel(page, isMobile, "Pages");
-    await expect(page.getByText("3 pages")).toBeVisible();
+    await expect(page.getByText("3 pages").first()).toBeVisible();
 
     // Page 2 is the scanned one — navigate to it via the thumbnail rail.
     await page.getByRole("button", { name: "Go to page 2" }).click();
@@ -158,6 +161,7 @@ test.describe("PDF Editor: OCR integration", () => {
 });
 
 test.describe("PDF Editor: OCR text edit round trip", () => {
+  test.skip(!OCR_EDITING, "Editing recognized words is experimental and off by default (build with NEXT_PUBLIC_TFC_OCR_EDITING=1 and run with TFC_OCR_EDITING=1).");
   test("corrects exactly one recognized word — original text carries only that word, not the whole line", async ({ page, isMobile }) => {
     await openFile(page, path.join(OCR_FIXTURES, "clean-scan.pdf"));
 
@@ -267,6 +271,7 @@ test.describe("PDF Editor: OCR text edit round trip", () => {
 });
 
 test.describe("PDF Editor: OCR visual-fidelity fixtures", () => {
+  test.skip(!OCR_EDITING, "Editing recognized words is experimental and off by default (build with NEXT_PUBLIC_TFC_OCR_EDITING=1 and run with TFC_OCR_EDITING=1).");
   // Each of these is a synthetic "scan" (real text rendered to a raster image, then
   // embedded as an image-only PDF page — no native text layer, so OCR is required, exactly
   // like a real scanned document) built to stress a specific background scenario called
@@ -631,6 +636,7 @@ test.describe("PDF Editor: OCR visual-fidelity fixtures", () => {
 });
 
 test.describe("PDF Editor: OCR privacy regression", () => {
+  test.skip(!OCR_EDITING, "Editing recognized words is experimental and off by default (build with NEXT_PUBLIC_TFC_OCR_EDITING=1 and run with TFC_OCR_EDITING=1).");
   test("recognizing and correcting a scanned page, then exporting, never sends document content or scan pixels off-device", async ({ page, isMobile }) => {
     const requests: { url: string; method: string }[] = [];
     page.on("request", (req) => requests.push({ url: req.url(), method: req.method() }));

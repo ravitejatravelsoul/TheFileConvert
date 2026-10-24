@@ -1,4 +1,6 @@
+import type { ContentRotation } from "./contentFrame";
 import type { Rotation, ViewportSpec } from "./coordinates";
+import type { NativeEdit } from "./native";
 
 export interface RgbColor {
   r: number; // 0-1
@@ -62,13 +64,21 @@ interface BaseObject {
   height: number;
 }
 
-export interface NativeTextReplacementObject extends BaseObject {
-  type: "native-text-replacement";
+/** An edit to text that is already in the PDF: the engine rewrites the page's own text (see lib/editor/native.ts). */
+export interface NativeTextEditObject extends BaseObject {
+  type: "native-text-edit";
+  /** The text before the edit (for undo history labels, search and the properties panel). */
   originalText: string;
-  newText: string;
-  fontSize: number;
-  color: RgbColor;
+  edit: Extract<NativeEdit, { kind: "text" }>;
 }
+
+/** An edit to a picture that is already in the PDF: moved, resized, rotated, replaced or deleted. */
+export interface NativeImageEditObject extends BaseObject {
+  type: "native-image-edit";
+  edit: Extract<NativeEdit, { kind: "image" }>;
+}
+
+export const isNativeEdit = (o: { type: string }): o is NativeTextEditObject | NativeImageEditObject => o.type === "native-text-edit" || o.type === "native-image-edit";
 
 export interface OcrTextReplacementObject extends BaseObject {
   type: "ocr-text-replacement";
@@ -108,6 +118,9 @@ export interface OcrTextReplacementObject extends BaseObject {
    * box sized for just the characters that changed (see export.ts). Falls back to this
    * object's own rect when absent (objects saved before this field existed). */
   searchAnchor?: { x: number; y: number; width: number; height: number };
+  /** Content turned counter-clockwise by this much inside the box, so it reads upright on a page
+   * shown rotated (see contentFrame.ts). Absent = 0, the behaviour of objects saved before this existed. */
+  rotation?: ContentRotation;
 }
 
 export interface AddedTextObject extends BaseObject {
@@ -117,16 +130,29 @@ export interface AddedTextObject extends BaseObject {
   color: RgbColor;
   align: "left" | "center" | "right";
   bold: boolean;
+  italic?: boolean;
+  underline?: boolean;
+  /** Typeface: Helvetica-, Times- or Courier-like (PDF's standard fonts). Absent = sans. */
+  family?: "sans" | "serif" | "mono";
+  /** Content turned counter-clockwise by this much inside the box, so it reads upright on a page
+   * shown rotated (see contentFrame.ts). Absent = 0, the behaviour of objects saved before this existed. */
+  rotation?: ContentRotation;
 }
 
 export interface ImageObjectData extends BaseObject {
   type: "image";
   dataUrl: string;
+  /** Content turned counter-clockwise by this much inside the box, so it reads upright on a page
+   * shown rotated (see contentFrame.ts). Absent = 0, the behaviour of objects saved before this existed. */
+  rotation?: ContentRotation;
 }
 
 export interface SignatureObjectData extends BaseObject {
   type: "signature";
   dataUrl: string;
+  /** Content turned counter-clockwise by this much inside the box, so it reads upright on a page
+   * shown rotated (see contentFrame.ts). Absent = 0, the behaviour of objects saved before this existed. */
+  rotation?: ContentRotation;
 }
 
 export interface DrawingObjectData extends BaseObject {
@@ -163,7 +189,8 @@ export interface AnnotationObjectData extends BaseObject {
 }
 
 export type EditorObject =
-  | NativeTextReplacementObject
+  | NativeTextEditObject
+  | NativeImageEditObject
   | OcrTextReplacementObject
   | AddedTextObject
   | ImageObjectData
@@ -180,6 +207,38 @@ export interface FormFieldValue {
   value: string; // for checkbox: "true"/"false"; for radio/dropdown: the selected option
   /** For radio groups and dropdowns: the choices the PDF offers. */
   options?: string[];
+  /** The value the file had when it was opened: a field is only rewritten on export if it differs from this. */
+  initial: string;
+  /** Where the field's widgets are on the source pages (page space), so the field can be filled right on the page. */
+  widgets: FormWidget[];
+  multiline?: boolean;
+  readOnly?: boolean;
+  maxLength?: number;
+  /** The file's appearance of this field is missing, stale (it no longer shows the value), or the form says /NeedAppearances:
+   * the field's appearance is written from its value (on screen and on export) instead of trusting the file's. */
+  regen?: boolean;
+  /** Why the field can be seen but not edited here (password, comb, rich text, rotated widget …). */
+  unsupported?: string;
+}
+
+export interface FormWidget {
+  /** The file the field was read from, and the index of the page in it. */
+  sourceFileId: string;
+  pageIndex: number;
+  rect: { x: number; y: number; width: number; height: number };
+  /** For one button of a radio group: the option this widget selects. */
+  onValue?: string;
+  /** How the widget is set out (from /DA, /Q, /MK, /BS) — what the live text box has to look like. */
+  style?: {
+    fontSize: number;
+    family: "sans" | "serif" | "mono";
+    color: { r: number; g: number; b: number };
+    align: 0 | 1 | 2;
+    borderWidth: number;
+    background?: { r: number; g: number; b: number };
+    borderColor?: { r: number; g: number; b: number };
+    rotation: 0 | 90 | 180 | 270;
+  };
 }
 
 export interface EditorDocument {
@@ -191,6 +250,3 @@ export interface EditorDocument {
   formFields: FormFieldValue[];
 }
 
-export function createEmptyDocument(): EditorDocument {
-  return { sourceFiles: {}, pages: [], objects: [], formFields: [] };
-}

@@ -1,8 +1,16 @@
+import { savePdfChecked } from "@/lib/pdf/save";
+import { applyFormState, clearNeedAppearances } from "./formApply";
 import { PDFDocument, PDFDict, PDFName, PDFRef, StandardFonts, rgb, degrees, type PDFFont, type PDFPage } from "pdf-lib";
 import type { EditorDocument, EditorObject, RgbColor } from "./types";
 import { effectiveRotation } from "./types";
 import { wrapText, lineBaselineY, sanitizeForFont } from "./textLayout";
 import { arrowHead, drawingPdfPoints, lineEndpoints, annotationLineThickness } from "./shapeGeometry";
+import { contentFrame } from "./contentFrame";
+import { correctionsInLayer, drawOcrTextLayer, type Rect } from "./searchLayer";
+import type { OcrPageResult } from "@/lib/processors/ocr";
+import { loadPdfForEditing } from "@/lib/pdf/load";
+import { replayNativeEdits, type FontBytes } from "./native";
+import { isNativeEdit } from "./types";
 
 export class EditorExportError extends Error {}
 
@@ -21,6 +29,8 @@ function reconnectFormFields(out: PDFDocument, copiedPage: PDFPage, seen: Set<st
     if (!(annotRef instanceof PDFRef)) continue;
     let ref: PDFRef = annotRef;
     let dict = out.context.lookup(ref);
+    // only form widgets belong in the form: a link or a note registered as a "field" makes pdf-lib fail when it saves
+    if (!(dict instanceof PDFDict) || dict.get(PDFName.of("Subtype")) !== PDFName.of("Widget")) continue;
     while (dict instanceof PDFDict && dict.has(PDFName.of("Parent"))) {
       const parentRef = dict.get(PDFName.of("Parent"));
       if (!(parentRef instanceof PDFRef)) break;
@@ -29,6 +39,7 @@ function reconnectFormFields(out: PDFDocument, copiedPage: PDFPage, seen: Set<st
     }
     if (seen.has(ref.toString())) continue;
     seen.add(ref.toString());
+    if (!(dict instanceof PDFDict) || !(dict.has(PDFName.of("FT")) || dict.has(PDFName.of("Kids")))) continue;
     acroForm.addField(ref);
   }
 }
@@ -46,6 +57,23 @@ async function dataUrlToBytes(dataUrl: string): Promise<Uint8Array> {
 interface Fonts {
   regular: PDFFont;
   bold: PDFFont;
+  /** Standard fonts embedded on first use (added text can pick a family and italics). */
+  extra?: Map<string, PDFFont>;
+}
+
+const STANDARD: Record<"sans" | "serif" | "mono", [StandardFonts, StandardFonts, StandardFonts, StandardFonts]> = {
+  sans: [StandardFonts.Helvetica, StandardFonts.HelveticaBold, StandardFonts.HelveticaOblique, StandardFonts.HelveticaBoldOblique],
+  serif: [StandardFonts.TimesRoman, StandardFonts.TimesRomanBold, StandardFonts.TimesRomanItalic, StandardFonts.TimesRomanBoldItalic],
+  mono: [StandardFonts.Courier, StandardFonts.CourierBold, StandardFonts.CourierOblique, StandardFonts.CourierBoldOblique],
+};
+
+async function addedTextFont(doc: PDFDocument, fonts: Fonts, family: "sans" | "serif" | "mono", bold: boolean, italic: boolean): Promise<PDFFont> {
+  if (family === "sans" && !italic) return bold ? fonts.bold : fonts.regular;
+  const name = STANDARD[family][(italic ? 2 : 0) + (bold && italic ? 1 : bold ? 1 : 0)];
+  fonts.extra ??= new Map();
+  let f = fonts.extra.get(name);
+  if (!f) fonts.extra.set(name, (f = await doc.embedFont(name)));
+  return f;
 }
 
 /** Draws a whiteout rectangle over a region — used both by the standalone Whiteout tool
@@ -89,17 +117,6 @@ function drawArrow(
   page.drawLine({ start: end, end: right, thickness: strokeWidth, color: pdfColor });
 }
 
-/** Sizes text to fit inside a box: primarily by height (matches normal reading size),
- * clamped so an unusually short/long replacement string doesn't blow up or vanish. */
-function fitFontSize(font: PDFFont, text: string, box: { width: number; height: number }, requestedSize?: number): number {
-  if (requestedSize) return requestedSize;
-  const heightEstimate = Math.max(6, box.height * 0.8);
-  const naturalWidth = font.widthOfTextAtSize(text || " ", heightEstimate);
-  if (naturalWidth <= box.width || box.width <= 0) return heightEstimate;
-  const scaled = heightEstimate * (box.width / naturalWidth);
-  return Math.max(4, scaled);
-}
-
 /** How far a replacement word's bounding box may grow past its original OCR box before
  * export gives up shrinking further and just lets it slightly overflow — this mirrors the
  * "shrink first, then tolerate a small overflow rather than silently covering neighboring
@@ -111,7 +128,7 @@ const MAX_WIDTH_GROWTH_FACTOR = 1.15;
  * replacement is wider than the original. */
 const MIN_SHRINK_FACTOR = 0.7;
 
-/** Like fitFontSize, but tuned for word-level OCR replacements: a tight word box has much
+/** Fits text for word-level OCR replacements: a tight word box has much
  * less slack than a whole line, so a longer replacement (e.g. "182.50" -> "1,282.50") is
  * allowed to grow the effective box a little before the font shrinks, and shrinking stops
  * at a legibility floor rather than continuing indefinitely for very long replacements. */
@@ -143,24 +160,17 @@ async function drawObject(
   obj: EditorObject,
   doc: PDFDocument,
   fonts: Fonts,
-  imageCache: Map<string, unknown>
+  imageCache: Map<string, unknown>,
+  /** Corrections whose text is already in the page's OCR text layer (no second searchable run). */
+  inTextLayer: Set<EditorObject> = new Set(),
+  /** Filled with the corrections drawn as visible vector text (already searchable as they are). */
+  drawnAsText: Set<EditorObject> = new Set()
 ): Promise<void> {
   switch (obj.type) {
-    case "native-text-replacement": {
-      drawWhiteoutRect(page, obj.x, obj.y, obj.width, obj.height);
-      if (!obj.newText.trim()) break;
-      const font = fonts.regular;
-      const size = fitFontSize(font, obj.newText, obj, obj.fontSize);
-      try {
-        // Real (visible) text, so the correction is already searchable and copyable — a second
-        // invisible copy would make every search/copy of this text appear twice.
-        page.drawText(obj.newText, { x: obj.x, y: obj.y, size, font, color: rgb(0, 0, 0) });
-      } catch {
-        // A character outside Helvetica's supported encoding shouldn't fail the whole
-        // export — the region is still whited out, just without replacement text drawn.
-      }
+    case "native-text-edit":
+    case "native-image-edit":
+      // Edits to the page's own text and pictures are replayed on the page before anything is drawn (see exportEditorDocument).
       break;
-    }
 
     case "ocr-text-replacement": {
       // Primary path: embed the raster patch composed in the browser (see scanPatch.ts) —
@@ -169,12 +179,17 @@ async function drawObject(
       // the visible result matches the scan's own look rather than a generic PDF font. This
       // covers exactly (obj.x, obj.y, obj.width, obj.height); no separate rectangle/text
       // drawing needed for this path.
+      // The patch and text are laid out in the word's own frame: on a scan shown rotated (e.g. stored
+      // sideways with /Rotate 90) that frame is turned so the correction reads like the scan does.
+      const frame = contentFrame(obj, obj.rotation);
+      const rot = degrees(frame.rotation);
       let patchEmbedded = false;
       if (obj.patchDataUrl) {
         try {
           const bytes = await dataUrlToBytes(obj.patchDataUrl);
           const embedded = await doc.embedPng(bytes);
-          page.drawImage(embedded, { x: obj.x, y: obj.y, width: obj.width, height: obj.height });
+          const at = frame.toPdf(0, 0);
+          page.drawImage(embedded, { x: at.x, y: at.y, width: frame.width, height: frame.height, rotate: rot });
           patchEmbedded = true;
         } catch {
           // Fall through to the legacy vector path below — e.g. a corrupt/oversized data
@@ -189,7 +204,7 @@ async function drawObject(
       // the override actually has a visible effect — see PropertiesPanel.tsx).
       if (!patchEmbedded) {
         const font = fonts.regular;
-        const size = fitOcrReplacementFontSize(font, obj.newText, obj, obj.fontSize);
+        const size = fitOcrReplacementFontSize(font, obj.newText, frame, obj.fontSize);
         if (!obj.overlayOnly) {
           // The original word's OCR box is tight to *its own* glyphs — if it had no
           // descenders (e.g. "Smith") but the replacement does (e.g. "Rodriguez" -> the
@@ -198,17 +213,13 @@ async function drawObject(
           // OCR box measured one) is cheap and safe: the patch already matches the local
           // background color, so a slightly taller patch doesn't introduce a visible seam.
           const descenderAllowance = size * 0.28;
-          page.drawRectangle({
-            x: obj.x,
-            y: obj.y - descenderAllowance,
-            width: obj.width,
-            height: obj.height + descenderAllowance,
-            color: toPdfLibColor(obj.backgroundColor),
-          });
+          page.drawRectangle({ ...frame.rectToPdf(0, -descenderAllowance, frame.width, frame.height + descenderAllowance), color: toPdfLibColor(obj.backgroundColor) });
         }
         if (obj.newText.trim()) {
           try {
-            page.drawText(obj.newText, { x: obj.x, y: obj.y, size, font, color: toPdfLibColor(obj.textColor) });
+            const at = frame.toPdf(0, 0);
+            page.drawText(obj.newText, { x: at.x, y: at.y, size, font, color: toPdfLibColor(obj.textColor), rotate: rot });
+            drawnAsText.add(obj);
           } catch {
             // A character outside Helvetica's supported encoding shouldn't fail the whole
             // export — the region still shows the patch/original scan, just without
@@ -218,16 +229,18 @@ async function drawObject(
       }
 
       // Keep the page searchable after a correction either way: an invisible run with the
-      // *full* corrected word, same technique buildSearchablePdf uses. Positioned/sized from
+      // *full* corrected word — unless the page's OCR text layer already carries it (searchLayer.ts),
+      // which would make the word appear twice in a search. Positioned/sized from
       // searchAnchor (the whole word's own box) rather than (obj.x, obj.y, obj.width,
       // obj.height) — since a micro-edit's visible patch is now tight to just the changed
       // characters, sizing the invisible run to that same tiny box would squeeze the whole
       // word's search text into it instead of the word's actual full span.
-      if (obj.newText.trim()) {
-        const anchor = obj.searchAnchor ?? obj;
+      if (obj.newText.trim() && !inTextLayer.has(obj) && !drawnAsText.has(obj)) {
+        const anchorFrame = contentFrame(obj.searchAnchor ?? obj, obj.rotation);
         try {
-          const size = fitOcrReplacementFontSize(fonts.regular, obj.newText, anchor, obj.fontSize);
-          page.drawText(obj.newText, { x: anchor.x, y: anchor.y, size, font: fonts.regular, opacity: 0 });
+          const size = fitOcrReplacementFontSize(fonts.regular, obj.newText, anchorFrame, obj.fontSize);
+          const at = anchorFrame.toPdf(0, 0);
+          page.drawText(obj.newText, { x: at.x, y: at.y, size, font: fonts.regular, opacity: 0, rotate: degrees(anchorFrame.rotation) });
         } catch {
           // Same non-fatal handling as above — searchability is a bonus, not required for
           // the visible correction to be correct.
@@ -237,7 +250,7 @@ async function drawObject(
     }
 
     case "added-text": {
-      const font = obj.bold ? fonts.bold : fonts.regular;
+      const font = await addedTextFont(doc, fonts, obj.family ?? "sans", obj.bold, Boolean(obj.italic));
       const size = obj.fontSize;
       const canEncode = (ch: string) => {
         try {
@@ -249,17 +262,23 @@ async function drawObject(
       };
       const text = sanitizeForFont(obj.text, canEncode);
       const measure = (t: string) => font.widthOfTextAtSize(t, size);
-      const lines = wrapText(text, obj.width, measure);
-      const topY = obj.y + obj.height;
+      // Laid out in the text's own frame (upright for text placed on a page shown rotated).
+      const frame = contentFrame(obj, obj.rotation);
+      const lines = wrapText(text, frame.width, measure);
       lines.forEach((line, i) => {
         if (!line) return;
-        let x = obj.x;
+        let u = 0;
         if (obj.align !== "left") {
           const lineWidth = measure(line);
-          x = obj.align === "center" ? obj.x + (obj.width - lineWidth) / 2 : obj.x + obj.width - lineWidth;
+          u = obj.align === "center" ? (frame.width - lineWidth) / 2 : frame.width - lineWidth;
         }
+        const at = frame.toPdf(u, lineBaselineY(frame.height, size, i));
         try {
-          page.drawText(line, { x, y: lineBaselineY(topY, size, i), size, font, color: toPdfLibColor(obj.color) });
+          page.drawText(line, { x: at.x, y: at.y, size, font, color: toPdfLibColor(obj.color), rotate: degrees(frame.rotation) });
+          if (obj.underline) {
+            const y = lineBaselineY(frame.height, size, i) - size * 0.12;
+            page.drawLine({ start: frame.toPdf(u, y), end: frame.toPdf(u + measure(line), y), thickness: Math.max(0.5, size * 0.055), color: toPdfLibColor(obj.color) });
+          }
         } catch {
           // Shouldn't happen after sanitizing, but one bad line shouldn't fail the export.
         }
@@ -272,7 +291,9 @@ async function drawObject(
       const bytes = await dataUrlToBytes(obj.dataUrl);
       const isPng = obj.dataUrl.startsWith("data:image/png");
       const embedded = isPng ? await doc.embedPng(bytes) : await doc.embedJpg(bytes);
-      page.drawImage(embedded, { x: obj.x, y: obj.y, width: obj.width, height: obj.height });
+      const frame = contentFrame(obj, obj.rotation);
+      const at = frame.toPdf(0, 0);
+      page.drawImage(embedded, { x: at.x, y: at.y, width: frame.width, height: frame.height, rotate: degrees(frame.rotation) });
       break;
     }
 
@@ -344,7 +365,34 @@ async function drawObject(
   void imageCache; // reserved for future de-duplication of repeated images; not needed yet
 }
 
-export async function exportEditorDocument(doc: EditorDocument): Promise<Blob> {
+export interface ExportOptions {
+  /** Where the bundled fonts come from (the browser fetches them from /fonts/word/; tests read them from disk). */
+  loadFont?: FontBytes;
+  /** Recognised text per page id: those pages get an invisible, searchable text layer. */
+  ocrResultsByPage?: Record<string, OcrPageResult | undefined>;
+  /** Where a source page already has real text (PDF space). Defaults to reading it with pdf.js. */
+  nativeTextBoxes?: (file: File, pageIndex: number) => Promise<Rect[]>;
+}
+
+/** The boxes of a page's own (native) text, read with pdf.js; none if the page can't be read. */
+async function pdfjsTextBoxes(file: File, pageIndex: number): Promise<Rect[]> {
+  try {
+    const { loadPdfJsDocument } = await import("@/lib/processors/pdfjs-utils");
+    const page = await (await loadPdfJsDocument(file)).getPage(pageIndex + 1);
+    const content = await page.getTextContent();
+    const boxes: Rect[] = [];
+    for (const it of content.items) {
+      if (!("str" in it) || !it.str.trim()) continue;
+      const [, , c, d, e, f] = it.transform;
+      boxes.push({ x: e, y: f, width: Math.max(1, it.width), height: Math.max(1, Math.hypot(c, d)) });
+    }
+    return boxes;
+  } catch {
+    return [];
+  }
+}
+
+export async function exportEditorDocument(doc: EditorDocument, options: ExportOptions = {}): Promise<Blob> {
   if (doc.pages.length === 0) {
     throw new EditorExportError("There are no pages to export.");
   }
@@ -364,7 +412,7 @@ export async function exportEditorDocument(doc: EditorDocument): Promise<Blob> {
     const bytes = await file.arrayBuffer();
     let parsed: PDFDocument;
     try {
-      parsed = await PDFDocument.load(bytes, { ignoreEncryption: true });
+      parsed = await loadPdfForEditing(bytes);
     } catch {
       throw new EditorExportError("One of the source PDFs couldn't be read. It may be damaged.");
     }
@@ -384,8 +432,25 @@ export async function exportEditorDocument(doc: EditorDocument): Promise<Blob> {
     reconnectFormFields(out, copiedPage, reconnectedFieldRefs);
 
     const objectsForPage = doc.objects.filter((o) => o.pageId === page.id);
+    // The page's own text and pictures first: the editor's edits to them, in the order they were made.
+    const nativeEdits = objectsForPage.filter(isNativeEdit).map((o) => o.edit);
+    if (nativeEdits.length) {
+      const loadFont = options.loadFont ?? (await import("@/lib/processors/word-to-pdf/fonts")).browserFontLoader;
+      const replayed = await replayNativeEdits(out, copiedPage, nativeEdits, loadFont);
+      if (!replayed.ok) throw new EditorExportError(`An edit couldn't be applied to page ${doc.pages.indexOf(page) + 1}: ${replayed.reason}`);
+    }
+    // A recognised scan: its words become searchable text (corrected words with their new text).
+    const ocr = options.ocrResultsByPage?.[page.id];
+    const corrections = objectsForPage.filter((o): o is Extract<EditorObject, { type: "ocr-text-replacement" }> => o.type === "ocr-text-replacement");
+    const inTextLayer: Set<EditorObject> = ocr ? correctionsInLayer(ocr, corrections) : new Set();
+    const drawnAsText = new Set<EditorObject>();
     for (const obj of objectsForPage) {
-      await drawObject(copiedPage, obj, out, fonts, imageCache);
+      await drawObject(copiedPage, obj, out, fonts, imageCache, inTextLayer, drawnAsText);
+    }
+    if (ocr) {
+      const sourceFile = doc.sourceFiles[page.sourceFileId];
+      const nativeText = sourceFile ? await (options.nativeTextBoxes ?? pdfjsTextBoxes)(sourceFile, page.sourcePageIndex) : [];
+      drawOcrTextLayer(copiedPage, ocr, corrections, fonts.regular, ocr.rotation ?? effectiveRotation(page), drawnAsText as Set<(typeof corrections)[number]>, nativeText);
     }
 
     if (page.cropBox) {
@@ -394,32 +459,13 @@ export async function exportEditorDocument(doc: EditorDocument): Promise<Blob> {
     }
   }
 
+  // Form values and the appearances that show them are written by the same code the editor draws its page with.
   if (doc.formFields.length > 0) {
-    try {
-      const form = out.getForm();
-      for (const field of doc.formFields) {
-        try {
-          if (field.kind === "text") {
-            form.getTextField(field.name).setText(field.value);
-          } else if (field.kind === "checkbox") {
-            const checkbox = form.getCheckBox(field.name);
-            if (field.value === "true") checkbox.check();
-            else checkbox.uncheck();
-          } else if (field.kind === "radio") {
-            form.getRadioGroup(field.name).select(field.value);
-          } else if (field.kind === "dropdown") {
-            form.getDropdown(field.name).select(field.value);
-          }
-        } catch {
-          // A single field that no longer resolves (e.g. rare field-name collisions
-          // across merged documents) shouldn't fail the whole export.
-        }
-      }
-    } catch {
-      // No form on this document — nothing to apply.
-    }
+    for (const p of out.getPages()) await applyFormState(out, p, doc.formFields);
+    if (!doc.formFields.some((f) => f.regen && f.unsupported)) clearNeedAppearances(out);
   }
 
-  const bytes = await out.save();
+  // pdf-lib must not redraw field appearances at save: the ones we wrote, and the file's own, are final
+  const bytes = await savePdfChecked(out, { updateFieldAppearances: false });
   return new Blob([bytes as BlobPart], { type: "application/pdf" });
 }

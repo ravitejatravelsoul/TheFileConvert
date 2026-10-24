@@ -1,0 +1,38 @@
+{
+ "checks": [
+  {
+   "id": "tables:count",
+   "kind": "ntables",
+   "min": 3
+  },
+  {
+   "id": "forms:blanks",
+   "kind": "leaders",
+   "min": 1
+  },
+  {
+   "id": "issued-row",
+   "kind": "same_line",
+   "page": 1,
+   "phrases": [
+    "ISSUED",
+    "03/14/2026",
+    "EXPIRES",
+    "03/13/2027"
+   ],
+   "tol": 8
+  },
+  {
+   "id": "order:zones",
+   "kind": "docorder",
+   "phrases": [
+    "PERMIT APPLICATION RECORD",
+    "Applicant",
+    "ISSUED",
+    "Conditions",
+    "Inspection",
+    "Inspector"
+   ]
+  }
+ ]
+}

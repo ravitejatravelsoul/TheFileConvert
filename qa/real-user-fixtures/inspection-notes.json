@@ -1,0 +1,9 @@
+[
+  { "tool": "PDF → Word", "match": "DOCUMENT-13", "note": "Text, columns, both pictures and the page count are right; LIMITED because the three grey rule bars above the columns and the full-height dark band behind the title are not reproduced (the band shrinks to the title block), vertical spacing drifts about 5 pt, and the call-out box stretches to the page edge." },
+  { "tool": "PDF → Word", "match": "DOCUMENT-06", "note": "Editable text, headings, bullet list and the skills table (horizontal lines only) match the original; LIMITED because the dark name band is only as wide as its text instead of full page width." },
+  { "tool": "PDF → Word", "match": "DOCUMENT-07", "note": "Hybrid chosen because the reading was reliable: the letter is editable paragraphs on a white page (the scan's paper grain is gone, wording identical)." },
+  { "tool": "PDF → Word", "match": "DOCUMENT-0", "note": "Source and render compared side by side: borders, handwriting, stamps, signatures, photos and check boxes are as scanned. Not editable by design." },
+  { "tool": "Word → PDF", "match": "DOCUMENT-16", "note": "All text, the table, chart and footer are there; LIMITED because line spacing and the bullet glyph differ by a few points from LibreOffice's own rendering, and Word's own layout may differ again." },
+  { "tool": "PDF Editor", "match": "résumé", "note": "The corrected line is white on the same dark band as the original; it is drawn in Helvetica regular, the original line is a bold sans-serif — the typeface is not matched." },
+  { "tool": "Image → Word", "match": "filled form", "note": "The page is the form image; the faint marks in the difference image come from the renderer resampling paper grain, the file holds the source's own bytes." }
+]

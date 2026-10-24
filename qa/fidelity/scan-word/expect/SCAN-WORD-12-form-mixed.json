@@ -1,0 +1,65 @@
+{
+ "checks": [
+  {
+   "id": "forms:blanks",
+   "kind": "leaders",
+   "min": 4
+  },
+  {
+   "id": "forms:checkboxes",
+   "kind": "checkboxes",
+   "total": 1,
+   "checked": 0
+  },
+  {
+   "id": "tables:count",
+   "kind": "ntables",
+   "min": 1
+  },
+  {
+   "id": "tables:loan",
+   "kind": "table",
+   "page": 1,
+   "cells": [
+    [
+     "Item",
+     "Quantity",
+     "Return date"
+    ],
+    [
+     "Projector",
+     "1"
+    ],
+    [
+     "Laptop",
+     "2"
+    ],
+    [
+     "Microphone",
+     "4"
+    ]
+   ]
+  },
+  {
+   "id": "forms:approved-date",
+   "kind": "same_line",
+   "page": 1,
+   "phrases": [
+    "Approved by",
+    "Date"
+   ],
+   "tol": 8
+  },
+  {
+   "id": "order:zones",
+   "kind": "docorder",
+   "phrases": [
+    "Equipment Loan Request",
+    "Borrower",
+    "Item",
+    "Approved by",
+    "Equipment returned"
+   ]
+  }
+ ]
+}

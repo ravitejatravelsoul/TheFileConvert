@@ -1,0 +1,50 @@
+[
+ {
+  "tool": "Performance",
+  "test": "/: JavaScript before a file is chosen",
+  "verdict": "PASS",
+  "jsKB": 528,
+  "files": 10,
+  "heavyEngines": []
+ },
+ {
+  "tool": "Performance",
+  "test": "/tools: JavaScript before a file is chosen",
+  "verdict": "PASS",
+  "jsKB": 680,
+  "files": 17,
+  "heavyEngines": []
+ },
+ {
+  "tool": "Performance",
+  "test": "/compress-pdf: JavaScript before a file is chosen",
+  "verdict": "PASS",
+  "jsKB": 528,
+  "files": 10,
+  "heavyEngines": []
+ },
+ {
+  "tool": "Performance",
+  "test": "/pdf-editor: JavaScript before a file is chosen",
+  "verdict": "PASS",
+  "jsKB": 508,
+  "files": 9,
+  "heavyEngines": []
+ },
+ {
+  "tool": "Performance",
+  "test": "editor code and pdf.js load only after a PDF is chosen",
+  "verdict": "PASS",
+  "jsKBLoadedOnOpen": 6082
+ },
+ {
+  "tool": "Performance",
+  "test": "OCR engine loads only when Recognize text is pressed",
+  "verdict": "PASS",
+  "ocrAssets": [
+   "worker.min.js",
+   "tesseract-core-lstm.wasm.js",
+   "eng.traineddata.gz"
+  ]
+ }
+]

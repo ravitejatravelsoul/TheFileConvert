@@ -1,0 +1,386 @@
+[
+ {
+  "id": "PDF-A",
+  "name": "PDF-A-text-heavy-300k.pdf",
+  "bytes": 290011,
+  "sha": "606488c7ecc6",
+  "what": "Text-heavy report: 28 pages of native text, content streams stored uncompressed, one small logo",
+  "structure": "native text (Helvetica), unfiltered content streams, 1 DCTDecode logo, classic xref"
+ },
+ {
+  "id": "PDF-B",
+  "name": "PDF-B-mixed-800k.pdf",
+  "bytes": 751881,
+  "sha": "6959aa180eca",
+  "what": "Mixed 6-page survey: text + 4 JPEG photos + ASCII85+Flate RGB diagram + Flate grayscale figure",
+  "structure": "DCTDecode RGB, [/ASCII85Decode /FlateDecode] RGB, FlateDecode DeviceGray"
+ },
+ {
+  "id": "PDF-C",
+  "name": "PDF-C-scan-3.8mb-incremental.pdf",
+  "bytes": 3624648,
+  "sha": "ec55249697e4",
+  "what": "2-page 300 dpi A4 scan (JPEG), incrementally updated: catalog re-created as object N generation 1",
+  "structure": "DCTDecode RGB 2480x3508; classic xref + incremental update with /Prev; catalog gen 1 (the reported corruption trigger)"
+ },
+ {
+  "id": "PDF-D",
+  "name": "PDF-D-photo-heavy-5mb.pdf",
+  "bytes": 4942531,
+  "sha": "4244bf975924",
+  "what": "5 landscape pages, each a 2400x1600 photo",
+  "structure": "DCTDecode RGB"
+ },
+ {
+  "id": "PDF-E",
+  "name": "PDF-E-scan-10mb.pdf",
+  "bytes": 9897854,
+  "sha": "cd1229d6b05c",
+  "what": "4-page 300 dpi letter scan",
+  "structure": "DCTDecode RGB 2550x3300"
+ },
+ {
+  "id": "PDF-F",
+  "name": "PDF-F-photo-heavy-20mb.pdf",
+  "bytes": 19692949,
+  "sha": "cf639b4e5163",
+  "what": "8 pages, each a 3600x2400 photo",
+  "structure": "DCTDecode RGB"
+ },
+ {
+  "id": "PDF-G",
+  "name": "PDF-G-already-optimized.pdf",
+  "bytes": 140166,
+  "sha": "ab710430c299",
+  "what": "Already optimized: 3 pages, 900x600 JPEGs at quality 45",
+  "structure": "DCTDecode RGB q45, object streams"
+ },
+ {
+  "id": "PDF-H",
+  "name": "PDF-H-multipage-text-image.pdf",
+  "bytes": 5315233,
+  "sha": "5610dec94d45",
+  "what": "10 pages, text + a lossless PNG-derived image per page, 'HANDBOOK — Page N of 10'",
+  "structure": "FlateDecode RGB images (from PNG)"
+ },
+ {
+  "id": "PDF-I",
+  "name": "PDF-I-rotated.pdf",
+  "bytes": 646007,
+  "sha": "680543ecd8cd",
+  "what": "4 pages with /Rotate 0, 90, 180, 270 (text + photo)",
+  "structure": "page /Rotate"
+ },
+ {
+  "id": "PDF-J",
+  "name": "PDF-J-mixed-page-sizes.pdf",
+  "bytes": 2515,
+  "sha": "f9cb3cc94348",
+  "what": "6 pages: Letter, A4, Legal, A5 landscape, Tabloid, 226x600 receipt",
+  "structure": "mixed MediaBox"
+ },
+ {
+  "id": "PDF-K",
+  "name": "PDF-K-native-text.pdf",
+  "bytes": 2281,
+  "sha": "ad1f974485a8",
+  "what": "2-page native-text invoice ('Jordan Smith', '12/20/2026', 'Consultation', '$1,250.00')",
+  "structure": "text only"
+ },
+ {
+  "id": "PDF-L",
+  "name": "PDF-L-image-only-scan-gray-a85.pdf",
+  "bytes": 4449622,
+  "sha": "23233eadda8b",
+  "what": "2-page image-only scan (no text layer): page 1 Flate DeviceGray, page 2 ASCII85+Flate DeviceRGB, 150 dpi",
+  "structure": "FlateDecode DeviceGray; [/ASCII85Decode /FlateDecode] DeviceRGB"
+ },
+ {
+  "id": "PDF-M",
+  "name": "PDF-M-acroform.pdf",
+  "bytes": 4798,
+  "sha": "56ee8de31913",
+  "what": "AcroForm: 2 filled text fields, a dropdown (Standard), a checked checkbox",
+  "structure": "AcroForm with appearance streams"
+ },
+ {
+  "id": "PDF-N",
+  "name": "PDF-N-metadata-rich.pdf",
+  "bytes": 3682,
+  "sha": "ec8301c53a7c",
+  "what": "3 pages; Info (Title, Author, Subject, Keywords, Creator, Producer), XMP stream, /Lang, page labels",
+  "structure": "Info dict + XMP /Metadata + /PageLabels"
+ },
+ {
+  "id": "PDF-O",
+  "name": "PDF-O-corrupted.pdf",
+  "bytes": 304848,
+  "sha": "ba0a08554927",
+  "what": "Corrupted: first 40% of PDF-B then 4 KB of random bytes (no xref/trailer)",
+  "structure": "truncated"
+ },
+ {
+  "id": "PDF-P",
+  "name": "PDF-P-encrypted.pdf",
+  "bytes": 3115,
+  "sha": "3fc2aa658eff",
+  "what": "Encrypted copy of PDF-K (AES-256, user password 'user-pw')",
+  "structure": "Encrypt dict R6"
+ },
+ {
+  "id": "PDF-Q",
+  "name": "PDF-Q-owner-password-only.pdf",
+  "bytes": 724790,
+  "sha": "e162c7fb2888",
+  "what": "Owner-password-only encryption (RC4-128) of PDF-B: opens without a password, content encrypted",
+  "structure": "Encrypt dict R3, empty user password"
+ },
+ {
+  "id": "IMAGE-A",
+  "name": "IMAGE-A-optimized-250k.jpg",
+  "bytes": 249814,
+  "sha": "49faab5ec21d",
+  "what": "Optimized JPEG ~250 KB, 1920x1280",
+  "structure": "baseline JPEG, no metadata"
+ },
+ {
+  "id": "IMAGE-B",
+  "name": "IMAGE-B-photo-500k.jpg",
+  "bytes": 498577,
+  "sha": "007cadef8759",
+  "what": "JPEG ~500 KB, 2400x1600",
+  "structure": "baseline JPEG"
+ },
+ {
+  "id": "IMAGE-C",
+  "name": "IMAGE-C-photo-3mb.jpg",
+  "bytes": 2975516,
+  "sha": "04631fcf9e73",
+  "what": "JPEG ~3 MB, 4000x3000",
+  "structure": "baseline JPEG"
+ },
+ {
+  "id": "IMAGE-D",
+  "name": "IMAGE-D-photo-8mb.jpg",
+  "bytes": 7995077,
+  "sha": "fef54ae44c5e",
+  "what": "JPEG ~8 MB, 6000x4000",
+  "structure": "baseline JPEG"
+ },
+ {
+  "id": "IMAGE-E",
+  "name": "IMAGE-E-photo-15mb.jpg",
+  "bytes": 14688976,
+  "sha": "bb804a2b3e56",
+  "what": "JPEG ~15 MB, 8000x6000 (48 MP)",
+  "structure": "baseline JPEG"
+ },
+ {
+  "id": "IMAGE-F",
+  "name": "IMAGE-F-transparent.png",
+  "bytes": 3280825,
+  "sha": "fda7e284f187",
+  "what": "Transparent PNG 1800x1400 (photo inside an ellipse, clear corners)",
+  "structure": "PNG RGBA"
+ },
+ {
+  "id": "IMAGE-G",
+  "name": "IMAGE-G-large-photo.png",
+  "bytes": 8311892,
+  "sha": "bd598844fa9b",
+  "what": "Large photographic PNG 3000x2000 (opaque)",
+  "structure": "PNG RGB(A) opaque"
+ },
+ {
+  "id": "IMAGE-H",
+  "name": "IMAGE-H-photo.webp",
+  "bytes": 1167856,
+  "sha": "8cdde1cc033f",
+  "what": "WebP 2400x1600 photo",
+  "structure": "lossy WebP"
+ },
+ {
+  "id": "IMAGE-I",
+  "name": "IMAGE-I-vector.svg",
+  "bytes": 372,
+  "sha": "7422b13a5afe",
+  "what": "Clean SVG 800x500 (shapes + text)",
+  "structure": "SVG"
+ },
+ {
+  "id": "IMAGE-J",
+  "name": "IMAGE-J-unsafe.svg",
+  "bytes": 633,
+  "sha": "044b18f77c87",
+  "what": "SVG with <script>, onload handler, external <image>, <foreignObject><iframe>, javascript: link",
+  "structure": "SVG (unsafe)"
+ },
+ {
+  "id": "IMAGE-K",
+  "name": "IMAGE-K-exif-rich.jpg",
+  "bytes": 679943,
+  "sha": "0e80ec2e1801",
+  "what": "EXIF-rich JPEG: Make/Model/DateTime/Software/Artist, GPS 37°46'N 122°25'W, Orientation 6 (stored 1600x1200, displays 1200x1600)",
+  "structure": "APP1 EXIF (IFD0 + GPS IFD)"
+ },
+ {
+  "id": "IMAGE-L",
+  "name": "IMAGE-L-tiny-optimized.jpg",
+  "bytes": 23430,
+  "sha": "4cdd316d3701",
+  "what": "Very small optimized JPEG 480x320 q60",
+  "structure": "baseline JPEG"
+ },
+ {
+  "id": "X-ODD",
+  "name": "X-odd-1001x777.png",
+  "bytes": 1170612,
+  "sha": "564c6ee2ce5e",
+  "what": "Odd dimensions 1001x777 opaque PNG",
+  "structure": "PNG"
+ },
+ {
+  "id": "X-PORT",
+  "name": "X-portrait-1200x1800.jpg",
+  "bytes": 705945,
+  "sha": "9859a8f0b990",
+  "what": "Portrait 1200x1800 JPEG",
+  "structure": "JPEG"
+ },
+ {
+  "id": "X-TINY",
+  "name": "X-tiny-64x48.png",
+  "bytes": 6518,
+  "sha": "983a78f8766b",
+  "what": "Tiny 64x48 transparent PNG",
+  "structure": "PNG RGBA"
+ },
+ {
+  "id": "X-WEBPA",
+  "name": "X-transparent.webp",
+  "bytes": 136976,
+  "sha": "4e5ce16943b0",
+  "what": "Transparent WebP 900x700",
+  "structure": "lossy WebP with alpha"
+ },
+ {
+  "id": "X-CORRUPT",
+  "name": "X-corrupt.jpg",
+  "bytes": 4000,
+  "sha": "0dc22e60e014",
+  "what": "Corrupt JPEG: first 4,000 bytes of IMAGE-B (header only, no image data)",
+  "structure": "truncated JPEG"
+ },
+ {
+  "id": "X-HALF",
+  "name": "X-truncated-half.jpg",
+  "bytes": 249288,
+  "sha": "cc82a87033b1",
+  "what": "JPEG cut off halfway through the image data (browsers show the bottom half grey, no error)",
+  "structure": "truncated JPEG, no EOI"
+ },
+ {
+  "id": "X-ZERO-JPG",
+  "name": "X-zero-byte.jpg",
+  "bytes": 0,
+  "sha": "e3b0c44298fc",
+  "what": "Zero-byte .jpg",
+  "structure": "empty"
+ },
+ {
+  "id": "X-ZERO-PDF",
+  "name": "X-zero-byte.pdf",
+  "bytes": 0,
+  "sha": "e3b0c44298fc",
+  "what": "Zero-byte .pdf",
+  "structure": "empty"
+ },
+ {
+  "id": "X-GIF",
+  "name": "X-animation.gif",
+  "bytes": 43,
+  "sha": "b1442e85b03b",
+  "what": "1x1 GIF (unsupported format)",
+  "structure": "GIF89a"
+ },
+ {
+  "id": "X-TXT",
+  "name": "X-notes.txt",
+  "bytes": 39,
+  "sha": "353bdf194419",
+  "what": "Plain text file (wrong type for every tool)",
+  "structure": "text"
+ },
+ {
+  "id": "X-FAKEPDF",
+  "name": "X-fake.pdf",
+  "bytes": 46,
+  "sha": "e7351649eabd",
+  "what": "Text content with a .pdf extension",
+  "structure": "text"
+ },
+ {
+  "id": "X-JPGASPNG",
+  "name": "X-jpeg-named.png",
+  "bytes": 23430,
+  "sha": "4cdd316d3701",
+  "what": "A JPEG saved with a .png extension (mislabelled but valid)",
+  "structure": "JPEG bytes, .png name"
+ },
+ {
+  "id": "OCR-A",
+  "name": "OCR-A-clean-300dpi.pdf",
+  "bytes": 859411,
+  "sha": "9a8841f6d141",
+  "what": "Clean 300 dpi English page",
+  "structure": "image-only JPEG page(s); OCR language eng"
+ },
+ {
+  "id": "OCR-B",
+  "name": "OCR-B-low-res-100dpi.pdf",
+  "bytes": 111089,
+  "sha": "51dca1536b80",
+  "what": "Low-resolution 100 dpi English page",
+  "structure": "image-only JPEG page(s); OCR language eng"
+ },
+ {
+  "id": "OCR-C",
+  "name": "OCR-C-low-contrast.pdf",
+  "bytes": 635205,
+  "sha": "114d6d86b205",
+  "what": "Low contrast (grey on grey) 200 dpi English page",
+  "structure": "image-only JPEG page(s); OCR language eng"
+ },
+ {
+  "id": "OCR-D",
+  "name": "OCR-D-rotated.pdf",
+  "bytes": 864449,
+  "sha": "2e800b992eb2",
+  "what": "English page scanned sideways (stored landscape) with /Rotate 90 so it displays upright, plus a 1.5° skew",
+  "structure": "image-only JPEG page(s); OCR language eng"
+ },
+ {
+  "id": "OCR-E",
+  "name": "OCR-E-spanish.pdf",
+  "bytes": 834527,
+  "sha": "feff3c80d632",
+  "what": "Clean 300 dpi Spanish page (accents: producción, miércoles, mañana, envíe)",
+  "structure": "image-only JPEG page(s); OCR language spa"
+ },
+ {
+  "id": "OCR-F",
+  "name": "OCR-F-mixed-native-scan.pdf",
+  "bytes": 860314,
+  "sha": "d596ddf6d82a",
+  "what": "Scanned body with a native-text header line on top",
+  "structure": "image-only JPEG page(s); OCR language eng"
+ },
+ {
+  "id": "OCR-G",
+  "name": "OCR-G-multipage.pdf",
+  "bytes": 2432173,
+  "sha": "990252f888f4",
+  "what": "3 scanned pages (EN, EN, unaccented ES)",
+  "structure": "image-only JPEG page(s); OCR language eng"
+ }
+]

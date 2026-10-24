@@ -2,6 +2,7 @@ import path from "node:path";
 import fs from "node:fs";
 import { test, expect, type Page } from "@playwright/test";
 import { PDFDocument } from "pdf-lib";
+import { pickTool, toolButton } from "./helpers/editor";
 
 // Regression tests for interactions that only fail with *real pointer/keyboard input* on the
 // page: where a drag preview appears, whether a tool stays armed, whether strokes render while
@@ -11,8 +12,8 @@ import { PDFDocument } from "pdf-lib";
 const FIXTURES = path.join(__dirname, "fixtures");
 
 async function openFile(page: Page, filePath: string, { actualSize = true } = {}) {
-  await page.goto("/pdf/editor");
-  await page.locator('input[type="file"]').setInputFiles(filePath);
+  await page.goto("/pdf-editor");
+  await page.getByTestId("file-input").first().setInputFiles(filePath);
   await expect(page.locator('[data-testid="page-surface"]').first()).toBeVisible({ timeout: 15_000 });
   // A phone opens the page fit to its width; most of these tests measure against 100%.
   if (actualSize) await page.getByRole("button", { name: "Actual size (100%)" }).click();
@@ -86,7 +87,7 @@ test.describe("PDF Editor: drag previews follow the pointer", () => {
   test("a drag started on top of the page's text still draws (the text hit-target doesn't swallow it)", async ({ page }) => {
     await openFile(page, path.join(FIXTURES, "sample-a.pdf"));
     await page.getByRole("button", { name: "Highlight", exact: true }).click();
-    const target = await page.getByRole("button", { name: /Edit text: Sample A - page 1/ }).boundingBox();
+    const target = await page.locator('[data-testid="native-block"][data-text*="Sample A - page 1"]').boundingBox();
     if (!target) throw new Error("no text region");
     await drag(page, target.x + 4, target.y + 4, target.x + target.width - 4, target.y + target.height - 2);
     await expect(page.locator("[data-object-type=annotation]")).toHaveCount(1);
@@ -96,7 +97,7 @@ test.describe("PDF Editor: drag previews follow the pointer", () => {
     await openFile(page, path.join(FIXTURES, "sample-a.pdf"));
     async function rectDragIsExact() {
       await page.waitForTimeout(600);
-      await page.getByRole("button", { name: "Rectangle", exact: true }).click();
+      await pickTool(page, "Rectangle");
       const sb = await surfaceBox(page);
       const x0 = sb.x + 40, y0 = sb.y + 40;
       const x1 = Math.min(x0 + 120, sb.x + sb.width - 8), y1 = Math.min(y0 + 70, sb.y + sb.height - 8);
@@ -124,9 +125,9 @@ test.describe("PDF Editor: tools stay armed for repeated use", () => {
     await openFile(page, path.join(FIXTURES, "sample-a.pdf"));
     const sb = await surfaceBox(page);
     for (const [label, n] of [["Highlight", 3], ["Underline", 5], ["Strike", 2]] as const) {
-      await page.getByRole("button", { name: label, exact: true }).click();
+      await pickTool(page, label);
       for (let i = 0; i < n; i++) await drag(page, sb.x + 30, sb.y + 30 + i * 35, sb.x + 180, sb.y + 55 + i * 35, 4);
-      await expect(page.getByRole("button", { name: label, exact: true })).toHaveAttribute("aria-pressed", "true");
+      await expect(toolButton(page, label)).toHaveAttribute("aria-pressed", "true");
     }
     await expect(page.locator("[data-object-type=annotation]")).toHaveCount(10);
   });
@@ -166,7 +167,7 @@ test.describe("PDF Editor: text is edited directly on the page", () => {
   test("place text, type a sentence continuously, edit inside it, and it exports where it shows", async ({ page }) => {
     await openFile(page, path.join(FIXTURES, "sample-a.pdf"));
     const sb = await surfaceBox(page);
-    await page.getByRole("button", { name: "Text", exact: true }).click();
+    await page.getByRole("button", { name: "Add text", exact: true }).click();
     await page.mouse.click(sb.x + 60, sb.y + 300);
 
     const editor = page.getByTestId("canvas-text-editor");
@@ -201,7 +202,7 @@ test.describe("PDF Editor: text is edited directly on the page", () => {
   test("clicking an already-selected text box (or double-clicking) re-enters editing; typing is one undo step", async ({ page }) => {
     await openFile(page, path.join(FIXTURES, "sample-a.pdf"));
     const sb = await surfaceBox(page);
-    await page.getByRole("button", { name: "Text", exact: true }).click();
+    await page.getByRole("button", { name: "Add text", exact: true }).click();
     await page.mouse.click(sb.x + 60, sb.y + 300);
     await page.keyboard.type("Hello world");
     await page.keyboard.press("Escape");
@@ -218,7 +219,7 @@ test.describe("PDF Editor: text is edited directly on the page", () => {
   test("the selected text's color and size are edited from the panel, and Delete removes it", async ({ page, isMobile }) => {
     await openFile(page, path.join(FIXTURES, "sample-a.pdf"));
     const sb = await surfaceBox(page);
-    await page.getByRole("button", { name: "Text", exact: true }).click();
+    await page.getByRole("button", { name: "Add text", exact: true }).click();
     await page.mouse.click(sb.x + 60, sb.y + 300);
     await page.getByTestId("canvas-text-editor").waitFor();
     await page.keyboard.type("Sized");
@@ -240,7 +241,7 @@ test.describe("PDF Editor: text is edited directly on the page", () => {
   test("typing into the properties-panel text box isn't cut off after one character", async ({ page, isMobile }) => {
     await openFile(page, path.join(FIXTURES, "sample-a.pdf"));
     const sb = await surfaceBox(page);
-    await page.getByRole("button", { name: "Text", exact: true }).click();
+    await page.getByRole("button", { name: "Add text", exact: true }).click();
     await page.mouse.click(sb.x + 60, sb.y + 300);
     await page.getByTestId("canvas-text-editor").waitFor();
     await page.keyboard.press("Escape");
@@ -259,7 +260,7 @@ test.describe("PDF Editor: shapes, images, crop, search, pages", () => {
   test("a line dragged down-right exports down-right, and matches what's on screen", async ({ page }) => {
     await openFile(page, path.join(FIXTURES, "sample-a.pdf"));
     const sb = await surfaceBox(page);
-    await page.getByRole("button", { name: "Line", exact: true }).click();
+    await pickTool(page, "Line");
     await drag(page, sb.x + 40, sb.y + 40, sb.x + 200, sb.y + 160); // top-left → bottom-right on screen
     const bytes = await exportAndSave(page, "line.pdf");
     const doc = await PDFDocument.load(bytes);
@@ -306,7 +307,7 @@ test.describe("PDF Editor: shapes, images, crop, search, pages", () => {
 
   test("a crop area can be adjusted by its handles, is kept on the page, and applied from the action bar", async ({ page }) => {
         await openFile(page, path.join(FIXTURES, "multi-page.pdf"));
-    await page.getByRole("button", { name: "Crop", exact: true }).click();
+    await pickTool(page, "Crop");
     await expect(page.getByRole("status")).toContainText("Drag on the page");
     const sb = await surfaceBox(page);
     await drag(page, sb.x + 40, sb.y + 40, sb.x + sb.width + 200, sb.y + sb.height + 200); // overshoots the page
@@ -341,7 +342,7 @@ test.describe("PDF Editor: shapes, images, crop, search, pages", () => {
       await expect(page.getByText("2 of 5")).toBeVisible();
     });
     await withPanel(page, isMobile, "Pages", async () => {
-      await expect(page.locator('div.group[class*="border-[var(--brand)]"]').getByRole("button", { name: "Go to page 2" })).toBeVisible();
+      await expect(page.getByRole("button", { name: "Go to page 2" })).toHaveAttribute("aria-current", "page");
     });
     await expect(page.locator("[data-testid=page-surface] [class*='ring-yellow-500']")).toHaveCount(1);
   });
@@ -370,7 +371,7 @@ test.describe("PDF Editor: added text on a rotated page", () => {
   test("keeps its layout (one line, real width) and turns with the page instead of wrapping into a sliver", async ({ page, isMobile }) => {
     await openFile(page, path.join(FIXTURES, "sample-a.pdf"));
     const sb = await surfaceBox(page);
-    await page.getByRole("button", { name: "Text", exact: true }).click();
+    await page.getByRole("button", { name: "Add text", exact: true }).click();
     await page.mouse.click(sb.x + 60, sb.y + 300);
     await page.getByTestId("canvas-text-editor").waitFor();
     await page.keyboard.type("A single line of text");
@@ -397,7 +398,7 @@ test.describe("PDF Editor: underline and strikethrough as a flat drag", () => {
     await page.getByRole("button", { name: "Underline", exact: true }).click();
     await drag(page, sb.x + 40, sb.y + 120, sb.x + 220, sb.y + 122, 6);
     await expect(page.locator("[data-object-type=annotation]")).toHaveCount(1);
-    await page.getByRole("button", { name: "Strike", exact: true }).click();
+    await pickTool(page, "Strike");
     await drag(page, sb.x + 40, sb.y + 180, sb.x + 220, sb.y + 181, 6);
     await expect(page.locator("[data-object-type=annotation]")).toHaveCount(2);
     // The underline sits on the dragged line (its bottom edge), the strikethrough through it.
@@ -414,7 +415,7 @@ test.describe("PDF Editor: typing right after placing text", () => {
   test("the first character typed immediately after clicking is not lost", async ({ page }) => {
     await openFile(page, path.join(FIXTURES, "sample-a.pdf"));
     const sb = await surfaceBox(page);
-    await page.getByRole("button", { name: "Text", exact: true }).click();
+    await page.getByRole("button", { name: "Add text", exact: true }).click();
     await page.mouse.click(sb.x + 60, sb.y + 320);
     await page.keyboard.type("Reviewed by QA"); // no waiting for the editor to appear
     await expect(page.getByTestId("canvas-text-editor")).toHaveValue("Reviewed by QA");
@@ -423,7 +424,7 @@ test.describe("PDF Editor: typing right after placing text", () => {
   test("typing across a pause (e.g. thinking mid-sentence) never loses what was already typed", async ({ page }) => {
     await openFile(page, path.join(FIXTURES, "sample-a.pdf"));
     const sb = await surfaceBox(page);
-    await page.getByRole("button", { name: "Text", exact: true }).click();
+    await page.getByRole("button", { name: "Add text", exact: true }).click();
     await page.mouse.click(sb.x + 60, sb.y + 320);
     const editor = page.getByTestId("canvas-text-editor");
     await expect(editor).toBeFocused();
@@ -539,14 +540,10 @@ test.describe("PDF Editor on a phone: touch input", () => {
     await openFile(page, path.join(FIXTURES, "multi-page.pdf"), { actualSize: false });
     const touch = await touchTools(page);
     const sb = await surfaceBox(page);
-    const tool = async (name: string) => {
-      const btn = page.getByRole("button", { name, exact: true });
-      await btn.tap();
-      if ((await btn.getAttribute("aria-pressed")) === "false") await btn.tap();
-    };
+    const tool = (name: string) => pickTool(page, name);
 
     // Text: tap, type, tap away.
-    await tool("Text");
+    await tool("Add text");
     await page.touchscreen.tap(sb.x + 100, sb.y + sb.height * 0.6);
     await page.getByTestId("canvas-text-editor").waitFor();
     await page.keyboard.type("Typed on a phone");

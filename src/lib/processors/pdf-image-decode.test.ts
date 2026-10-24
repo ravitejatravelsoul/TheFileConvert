@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { deflateSync } from "node:zlib";
 import { PDFDocument, PDFName, PDFNumber, PDFRawStream } from "pdf-lib";
 import { ascii85Decode, decodeFlateImage, undoPngPredictor } from "./pdf-image-decode";
-import { analyzePdfImages, compressPdfDocument, describeAnalysis, type RawReencoder } from "./pdf-compress";
+import { analyzePdfImages, compressPdfDocument, compressionOutlook, type RawReencoder } from "./pdf-compress";
 
 function ascii85Encode(buf: Uint8Array): string {
   let out = "";
@@ -106,13 +106,11 @@ describe("Flate scans are recognised and recompressed", () => {
     });
   }
 
-  it("analysis counts them and the advice says a lossy level will help (no longer 'none are JPEG')", async () => {
+  it("analysis counts them as recompressible, so the outlook says there is room to shrink", async () => {
     const { bytes } = await pdfWithFlateImage("a85flate", 200, 200);
     const a = await analyzePdfImages(bytes);
     expect(a.flateCount).toBe(1);
-    const d = describeAnalysis(a);
-    expect(d.suggestLossy).toBe(true);
-    expect(d.advice).toMatch(/Balanced or Smallest/);
+    expect(compressionOutlook(a).kind).toBe("good-room");
   });
 
   it("Balanced replaces a Flate image with a JPEG stream when that is smaller, Lossless leaves it alone", async () => {
@@ -135,5 +133,24 @@ describe("Flate scans are recognised and recompressed", () => {
     const r = await compressPdfDocument(bytes, "balanced", undefined, bigger);
     expect(r.imagesRecompressed).toBe(0);
     expect(r.imagesSkipped).toBe(1);
+  });
+});
+
+describe("colorChannels", () => {
+  it("accepts device, calibrated and 1-/3-component ICC spaces; rejects CMYK, palette and unknown ones", async () => {
+    const { PDFDocument: Doc, PDFName: N } = await import("pdf-lib");
+    const { colorChannels } = await import("./pdf-image-decode");
+    const doc = await Doc.create();
+    const icc = (n: number) => doc.context.register(doc.context.stream(new Uint8Array(4), { N: n }));
+    expect(colorChannels(N.of("DeviceRGB"), doc.context)).toBe(3);
+    expect(colorChannels(N.of("DeviceGray"), doc.context)).toBe(1);
+    expect(colorChannels(doc.context.obj([N.of("ICCBased"), icc(3)]), doc.context)).toBe(3);
+    expect(colorChannels(doc.context.obj([N.of("ICCBased"), icc(1)]), doc.context)).toBe(1);
+    expect(colorChannels(doc.context.obj([N.of("ICCBased"), icc(4)]), doc.context)).toBe(0); // CMYK profile
+    expect(colorChannels(doc.context.obj([N.of("CalRGB"), doc.context.obj({})]), doc.context)).toBe(3);
+    expect(colorChannels(N.of("DeviceCMYK"), doc.context)).toBe(0);
+    expect(colorChannels(doc.context.obj([N.of("Indexed"), N.of("DeviceRGB"), 1, doc.context.obj([])]), doc.context)).toBe(0);
+    // A colour space stored as an indirect object is resolved first.
+    expect(colorChannels(doc.context.register(doc.context.obj([N.of("ICCBased"), icc(3)])), doc.context)).toBe(3);
   });
 });

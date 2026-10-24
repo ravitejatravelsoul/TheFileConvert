@@ -17,6 +17,9 @@ const eslintConfig = defineConfig([
     // QA harness scripts and generated fixtures (not shipped).
     "qa/**",
     "qa-fixtures/**",
+    // Playwright run output (traces, reports).
+    "test-results/**",
+    "playwright-report/**",
   ]),
 ]);
 

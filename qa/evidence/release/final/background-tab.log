@@ -1,0 +1,13 @@
+### pdf-to-word qa/real-user-fixtures/DOCUMENT-02-filled-application.pdf --button=Convert to Word
+{"route":"pdf-to-word","file":"DOCUMENT-02-filled-application.pdf","finishedInBackgroundTab":true,"seconds":5.4,"status":"Your Word document is ready"}
+### pdf-to-word qa/real-user-fixtures/DOCUMENT-06-resume-native.pdf --button=Convert to Word
+{"route":"pdf-to-word","file":"DOCUMENT-06-resume-native.pdf","finishedInBackgroundTab":true,"seconds":0.5,"status":"Your Word document is ready"}
+### pdf-to-word qa/real-user-fixtures/DOCUMENT-08-signed-contract.pdf --button=Convert to Word
+{"route":"pdf-to-word","file":"DOCUMENT-08-signed-contract.pdf","finishedInBackgroundTab":true,"seconds":68.2,"status":"Your Word document is ready"}
+### pdf-to-image qa/real-user-fixtures/DOCUMENT-05-bank-statement.pdf --button=Convert all
+{"route":"pdf-to-image","file":"DOCUMENT-05-bank-statement.pdf","finishedInBackgroundTab":true,"seconds":3.1,"status":"2 pages saved as JPG"}
+### compress-pdf qa/fresh-scenario-fixtures/PDF-C-scan-3.8mb-incremental.pdf --button=Compress to under
+{"route":"compress-pdf","file":"PDF-C-scan-3.8mb-incremental.pdf","finishedInBackgroundTab":true,"seconds":43.5,"status":"Done — 882 KB"}
+### word-to-pdf qa/real-user-fixtures/DOCUMENT-16-complex-word-report.docx --button=Convert to PDF
+{"route":"word-to-pdf","file":"DOCUMENT-16-complex-word-report.docx","finishedInBackgroundTab":true,"seconds":0.5,"status":"Your PDF is ready"}
+DONE

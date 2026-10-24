@@ -2,13 +2,14 @@ import path from "node:path";
 import fs from "node:fs";
 import { test, expect, type Page } from "@playwright/test";
 import { PDFDocument } from "pdf-lib";
+import { pickTool } from "./helpers/editor";
 
 const OCR_FIXTURES = path.join(__dirname, "fixtures", "ocr");
 const FIXTURES = path.join(__dirname, "fixtures");
 
 async function openFile(page: Page, filePath: string) {
-  await page.goto("/pdf/editor");
-  await page.locator('input[type="file"]').setInputFiles(filePath);
+  await page.goto("/pdf-editor");
+  await page.getByTestId("file-input").first().setInputFiles(filePath);
   await expect(page.locator('[data-testid="page-surface"]').first()).toBeVisible({ timeout: 15_000 });
   await page.getByRole("button", { name: "Actual size (100%)" }).click(); // these tests assume 100% (a phone opens fit to width)
 }
@@ -41,7 +42,7 @@ async function extractText(bytes: Buffer, pageNumber: number): Promise<string> {
 async function openMobilePanel(page: Page, isMobile: boolean, panel: "Pages" | "Properties") {
   if (!isMobile) return;
   await page.keyboard.press("Escape");
-  const label = panel === "Pages" ? /Pages \(/ : "Properties";
+  const label = panel;
   await page.getByRole("button", { name: label }).click();
 }
 
@@ -49,14 +50,14 @@ test.describe("PDF Editor: native text editing", () => {
   test("corrects native text, exports, and the correction is verifiable in the reopened PDF", async ({ page }) => {
     await openFile(page, path.join(OCR_FIXTURES, "native-text.pdf"));
 
-    await page.getByRole("button", { name: /Edit text: Quarterly Report/i }).click();
-    const dialog = page.getByRole("dialog", { name: "Edit text" });
-    await expect(dialog).toBeVisible();
-    const input = dialog.locator("input[type=text]");
-    await expect(input).toHaveValue("Quarterly Report");
-    await input.fill("Annual Summary");
-    await dialog.getByRole("button", { name: "Save correction" }).click();
-    await expect(dialog).not.toBeVisible();
+    await page.locator('[data-testid="native-block"][data-text*="Quarterly Report"]').dblclick();
+    const editor = page.getByTestId("native-text-editor");
+    await expect(editor).toBeFocused();
+    await expect(editor).toHaveText("Quarterly Report");
+    await page.keyboard.press("Control+A");
+    await page.keyboard.type("Annual Summary");
+    await page.getByRole("button", { name: "Apply this text edit" }).click();
+    await expect(editor).toHaveCount(0);
 
     const bytes = await exportAndSave(page, "native-corrected.pdf");
     const doc = await PDFDocument.load(bytes);
@@ -64,6 +65,7 @@ test.describe("PDF Editor: native text editing", () => {
 
     const text = await extractText(bytes, 1);
     expect(text).toContain("Annual Summary");
+    expect(text).not.toContain("Quarterly Report");
   });
 });
 
@@ -71,7 +73,7 @@ test.describe("PDF Editor: add text / shapes / annotations", () => {
   test("adds a text box and it appears at export in the reopened PDF", async ({ page }) => {
     await openFile(page, path.join(OCR_FIXTURES, "native-text.pdf"));
 
-    await page.getByRole("button", { name: "Text", exact: true }).click();
+    await page.getByRole("button", { name: "Add text", exact: true }).click();
     const surface = page.locator('[data-testid="page-surface"]').first();
     await surface.click({ position: { x: 60, y: 600 } });
 
@@ -107,7 +109,7 @@ test.describe("PDF Editor: add text / shapes / annotations", () => {
   test("draws a rectangle shape that survives export", async ({ page, isMobile }) => {
     await openFile(page, path.join(OCR_FIXTURES, "native-text.pdf"));
 
-    await page.getByRole("button", { name: "Rectangle", exact: true }).click();
+    await pickTool(page, "Rectangle");
     const surface = page.locator('[data-testid="page-surface"]').first();
     await surface.scrollIntoViewIfNeeded();
     const box = await surface.boundingBox();
@@ -132,7 +134,7 @@ test.describe("PDF Editor: page management", () => {
   test("rotate, duplicate, and delete pages, then export and verify the result", async ({ page, isMobile }) => {
     await openFile(page, path.join(FIXTURES, "multi-page.pdf"));
     await openMobilePanel(page, isMobile, "Pages");
-    await expect(page.getByText("5 pages")).toBeVisible();
+    await expect(page.getByText("5 pages").first()).toBeVisible();
 
     // The per-thumbnail action buttons only render on hover (desktop pattern), so hover the
     // thumbnail first to reveal them before clicking.
@@ -140,10 +142,10 @@ test.describe("PDF Editor: page management", () => {
     await page.getByRole("button", { name: "Rotate page 1 clockwise" }).click();
     await page.getByRole("button", { name: "Go to page 1" }).hover();
     await page.getByRole("button", { name: "Duplicate page 1" }).click();
-    await expect(page.getByText("6 pages")).toBeVisible();
+    await expect(page.getByText("6 pages").first()).toBeVisible();
     await page.getByRole("button", { name: "Go to page 6" }).hover();
     await page.getByRole("button", { name: "Delete page 6" }).click();
-    await expect(page.getByText("5 pages")).toBeVisible();
+    await expect(page.getByText("5 pages").first()).toBeVisible();
 
     const bytes = await exportAndSave(page, "page-management.pdf");
     const doc = await PDFDocument.load(bytes);
@@ -154,14 +156,14 @@ test.describe("PDF Editor: page management", () => {
   test("inserts pages from another PDF after the current page", async ({ page, isMobile }) => {
     await openFile(page, path.join(FIXTURES, "sample-a.pdf")); // 2 pages
     await openMobilePanel(page, isMobile, "Pages");
-    await expect(page.getByText("2 pages")).toBeVisible();
+    await expect(page.getByText("2 pages").first()).toBeVisible();
 
     const [fileChooser] = await Promise.all([
       page.waitForEvent("filechooser"),
       page.getByRole("button", { name: "Insert pages after page 1" }).click(),
     ]);
     await fileChooser.setFiles(path.join(FIXTURES, "sample-b.pdf")); // 3 pages
-    await expect(page.getByText("5 pages")).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByText("5 pages").first()).toBeVisible({ timeout: 10_000 });
 
     const bytes = await exportAndSave(page, "inserted.pdf");
     const doc = await PDFDocument.load(bytes);
@@ -173,7 +175,7 @@ test.describe("PDF Editor: undo/redo", () => {
   test("Ctrl+Z undoes an added text object and Ctrl+Shift+Z redoes it", async ({ page, isMobile }) => {
     await openFile(page, path.join(OCR_FIXTURES, "native-text.pdf"));
 
-    await page.getByRole("button", { name: "Text", exact: true }).click();
+    await page.getByRole("button", { name: "Add text", exact: true }).click();
     const surface = page.locator('[data-testid="page-surface"]').first();
     await surface.click({ position: { x: 60, y: 600 } });
     await openMobilePanel(page, isMobile, "Properties");
@@ -201,7 +203,7 @@ test.describe("PDF Editor: OCR integration", () => {
     page.on("request", (req) => requests.push(req.url()));
 
     await page.goto("/pdf/editor", { waitUntil: "networkidle" });
-    await page.locator('input[type="file"]').setInputFiles(path.join(OCR_FIXTURES, "native-text.pdf"));
+    await page.getByTestId("file-input").first().setInputFiles(path.join(OCR_FIXTURES, "native-text.pdf"));
     await expect(page.locator('[data-testid="page-surface"]').first()).toBeVisible({ timeout: 15_000 });
     await page.getByRole("button", { name: "Actual size (100%)" }).click(); // a phone opens fit to width
     await page.waitForTimeout(1000);
@@ -217,12 +219,12 @@ test.describe("PDF Editor: privacy / network", () => {
     page.on("request", (req) => requests.push(req.url()));
 
     await page.goto("/pdf/editor", { waitUntil: "networkidle" });
-    await page.locator('input[type="file"]').setInputFiles(path.join(OCR_FIXTURES, "native-text.pdf"));
+    await page.getByTestId("file-input").first().setInputFiles(path.join(OCR_FIXTURES, "native-text.pdf"));
     await expect(page.locator('[data-testid="page-surface"]').first()).toBeVisible({ timeout: 15_000 });
 
     await page.getByRole("button", { name: "Actual size (100%)" }).click(); // a phone opens fit to width
     requests.length = 0;
-    await page.getByRole("button", { name: "Text", exact: true }).click();
+    await page.getByRole("button", { name: "Add text", exact: true }).click();
     await page.locator('[data-testid="page-surface"]').first().click({ position: { x: 60, y: 600 } });
     await exportAndSave(page, "privacy-check.pdf");
 
@@ -236,21 +238,21 @@ test.describe("PDF Editor: security / error handling", () => {
   test("a corrupted PDF fails safely with a friendly message", async ({ page }) => {
     const errors: string[] = [];
     page.on("pageerror", (e) => errors.push(e.message));
-    await page.goto("/pdf/editor");
-    await page.locator('input[type="file"]').setInputFiles(path.join(FIXTURES, "corrupted.pdf"));
+    await page.goto("/pdf-editor");
+    await page.getByTestId("file-input").first().setInputFiles(path.join(FIXTURES, "corrupted.pdf"));
     await expect(page.getByText(/couldn't read this PDF|damaged/i)).toBeVisible();
     expect(errors).toEqual([]);
   });
 
   test("a zero-byte file is rejected immediately", async ({ page }) => {
-    await page.goto("/pdf/editor");
-    await page.locator('input[type="file"]').setInputFiles(path.join(FIXTURES, "zero-byte.pdf"));
+    await page.goto("/pdf-editor");
+    await page.getByTestId("file-input").first().setInputFiles(path.join(FIXTURES, "zero-byte.pdf"));
     await expect(page.getByText(/empty/i)).toBeVisible();
   });
 
   test("an unsupported file type shows a friendly error", async ({ page }) => {
-    await page.goto("/pdf/editor");
-    await page.locator('input[type="file"]').setInputFiles(path.join(FIXTURES, "sample.csv"));
+    await page.goto("/pdf-editor");
+    await page.getByTestId("file-input").first().setInputFiles(path.join(FIXTURES, "sample.csv"));
     await expect(page.getByText(/isn't supported/i)).toBeVisible();
   });
 });
@@ -263,7 +265,7 @@ test.describe("PDF Editor: responsive / mobile", () => {
     const hasOverflow = await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth + 1);
     expect(hasOverflow).toBe(false);
 
-    await page.getByRole("button", { name: /Pages \(/ }).click();
-    await expect(page.getByText("1 page", { exact: true })).toBeVisible();
+    await page.getByRole("button", { name: "Pages", exact: true }).click();
+    await expect(page.getByRole("dialog", { name: "Pages" }).getByText("1 page", { exact: true })).toBeVisible();
   });
 });

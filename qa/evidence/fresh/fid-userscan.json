@@ -1,0 +1,187 @@
+[
+  {
+    "tool": "User scan → Word",
+    "test": "TheFileConvert_Scanned_OCR_Test.pdf",
+    "verdict": "PASS",
+    "ms": 6997,
+    "stages": [
+      "Analyzing document — page 1 of 2…\n\nEverything happens in this tab. Nothing is uploaded.",
+      "Analyzing document — page 2 of 2…\n\nEverything happens in this tab. Nothing is uploaded.",
+      "Recognizing page 1 of 2…\n\nScanned pages are read with OCR on this device — the first run downloads a small recognition model.",
+      "Recognizing page 2 of 2…\n\nScanned pages are read with OCR on this device — the first run downloads a small recognition model.",
+      "Building Word document…\n\nEverything happens in this tab. Nothing is uploaded.",
+      "Your Word document is ready"
+    ],
+    "uploads": 0,
+    "pagesSrc": 2,
+    "pagesOut": 2,
+    "pages": [
+      {
+        "page": 1,
+        "wordsOut": 59,
+        "wordsInPlacePct": 100,
+        "wordsWithoutInk": 0,
+        "rulesH": {
+          "src": 11,
+          "out": 11,
+          "keptPct": 100
+        },
+        "rulesV": {
+          "src": 5,
+          "out": 6,
+          "keptPct": 99.4
+        }
+      },
+      {
+        "page": 2,
+        "wordsOut": 42,
+        "wordsInPlacePct": 100,
+        "wordsWithoutInk": 0,
+        "rulesH": {
+          "src": 7,
+          "out": 5,
+          "keptPct": 99.9
+        },
+        "rulesV": {
+          "src": 5,
+          "out": 4,
+          "keptPct": 99.9
+        }
+      }
+    ],
+    "wordsInPlacePct": 100,
+    "wordsWithoutInk": 0,
+    "rulesKeptPct": 99.8,
+    "typographyPct": 97,
+    "tables": [
+      "1x1",
+      "2x2",
+      "4x3",
+      "1x1"
+    ],
+    "checks": [
+      {
+        "id": "p1-title-top",
+        "ok": true,
+        "detail": "(44.099998474121094, 38.207489013671875, 362.70501708984375, 57.579986572265625)"
+      },
+      {
+        "id": "order:p1-order",
+        "ok": true,
+        "detail": "[38.2, 79.4, 112.2, 163.1, 223.0, 279.1, 312.8, 383.3, 409.9, 436.2, 462.7, 546.8, 599.7]"
+      },
+      {
+        "id": "p1-name-row",
+        "ok": true,
+        "detail": "mid-y [118.3, 117.1] x [43.4, 125.1]"
+      },
+      {
+        "id": "p1-sentence",
+        "ok": true,
+        "detail": "(43.400001525878906, 163.1170196533203, 368.0100402832031, 177.5080108642578)"
+      },
+      {
+        "id": "p1-valid-row",
+        "ok": true,
+        "detail": "mid-y [228.5, 226.7, 226.7, 226.7] x [43.8, 135.4, 257.8, 361.8]"
+      },
+      {
+        "id": "p1-valid-box",
+        "ok": true,
+        "detail": "lines above/below/left/right: (3, 1, 1, 1)"
+      },
+      {
+        "id": "p1-account-row",
+        "ok": true,
+        "detail": "mid-y [285.0, 283.9] x [43.4, 173.0]"
+      },
+      {
+        "id": "p1-invoice-row",
+        "ok": true,
+        "detail": "mid-y [318.6, 317.6] x [43.4, 173.0]"
+      },
+      {
+        "id": "tables:p1-table",
+        "ok": true,
+        "detail": "tables in docx: ['1x1', '2x2', '4x3', '1x1']"
+      },
+      {
+        "id": "p1-registrar-row",
+        "ok": true,
+        "detail": "mid-y [552.1, 550.9] x [43.4, 125.4]"
+      },
+      {
+        "id": "p2-title-top",
+        "ok": true,
+        "detail": "(63.400001525878906, 52.32551193237305, 370.7979736328125, 73.9120101928711)"
+      },
+      {
+        "id": "order:p2-order",
+        "ok": true,
+        "detail": "[52.3, 103.2, 136.6, 182.4, 213.3, 268.9, 328.6, 369.9, 450.9, 575.8]"
+      },
+      {
+        "id": "p2-award-row",
+        "ok": true,
+        "detail": "mid-y [274.8, 273.4] x [86.8, 198.4]"
+      },
+      {
+        "id": "p2-class-row",
+        "ok": true,
+        "detail": "mid-y [334.4, 333.1] x [87.1, 219.1]"
+      },
+      {
+        "id": "p2-score-row",
+        "ok": true,
+        "detail": "mid-y [375.5, 374.0] x [87.1, 156.4]"
+      },
+      {
+        "id": "p2-code-row",
+        "ok": true,
+        "detail": "mid-y [456.7, 455.5] x [92.1, 236.2]"
+      },
+      {
+        "id": "p2-code-box",
+        "ok": true,
+        "detail": "lines above/below/left/right: (3, 3, 3, 5)"
+      }
+    ],
+    "layout": "PASS",
+    "rules": "PASS",
+    "typography": "PASS",
+    "garbage": "PASS",
+    "checksFailed": [],
+    "structure": "PASS",
+    "dimensions": {
+      "TEXT": "n/a",
+      "LAYOUT": "PASS",
+      "TABLES": "PASS",
+      "BORDERS_RULES": "PASS",
+      "FORMS": "n/a",
+      "IMAGES": "n/a",
+      "TYPOGRAPHY": "PASS",
+      "READING_ORDER": "PASS"
+    },
+    "overall": "PASS",
+    "integrity": [
+      {
+        "file": "userscan-TheFileConvert_Scanned_OCR_Test.docx",
+        "bytes": 5480,
+        "ok": true,
+        "kind": "docx",
+        "pages": 2,
+        "paragraphs": 15,
+        "tables": 4,
+        "pictures": 0
+      }
+    ]
+  },
+  {
+    "tool": "User scan → Word",
+    "test": "console errors",
+    "verdict": "FAIL",
+    "errors": [
+      "Estimating resolution as 341"
+    ]
+  }
+]

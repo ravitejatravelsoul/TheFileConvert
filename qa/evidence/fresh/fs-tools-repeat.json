@@ -1,0 +1,241 @@
+[
+ {
+  "tool": "Merge PDF",
+  "test": "repeat use: second merge after the first (no stale state)",
+  "verdict": "PASS",
+  "firstPages": 5,
+  "secondPages": 10,
+  "integrity": [
+   {
+    "file": "fs-repeat-merge-1-merged.pdf",
+    "bytes": 4551,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 5
+   },
+   {
+    "file": "fs-repeat-merge-2-merged.pdf",
+    "bytes": 647822,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 10
+   }
+  ]
+ },
+ {
+  "tool": "PDF Editor",
+  "test": "repeat use: second document in the same tab (no stale state)",
+  "verdict": "PASS",
+  "firstPages": 2,
+  "secondPages": 3,
+  "secondText": "Annual Summary — Page 1  Quarterly operations review. Revenu",
+  "integrity": [
+   {
+    "file": "fs-repeat-editor-1-PDF-K-native-text-edited.pdf",
+    "bytes": 2744,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 2
+   },
+   {
+    "file": "fs-repeat-editor-2-PDF-N-metadata-rich-edited.pdf",
+    "bytes": 3494,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 3
+   }
+  ]
+ },
+ {
+  "tool": "Compress PDF",
+  "test": "repeat use: second file after the first (no stale state)",
+  "verdict": "PASS",
+  "first": "fs-repeat-CompressPDF-1-PDF-B-mixed-800k.pdf",
+  "second": "fs-repeat-CompressPDF-2-PDF-K-native-text.pdf",
+  "differ": true,
+  "secondFromSecondInput": true,
+  "integrity": [
+   {
+    "file": "fs-repeat-CompressPDF-1-PDF-B-mixed-800k.pdf",
+    "bytes": 751881,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 6
+   },
+   {
+    "file": "fs-repeat-CompressPDF-2-PDF-K-native-text.pdf",
+    "bytes": 2281,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 2
+   }
+  ]
+ },
+ {
+  "tool": "Compress Image",
+  "test": "repeat use: second file after the first (no stale state)",
+  "verdict": "PASS",
+  "first": "fs-repeat-CompressImage-1-IMAGE-B-photo-500k-compressed.jpg",
+  "second": "fs-repeat-CompressImage-2-IMAGE-L-tiny-optimized.jpg",
+  "differ": true,
+  "secondFromSecondInput": true,
+  "integrity": [
+   {
+    "file": "fs-repeat-CompressImage-1-IMAGE-B-photo-500k-compressed.jpg",
+    "bytes": 243433,
+    "ok": true,
+    "kind": "jpeg",
+    "w": 1482,
+    "h": 988,
+    "alpha": false
+   },
+   {
+    "file": "fs-repeat-CompressImage-2-IMAGE-L-tiny-optimized.jpg",
+    "bytes": 23430,
+    "ok": true,
+    "kind": "jpeg",
+    "w": 480,
+    "h": 320,
+    "alpha": false
+   }
+  ]
+ },
+ {
+  "tool": "Image Converter",
+  "test": "repeat use: second file after the first (no stale state)",
+  "verdict": "PASS",
+  "first": "fs-repeat-ImageConverter-1-IMAGE-B-photo-500k.webp",
+  "second": "fs-repeat-ImageConverter-2-X-odd-1001x777.webp",
+  "differ": true,
+  "secondFromSecondInput": true,
+  "integrity": [
+   {
+    "file": "fs-repeat-ImageConverter-1-IMAGE-B-photo-500k.webp",
+    "bytes": 920226,
+    "ok": true,
+    "kind": "webp",
+    "w": 2400,
+    "h": 1600,
+    "alpha": false
+   },
+   {
+    "file": "fs-repeat-ImageConverter-2-X-odd-1001x777.webp",
+    "bytes": 198574,
+    "ok": true,
+    "kind": "webp",
+    "w": 1001,
+    "h": 777,
+    "alpha": false
+   }
+  ]
+ },
+ {
+  "tool": "Images → PDF",
+  "test": "repeat use: second file after the first (no stale state)",
+  "verdict": "PASS",
+  "first": "fs-repeat-ImagesPDF-1-IMAGE-B-photo-500k.pdf",
+  "second": "fs-repeat-ImagesPDF-2-X-portrait-1200x1800.pdf",
+  "differ": true,
+  "secondFromSecondInput": true,
+  "integrity": [
+   {
+    "file": "fs-repeat-ImagesPDF-1-IMAGE-B-photo-500k.pdf",
+    "bytes": 499525,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 1
+   },
+   {
+    "file": "fs-repeat-ImagesPDF-2-X-portrait-1200x1800.pdf",
+    "bytes": 706892,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 1
+   }
+  ]
+ },
+ {
+  "tool": "PDF → Image",
+  "test": "repeat use: second file after the first (no stale state)",
+  "verdict": "PASS",
+  "first": "fs-repeat-PDFImage-1-OCR-A-clean-300dpi-page-1.jpg",
+  "second": "fs-repeat-PDFImage-2-OCR-B-low-res-100dpi-page-1.jpg",
+  "differ": true,
+  "secondFromSecondInput": true,
+  "integrity": [
+   {
+    "file": "fs-repeat-PDFImage-1-OCR-A-clean-300dpi-page-1.jpg",
+    "bytes": 178256,
+    "ok": true,
+    "kind": "jpeg",
+    "w": 1224,
+    "h": 1584,
+    "alpha": false
+   },
+   {
+    "file": "fs-repeat-PDFImage-2-OCR-B-low-res-100dpi-page-1.jpg",
+    "bytes": 301287,
+    "ok": true,
+    "kind": "jpeg",
+    "w": 1224,
+    "h": 1584,
+    "alpha": false
+   }
+  ]
+ },
+ {
+  "tool": "Split PDF",
+  "test": "repeat use: second file after the first (no stale state)",
+  "verdict": "PASS",
+  "first": "fs-repeat-SplitPDF-1-PDF-H-multipage-text-image-pages-2.pdf",
+  "second": "fs-repeat-SplitPDF-2-PDF-K-native-text-pages-2.pdf",
+  "differ": true,
+  "secondFromSecondInput": true,
+  "integrity": [
+   {
+    "file": "fs-repeat-SplitPDF-1-PDF-H-multipage-text-image-pages-2.pdf",
+    "bytes": 518541,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 1
+   },
+   {
+    "file": "fs-repeat-SplitPDF-2-PDF-K-native-text-pages-2.pdf",
+    "bytes": 1449,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 1
+   }
+  ]
+ },
+ {
+  "tool": "Organize PDF",
+  "test": "repeat use: second file after the first (no stale state)",
+  "verdict": "PASS",
+  "first": "fs-repeat-OrganizePDF-1-PDF-H-multipage-text-image-organized.pdf",
+  "second": "fs-repeat-OrganizePDF-2-PDF-K-native-text-organized.pdf",
+  "differ": true,
+  "secondFromSecondInput": true,
+  "integrity": [
+   {
+    "file": "fs-repeat-OrganizePDF-1-PDF-H-multipage-text-image-organized.pdf",
+    "bytes": 5315243,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 10
+   },
+   {
+    "file": "fs-repeat-OrganizePDF-2-PDF-K-native-text-organized.pdf",
+    "bytes": 2293,
+    "ok": true,
+    "kind": "pdf",
+    "pages": 2
+   }
+  ]
+ },
+ {
+  "tool": "All tools",
+  "test": "console errors / unexpected dialogs",
+  "verdict": "PASS"
+ }
+]

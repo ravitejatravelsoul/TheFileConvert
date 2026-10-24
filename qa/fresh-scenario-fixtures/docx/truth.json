@@ -1,0 +1,682 @@
+{
+ "WORD-01-simple.docx": {
+  "texts": [
+   "The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline. Customer response times improved across all three support channels after the new routing rules went live in March.",
+   "Customer response times improved across all three support channels after the new routing rules went live in March. The committee agreed to publish the revised travel policy once the finance team has confirmed the new mileage rates.",
+   "The committee agreed to publish the revised travel policy once the finance team has confirmed the new mileage rates. Two warehouse locations will move to the shared inventory system next quarter, which should reduce duplicate orders.",
+   "Two warehouse locations will move to the shared inventory system next quarter, which should reduce duplicate orders. Training sessions for the new reporting dashboard are scheduled for the first week of every month until the end of the year.",
+   "Training sessions for the new reporting dashboard are scheduled for the first week of every month until the end of the year. Suppliers were asked to confirm delivery windows in writing so that the receiving team can plan staffing in advance."
+  ],
+  "expect": {
+   "pages": [
+    1,
+    1
+   ],
+   "paragraphs": 5
+  }
+ },
+ "WORD-02-headings.docx": {
+  "texts": [
+   "Annual Report 2026",
+   "Customer response times improved across all three support channels after the new routing rules went live in March.",
+   "Operations",
+   "The committee agreed to publish the revised travel policy once the finance team has confirmed the new mileage rates.",
+   "Staffing",
+   "Two warehouse locations will move to the shared inventory system next quarter, which should reduce duplicate orders.",
+   "Finance",
+   "The committee agreed to publish the revised travel policy once the finance team has confirmed the new mileage rates.",
+   "Budget outlook",
+   "Two warehouse locations will move to the shared inventory system next quarter, which should reduce duplicate orders."
+  ],
+  "expect": {
+   "pages": [
+    1,
+    1
+   ],
+   "headings": {
+    "Annual Report 2026": 1,
+    "Operations": 2,
+    "Staffing": 3
+   }
+  }
+ },
+ "WORD-03-formatting.docx": {
+  "texts": [
+   "This sentence has bold words, italic words, underlined words and bold italic words.",
+   "This line is set in 8 point type.",
+   "This line is set in 12 point type.",
+   "This line is set in 16 point type.",
+   "This line is set in 24 point type.",
+   "The quick brown fox in Arial.",
+   "The quick brown fox in Times New Roman.",
+   "The quick brown fox in Courier New.",
+   "The quick brown fox in Calibri.",
+   "Red text, struck text and E = mc2."
+  ],
+  "expect": {
+   "pages": [
+    1,
+    1
+   ],
+   "sizes": [
+    8,
+    12,
+    16,
+    24
+   ],
+   "fonts": [
+    "Carlito",
+    "LiberationSans",
+    "LiberationSerif",
+    "LiberationMono"
+   ],
+   "bold": "bold words",
+   "italic": "italic words",
+   "underline": true,
+   "color": "Red text"
+  }
+ },
+ "WORD-04-lists.docx": {
+  "texts": [
+   "Packing list",
+   "Passport and tickets",
+   "Phone charger",
+   "Rain jacket",
+   "Spare socks",
+   "Hiking boots",
+   "Party plan",
+   "Book the venue",
+   "Send the invitations",
+   "Order the food",
+   "Confirm the numbers",
+   "Vegetarian options",
+   "Dessert"
+  ],
+  "expect": {
+   "pages": [
+    1,
+    1
+   ],
+   "bullets": 5,
+   "numbers": [
+    "1.",
+    "2.",
+    "3.",
+    "4."
+   ],
+   "nested": [
+    "Spare socks",
+    "Vegetarian options"
+   ]
+  }
+ },
+ "WORD-05-table.docx": {
+  "texts": [
+   "Quarterly sales by region",
+   "Region",
+   "Q1",
+   "Q2",
+   "Q3",
+   "North",
+   "$12,400",
+   "$13,100",
+   "$14,250",
+   "South",
+   "$9,800",
+   "$10,050",
+   "$11,900",
+   "East",
+   "$15,600",
+   "$15,200",
+   "$16,780",
+   "West",
+   "$8,450",
+   "$9,300",
+   "$9,975",
+   "Figures are in US dollars and include all channels."
+  ],
+  "expect": {
+   "pages": [
+    1,
+    1
+   ],
+   "table": {
+    "rows": 5,
+    "cols": 4
+   }
+  }
+ },
+ "WORD-06-images.docx": {
+  "texts": [
+   "Site photos",
+   "The first picture shows the new logo on a transparent background.",
+   "Figure 1: Logo (PNG with transparency).",
+   "Customer response times improved after the new layout was installed at the front desk.",
+   "Figure 2: Reception area (JPEG)."
+  ],
+  "expect": {
+   "pages": [
+    1,
+    1
+   ],
+   "images": 2,
+   "aspects": [
+    1.3333333333333333,
+    1.7777777777777777
+   ]
+  }
+ },
+ "WORD-07-page-breaks.docx": {
+  "texts": [
+   "Page one",
+   "This text belongs on page one.",
+   "Page two",
+   "This text belongs on page two.",
+   "Page three",
+   "This text belongs on page three."
+  ],
+  "expect": {
+   "pages": [
+    3,
+    3
+   ],
+   "perPage": [
+    "page one",
+    "page two",
+    "page three"
+   ]
+  }
+ },
+ "WORD-08-special-characters.docx": {
+  "texts": [
+   "Prices: €120.50, £99.99, ₹1,250 and ¥3,000.",
+   "Marks: ✓ done, ™ brand, © 2026, ® registered.",
+   "Quotes: “double”, ‘single’, dashes – and — and an ellipsis…",
+   "Accents: niño, café, Zürich, Łódź, crème brûlée, São Paulo.",
+   "Greek: Ελληνικά — Cyrillic: Русский язык.",
+   "Maths: ½ + ¼ ≈ 0.75, x ≤ 5, a → b, 90°."
+  ],
+  "expect": {
+   "pages": [
+    1,
+    1
+   ],
+   "chars": [
+    "€",
+    "£",
+    "₹",
+    "✓",
+    "™",
+    "©",
+    "“",
+    "”",
+    "‘",
+    "’",
+    "–",
+    "—",
+    "…",
+    "ñ",
+    "é",
+    "ü",
+    "Ł",
+    "ź",
+    "Ελληνικά",
+    "Русский",
+    "½",
+    "≈",
+    "≤",
+    "→",
+    "°"
+   ]
+  }
+ },
+ "WORD-09-alignment.docx": {
+  "texts": [
+   "This short line is aligned left.",
+   "This short line is aligned center.",
+   "This short line is aligned right.",
+   "The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline. Customer response times improved across all three support channels after the new routing rules went live in March. The committee agreed to publish the revised travel policy once the finance team has confirmed the new mileage rates."
+  ],
+  "expect": {
+   "pages": [
+    1,
+    1
+   ],
+   "margins": [
+    90.0,
+    90.0
+   ],
+   "align": {
+    "This short line is aligned left.": "left",
+    "This short line is aligned center.": "center",
+    "This short line is aligned right.": "right"
+   },
+   "justified": "The regional office completed the quarte"
+  }
+ },
+ "WORD-10-header-footer.docx": {
+  "texts": [
+   "Chapter 1",
+   "The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline.",
+   "Customer response times improved across all three support channels after the new routing rules went live in March.",
+   "The committee agreed to publish the revised travel policy once the finance team has confirmed the new mileage rates.",
+   "Two warehouse locations will move to the shared inventory system next quarter, which should reduce duplicate orders.",
+   "Chapter 2",
+   "The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline.",
+   "Customer response times improved across all three support channels after the new routing rules went live in March.",
+   "The committee agreed to publish the revised travel policy once the finance team has confirmed the new mileage rates.",
+   "Two warehouse locations will move to the shared inventory system next quarter, which should reduce duplicate orders.",
+   "Chapter 3",
+   "The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline.",
+   "Customer response times improved across all three support channels after the new routing rules went live in March.",
+   "The committee agreed to publish the revised travel policy once the finance team has confirmed the new mileage rates.",
+   "Two warehouse locations will move to the shared inventory system next quarter, which should reduce duplicate orders."
+  ],
+  "expect": {
+   "pages": [
+    3,
+    3
+   ],
+   "header": "ACME Corporation — Confidential",
+   "footer": "Page {n} of {total}"
+  }
+ },
+ "WORD-11-multipage.docx": {
+  "texts": [
+   "Section 1: Operating notes",
+   "The committee agreed to publish the revised travel policy once the finance team has confirmed the new mileage rates. Customer response times improved across all three support channels after the new routing rules went live in March. Two warehouse locations will move to the shared inventory system next quarter, which should reduce duplicate orders.",
+   "Suppliers were asked to confirm delivery windows in writing so that the receiving team can plan staffing in advance. The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline. The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline.",
+   "Training sessions for the new reporting dashboard are scheduled for the first week of every month until the end of the year. The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline. The committee agreed to publish the revised travel policy once the finance team has confirmed the new mileage rates.",
+   "Training sessions for the new reporting dashboard are scheduled for the first week of every month until the end of the year. The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline. Training sessions for the new reporting dashboard are scheduled for the first week of every month until the end of the year.",
+   "Customer response times improved across all three support channels after the new routing rules went live in March. The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline. The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline.",
+   "Two warehouse locations will move to the shared inventory system next quarter, which should reduce duplicate orders. Two warehouse locations will move to the shared inventory system next quarter, which should reduce duplicate orders. The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline.",
+   "Customer response times improved across all three support channels after the new routing rules went live in March. The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline. Training sessions for the new reporting dashboard are scheduled for the first week of every month until the end of the year.",
+   "Two warehouse locations will move to the shared inventory system next quarter, which should reduce duplicate orders. The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline. Training sessions for the new reporting dashboard are scheduled for the first week of every month until the end of the year.",
+   "The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline. Customer response times improved across all three support channels after the new routing rules went live in March. Suppliers were asked to confirm delivery windows in writing so that the receiving team can plan staffing in advance.",
+   "Suppliers were asked to confirm delivery windows in writing so that the receiving team can plan staffing in advance. Training sessions for the new reporting dashboard are scheduled for the first week of every month until the end of the year. The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline.",
+   "Summary 1",
+   "Review the figures for section 1",
+   "Confirm the schedule for section 1",
+   "Share the notes for section 1",
+   "Section 2: Operating notes",
+   "Training sessions for the new reporting dashboard are scheduled for the first week of every month until the end of the year. Training sessions for the new reporting dashboard are scheduled for the first week of every month until the end of the year. Two warehouse locations will move to the shared inventory system next quarter, which should reduce duplicate orders.",
+   "The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline. Customer response times improved across all three support channels after the new routing rules went live in March. The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline.",
+   "Training sessions for the new reporting dashboard are scheduled for the first week of every month until the end of the year. Customer response times improved across all three support channels after the new routing rules went live in March. The committee agreed to publish the revised travel policy once the finance team has confirmed the new mileage rates.",
+   "Two warehouse locations will move to the shared inventory system next quarter, which should reduce duplicate orders. Customer response times improved across all three support channels after the new routing rules went live in March. Training sessions for the new reporting dashboard are scheduled for the first week of every month until the end of the year.",
+   "The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline. Training sessions for the new reporting dashboard are scheduled for the first week of every month until the end of the year. The committee agreed to publish the revised travel policy once the finance team has confirmed the new mileage rates.",
+   "Training sessions for the new reporting dashboard are scheduled for the first week of every month until the end of the year. Suppliers were asked to confirm delivery windows in writing so that the receiving team can plan staffing in advance. Customer response times improved across all three support channels after the new routing rules went live in March.",
+   "The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline. Training sessions for the new reporting dashboard are scheduled for the first week of every month until the end of the year. Training sessions for the new reporting dashboard are scheduled for the first week of every month until the end of the year.",
+   "Suppliers were asked to confirm delivery windows in writing so that the receiving team can plan staffing in advance. Customer response times improved across all three support channels after the new routing rules went live in March. The committee agreed to publish the revised travel policy once the finance team has confirmed the new mileage rates.",
+   "The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline. Training sessions for the new reporting dashboard are scheduled for the first week of every month until the end of the year. Suppliers were asked to confirm delivery windows in writing so that the receiving team can plan staffing in advance.",
+   "The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline. Training sessions for the new reporting dashboard are scheduled for the first week of every month until the end of the year. The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline.",
+   "Summary 2",
+   "Review the figures for section 2",
+   "Confirm the schedule for section 2",
+   "Share the notes for section 2",
+   "Section 3: Operating notes",
+   "Training sessions for the new reporting dashboard are scheduled for the first week of every month until the end of the year. Customer response times improved across all three support channels after the new routing rules went live in March. Two warehouse locations will move to the shared inventory system next quarter, which should reduce duplicate orders.",
+   "Suppliers were asked to confirm delivery windows in writing so that the receiving team can plan staffing in advance. Training sessions for the new reporting dashboard are scheduled for the first week of every month until the end of the year. Two warehouse locations will move to the shared inventory system next quarter, which should reduce duplicate orders.",
+   "The committee agreed to publish the revised travel policy once the finance team has confirmed the new mileage rates. Two warehouse locations will move to the shared inventory system next quarter, which should reduce duplicate orders. Training sessions for the new reporting dashboard are scheduled for the first week of every month until the end of the year.",
+   "Two warehouse locations will move to the shared inventory system next quarter, which should reduce duplicate orders. The committee agreed to publish the revised travel policy once the finance team has confirmed the new mileage rates. The committee agreed to publish the revised travel policy once the finance team has confirmed the new mileage rates.",
+   "Customer response times improved across all three support channels after the new routing rules went live in March. Customer response times improved across all three support channels after the new routing rules went live in March. Suppliers were asked to confirm delivery windows in writing so that the receiving team can plan staffing in advance.",
+   "Customer response times improved across all three support channels after the new routing rules went live in March. The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline. Training sessions for the new reporting dashboard are scheduled for the first week of every month until the end of the year.",
+   "The committee agreed to publish the revised travel policy once the finance team has confirmed the new mileage rates. Training sessions for the new reporting dashboard are scheduled for the first week of every month until the end of the year. Two warehouse locations will move to the shared inventory system next quarter, which should reduce duplicate orders.",
+   "The committee agreed to publish the revised travel policy once the finance team has confirmed the new mileage rates. Suppliers were asked to confirm delivery windows in writing so that the receiving team can plan staffing in advance. Two warehouse locations will move to the shared inventory system next quarter, which should reduce duplicate orders.",
+   "The committee agreed to publish the revised travel policy once the finance team has confirmed the new mileage rates. Training sessions for the new reporting dashboard are scheduled for the first week of every month until the end of the year. The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline.",
+   "The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline. Training sessions for the new reporting dashboard are scheduled for the first week of every month until the end of the year. Two warehouse locations will move to the shared inventory system next quarter, which should reduce duplicate orders.",
+   "Summary 3",
+   "Review the figures for section 3",
+   "Confirm the schedule for section 3",
+   "Share the notes for section 3",
+   "Section 4: Operating notes",
+   "Customer response times improved across all three support channels after the new routing rules went live in March. The committee agreed to publish the revised travel policy once the finance team has confirmed the new mileage rates. Customer response times improved across all three support channels after the new routing rules went live in March.",
+   "Two warehouse locations will move to the shared inventory system next quarter, which should reduce duplicate orders. Two warehouse locations will move to the shared inventory system next quarter, which should reduce duplicate orders. The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline.",
+   "Suppliers were asked to confirm delivery windows in writing so that the receiving team can plan staffing in advance. The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline. Training sessions for the new reporting dashboard are scheduled for the first week of every month until the end of the year.",
+   "Training sessions for the new reporting dashboard are scheduled for the first week of every month until the end of the year. The committee agreed to publish the revised travel policy once the finance team has confirmed the new mileage rates. The committee agreed to publish the revised travel policy once the finance team has confirmed the new mileage rates.",
+   "Suppliers were asked to confirm delivery windows in writing so that the receiving team can plan staffing in advance. The committee agreed to publish the revised travel policy once the finance team has confirmed the new mileage rates. Training sessions for the new reporting dashboard are scheduled for the first week of every month until the end of the year.",
+   "Two warehouse locations will move to the shared inventory system next quarter, which should reduce duplicate orders. Training sessions for the new reporting dashboard are scheduled for the first week of every month until the end of the year. Two warehouse locations will move to the shared inventory system next quarter, which should reduce duplicate orders.",
+   "The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline. The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline. The committee agreed to publish the revised travel policy once the finance team has confirmed the new mileage rates.",
+   "Two warehouse locations will move to the shared inventory system next quarter, which should reduce duplicate orders. Suppliers were asked to confirm delivery windows in writing so that the receiving team can plan staffing in advance. Suppliers were asked to confirm delivery windows in writing so that the receiving team can plan staffing in advance.",
+   "The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline. The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline. Suppliers were asked to confirm delivery windows in writing so that the receiving team can plan staffing in advance.",
+   "Suppliers were asked to confirm delivery windows in writing so that the receiving team can plan staffing in advance. The committee agreed to publish the revised travel policy once the finance team has confirmed the new mileage rates. Suppliers were asked to confirm delivery windows in writing so that the receiving team can plan staffing in advance.",
+   "Summary 4",
+   "Review the figures for section 4",
+   "Confirm the schedule for section 4",
+   "Share the notes for section 4",
+   "Section 5: Operating notes",
+   "Training sessions for the new reporting dashboard are scheduled for the first week of every month until the end of the year. Suppliers were asked to confirm delivery windows in writing so that the receiving team can plan staffing in advance. Two warehouse locations will move to the shared inventory system next quarter, which should reduce duplicate orders.",
+   "The committee agreed to publish the revised travel policy once the finance team has confirmed the new mileage rates. Suppliers were asked to confirm delivery windows in writing so that the receiving team can plan staffing in advance. Two warehouse locations will move to the shared inventory system next quarter, which should reduce duplicate orders.",
+   "Suppliers were asked to confirm delivery windows in writing so that the receiving team can plan staffing in advance. The committee agreed to publish the revised travel policy once the finance team has confirmed the new mileage rates. The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline.",
+   "Two warehouse locations will move to the shared inventory system next quarter, which should reduce duplicate orders. The committee agreed to publish the revised travel policy once the finance team has confirmed the new mileage rates. Customer response times improved across all three support channels after the new routing rules went live in March.",
+   "Training sessions for the new reporting dashboard are scheduled for the first week of every month until the end of the year. The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline. Two warehouse locations will move to the shared inventory system next quarter, which should reduce duplicate orders.",
+   "The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline. Customer response times improved across all three support channels after the new routing rules went live in March. The committee agreed to publish the revised travel policy once the finance team has confirmed the new mileage rates.",
+   "Customer response times improved across all three support channels after the new routing rules went live in March. Suppliers were asked to confirm delivery windows in writing so that the receiving team can plan staffing in advance. Customer response times improved across all three support channels after the new routing rules went live in March.",
+   "Two warehouse locations will move to the shared inventory system next quarter, which should reduce duplicate orders. Two warehouse locations will move to the shared inventory system next quarter, which should reduce duplicate orders. Two warehouse locations will move to the shared inventory system next quarter, which should reduce duplicate orders.",
+   "The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline. Customer response times improved across all three support channels after the new routing rules went live in March. Two warehouse locations will move to the shared inventory system next quarter, which should reduce duplicate orders.",
+   "Two warehouse locations will move to the shared inventory system next quarter, which should reduce duplicate orders. Training sessions for the new reporting dashboard are scheduled for the first week of every month until the end of the year. The committee agreed to publish the revised travel policy once the finance team has confirmed the new mileage rates.",
+   "Summary 5",
+   "Review the figures for section 5",
+   "Confirm the schedule for section 5",
+   "Share the notes for section 5",
+   "Section 6: Operating notes",
+   "Customer response times improved across all three support channels after the new routing rules went live in March. Two warehouse locations will move to the shared inventory system next quarter, which should reduce duplicate orders. Training sessions for the new reporting dashboard are scheduled for the first week of every month until the end of the year.",
+   "The committee agreed to publish the revised travel policy once the finance team has confirmed the new mileage rates. Suppliers were asked to confirm delivery windows in writing so that the receiving team can plan staffing in advance. Two warehouse locations will move to the shared inventory system next quarter, which should reduce duplicate orders.",
+   "The committee agreed to publish the revised travel policy once the finance team has confirmed the new mileage rates. Suppliers were asked to confirm delivery windows in writing so that the receiving team can plan staffing in advance. Two warehouse locations will move to the shared inventory system next quarter, which should reduce duplicate orders.",
+   "Customer response times improved across all three support channels after the new routing rules went live in March. Customer response times improved across all three support channels after the new routing rules went live in March. The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline.",
+   "Customer response times improved across all three support channels after the new routing rules went live in March. Customer response times improved across all three support channels after the new routing rules went live in March. Customer response times improved across all three support channels after the new routing rules went live in March.",
+   "Suppliers were asked to confirm delivery windows in writing so that the receiving team can plan staffing in advance. Customer response times improved across all three support channels after the new routing rules went live in March. The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline.",
+   "Two warehouse locations will move to the shared inventory system next quarter, which should reduce duplicate orders. Training sessions for the new reporting dashboard are scheduled for the first week of every month until the end of the year. Customer response times improved across all three support channels after the new routing rules went live in March.",
+   "The committee agreed to publish the revised travel policy once the finance team has confirmed the new mileage rates. The committee agreed to publish the revised travel policy once the finance team has confirmed the new mileage rates. The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline.",
+   "Customer response times improved across all three support channels after the new routing rules went live in March. Two warehouse locations will move to the shared inventory system next quarter, which should reduce duplicate orders. Training sessions for the new reporting dashboard are scheduled for the first week of every month until the end of the year.",
+   "The committee agreed to publish the revised travel policy once the finance team has confirmed the new mileage rates. Training sessions for the new reporting dashboard are scheduled for the first week of every month until the end of the year. Training sessions for the new reporting dashboard are scheduled for the first week of every month until the end of the year.",
+   "Summary 6",
+   "Review the figures for section 6",
+   "Confirm the schedule for section 6",
+   "Share the notes for section 6",
+   "Section 7: Operating notes",
+   "The committee agreed to publish the revised travel policy once the finance team has confirmed the new mileage rates. Customer response times improved across all three support channels after the new routing rules went live in March. Suppliers were asked to confirm delivery windows in writing so that the receiving team can plan staffing in advance.",
+   "Training sessions for the new reporting dashboard are scheduled for the first week of every month until the end of the year. Training sessions for the new reporting dashboard are scheduled for the first week of every month until the end of the year. Suppliers were asked to confirm delivery windows in writing so that the receiving team can plan staffing in advance.",
+   "Suppliers were asked to confirm delivery windows in writing so that the receiving team can plan staffing in advance. Suppliers were asked to confirm delivery windows in writing so that the receiving team can plan staffing in advance. The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline.",
+   "Two warehouse locations will move to the shared inventory system next quarter, which should reduce duplicate orders. Suppliers were asked to confirm delivery windows in writing so that the receiving team can plan staffing in advance. Training sessions for the new reporting dashboard are scheduled for the first week of every month until the end of the year.",
+   "Two warehouse locations will move to the shared inventory system next quarter, which should reduce duplicate orders. Two warehouse locations will move to the shared inventory system next quarter, which should reduce duplicate orders. Two warehouse locations will move to the shared inventory system next quarter, which should reduce duplicate orders.",
+   "Two warehouse locations will move to the shared inventory system next quarter, which should reduce duplicate orders. The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline. Two warehouse locations will move to the shared inventory system next quarter, which should reduce duplicate orders.",
+   "Suppliers were asked to confirm delivery windows in writing so that the receiving team can plan staffing in advance. Two warehouse locations will move to the shared inventory system next quarter, which should reduce duplicate orders. The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline.",
+   "Customer response times improved across all three support channels after the new routing rules went live in March. The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline. Customer response times improved across all three support channels after the new routing rules went live in March.",
+   "Two warehouse locations will move to the shared inventory system next quarter, which should reduce duplicate orders. Customer response times improved across all three support channels after the new routing rules went live in March. The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline.",
+   "The committee agreed to publish the revised travel policy once the finance team has confirmed the new mileage rates. Training sessions for the new reporting dashboard are scheduled for the first week of every month until the end of the year. The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline.",
+   "Summary 7",
+   "Review the figures for section 7",
+   "Confirm the schedule for section 7",
+   "Share the notes for section 7",
+   "Section 8: Operating notes",
+   "The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline. The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline. Training sessions for the new reporting dashboard are scheduled for the first week of every month until the end of the year.",
+   "Customer response times improved across all three support channels after the new routing rules went live in March. Training sessions for the new reporting dashboard are scheduled for the first week of every month until the end of the year. The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline.",
+   "The committee agreed to publish the revised travel policy once the finance team has confirmed the new mileage rates. Training sessions for the new reporting dashboard are scheduled for the first week of every month until the end of the year. The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline.",
+   "The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline. Customer response times improved across all three support channels after the new routing rules went live in March. Training sessions for the new reporting dashboard are scheduled for the first week of every month until the end of the year.",
+   "Two warehouse locations will move to the shared inventory system next quarter, which should reduce duplicate orders. Customer response times improved across all three support channels after the new routing rules went live in March. Suppliers were asked to confirm delivery windows in writing so that the receiving team can plan staffing in advance.",
+   "The committee agreed to publish the revised travel policy once the finance team has confirmed the new mileage rates. The committee agreed to publish the revised travel policy once the finance team has confirmed the new mileage rates. Training sessions for the new reporting dashboard are scheduled for the first week of every month until the end of the year.",
+   "The committee agreed to publish the revised travel policy once the finance team has confirmed the new mileage rates. Two warehouse locations will move to the shared inventory system next quarter, which should reduce duplicate orders. The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline.",
+   "The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline. Two warehouse locations will move to the shared inventory system next quarter, which should reduce duplicate orders. Two warehouse locations will move to the shared inventory system next quarter, which should reduce duplicate orders.",
+   "Two warehouse locations will move to the shared inventory system next quarter, which should reduce duplicate orders. Two warehouse locations will move to the shared inventory system next quarter, which should reduce duplicate orders. The committee agreed to publish the revised travel policy once the finance team has confirmed the new mileage rates.",
+   "The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline. Customer response times improved across all three support channels after the new routing rules went live in March. The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline.",
+   "Summary 8",
+   "Review the figures for section 8",
+   "Confirm the schedule for section 8",
+   "Share the notes for section 8",
+   "Section 9: Operating notes",
+   "Suppliers were asked to confirm delivery windows in writing so that the receiving team can plan staffing in advance. The committee agreed to publish the revised travel policy once the finance team has confirmed the new mileage rates. Suppliers were asked to confirm delivery windows in writing so that the receiving team can plan staffing in advance.",
+   "The committee agreed to publish the revised travel policy once the finance team has confirmed the new mileage rates. Two warehouse locations will move to the shared inventory system next quarter, which should reduce duplicate orders. Suppliers were asked to confirm delivery windows in writing so that the receiving team can plan staffing in advance.",
+   "Customer response times improved across all three support channels after the new routing rules went live in March. Training sessions for the new reporting dashboard are scheduled for the first week of every month until the end of the year. The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline.",
+   "Customer response times improved across all three support channels after the new routing rules went live in March. Training sessions for the new reporting dashboard are scheduled for the first week of every month until the end of the year. The committee agreed to publish the revised travel policy once the finance team has confirmed the new mileage rates.",
+   "Customer response times improved across all three support channels after the new routing rules went live in March. Suppliers were asked to confirm delivery windows in writing so that the receiving team can plan staffing in advance. Training sessions for the new reporting dashboard are scheduled for the first week of every month until the end of the year.",
+   "The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline. Training sessions for the new reporting dashboard are scheduled for the first week of every month until the end of the year. The committee agreed to publish the revised travel policy once the finance team has confirmed the new mileage rates.",
+   "Suppliers were asked to confirm delivery windows in writing so that the receiving team can plan staffing in advance. The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline. Suppliers were asked to confirm delivery windows in writing so that the receiving team can plan staffing in advance.",
+   "The committee agreed to publish the revised travel policy once the finance team has confirmed the new mileage rates. Training sessions for the new reporting dashboard are scheduled for the first week of every month until the end of the year. The committee agreed to publish the revised travel policy once the finance team has confirmed the new mileage rates.",
+   "Customer response times improved across all three support channels after the new routing rules went live in March. The committee agreed to publish the revised travel policy once the finance team has confirmed the new mileage rates. Customer response times improved across all three support channels after the new routing rules went live in March.",
+   "Training sessions for the new reporting dashboard are scheduled for the first week of every month until the end of the year. Training sessions for the new reporting dashboard are scheduled for the first week of every month until the end of the year. Training sessions for the new reporting dashboard are scheduled for the first week of every month until the end of the year.",
+   "Summary 9",
+   "Review the figures for section 9",
+   "Confirm the schedule for section 9",
+   "Share the notes for section 9",
+   "Section 10: Operating notes",
+   "The committee agreed to publish the revised travel policy once the finance team has confirmed the new mileage rates. Suppliers were asked to confirm delivery windows in writing so that the receiving team can plan staffing in advance. Customer response times improved across all three support channels after the new routing rules went live in March.",
+   "Training sessions for the new reporting dashboard are scheduled for the first week of every month until the end of the year. Customer response times improved across all three support channels after the new routing rules went live in March. Customer response times improved across all three support channels after the new routing rules went live in March.",
+   "Two warehouse locations will move to the shared inventory system next quarter, which should reduce duplicate orders. Suppliers were asked to confirm delivery windows in writing so that the receiving team can plan staffing in advance. Customer response times improved across all three support channels after the new routing rules went live in March.",
+   "Customer response times improved across all three support channels after the new routing rules went live in March. Training sessions for the new reporting dashboard are scheduled for the first week of every month until the end of the year. Two warehouse locations will move to the shared inventory system next quarter, which should reduce duplicate orders.",
+   "The committee agreed to publish the revised travel policy once the finance team has confirmed the new mileage rates. Suppliers were asked to confirm delivery windows in writing so that the receiving team can plan staffing in advance. The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline.",
+   "The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline. The committee agreed to publish the revised travel policy once the finance team has confirmed the new mileage rates. Two warehouse locations will move to the shared inventory system next quarter, which should reduce duplicate orders.",
+   "The committee agreed to publish the revised travel policy once the finance team has confirmed the new mileage rates. Customer response times improved across all three support channels after the new routing rules went live in March. Suppliers were asked to confirm delivery windows in writing so that the receiving team can plan staffing in advance.",
+   "Training sessions for the new reporting dashboard are scheduled for the first week of every month until the end of the year. The committee agreed to publish the revised travel policy once the finance team has confirmed the new mileage rates. Two warehouse locations will move to the shared inventory system next quarter, which should reduce duplicate orders.",
+   "Suppliers were asked to confirm delivery windows in writing so that the receiving team can plan staffing in advance. The committee agreed to publish the revised travel policy once the finance team has confirmed the new mileage rates. The committee agreed to publish the revised travel policy once the finance team has confirmed the new mileage rates.",
+   "The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline. Customer response times improved across all three support channels after the new routing rules went live in March. The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline.",
+   "Summary 10",
+   "Review the figures for section 10",
+   "Confirm the schedule for section 10",
+   "Share the notes for section 10",
+   "Section 11: Operating notes",
+   "Customer response times improved across all three support channels after the new routing rules went live in March. Two warehouse locations will move to the shared inventory system next quarter, which should reduce duplicate orders. Customer response times improved across all three support channels after the new routing rules went live in March.",
+   "The committee agreed to publish the revised travel policy once the finance team has confirmed the new mileage rates. Customer response times improved across all three support channels after the new routing rules went live in March. Two warehouse locations will move to the shared inventory system next quarter, which should reduce duplicate orders.",
+   "Training sessions for the new reporting dashboard are scheduled for the first week of every month until the end of the year. Training sessions for the new reporting dashboard are scheduled for the first week of every month until the end of the year. The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline.",
+   "Two warehouse locations will move to the shared inventory system next quarter, which should reduce duplicate orders. Suppliers were asked to confirm delivery windows in writing so that the receiving team can plan staffing in advance. The committee agreed to publish the revised travel policy once the finance team has confirmed the new mileage rates.",
+   "Suppliers were asked to confirm delivery windows in writing so that the receiving team can plan staffing in advance. The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline. Suppliers were asked to confirm delivery windows in writing so that the receiving team can plan staffing in advance.",
+   "The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline. Two warehouse locations will move to the shared inventory system next quarter, which should reduce duplicate orders. Suppliers were asked to confirm delivery windows in writing so that the receiving team can plan staffing in advance.",
+   "Customer response times improved across all three support channels after the new routing rules went live in March. Two warehouse locations will move to the shared inventory system next quarter, which should reduce duplicate orders. Customer response times improved across all three support channels after the new routing rules went live in March.",
+   "Two warehouse locations will move to the shared inventory system next quarter, which should reduce duplicate orders. Suppliers were asked to confirm delivery windows in writing so that the receiving team can plan staffing in advance. The committee agreed to publish the revised travel policy once the finance team has confirmed the new mileage rates.",
+   "The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline. Suppliers were asked to confirm delivery windows in writing so that the receiving team can plan staffing in advance. Two warehouse locations will move to the shared inventory system next quarter, which should reduce duplicate orders.",
+   "Two warehouse locations will move to the shared inventory system next quarter, which should reduce duplicate orders. Two warehouse locations will move to the shared inventory system next quarter, which should reduce duplicate orders. Suppliers were asked to confirm delivery windows in writing so that the receiving team can plan staffing in advance.",
+   "Summary 11",
+   "Review the figures for section 11",
+   "Confirm the schedule for section 11",
+   "Share the notes for section 11",
+   "Section 12: Operating notes",
+   "The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline. Suppliers were asked to confirm delivery windows in writing so that the receiving team can plan staffing in advance. Customer response times improved across all three support channels after the new routing rules went live in March.",
+   "Customer response times improved across all three support channels after the new routing rules went live in March. Customer response times improved across all three support channels after the new routing rules went live in March. The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline.",
+   "Customer response times improved across all three support channels after the new routing rules went live in March. Training sessions for the new reporting dashboard are scheduled for the first week of every month until the end of the year. Two warehouse locations will move to the shared inventory system next quarter, which should reduce duplicate orders.",
+   "Suppliers were asked to confirm delivery windows in writing so that the receiving team can plan staffing in advance. Customer response times improved across all three support channels after the new routing rules went live in March. Training sessions for the new reporting dashboard are scheduled for the first week of every month until the end of the year.",
+   "Training sessions for the new reporting dashboard are scheduled for the first week of every month until the end of the year. Two warehouse locations will move to the shared inventory system next quarter, which should reduce duplicate orders. Suppliers were asked to confirm delivery windows in writing so that the receiving team can plan staffing in advance.",
+   "The committee agreed to publish the revised travel policy once the finance team has confirmed the new mileage rates. Customer response times improved across all three support channels after the new routing rules went live in March. Training sessions for the new reporting dashboard are scheduled for the first week of every month until the end of the year.",
+   "Training sessions for the new reporting dashboard are scheduled for the first week of every month until the end of the year. Customer response times improved across all three support channels after the new routing rules went live in March. The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline.",
+   "The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline. Suppliers were asked to confirm delivery windows in writing so that the receiving team can plan staffing in advance. Suppliers were asked to confirm delivery windows in writing so that the receiving team can plan staffing in advance.",
+   "The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline. Training sessions for the new reporting dashboard are scheduled for the first week of every month until the end of the year. Suppliers were asked to confirm delivery windows in writing so that the receiving team can plan staffing in advance.",
+   "Customer response times improved across all three support channels after the new routing rules went live in March. Two warehouse locations will move to the shared inventory system next quarter, which should reduce duplicate orders. Customer response times improved across all three support channels after the new routing rules went live in March.",
+   "Summary 12",
+   "Review the figures for section 12",
+   "Confirm the schedule for section 12",
+   "Share the notes for section 12",
+   "Section 13: Operating notes",
+   "Customer response times improved across all three support channels after the new routing rules went live in March. The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline. The committee agreed to publish the revised travel policy once the finance team has confirmed the new mileage rates.",
+   "Customer response times improved across all three support channels after the new routing rules went live in March. The committee agreed to publish the revised travel policy once the finance team has confirmed the new mileage rates. Training sessions for the new reporting dashboard are scheduled for the first week of every month until the end of the year.",
+   "Customer response times improved across all three support channels after the new routing rules went live in March. Training sessions for the new reporting dashboard are scheduled for the first week of every month until the end of the year. The committee agreed to publish the revised travel policy once the finance team has confirmed the new mileage rates.",
+   "The committee agreed to publish the revised travel policy once the finance team has confirmed the new mileage rates. Training sessions for the new reporting dashboard are scheduled for the first week of every month until the end of the year. Two warehouse locations will move to the shared inventory system next quarter, which should reduce duplicate orders.",
+   "Customer response times improved across all three support channels after the new routing rules went live in March. The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline. Suppliers were asked to confirm delivery windows in writing so that the receiving team can plan staffing in advance.",
+   "The committee agreed to publish the revised travel policy once the finance team has confirmed the new mileage rates. Two warehouse locations will move to the shared inventory system next quarter, which should reduce duplicate orders. Suppliers were asked to confirm delivery windows in writing so that the receiving team can plan staffing in advance.",
+   "Training sessions for the new reporting dashboard are scheduled for the first week of every month until the end of the year. Training sessions for the new reporting dashboard are scheduled for the first week of every month until the end of the year. Two warehouse locations will move to the shared inventory system next quarter, which should reduce duplicate orders.",
+   "Training sessions for the new reporting dashboard are scheduled for the first week of every month until the end of the year. Customer response times improved across all three support channels after the new routing rules went live in March. Training sessions for the new reporting dashboard are scheduled for the first week of every month until the end of the year.",
+   "Customer response times improved across all three support channels after the new routing rules went live in March. Training sessions for the new reporting dashboard are scheduled for the first week of every month until the end of the year. Training sessions for the new reporting dashboard are scheduled for the first week of every month until the end of the year.",
+   "The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline. Two warehouse locations will move to the shared inventory system next quarter, which should reduce duplicate orders. Customer response times improved across all three support channels after the new routing rules went live in March.",
+   "Summary 13",
+   "Review the figures for section 13",
+   "Confirm the schedule for section 13",
+   "Share the notes for section 13",
+   "Section 14: Operating notes",
+   "Training sessions for the new reporting dashboard are scheduled for the first week of every month until the end of the year. The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline. Customer response times improved across all three support channels after the new routing rules went live in March.",
+   "Customer response times improved across all three support channels after the new routing rules went live in March. Customer response times improved across all three support channels after the new routing rules went live in March. Two warehouse locations will move to the shared inventory system next quarter, which should reduce duplicate orders.",
+   "Training sessions for the new reporting dashboard are scheduled for the first week of every month until the end of the year. Suppliers were asked to confirm delivery windows in writing so that the receiving team can plan staffing in advance. The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline.",
+   "Training sessions for the new reporting dashboard are scheduled for the first week of every month until the end of the year. The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline. The committee agreed to publish the revised travel policy once the finance team has confirmed the new mileage rates.",
+   "Suppliers were asked to confirm delivery windows in writing so that the receiving team can plan staffing in advance. Training sessions for the new reporting dashboard are scheduled for the first week of every month until the end of the year. Training sessions for the new reporting dashboard are scheduled for the first week of every month until the end of the year.",
+   "Training sessions for the new reporting dashboard are scheduled for the first week of every month until the end of the year. Two warehouse locations will move to the shared inventory system next quarter, which should reduce duplicate orders. The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline.",
+   "Training sessions for the new reporting dashboard are scheduled for the first week of every month until the end of the year. The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline. Customer response times improved across all three support channels after the new routing rules went live in March.",
+   "Customer response times improved across all three support channels after the new routing rules went live in March. The committee agreed to publish the revised travel policy once the finance team has confirmed the new mileage rates. The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline.",
+   "The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline. Training sessions for the new reporting dashboard are scheduled for the first week of every month until the end of the year. Two warehouse locations will move to the shared inventory system next quarter, which should reduce duplicate orders.",
+   "Training sessions for the new reporting dashboard are scheduled for the first week of every month until the end of the year. The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline. The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline.",
+   "Summary 14",
+   "Review the figures for section 14",
+   "Confirm the schedule for section 14",
+   "Share the notes for section 14",
+   "Section 15: Operating notes",
+   "Two warehouse locations will move to the shared inventory system next quarter, which should reduce duplicate orders. The committee agreed to publish the revised travel policy once the finance team has confirmed the new mileage rates. Training sessions for the new reporting dashboard are scheduled for the first week of every month until the end of the year.",
+   "Training sessions for the new reporting dashboard are scheduled for the first week of every month until the end of the year. Training sessions for the new reporting dashboard are scheduled for the first week of every month until the end of the year. Training sessions for the new reporting dashboard are scheduled for the first week of every month until the end of the year.",
+   "Customer response times improved across all three support channels after the new routing rules went live in March. Suppliers were asked to confirm delivery windows in writing so that the receiving team can plan staffing in advance. The committee agreed to publish the revised travel policy once the finance team has confirmed the new mileage rates.",
+   "Two warehouse locations will move to the shared inventory system next quarter, which should reduce duplicate orders. Training sessions for the new reporting dashboard are scheduled for the first week of every month until the end of the year. Training sessions for the new reporting dashboard are scheduled for the first week of every month until the end of the year.",
+   "Two warehouse locations will move to the shared inventory system next quarter, which should reduce duplicate orders. Training sessions for the new reporting dashboard are scheduled for the first week of every month until the end of the year. Customer response times improved across all three support channels after the new routing rules went live in March.",
+   "Suppliers were asked to confirm delivery windows in writing so that the receiving team can plan staffing in advance. Training sessions for the new reporting dashboard are scheduled for the first week of every month until the end of the year. The committee agreed to publish the revised travel policy once the finance team has confirmed the new mileage rates.",
+   "Training sessions for the new reporting dashboard are scheduled for the first week of every month until the end of the year. Customer response times improved across all three support channels after the new routing rules went live in March. Two warehouse locations will move to the shared inventory system next quarter, which should reduce duplicate orders.",
+   "Customer response times improved across all three support channels after the new routing rules went live in March. Two warehouse locations will move to the shared inventory system next quarter, which should reduce duplicate orders. The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline.",
+   "Two warehouse locations will move to the shared inventory system next quarter, which should reduce duplicate orders. Two warehouse locations will move to the shared inventory system next quarter, which should reduce duplicate orders. The committee agreed to publish the revised travel policy once the finance team has confirmed the new mileage rates.",
+   "The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline. Suppliers were asked to confirm delivery windows in writing so that the receiving team can plan staffing in advance. Customer response times improved across all three support channels after the new routing rules went live in March.",
+   "Summary 15",
+   "Review the figures for section 15",
+   "Confirm the schedule for section 15",
+   "Share the notes for section 15",
+   "Section 16: Operating notes",
+   "Two warehouse locations will move to the shared inventory system next quarter, which should reduce duplicate orders. The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline. Customer response times improved across all three support channels after the new routing rules went live in March.",
+   "Suppliers were asked to confirm delivery windows in writing so that the receiving team can plan staffing in advance. The committee agreed to publish the revised travel policy once the finance team has confirmed the new mileage rates. The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline.",
+   "Customer response times improved across all three support channels after the new routing rules went live in March. Suppliers were asked to confirm delivery windows in writing so that the receiving team can plan staffing in advance. Suppliers were asked to confirm delivery windows in writing so that the receiving team can plan staffing in advance.",
+   "Suppliers were asked to confirm delivery windows in writing so that the receiving team can plan staffing in advance. The committee agreed to publish the revised travel policy once the finance team has confirmed the new mileage rates. Customer response times improved across all three support channels after the new routing rules went live in March.",
+   "The committee agreed to publish the revised travel policy once the finance team has confirmed the new mileage rates. Customer response times improved across all three support channels after the new routing rules went live in March. Two warehouse locations will move to the shared inventory system next quarter, which should reduce duplicate orders.",
+   "Customer response times improved across all three support channels after the new routing rules went live in March. Suppliers were asked to confirm delivery windows in writing so that the receiving team can plan staffing in advance. The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline.",
+   "Two warehouse locations will move to the shared inventory system next quarter, which should reduce duplicate orders. Two warehouse locations will move to the shared inventory system next quarter, which should reduce duplicate orders. Customer response times improved across all three support channels after the new routing rules went live in March.",
+   "Suppliers were asked to confirm delivery windows in writing so that the receiving team can plan staffing in advance. Customer response times improved across all three support channels after the new routing rules went live in March. Customer response times improved across all three support channels after the new routing rules went live in March.",
+   "Suppliers were asked to confirm delivery windows in writing so that the receiving team can plan staffing in advance. Two warehouse locations will move to the shared inventory system next quarter, which should reduce duplicate orders. Training sessions for the new reporting dashboard are scheduled for the first week of every month until the end of the year.",
+   "Two warehouse locations will move to the shared inventory system next quarter, which should reduce duplicate orders. The committee agreed to publish the revised travel policy once the finance team has confirmed the new mileage rates. Two warehouse locations will move to the shared inventory system next quarter, which should reduce duplicate orders.",
+   "Summary 16",
+   "Review the figures for section 16",
+   "Confirm the schedule for section 16",
+   "Share the notes for section 16",
+   "Section 17: Operating notes",
+   "Customer response times improved across all three support channels after the new routing rules went live in March. The committee agreed to publish the revised travel policy once the finance team has confirmed the new mileage rates. The committee agreed to publish the revised travel policy once the finance team has confirmed the new mileage rates.",
+   "The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline. Suppliers were asked to confirm delivery windows in writing so that the receiving team can plan staffing in advance. The committee agreed to publish the revised travel policy once the finance team has confirmed the new mileage rates.",
+   "The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline. The committee agreed to publish the revised travel policy once the finance team has confirmed the new mileage rates. Training sessions for the new reporting dashboard are scheduled for the first week of every month until the end of the year.",
+   "Two warehouse locations will move to the shared inventory system next quarter, which should reduce duplicate orders. Two warehouse locations will move to the shared inventory system next quarter, which should reduce duplicate orders. Suppliers were asked to confirm delivery windows in writing so that the receiving team can plan staffing in advance.",
+   "The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline. Two warehouse locations will move to the shared inventory system next quarter, which should reduce duplicate orders. The committee agreed to publish the revised travel policy once the finance team has confirmed the new mileage rates.",
+   "Training sessions for the new reporting dashboard are scheduled for the first week of every month until the end of the year. Training sessions for the new reporting dashboard are scheduled for the first week of every month until the end of the year. The committee agreed to publish the revised travel policy once the finance team has confirmed the new mileage rates.",
+   "Training sessions for the new reporting dashboard are scheduled for the first week of every month until the end of the year. The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline. The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline.",
+   "Customer response times improved across all three support channels after the new routing rules went live in March. The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline. The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline.",
+   "The committee agreed to publish the revised travel policy once the finance team has confirmed the new mileage rates. The committee agreed to publish the revised travel policy once the finance team has confirmed the new mileage rates. The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline.",
+   "Customer response times improved across all three support channels after the new routing rules went live in March. The committee agreed to publish the revised travel policy once the finance team has confirmed the new mileage rates. Customer response times improved across all three support channels after the new routing rules went live in March.",
+   "Summary 17",
+   "Review the figures for section 17",
+   "Confirm the schedule for section 17",
+   "Share the notes for section 17",
+   "Section 18: Operating notes",
+   "Two warehouse locations will move to the shared inventory system next quarter, which should reduce duplicate orders. Suppliers were asked to confirm delivery windows in writing so that the receiving team can plan staffing in advance. The committee agreed to publish the revised travel policy once the finance team has confirmed the new mileage rates.",
+   "Two warehouse locations will move to the shared inventory system next quarter, which should reduce duplicate orders. Customer response times improved across all three support channels after the new routing rules went live in March. Training sessions for the new reporting dashboard are scheduled for the first week of every month until the end of the year.",
+   "Training sessions for the new reporting dashboard are scheduled for the first week of every month until the end of the year. Training sessions for the new reporting dashboard are scheduled for the first week of every month until the end of the year. Two warehouse locations will move to the shared inventory system next quarter, which should reduce duplicate orders.",
+   "Suppliers were asked to confirm delivery windows in writing so that the receiving team can plan staffing in advance. The committee agreed to publish the revised travel policy once the finance team has confirmed the new mileage rates. The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline.",
+   "The committee agreed to publish the revised travel policy once the finance team has confirmed the new mileage rates. The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline. Suppliers were asked to confirm delivery windows in writing so that the receiving team can plan staffing in advance.",
+   "Customer response times improved across all three support channels after the new routing rules went live in March. Two warehouse locations will move to the shared inventory system next quarter, which should reduce duplicate orders. The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline.",
+   "The committee agreed to publish the revised travel policy once the finance team has confirmed the new mileage rates. The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline. Suppliers were asked to confirm delivery windows in writing so that the receiving team can plan staffing in advance.",
+   "The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline. The committee agreed to publish the revised travel policy once the finance team has confirmed the new mileage rates. The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline.",
+   "Training sessions for the new reporting dashboard are scheduled for the first week of every month until the end of the year. Customer response times improved across all three support channels after the new routing rules went live in March. The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline.",
+   "The committee agreed to publish the revised travel policy once the finance team has confirmed the new mileage rates. The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline. Two warehouse locations will move to the shared inventory system next quarter, which should reduce duplicate orders.",
+   "Summary 18",
+   "Review the figures for section 18",
+   "Confirm the schedule for section 18",
+   "Share the notes for section 18"
+  ],
+  "expect": {
+   "pages": [
+    20,
+    45
+   ],
+   "bookmarks": 36
+  }
+ },
+ "WORD-12-complex.docx": {
+  "texts": [
+   "Project Falcon status report",
+   "Prepared by the operations team March 2026",
+   "1. Highlights",
+   "The rollout reached 94% of sites on schedule. See the project dashboard for live numbers.",
+   "Warehouse migration finished early",
+   "Two regional offices joined the pilot",
+   "Support backlog cut by a third",
+   "2. Budget",
+   "Item",
+   "Planned",
+   "Actual",
+   "Hardware",
+   "$40,000",
+   "$38,200",
+   "Training",
+   "$12,000",
+   "$13,450",
+   "Total",
+   "$52,000",
+   "$51,650",
+   "3. Next steps",
+   "Finish the security review",
+   "Train the remaining site leads",
+   "Publish the final report",
+   "Figure 1: Rollout progress by month.",
+   "Appendix: site list",
+   "The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline.",
+   "Customer response times improved across all three support channels after the new routing rules went live in March.",
+   "The committee agreed to publish the revised travel policy once the finance team has confirmed the new mileage rates."
+  ],
+  "expect": {
+   "pages": [
+    2,
+    3
+   ],
+   "images": 1,
+   "links": [
+    "https://example.com/falcon"
+   ],
+   "landscapeLast": true,
+   "header": "Project Falcon — Status Report",
+   "leader": true
+  }
+ },
+ "WORD-15-photos.docx": {
+  "texts": [
+   "Site inspection photos",
+   "Photo 1: north wall, level 1.",
+   "Photo 2: north wall, level 2.",
+   "Photo 3: north wall, level 3."
+  ],
+  "expect": {
+   "pages": [
+    2,
+    3
+   ],
+   "images": 3
+  }
+ },
+ "WORD-13-corrupt.docx": {
+  "texts": [],
+  "expect": {
+   "error": "couldn't be read"
+  }
+ },
+ "X-zero-byte.docx": {
+  "texts": [],
+  "expect": {
+   "error": "is empty"
+  }
+ },
+ "X-fake.docx": {
+  "texts": [],
+  "expect": {
+   "error": "isn't a Word document"
+  }
+ },
+ "X-legacy.doc": {
+  "texts": [],
+  "expect": {
+   "error": "Word 97–2003"
+  }
+ },
+ "X-encrypted.docx": {
+  "texts": [],
+  "expect": {
+   "error": "password-protected"
+  }
+ },
+ "X-spreadsheet.docx": {
+  "texts": [],
+  "expect": {
+   "error": "isn't a Word document"
+  }
+ },
+ "WORD-14-from-pdf-to-word.docx": {
+  "texts": [
+   "Annual Report 2026",
+   "The regional office completed the quarterly review on schedule, and every site submitted its figures before the deadline.",
+   "Operations",
+   "Customer response times improved after the new intake process, which routes each request to the right team on the first day.",
+   "Staffing",
+   "Supplier costs increased slightly because of freight surcharges, but renegotiated packaging contracts offset most of the change.",
+   "Finance",
+   "The audit committee examined purchase approvals across all departments and found no exceptions that required further action.",
+   "Outlook",
+   "Next quarter the team will pilot the scheduling tool in two locations and report the results at the planning meeting."
+  ],
+  "expect": {
+   "pages": [
+    1,
+    1
+   ]
+  }
+ }
+}

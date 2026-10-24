@@ -1,0 +1,19 @@
+{
+ "checks": [
+  {
+   "id": "layout:summary-left",
+   "kind": "present",
+   "page": 1,
+   "phrase": "Summary of the second survey season",
+   "x_max": 120
+  },
+  {
+   "id": "order:spans",
+   "kind": "docorder",
+   "phrases": [
+    "Coastal Habitat Monitoring",
+    "Summary of the second survey season"
+   ]
+  }
+ ]
+}

@@ -25,19 +25,25 @@ export function revokeObjectUrl(url: string): void {
   }
 }
 
-export function revokeAllObjectUrls(): void {
-  for (const url of activeObjectUrls) {
-    URL.revokeObjectURL(url);
-  }
-  activeObjectUrls.clear();
+
+/** Makes names unique ("page.png", "page (2).png") so no entry silently overwrites another in a ZIP. */
+export function uniqueNames(names: string[]): string[] {
+  const seen = new Map<string, number>();
+  return names.map((name) => {
+    const key = name.toLowerCase();
+    const count = (seen.get(key) ?? 0) + 1;
+    seen.set(key, count);
+    if (count === 1) return name;
+    const dot = name.lastIndexOf(".");
+    return dot > 0 ? `${name.slice(0, dot)} (${count})${name.slice(dot)}` : `${name} (${count})`;
+  });
 }
 
 export async function downloadAllAsZip(zipName: string, results: DownloadableResult[]): Promise<void> {
   const { default: JSZip } = await import("jszip");
   const zip = new JSZip();
-  for (const result of results) {
-    zip.file(result.name, result.blob);
-  }
+  const names = uniqueNames(results.map((r) => r.name));
+  results.forEach((result, i) => zip.file(names[i], result.blob));
   const blob = await zip.generateAsync({ type: "blob" });
   triggerDownload(zipName, blob);
 }

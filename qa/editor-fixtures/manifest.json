@@ -1,0 +1,268 @@
+{
+ "EDITOR-01-simple-text.pdf": {
+  "producer": "Chromium/Skia, Arial, one page",
+  "what": "plain paragraphs with spelling mistakes",
+  "targets": [
+   [
+    "recieve",
+    "receive"
+   ],
+   [
+    "teh",
+    "the"
+   ],
+   [
+    "seperate",
+    "separate"
+   ],
+   [
+    "occured",
+    "occurred"
+   ],
+   [
+    "definately",
+    "definitely"
+   ],
+   [
+    "adress",
+    "address"
+   ]
+  ]
+ },
+ "EDITOR-02-resume.pdf": {
+  "producer": "Chromium/Skia, bold + italic + colour + dark band",
+  "what": "résumé",
+  "targets": [
+   [
+    "experiance",
+    "experience"
+   ]
+  ]
+ },
+ "EDITOR-04-invoice.pdf": {
+  "producer": "Chromium/Skia, table",
+  "what": "invoice with a table",
+  "targets": [
+   [
+    "seperate",
+    "separate"
+   ],
+   [
+    "buisness",
+    "business"
+   ]
+  ]
+ },
+ "EDITOR-06-mixed-fonts.pdf": {
+  "producer": "Chromium/Skia, 8 families, bold/italic/colour/size",
+  "what": "font and style variety",
+  "targets": [
+   [
+    "definately",
+    "definitely"
+   ],
+   [
+    "recieved",
+    "received"
+   ],
+   [
+    "wich",
+    "which"
+   ],
+   [
+    "occured",
+    "occurred"
+   ],
+   [
+    "teh",
+    "the"
+   ]
+  ]
+ },
+ "EDITOR-07-multi-column.pdf": {
+  "producer": "Chromium/Skia, two justified columns",
+  "what": "columns",
+  "targets": [
+   [
+    "recieve",
+    "receive"
+   ],
+   [
+    "teh",
+    "the"
+   ]
+  ]
+ },
+ "EDITOR-08-images.pdf": {
+  "producer": "Chromium/Skia, two raster images",
+  "what": "images with captions",
+  "targets": [
+   [
+    "teh",
+    "the"
+   ]
+  ]
+ },
+ "EDITOR-20-multi-image.pdf": {
+  "producer": "Chromium/Skia, 7 images over 2 pages",
+  "what": "many images",
+  "targets": [
+   [
+    "seperate",
+    "separate"
+   ]
+  ]
+ },
+ "EDITOR-11-long-document-25-pages.pdf": {
+  "producer": "Chromium/Skia, 25 pages",
+  "what": "long document",
+  "targets": [
+   [
+    "recieve",
+    "receive"
+   ]
+  ]
+ },
+ "EDITOR-14-table-heavy.pdf": {
+  "producer": "Chromium/Skia, 28-row table",
+  "what": "table-heavy",
+  "targets": [
+   [
+    "teh",
+    "the"
+   ]
+  ]
+ },
+ "EDITOR-15-special-characters.pdf": {
+  "producer": "Chromium/Skia, accents/symbols/Greek/Cyrillic",
+  "what": "special characters",
+  "targets": [
+   [
+    "recieve",
+    "receive"
+   ]
+  ]
+ },
+ "EDITOR-16-header-footer.pdf": {
+  "producer": "Chromium/Skia, running header + page-number footer",
+  "what": "header/footer",
+  "targets": [
+   [
+    "recieve",
+    "receive"
+   ]
+  ]
+ },
+ "EDITOR-03-business-letter.pdf": {
+  "producer": "LibreOffice (Calibri→Carlito), simple-font TrueType subsets",
+  "what": "business letter",
+  "targets": [
+   [
+    "recieve",
+    "receive"
+   ],
+   [
+    "teh",
+    "the"
+   ],
+   [
+    "seperate",
+    "separate"
+   ],
+   [
+    "occured",
+    "occurred"
+   ]
+  ]
+ },
+ "EDITOR-12-scanned-form.pdf": {
+  "producer": "fake scan (JPEG page image)",
+  "what": "scanned form — must stay a picture",
+  "targets": []
+ },
+ "EDITOR-13-scanned-letter.pdf": {
+  "producer": "fake scan (JPEG page image)",
+  "what": "scanned letter — must stay a picture",
+  "targets": []
+ },
+ "EDITOR-05-form-acroform.pdf": {
+  "producer": "MuPDF AcroForm",
+  "what": "text, checkbox, radio group, dropdown, list box",
+  "targets": [
+   [
+    "recieve",
+    "receive"
+   ],
+   [
+    "teh",
+    "the"
+   ]
+  ]
+ },
+ "EDITOR-09-rotated-pages.pdf": {
+  "producer": "MuPDF, /Rotate 0/90/180/270",
+  "what": "rotated pages",
+  "targets": [
+   [
+    "recieve",
+    "receive"
+   ],
+   [
+    "teh",
+    "the"
+   ]
+  ]
+ },
+ "EDITOR-10-mixed-page-sizes.pdf": {
+  "producer": "MuPDF, five page sizes",
+  "what": "mixed page sizes",
+  "targets": [
+   [
+    "recieve",
+    "receive"
+   ],
+   [
+    "teh",
+    "the"
+   ]
+  ]
+ },
+ "EDITOR-17-watermark.pdf": {
+  "producer": "MuPDF, grey rotated watermark text",
+  "what": "watermark on each page",
+  "targets": [
+   [
+    "recieve",
+    "receive"
+   ],
+   [
+    "teh",
+    "the"
+   ]
+  ]
+ },
+ "EDITOR-18-annotations.pdf": {
+  "producer": "MuPDF, real annotations",
+  "what": "eight annotation kinds",
+  "targets": [
+   [
+    "recieve",
+    "receive"
+   ]
+  ]
+ },
+ "EDITOR-19-cropbox.pdf": {
+  "producer": "MuPDF, CropBox ≠ MediaBox",
+  "what": "CropBox",
+  "targets": [
+   [
+    "recieve",
+    "receive"
+   ],
+   [
+    "teh",
+    "the"
+   ]
+  ]
+ }
+}

@@ -1,0 +1,13 @@
+{
+ "FORM-01-given-name.pdf": "pre-filled text field (Raviteja, 12 pt, left) next to an empty one",
+ "FORM-02-sizes.pdf": "the same value at 8, 10, 12, 14, 18 pt and auto-size (DA size 0)",
+ "FORM-03-alignment.pdf": "left / centre / right aligned values (/Q 0, 1, 2)",
+ "FORM-04-multiline.pdf": "multi-line fields: fixed 10 pt and auto-size",
+ "FORM-05-choices.pdf": "checked + unchecked checkbox, a selected radio option, a selected dropdown",
+ "FORM-06-needappearances.pdf": "/V = Raviteja, no /AP, /NeedAppearances true",
+ "FORM-07-stale-appearance.pdf": "/AP says Old Value, /V says Raviteja",
+ "FORM-08-flattened.pdf": "a flattened form: the value is ordinary page text, no AcroForm",
+ "FORM-09-long.pdf": "13 fields: 8 text (one empty, one multi-line), checkbox, radio group, dropdown",
+ "FORM-10-fonts-colours.pdf": "Times / Courier fields with text colour, fill and border widths",
+ "FORM-11-rotated-page.pdf": "pre-filled field on a page with /Rotate 90"
+}
