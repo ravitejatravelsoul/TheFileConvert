@@ -60,6 +60,7 @@ export function SiteFooter() {
               <LogoMark size={22} />
               <span>© {new Date().getFullYear()} TheFileConvert</span>
             </span>
+            <span className="text-white/65">Developed by Raviteja Vemulapelli</span>
             <span className="flex items-center gap-1.5 text-white/45">
               <IconLock className="h-3.5 w-3.5" /> Files never leave your device
             </span>
